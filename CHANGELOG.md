@@ -12,6 +12,66 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
 ---
 
+## [2.0.0] — 2026-08-22 — "Wegweiser"
+
+A grown library is not one flat folder. It has topic folders and folders that
+already carry a date, and what should happen to them is a judgement call. This
+release makes the tool **recognise** those folders and lets the operator decide
+— per folder if they want to.
+
+### Added
+
+- **Folder classification.** Every source folder is examined. A name that
+  *begins* with a date is a dated folder: `2019-04-15 Ostern in Tirol`,
+  `2019_06_01 Hochzeit`, `20190415_Hochzeit`, `2019.03.10`, `2019-04`, `2019`.
+  Anything else is a topic folder. A date in the middle of a name is ignored —
+  guessing there would invent intent.
+
+- **A dated folder only counts when it is fine enough.** A folder called `2019`
+  is no answer to a request for day folders, so it is treated as a topic folder
+  and its photos are sorted properly. A day folder does satisfy a request for
+  year folders. With a structure that has no date tokens at all, folder dates
+  are irrelevant and ignored.
+
+- **Three decisions, each with a default, a global switch and a per-folder
+  override:**
+
+  | setting | flag | choices | default |
+  | --- | --- | --- | --- |
+  | `subfolder_action` | `--subfolder-action` | `consolidate`, `sort-inside`, `leave` | `consolidate` |
+  | `dated_folder_action` | `--dated-folder-action` | `keep`, `consolidate`, `sort-inside`, `leave` | `keep` |
+  | `mismatch_action` | `--mismatch-action` | `move-out`, `leave` | `move-out` |
+
+  `--folder-action ID=ACTION` decides one catalog folder explicitly and beats
+  the defaults. Decisions live in `Settings.folder_actions`, so a profile can
+  carry them.
+
+- **Asking the operator.** `lrfc plan|apply --interactive` puts every folder
+  that could reasonably go either way to the operator, showing what was found,
+  how many photos are affected, how many carry a different date, and which
+  option is the default. Enter accepts the default. The planner itself never
+  prompts: front ends pass a `decide` callback, so the core stays free of any
+  user interface. In the TUI the same choice is made by pressing Enter on a row
+  of the folder table, which cycles the decision and re-plans.
+
+- **The plan shows its findings**: which folders exist, what kind each is, how
+  many photos, what was decided and whether that came from a default, an
+  explicit override or the operator. Also in the JSON export, under `folders`.
+
+### Changed
+
+- **A dated folder's photos now stay put by default.** Previously
+  `2019-04-15 Ostern in Tirol` was dissolved into a bare `2019-04-15`, losing
+  the description. Photos inside it whose capture date does *not* match still
+  move out to their own date folder — a photo filed in the wrong place gets
+  corrected. Set `--dated-folder-action consolidate` for the old behaviour, or
+  `--mismatch-action leave` to make a dated folder entirely off limits.
+
+- The anchor folder is never offered as a decision and always sorts its own
+  photos: "leave subfolders alone" must not silently mean "do nothing at all".
+
+[2.0.0]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v2.0.0
+
 ## [1.0.6] — 2026-08-22
 
 ### Added
@@ -242,7 +302,7 @@ and rewriting the catalog in one reversible operation.
 - Debug mode and a per-run log file carrying a numbered `STEP` audit trail.
 
 **Project**
-- 182 tests, 88 % coverage, built on a synthetic catalog fixture so no
+- 229 tests, 88 % coverage, built on a synthetic catalog fixture so no
   Lightroom installation is needed.
 - GitLab CI: lint, tests on Python 3.9–3.13, a dedicated safety job, build.
 - Installers for macOS, Linux and Windows.

@@ -346,6 +346,50 @@ def validate_structure(structure: Sequence[str]) -> None:
         validate_template(template)
 
 
+#: Which date tokens pin a value down to which granularity.
+TOKEN_GRANULARITY = {
+    "yyyy": "year",
+    "yy": "year",
+    "iso_year": "year",
+    "quarter": "month",
+    "mm": "month",
+    "m": "month",
+    "month_name": "month",
+    "month_short": "month",
+    "iso_week": "week",
+    "dd": "day",
+    "d": "day",
+    "doy": "day",
+    "weekday": "day",
+    "weekday_short": "day",
+    "hh": "day",
+    "mi": "day",
+}
+
+#: Ordering of :data:`TOKEN_GRANULARITY` values, coarsest first.
+GRANULARITY_ORDER = ("year", "month", "week", "day")
+
+
+def structure_date_granularity(structure: Sequence[str]) -> Optional[str]:
+    """Finest date granularity the structure pins down, or ``None``.
+
+    ``{yyyy}/{mm}/{dd}`` asks for day resolution, ``{yyyy}`` only for a year.
+    A structure without date tokens returns ``None``: an existing dated folder
+    then says nothing about whether the structure is satisfied.
+    """
+    finest: Optional[str] = None
+    for template in structure:
+        for token in template_tokens(template):
+            granularity = TOKEN_GRANULARITY.get(token)
+            if granularity is None:
+                continue
+            if finest is None or GRANULARITY_ORDER.index(granularity) > GRANULARITY_ORDER.index(
+                finest
+            ):
+                finest = granularity
+    return finest
+
+
 def structure_requires_date(structure: Sequence[str]) -> bool:
     """True when any level uses a date token."""
     date_tokens = {spec.name for spec in TOKEN_SPECS if spec.category == "date"}

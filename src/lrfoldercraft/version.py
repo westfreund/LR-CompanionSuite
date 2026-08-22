@@ -11,9 +11,9 @@ every UI surface (TUI header, CLI banner, log header, reports).
 
 from __future__ import annotations
 
-__version__ = "1.0.6"
+__version__ = "2.0.0"
 __build_date__ = "2026-08-22"
-__codename__ = "Daybreak"
+__codename__ = "Wegweiser"
 
 #: Human readable revision tag, e.g. ``r1.0.0 (2026-08-22)``.
 REVISION = "r{v} ({d})".format(v=__version__, d=__build_date__)

@@ -2,7 +2,7 @@
 
 **Reorganise Adobe Lightroom Classic folder trees — without losing the catalog connection.**
 
-[![Revision](https://img.shields.io/badge/revision-r1.0.6-blue)](CHANGELOG.md)
+[![Revision](https://img.shields.io/badge/revision-r2.0.0-blue)](CHANGELOG.md)
 [![Build date](https://img.shields.io/badge/build-2026--08--22-lightgrey)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20GPL--3.0--or--later-green)](LICENSE)
@@ -80,6 +80,12 @@ with the tool:
 | `year/month-name` | `2019/01 January` |
 
 Run `lrfc presets` for the full list, `lrfc tokens` for every placeholder.
+
+**Folders you already have** — topic folders like `Urlaub` and dated ones like
+`2019-04-15 Ostern in Tirol` are recognised and, by default, dated folders keep
+their name and their photos. `--interactive` asks you about each folder;
+`--subfolder-action`, `--dated-folder-action` and `--folder-action ID=ACTION`
+set it without being asked. See [usage.md](docs/en/usage.md).
 
 Any combination works — separate levels with `/`:
 

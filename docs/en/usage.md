@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r1.0.6 · Build date 2026-08-22**
+**Revision r2.0.0 · Build date 2026-08-22**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -247,6 +247,80 @@ next time it is plugged into a Mac.
 library is shared with a system that struggles with Unicode. Illegal characters
 (`< > : " / \ | ? *`), trailing dots and Windows device names (`CON`, `LPT1`, …)
 are always handled, on every platform.
+
+## Folders your library already has
+
+A library that has grown over years is rarely one flat folder. It holds topic
+folders — `Urlaub`, `Hochzeit Meyer` — and folders that already carry a date —
+`2019-04-15 Ostern in Tirol`. What should happen to those is a judgement call,
+so LR-FolderCraft recognises them, states what it found, and lets you decide.
+
+### What counts as a dated folder
+
+A name that **begins** with a date, optionally followed by descriptive text:
+
+| Name | Recognised as |
+| --- | --- |
+| `2019-04-15 Ostern in Tirol` | day |
+| `2019_06_01 Hochzeit` | day |
+| `20190415_Hochzeit` | day |
+| `2019.03.10` | day |
+| `2019-04` | month |
+| `2019 Jahresrueckblick` | year |
+| `Urlaub`, `Sommer 2019`, `raw2019` | not a date |
+
+A date in the middle of a name is ignored: guessing there would invent intent.
+
+A dated folder only counts when it is **at least as fine** as the structure
+asks for. A folder called `2019` is no answer to a request for day folders, so
+it is treated as a topic folder and its photos are sorted properly. A day
+folder does satisfy a request for year folders. If the structure has no date
+tokens at all, folder dates say nothing and are ignored.
+
+### The three decisions
+
+| Situation | Flag | Choices | Default |
+| --- | --- | --- | --- |
+| A topic subfolder | `--subfolder-action` | `consolidate` · `sort-inside` · `leave` | `consolidate` |
+| A dated folder | `--dated-folder-action` | `keep` · `consolidate` · `sort-inside` · `leave` | `keep` |
+| A photo in a kept dated folder whose date does not match | `--mismatch-action` | `move-out` · `leave` | `move-out` |
+
+- `consolidate` — move the photos up and sort them below the run's anchor.
+- `sort-inside` — keep the folder and build the structure *inside* it.
+- `leave` — do not touch the photos in this folder at all.
+- `keep` — a dated folder: leave the photos it correctly describes.
+
+With the defaults, `2019-04-15 Ostern in Tirol` keeps its name and its photos,
+while a photo in it that was shot on a different day moves to its own date
+folder. Topic folders are merged into the shared date structure.
+
+### Deciding one folder at a time
+
+```bash
+lrfc folders CATALOG                      # find the folder ids
+lrfc plan CATALOG -s day --folder-action 4711=sort-inside
+```
+
+`--folder-action ID=ACTION` is repeatable and beats the global defaults.
+
+### Being asked
+
+```bash
+lrfc plan CATALOG -s day --interactive
+```
+
+Every folder that could reasonably go either way is put to you, with what was
+found, how many photos it holds, how many carry a different date, and which
+option is the default. Enter accepts the default, so nothing happens by
+accident. The anchor folder is never offered: it is the container the run sorts
+into, not a subfolder whose fate is in question.
+
+In the TUI the same choice is made by pressing Enter on a row of the folder
+table — it cycles that folder's decision and re-plans immediately.
+
+Whatever you choose, `plan` lists every folder it found, what kind it is, what
+was decided and whether that came from a default, an explicit `--folder-action`
+or your own answer. The JSON export carries the same under `folders`.
 
 ## Profiles
 

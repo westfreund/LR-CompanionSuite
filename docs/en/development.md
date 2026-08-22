@@ -1,6 +1,6 @@
 # Development and continuation
 
-**Revision r1.0.6 · Build date 2026-08-22**
+**Revision r2.0.0 · Build date 2026-08-22**
 
 This document exists so that work can be picked up later — by you, by someone
 else, or by an AI assistant — without reconstructing context from the code.
@@ -19,7 +19,7 @@ Lightroom Classic catalog (schema 18.0.0, 9,452 files, 337 GiB, exFAT).
 | CLI | complete: 9 commands |
 | TUI | complete: load, plan, apply, live preview, EN/DE |
 | GUI | **not started** — the seam is prepared, see below |
-| Tests | 182 tests, 88 % coverage |
+| Tests | 229 tests, 88 % coverage |
 | CI | GitLab, Python 3.9–3.13 |
 | Docs | complete, EN and DE |
 | Installers | macOS, Linux, Windows |
@@ -75,6 +75,7 @@ def test_custom(builder):                  # build your own case
 | File | Covers |
 | --- | --- |
 | `test_rules.py` | tokens, sanitising, presets, ISO week edges |
+| `test_folders.py` | date recognition in folder names, granularity |
 | `test_catalog.py` | reader, writer, id allocation, locking, rollback |
 | `test_planner.py` | grouping, anchors, conflicts, sidecars, idempotency |
 | `test_executor.py` | apply, rollback under injected failure, undo, cycles |
@@ -133,6 +134,7 @@ SELECT rf.absolutePath || fo.pathFromRoot || f.idx_filename
 | New preset | `rules.py` (`PRESETS`, `PRESET_DESCRIPTIONS`) |
 | New catalog field | `catalog/model.py` (`Photo`), `catalog/reader.py` (`_PHOTO_SELECT`) |
 | New CLI option | `cli.py` (`_add_plan_flags`, `settings_from_args`), `config.py` |
+| New folder kind or decision | `folders.py`, then `planner._segments_for` |
 | New pre-flight check | `safety.py` — return a bilingual `Check` |
 | New execution behaviour | `executor.py`, and a matching rollback test |
 | New TUI widget | `tui/app.py`, `tui/app.tcss` |

@@ -67,9 +67,15 @@ Screen {
     padding: 0 1;
 }
 
+#cases {
+    height: auto;
+    max-height: 12;
+    border: round $panel-lighten-2;
+}
+
 #folders {
     height: 1fr;
-    min-height: 8;
+    min-height: 6;
 }
 
 #log {

@@ -16,6 +16,8 @@ from typing import Any, Dict, List, Sequence, Tuple
 
 from .catalog.model import CatalogInfo
 from .executor import RunResult
+from .folders import label as action_label
+from .folders import summarise
 from .planner import STATUS_LABELS, Plan
 from .rules import describe_structure, token_help
 from .safety import PreflightResult
@@ -68,6 +70,12 @@ T = {
     "presets": ("PRESETS", "VORLAGEN"),
     "duration": ("Duration", "Dauer"),
     "more": ("more", "weitere"),
+    "folders_found": ("EXISTING FOLDERS", "VORGEFUNDENE ORDNER"),
+    "decision": ("decision", "Entscheidung"),
+    "from_default": ("default", "Vorgabe"),
+    "from_override": ("set explicitly", "ausdruecklich gesetzt"),
+    "from_operator": ("chosen by you", "von Ihnen gewaehlt"),
+    "anchor_folder": ("the run's anchor", "Ankerordner des Laufs"),
 }
 
 
@@ -210,6 +218,38 @@ def render_plan(
         if len(folders) > len(shown):
             lines.append("  ... {n} {m}".format(n=len(folders) - len(shown), m=t("more", language)))
 
+    cases = [c for c in plan.folder_cases if c.photo_count]
+    if cases:
+        lines += ["", "{h} ({n}):".format(h=t("folders_found", language), n=len(cases))]
+        source = {
+            "default": t("from_default", language),
+            "override": t("from_override", language),
+            "operator": t("from_operator", language),
+        }
+        for case in cases:
+            if case.is_anchor:
+                detail = t("anchor_folder", language)
+            else:
+                detail = "{a} ({s})".format(
+                    a=action_label(case.action, language),
+                    s=source.get(case.action_source, case.action_source),
+                )
+            extra = ""
+            if case.is_dated and case.mismatched_photos:
+                extra = (
+                    ", {n} mit abweichendem Datum"
+                    if language == "de"
+                    else ", {n} with a different date"
+                ).format(n=case.mismatched_photos)
+            lines.append(
+                "  {p:<34} {n:>5}{e}".format(
+                    p=(case.path_from_root or ".")[:34], n=case.photo_count, e=extra
+                )
+            )
+            lines.append("      {d}".format(d=detail))
+        for line in summarise(cases, language):
+            lines.append("  = " + line)
+
     samples = plan.active_moves
     if samples and not show_all:
         lines += ["", t("sample", language) + ":"]
@@ -244,6 +284,20 @@ def plan_to_dict(plan: Plan) -> Dict[str, Any]:
         "stats": asdict(plan.stats),
         "warnings": list(plan.warnings),
         "new_folders": ["/".join(s) for s in plan.new_folder_segments],
+        "folders": [
+            {
+                "id": c.folder_id,
+                "path": c.path_from_root,
+                "kind": c.kind,
+                "photos": c.photo_count,
+                "matching": c.matching_photos,
+                "mismatched": c.mismatched_photos,
+                "action": c.action,
+                "action_source": c.action_source,
+                "is_anchor": c.is_anchor,
+            }
+            for c in plan.folder_cases
+        ],
         "moves": [
             {
                 "file_id": m.file_id,

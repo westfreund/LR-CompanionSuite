@@ -18,7 +18,7 @@ import argparse
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Sequence
+from typing import Callable, Optional, Sequence
 
 from .catalog.db import CatalogError, open_catalog
 from .catalog.reader import CatalogReader
@@ -34,6 +34,15 @@ from .config import (
     profiles_dir,
 )
 from .executor import ExecutionError, execute, undo
+from .folders import (
+    DATED_FOLDER_ACTIONS,
+    MISMATCH_ACTIONS,
+    SUBFOLDER_ACTIONS,
+    FolderCase,
+)
+from .folders import (
+    label as action_label,
+)
 from .journal import JOURNAL_SUFFIX
 from .logging_setup import get_logger, setup_logging, step
 from .planner import PlanError, build_plan
@@ -209,6 +218,39 @@ def _add_plan_flags(parser: argparse.ArgumentParser) -> None:
         "--exclude-ext", action="append", metavar="EXT", help="skip these extensions (repeatable)"
     )
 
+    existing = parser.add_argument_group("existing folder structure")
+    existing.add_argument(
+        "--subfolder-action",
+        choices=SUBFOLDER_ACTIONS,
+        help="what to do with a subfolder that has no date in its name, e.g. "
+        "'Urlaub' (default: consolidate)",
+    )
+    existing.add_argument(
+        "--dated-folder-action",
+        choices=DATED_FOLDER_ACTIONS,
+        help="what to do with a folder whose name starts with a date, e.g. "
+        "'2019-04-15 Ostern in Tirol' (default: keep)",
+    )
+    existing.add_argument(
+        "--mismatch-action",
+        choices=MISMATCH_ACTIONS,
+        help="what to do with a photo in a kept dated folder whose capture date "
+        "does not match the folder name (default: move-out)",
+    )
+    existing.add_argument(
+        "--folder-action",
+        action="append",
+        metavar="ID=ACTION",
+        help="decide one catalog folder explicitly, repeatable, e.g. "
+        "--folder-action 4711=sort-inside. Beats the defaults above.",
+    )
+    existing.add_argument(
+        "-i",
+        "--interactive",
+        action="store_true",
+        help="ask about every folder that could reasonably go either way",
+    )
+
     behaviour = parser.add_argument_group("behaviour")
     behaviour.add_argument(
         "--date-source",
@@ -278,6 +320,25 @@ def settings_from_args(args: argparse.Namespace) -> Settings:
         settings.unsorted_folder = args.unsorted_folder
     if getattr(args, "conflict", None):
         settings.conflict = args.conflict
+    if getattr(args, "subfolder_action", None):
+        settings.subfolder_action = args.subfolder_action
+    if getattr(args, "dated_folder_action", None):
+        settings.dated_folder_action = args.dated_folder_action
+    if getattr(args, "mismatch_action", None):
+        settings.mismatch_action = args.mismatch_action
+    if getattr(args, "folder_action", None):
+        for entry in args.folder_action:
+            folder_id, _, action = entry.partition("=")
+            if not action:
+                raise ConfigError("--folder-action expects ID=ACTION, got {e!r}".format(e=entry))
+            try:
+                settings.folder_actions[int(folder_id)] = action
+            except ValueError:
+                raise ConfigError(
+                    "--folder-action folder id must be a number, got {f!r}".format(f=folder_id)
+                ) from None
+    if getattr(args, "interactive", False):
+        settings.interactive_folders = True
     if getattr(args, "no_sidecars", False):
         settings.move_sidecars = False
     if getattr(args, "ascii", False):
@@ -338,12 +399,13 @@ def cmd_plan(args: argparse.Namespace) -> int:
     settings = settings_from_args(args)
     settings.dry_run = True
     language = settings.language
+    decide = _folder_prompt(language) if settings.interactive_folders else None
     with open_catalog(
         settings.catalog,
         allow_unsupported=settings.allow_unsupported_catalog,
         ignore_lock=settings.ignore_lock,
     ) as conn:
-        plan = build_plan(CatalogReader(conn), settings)
+        plan = build_plan(CatalogReader(conn), settings, decide=decide)
 
     if args.json:
         print(render_plan_json(plan))
@@ -367,12 +429,13 @@ def cmd_apply(args: argparse.Namespace) -> int:
     settings.dry_run = False
     language = settings.language
 
+    decide = _folder_prompt(language) if settings.interactive_folders else None
     with open_catalog(
         settings.catalog,
         allow_unsupported=settings.allow_unsupported_catalog,
         ignore_lock=settings.ignore_lock,
     ) as conn:
-        plan = build_plan(CatalogReader(conn), settings)
+        plan = build_plan(CatalogReader(conn), settings, decide=decide)
 
     print(render_plan(plan, language))
     checks = preflight(plan)
@@ -460,6 +523,62 @@ def cmd_tui(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+
+def _folder_prompt(language: str) -> Callable[[FolderCase], Optional[str]]:
+    """Build the per-folder question the planner calls back into.
+
+    The planner never prompts on its own -- it hands each folder that could
+    reasonably go either way to this callback and takes the answer. Returning
+    ``None`` accepts the configured default, so pressing Enter is always safe.
+
+    Everything is written to stderr: the prompt is interface, not output, and
+    ``plan --json --interactive`` has to stay machine readable.
+    """
+
+    def say(text: str = "") -> None:
+        print(text, file=sys.stderr)
+
+    def ask(case: FolderCase) -> Optional[str]:
+        choices = DATED_FOLDER_ACTIONS if case.is_dated else SUBFOLDER_ACTIONS
+        say()
+        say("-" * 78)
+        say(case.describe(language))
+        if case.is_dated and case.mismatched_photos:
+            say(
+                (
+                    "  davon {n} mit abweichendem Aufnahmedatum"
+                    if language == "de"
+                    else "  of which {n} have a different capture date"
+                ).format(n=case.mismatched_photos)
+            )
+        for number, action in enumerate(choices, start=1):
+            marker = " *" if action == case.action else "  "
+            say(
+                "  {m}{n}) {a:<14} {d}".format(
+                    m=marker, n=number, a=action, d=action_label(action, language)
+                )
+            )
+        question = (
+            "  Auswahl [Enter = {d}]: " if language == "de" else "  Choice [Enter = {d}]: "
+        ).format(d=case.action)
+        while True:
+            sys.stderr.write(question)
+            sys.stderr.flush()
+            try:
+                answer = input().strip()
+            except (EOFError, KeyboardInterrupt):
+                say()
+                return None
+            if not answer:
+                return None
+            if answer in choices:
+                return answer
+            if answer.isdigit() and 1 <= int(answer) <= len(choices):
+                return choices[int(answer) - 1]
+            say("  ?")
+
+    return ask
 
 
 def _stamp(prefix: str) -> str:

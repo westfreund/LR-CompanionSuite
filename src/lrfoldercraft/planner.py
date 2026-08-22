@@ -13,20 +13,34 @@ import sys
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path, PurePosixPath
-from typing import Dict, Iterable, List, Optional, Sequence, Set, Tuple
+from typing import Callable, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 from .catalog.model import Photo, RootFolder, lr_path_from_root
 from .catalog.reader import CatalogReader
 from .config import Settings
+from .folders import (
+    KEEP,
+    LEAVE,
+    MOVE_OUT,
+    SORT_INSIDE,
+    FolderCase,
+    classify,
+)
 from .logging_setup import get_logger, step
 from .rules import (
     TokenContext,
     render_structure,
     sanitise_segment,
+    structure_date_granularity,
     structure_requires_date,
 )
 
 log = get_logger("planner")
+
+#: Asked once per folder that could reasonably be handled either way. Returning
+#: ``None`` accepts the configured default. Front ends supply this; no core
+#: module prompts on its own.
+FolderDecider = Callable[[FolderCase], Optional[str]]
 
 # -- move statuses ----------------------------------------------------------
 
@@ -121,6 +135,7 @@ class Plan:
     moves: List[PlannedMove] = field(default_factory=list)
     new_folder_segments: List[Tuple[str, ...]] = field(default_factory=list)
     source_folder_ids: Tuple[int, ...] = ()
+    folder_cases: List[FolderCase] = field(default_factory=list)
     stats: PlanStats = field(default_factory=PlanStats)
     warnings: List[str] = field(default_factory=list)
     created_at: str = ""
@@ -465,7 +480,125 @@ def _normalise_anchor(
     return anchor
 
 
-def build_plan(reader: CatalogReader, settings: Settings) -> Plan:
+def build_folder_cases(
+    reader: CatalogReader,
+    settings: Settings,
+    prepared: Sequence[Tuple[Photo, Optional[Tuple[str, ...]], str]],
+    decide: Optional[FolderDecider] = None,
+    anchor: Tuple[str, ...] = (),
+) -> Dict[int, FolderCase]:
+    """Classify every source folder and settle what happens to it.
+
+    Precedence, strongest first: an explicit per-folder entry in
+    ``settings.folder_actions``; the operator's answer via *decide*; the
+    configured default for the folder's kind.
+    """
+    folders = {f.id_local: f for f in reader.folders()}
+    cases: Dict[int, FolderCase] = {}
+    wanted = structure_date_granularity(settings.structure)
+
+    for photo, _segments, _reason in prepared:
+        folder = folders.get(photo.folder_id)
+        if folder is None:  # pragma: no cover - a file must have its folder
+            continue
+        case = cases.get(photo.folder_id)
+        if case is None:
+            case = classify(
+                name=folder.name,
+                folder_id=folder.id_local,
+                path_from_root=folder.path_from_root,
+                segments=folder.segments,
+                wanted_granularity=wanted,
+            )
+            # The anchor folder is the container the run sorts *into*; it is
+            # not one of the subfolders whose fate is in question, so it is
+            # never offered as a decision and always behaves as consolidate.
+            case.is_anchor = case.segments == anchor
+            cases[photo.folder_id] = case
+        case.photo_count += 1
+        if case.folder_date is not None:
+            when = resolve_date(photo, settings)
+            if when is not None and case.folder_date.matches(when.date()):
+                case.matching_photos += 1
+            else:
+                case.mismatched_photos += 1
+
+    for case in cases.values():
+        override = settings.folder_actions.get(case.folder_id)
+        if override:
+            case.action, case.action_source = override, "override"
+            continue
+        case.action = settings.dated_folder_action if case.is_dated else settings.subfolder_action
+        case.action_source = "default"
+        if decide is not None and case.needs_a_decision:
+            chosen = decide(case)
+            if chosen:
+                case.action, case.action_source = chosen, "operator"
+    return cases
+
+
+def _consolidates(case: Optional[FolderCase], settings: Settings, photo: Photo) -> bool:
+    """True when this photo will be moved below the run's shared anchor."""
+    if case is None:
+        return True
+    if case.action in (LEAVE, SORT_INSIDE):
+        return False
+    if case.action == KEEP:
+        when = resolve_date(photo, settings)
+        matches = (
+            case.folder_date is not None
+            and when is not None
+            and case.folder_date.matches(when.date())
+        )
+        if matches:
+            return False
+        return settings.mismatch_action == MOVE_OUT
+    return True
+
+
+def _segments_for(
+    photo: Photo,
+    case: Optional[FolderCase],
+    settings: Settings,
+    anchor: Tuple[str, ...],
+    structure_segments: Tuple[str, ...],
+    current: Tuple[str, ...],
+) -> Tuple[str, ...]:
+    """Where this photo should end up, given its folder's decision.
+
+    Every action reduces to a choice of target segments; returning the photo's
+    current folder is how "leave it alone" is expressed, because the planner
+    then recognises it as already in place.
+    """
+    if case is None or case.is_anchor:
+        # The anchor folder holds the photos the run exists to sort. "Leave
+        # subfolders alone" must not silently mean "do nothing at all".
+        return anchor + structure_segments
+
+    if case.action == LEAVE:
+        return current
+    if case.action == SORT_INSIDE:
+        return case.segments + structure_segments
+    if case.action == KEEP:
+        when = resolve_date(photo, settings)
+        matches = (
+            case.folder_date is not None
+            and when is not None
+            and case.folder_date.matches(when.date())
+        )
+        if matches:
+            return current
+        if settings.mismatch_action == LEAVE:
+            return current
+        return anchor + structure_segments
+    return anchor + structure_segments
+
+
+def build_plan(
+    reader: CatalogReader,
+    settings: Settings,
+    decide: Optional[FolderDecider] = None,
+) -> Plan:
     """Produce a :class:`Plan` for *settings* against the catalog behind *reader*."""
     settings.validate()
     step(
@@ -493,8 +626,22 @@ def build_plan(reader: CatalogReader, settings: Settings) -> Plan:
         segments, reason = _structure_segments(photo, settings, needs_date)
         prepared.append((photo, segments, reason))
 
+    # The anchor is a property of the run, not of a subset: it is the folder
+    # every selected photo sits under. It must be known before any folder
+    # decision is taken, so the anchor folder itself is never put up for one.
     root, anchor = resolve_anchor(reader, settings, photos)
     anchor = _normalise_anchor(anchor, settings, prepared)
+
+    cases = build_folder_cases(reader, settings, prepared, decide, anchor=anchor)
+    if cases:
+        step(
+            "Classified %d source folder(s): %s",
+            len(cases),
+            ", ".join(
+                "{p}={a}".format(p=c.path_from_root or ".", a=c.action)
+                for c in sorted(cases.values(), key=lambda c: c.path_from_root)
+            )[:400],
+        )
     step(
         "Anchor resolved: root=%s anchor=%r placement=%s",
         root.name,
@@ -515,6 +662,7 @@ def build_plan(reader: CatalogReader, settings: Settings) -> Plan:
         target_root_path=target_root_path,
         placement=settings.placement,
         source_folder_ids=tuple(sorted({p.folder_id for p in photos})),
+        folder_cases=sorted(cases.values(), key=lambda c: c.path_from_root),
         created_at=datetime.now().isoformat(timespec="seconds"),
     )
 
@@ -546,6 +694,7 @@ def build_plan(reader: CatalogReader, settings: Settings) -> Plan:
             claimed=claimed,
             cross_volume=cross_volume,
             index=index,
+            case=cases.get(photo.folder_id),
         )
         plan.moves.append(move)
         if move.is_active:
@@ -574,6 +723,7 @@ def _plan_one(
     claimed: Dict[str, int],
     cross_volume: bool,
     index: Optional[DirectoryIndex] = None,
+    case: Optional[FolderCase] = None,
 ) -> PlannedMove:
     source_path = photo.absolute_path
     base = PlannedMove(
@@ -609,7 +759,10 @@ def _plan_one(
         return base
 
     base.reason = date_reason
-    segments = anchor + structure_segments
+    current = tuple(_split(photo.folder_path_from_root))
+    segments = _segments_for(photo, case, settings, anchor, structure_segments, current)
+    if case is not None and segments == current and not base.reason and not case.is_anchor:
+        base.reason = "folder decision: {a}".format(a=case.action)
     base.target_segments = segments
     target_dir = _join(target_root_path, segments)
     target_path = "{d}/{f}".format(d=target_dir, f=photo.filename)

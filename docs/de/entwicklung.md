@@ -1,6 +1,6 @@
 # Entwicklung und Fortsetzung
 
-**Revision r1.0.6 · Build-Datum 2026-08-22**
+**Revision r2.0.0 · Build-Datum 2026-08-22**
 
 Dieses Dokument existiert, damit die Arbeit später fortgesetzt werden kann —
 von Ihnen, von jemand anderem oder von einem KI-Assistenten — ohne den Kontext
@@ -21,7 +21,7 @@ exFAT).
 | CLI | vollständig: 9 Befehle |
 | TUI | vollständig: Laden, Planen, Ausführen, Live-Vorschau, EN/DE |
 | GUI | **nicht begonnen** — die Schnittstelle ist vorbereitet, siehe unten |
-| Tests | 182 Tests, 88 % Abdeckung |
+| Tests | 229 Tests, 88 % Abdeckung |
 | CI | GitLab, Python 3.9–3.13 |
 | Dokumentation | vollständig, EN und DE |
 | Installationsskripte | macOS, Linux, Windows |
@@ -81,6 +81,7 @@ def test_eigenes(builder):                 # eigenen Fall bauen
 | Datei | Deckt ab |
 | --- | --- |
 | `test_rules.py` | Platzhalter, Namensbereinigung, Vorlagen, ISO-Wochen-Grenzfälle |
+| `test_folders.py` | Datumserkennung in Ordnernamen, Granularität |
 | `test_catalog.py` | Reader, Writer, ID-Vergabe, Sperren, Rollback |
 | `test_planner.py` | Gruppierung, Anker, Konflikte, Sidecars, Idempotenz |
 | `test_executor.py` | Ausführung, Rollback bei eingeschleustem Fehler, Undo, Zyklen |
@@ -141,6 +142,7 @@ SELECT rf.absolutePath || fo.pathFromRoot || f.idx_filename
 | Neue Vorlage | `rules.py` (`PRESETS`, `PRESET_DESCRIPTIONS`) |
 | Neues Katalogfeld | `catalog/model.py` (`Photo`), `catalog/reader.py` (`_PHOTO_SELECT`) |
 | Neue CLI-Option | `cli.py` (`_add_plan_flags`, `settings_from_args`), `config.py` |
+| Neue Ordnerart oder Entscheidung | `folders.py`, dann `planner._segments_for` |
 | Neue Vorprüfung | `safety.py` — ein zweisprachiges `Check` zurückgeben |
 | Neues Ausführungsverhalten | `executor.py`, plus passender Rollback-Test |
 | Neues TUI-Element | `tui/app.py`, `tui/app.tcss` |

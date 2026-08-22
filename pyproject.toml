@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lr-foldercraft"
-version = "1.0.6"
+version = "2.0.0"
 description = "Reorganise Adobe Lightroom Classic folder trees by date, camera and more, without losing the catalog connection."
 readme = "README.md"
 requires-python = ">=3.9"

@@ -1,6 +1,6 @@
 # Architektur
 
-**Revision r1.0.6 · Build-Datum 2026-08-22**
+**Revision r2.0.0 · Build-Datum 2026-08-22**
 
 ## Leitregel
 
@@ -51,6 +51,7 @@ LR-FolderCraft/
 │   ├── logging_setup.py             Logdatei, --debug, nummerierte STEP-Spur
 │   ├── config.py                    Settings, Validierung, JSON-Profile
 │   ├── rules.py                     Platzhalter, Vorlagen, Namensbereinigung
+│   ├── folders.py                   erkennt vorhandene Ordner und ihre Art
 │   ├── planner.py                   Plan, PlannedMove, Anker, Konflikte
 │   ├── safety.py                    Vorprüfungen
 │   ├── executor.py                  Backup, Transaktion, Bewegungen, Rollback, Undo
@@ -66,7 +67,7 @@ LR-FolderCraft/
 │       ├── app.py                   die Textual-Anwendung
 │       └── app.tcss                 deren Stylesheet
 │
-├── tests/                           182 Tests, synthetischer Katalog als Fixture
+├── tests/                           229 Tests, synthetischer Katalog als Fixture
 ├── install/                         Installationsskripte für macOS, Linux, Windows
 └── docs/  en/  de/  images/         diese Dokumentation, in beiden Sprachen
 ```
@@ -100,6 +101,14 @@ Reine Funktionen, keine Ein-/Ausgabe. Platzhalterdefinitionen mit
 zweisprachigen Beschreibungen, zwölf Vorlagen, Template-Validierung, Rendering
 und portable Namensbereinigung. Dieses Modul erweitert man für ein neues
 Gruppierungskriterium.
+
+### `folders.py`
+
+Reine Klassifikation, ohne Ein-/Ausgabe und ohne Politik. Erkennt ein Datum am
+Anfang eines Ordnernamens, vergleicht es mit der von der Struktur verlangten
+Granularität und hält das Vokabular der möglichen Entscheidungen samt
+zweisprachiger Beschriftung bereit. Entschieden wird hier nie — das ist Sache
+des Aufrufers.
 
 ### `catalog/`
 
@@ -185,10 +194,14 @@ Dieselben drei Aufrufe implementieren, die auch die TUI macht:
 
 ```python
 with open_catalog(pfad) as conn:
-    plan = build_plan(CatalogReader(conn), settings)
+    plan = build_plan(CatalogReader(conn), settings, decide=frage_zu_ordner)
 checks = preflight(plan)
 result = execute(plan, settings, progress=callback)
 ```
+
+`decide` ist optional und der Weg, auf dem ein Frontend den Operator zu einem
+Ordner befragt, ohne dass der Planer von einer Oberfläche wüsste. Es bekommt
+einen `FolderCase` und liefert eine Aktion oder ``None`` für „Vorgabe".
 
 `execute` nimmt einen `progress(done, total, message)`-Rückruf entgegen. Mehr
 braucht es nicht — kein Kerncode muss geändert werden.

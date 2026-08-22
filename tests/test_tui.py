@@ -103,3 +103,48 @@ def test_language_toggle():
         return True
 
     assert asyncio.run(_drive(LRFolderCraftApp(), steps))
+
+
+def test_folder_decisions_are_shown_and_can_be_cycled(builder):
+    """Enter on a folder row changes its decision and re-plans."""
+    import asyncio
+
+    from textual.widgets import DataTable
+
+    builder.add_photo("FLACH.CR2", "2019-01-03T10:00:00", folder="raw2019/")
+    builder.add_photo("U1.CR2", "2019-01-03T11:00:00", folder="raw2019/Urlaub/")
+    builder.add_photo("D1.CR2", "2019-03-10T11:00:00", folder="raw2019/2019-03-10/")
+
+    async def steps(app, pilot):
+        app.action_plan()
+        for _ in range(200):
+            await pilot.pause(0.05)
+            if app.plan is not None:
+                break
+        assert app.plan is not None
+
+        cases = app.query_one("#cases", DataTable)
+        assert cases.row_count == 3  # anchor, Urlaub, dated
+        paths = [c.path_from_root for c in app._case_rows]
+        assert "raw2019/Urlaub/" in paths
+
+        # the dated folder is kept by default
+        dated = next(c for c in app._case_rows if c.name == "2019-03-10")
+        assert dated.action == "keep"
+
+        # cycle the topic folder's decision
+        index = paths.index("raw2019/Urlaub/")
+        urlaub_id = app._case_rows[index].folder_id
+        app.folder_overrides[urlaub_id] = "sort-inside"
+        app.plan = None
+        app.action_plan()
+        for _ in range(200):
+            await pilot.pause(0.05)
+            if app.plan is not None:
+                break
+        move = next(m for m in app.plan.moves if m.filename == "U1.CR2")
+        assert move.target_segments == ("raw2019", "Urlaub", "2019-01-03")
+        return True
+
+    app = LRFolderCraftApp(catalog=str(builder.catalog_path))
+    assert asyncio.run(_drive(app, steps))

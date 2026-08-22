@@ -1,6 +1,6 @@
 # Architecture
 
-**Revision r1.0.6 · Build date 2026-08-22**
+**Revision r2.0.0 · Build date 2026-08-22**
 
 ## Guiding rule
 
@@ -49,6 +49,7 @@ LR-FolderCraft/
 │   ├── logging_setup.py             log file, --debug, numbered STEP trail
 │   ├── config.py                    Settings, validation, JSON profiles
 │   ├── rules.py                     tokens, presets, sanitising
+│   ├── folders.py                   classifies the folders a library already has
 │   ├── planner.py                   Plan, PlannedMove, anchors, conflicts
 │   ├── safety.py                    pre-flight checks
 │   ├── executor.py                  backup, transaction, moves, rollback, undo
@@ -64,7 +65,7 @@ LR-FolderCraft/
 │       ├── app.py                   the Textual application
 │       └── app.tcss                 its stylesheet
 │
-├── tests/                           182 tests, synthetic catalog fixture
+├── tests/                           229 tests, synthetic catalog fixture
 ├── install/                         installers for macOS, Linux, Windows
 └── docs/  en/  de/  images/         this documentation, in both languages
 ```
@@ -96,6 +97,13 @@ deliberately never stores `dry_run`, so loading one cannot start a live run.
 Pure functions, no I/O. Token definitions with bilingual descriptions, twelve
 presets, template validation, rendering and portable name sanitising. This is
 the module to extend when adding a new grouping criterion.
+
+### `folders.py`
+
+Pure classification, no I/O and no policy. Recognises a date at the start of a
+folder name, compares it against the granularity the structure asks for, and
+carries the vocabulary of possible decisions with bilingual labels. It never
+decides: that is the caller's job.
 
 ### `catalog/`
 
@@ -177,10 +185,14 @@ Implement the same three calls the TUI makes:
 
 ```python
 with open_catalog(path) as conn:
-    plan = build_plan(CatalogReader(conn), settings)
+    plan = build_plan(CatalogReader(conn), settings, decide=ask_about_folder)
 checks = preflight(plan)
 result = execute(plan, settings, progress=callback)
 ```
+
+`decide` is optional and is how a front end asks the operator about a folder
+without the planner knowing that a user interface exists. It receives a
+`FolderCase` and returns an action or ``None`` for "use the default".
 
 `execute` takes a `progress(done, total, message)` callback. Nothing else is
 needed — no core code has to change.

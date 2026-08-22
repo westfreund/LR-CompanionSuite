@@ -2,7 +2,7 @@
 
 **Ordnerstrukturen in Adobe Lightroom Classic neu sortieren — ohne die Katalogverbindung zu verlieren.**
 
-[![Revision](https://img.shields.io/badge/revision-r1.0.6-blue)](CHANGELOG.md)
+[![Revision](https://img.shields.io/badge/revision-r2.0.0-blue)](CHANGELOG.md)
 [![Build-Datum](https://img.shields.io/badge/build-2026--08--22-lightgrey)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![Lizenz](https://img.shields.io/badge/Lizenz-MIT%20ODER%20GPL--3.0--or--later-green)](LICENSE)
@@ -80,6 +80,12 @@ Vorlagen sind eingebaut:
 | `year/month-name` | `2019/01 Januar` |
 
 `lrfc presets` zeigt alle Vorlagen, `lrfc tokens` alle Platzhalter.
+
+**Vorhandene Ordner** — thematische wie `Urlaub` und datierte wie
+`2019-04-15 Ostern in Tirol` werden erkannt; datierte behalten standardmäßig
+Namen und Bilder. `--interactive` fragt Sie zu jedem Ordner,
+`--subfolder-action`, `--dated-folder-action` und `--folder-action ID=AKTION`
+setzen es ohne Rückfrage. Siehe [bedienung.md](docs/de/bedienung.md).
 
 Beliebige Kombinationen sind möglich — Ebenen mit `/` trennen:
 

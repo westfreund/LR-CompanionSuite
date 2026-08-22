@@ -379,7 +379,7 @@ def test_a_run_changes_no_storage_class_of_existing_rows(simple_catalog, tmp_pat
             )
         ]
         for table in tables:
-            cols = [c[1] for c in conn.execute('PRAGMA table_info("%s")' % table)]
+            cols = [c[1] for c in conn.execute('PRAGMA table_info("{t}")'.format(t=table))]
             if "id_local" not in cols:
                 continue
             selected = ", ".join('typeof("{c}")'.format(c=c) for c in cols)

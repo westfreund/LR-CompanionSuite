@@ -10,10 +10,18 @@ from __future__ import annotations
 import json
 import os
 import sys
-from dataclasses import asdict, dataclass, fields
+from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from .folders import (
+    CONSOLIDATE,
+    DATED_FOLDER_ACTIONS,
+    KEEP,
+    MISMATCH_ACTIONS,
+    MOVE_OUT,
+    SUBFOLDER_ACTIONS,
+)
 from .logging_setup import get_logger
 from .rules import RuleError, parse_structure, validate_structure
 from .version import __version__
@@ -93,6 +101,21 @@ class Settings:
     language: str = "en"
     ascii_only: bool = False
 
+    # -- existing folder structure --------------------------------------
+    #: What to do with a subfolder whose name carries no date ("Urlaub").
+    subfolder_action: str = CONSOLIDATE
+    #: What to do with a folder whose name starts with a date
+    #: ("2019-04-15 Ostern in Tirol").
+    dated_folder_action: str = KEEP
+    #: What to do with a photo inside a kept dated folder whose capture date
+    #: does not match the folder's name.
+    mismatch_action: str = MOVE_OUT
+    #: Per-folder overrides, ``{catalog folder id: action}``. Beats the three
+    #: settings above and is what an operator's case-by-case answers become.
+    folder_actions: Dict[int, str] = field(default_factory=dict)
+    #: Ask the operator about every folder that could reasonably go either way.
+    interactive_folders: bool = False
+
     # -- edge cases -----------------------------------------------------
     date_source: Tuple[str, ...] = ("capture", "exif-fields")
     on_missing_date: str = "unsorted"
@@ -125,6 +148,7 @@ class Settings:
             e.lower().lstrip(".") for e in self.extra_sidecar_extensions
         )
         self.date_source = tuple(self.date_source)
+        self.folder_actions = {int(k): str(v) for k, v in dict(self.folder_actions).items()}
 
     def validate(self) -> None:
         """Raise :class:`ConfigError` describing the first problem found."""
@@ -163,6 +187,23 @@ class Settings:
                 )
         if not self.unsorted_folder.strip():
             raise ConfigError("unsorted-folder name must not be empty")
+        if self.subfolder_action not in SUBFOLDER_ACTIONS:
+            raise ConfigError(
+                "subfolder-action must be one of {m}".format(m=", ".join(SUBFOLDER_ACTIONS))
+            )
+        if self.dated_folder_action not in DATED_FOLDER_ACTIONS:
+            raise ConfigError(
+                "dated-folder-action must be one of {m}".format(m=", ".join(DATED_FOLDER_ACTIONS))
+            )
+        if self.mismatch_action not in MISMATCH_ACTIONS:
+            raise ConfigError(
+                "mismatch-action must be one of {m}".format(m=", ".join(MISMATCH_ACTIONS))
+            )
+        for folder_id, action in self.folder_actions.items():
+            if action not in set(SUBFOLDER_ACTIONS) | set(DATED_FOLDER_ACTIONS):
+                raise ConfigError(
+                    "unknown action {a!r} for folder {f}".format(a=action, f=folder_id)
+                )
 
     # -- serialisation ---------------------------------------------------
 

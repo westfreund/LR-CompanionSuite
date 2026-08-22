@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r1.0.6 · Build-Datum 2026-08-22**
+**Revision r2.0.0 · Build-Datum 2026-08-22**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -242,6 +242,86 @@ wenn die Bibliothek mit einem System geteilt wird, das mit Unicode Mühe hat.
 Unzulässige Zeichen (`< > : " / \ | ? *`), abschließende Punkte und
 Windows-Gerätenamen (`CON`, `LPT1`, …) werden ohnehin immer behandelt, auf
 jeder Plattform.
+
+## Ordner, die Ihre Bibliothek schon hat
+
+Eine über Jahre gewachsene Bibliothek ist selten ein flacher Ordner. Sie
+enthält thematische Ordner — `Urlaub`, `Hochzeit Meyer` — und Ordner, die
+bereits ein Datum tragen — `2019-04-15 Ostern in Tirol`. Was damit geschehen
+soll, ist eine Ermessensfrage. LR-FolderCraft erkennt sie deshalb, legt offen,
+was es gefunden hat, und überlässt Ihnen die Entscheidung.
+
+### Was als datierter Ordner gilt
+
+Ein Name, der mit einem Datum **beginnt**, wahlweise gefolgt von Text:
+
+| Name | Erkannt als |
+| --- | --- |
+| `2019-04-15 Ostern in Tirol` | Tag |
+| `2019_06_01 Hochzeit` | Tag |
+| `20190415_Hochzeit` | Tag |
+| `2019.03.10` | Tag |
+| `2019-04` | Monat |
+| `2019 Jahresrueckblick` | Jahr |
+| `Urlaub`, `Sommer 2019`, `raw2019` | kein Datum |
+
+Ein Datum mitten im Namen wird ignoriert — dort zu raten hieße, Absicht zu
+erfinden.
+
+Ein datierter Ordner zählt nur, wenn er **mindestens so fein** ist, wie die
+Struktur es verlangt. Ein Ordner `2019` ist keine Antwort auf den Wunsch nach
+Tagesordnern und wird deshalb wie ein thematischer Ordner behandelt, seine
+Bilder werden ordentlich einsortiert. Umgekehrt genügt ein Tagesordner dem
+Wunsch nach Jahresordnern. Enthält die Struktur überhaupt keine
+Datums-Platzhalter, sagen Ordnerdaten nichts aus und werden ignoriert.
+
+### Die drei Entscheidungen
+
+| Situation | Schalter | Auswahl | Vorgabe |
+| --- | --- | --- | --- |
+| Thematischer Unterordner | `--subfolder-action` | `consolidate` · `sort-inside` · `leave` | `consolidate` |
+| Datierter Ordner | `--dated-folder-action` | `keep` · `consolidate` · `sort-inside` · `leave` | `keep` |
+| Foto in einem behaltenen datierten Ordner, dessen Datum nicht passt | `--mismatch-action` | `move-out` · `leave` | `move-out` |
+
+- `consolidate` — Fotos herausholen und unterhalb des Ankers einsortieren.
+- `sort-inside` — Ordner behalten und die Struktur *darin* aufbauen.
+- `leave` — die Fotos dieses Ordners gar nicht anfassen.
+- `keep` — datierter Ordner: die Fotos, die er korrekt beschreibt, bleiben.
+
+Mit den Vorgaben behält `2019-04-15 Ostern in Tirol` Namen und Bilder, während
+ein Foto darin, das an einem anderen Tag entstand, in seinen eigenen
+Datumsordner wandert. Thematische Ordner gehen in der gemeinsamen
+Datumsstruktur auf.
+
+### Einzelne Ordner abweichend entscheiden
+
+```bash
+lrfc folders KATALOG                      # Ordner-IDs ermitteln
+lrfc plan KATALOG -s day --folder-action 4711=sort-inside
+```
+
+`--folder-action ID=AKTION` ist wiederholbar und sticht die globalen Vorgaben.
+
+### Gefragt werden
+
+```bash
+lrfc plan KATALOG -s day --interactive
+```
+
+Jeder Ordner, der vernünftigerweise so oder so behandelt werden kann, wird
+Ihnen vorgelegt — mit dem Befund, der Zahl der Fotos, wie viele davon ein
+abweichendes Datum tragen, und welche Option die Vorgabe ist. Enter übernimmt
+die Vorgabe, es passiert also nichts versehentlich. Der Ankerordner wird nie
+vorgelegt: Er ist das Behältnis, in das sortiert wird, kein Unterordner, dessen
+Schicksal zur Debatte steht.
+
+In der TUI trifft man dieselbe Wahl mit Enter auf einer Zeile der Ordnertabelle
+— das wechselt die Entscheidung dieses Ordners und plant sofort neu.
+
+Wie auch immer Sie wählen: `plan` führt jeden gefundenen Ordner auf, welcher
+Art er ist, was entschieden wurde und ob das aus einer Vorgabe, einem
+ausdrücklichen `--folder-action` oder Ihrer eigenen Antwort stammt. Der
+JSON-Export enthält dasselbe unter `folders`.
 
 ## Profile
 

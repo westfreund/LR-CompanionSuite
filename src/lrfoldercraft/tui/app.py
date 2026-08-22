@@ -36,6 +36,14 @@ from ..catalog.db import CatalogError, open_catalog
 from ..catalog.reader import CatalogReader
 from ..config import CONFLICT_MODES, MISSING_DATE_MODES, PLACEMENT_MODES, Settings
 from ..executor import ExecutionError, execute
+from ..folders import (
+    DATED_FOLDER_ACTIONS,
+    MISMATCH_ACTIONS,
+    SUBFOLDER_ACTIONS,
+)
+from ..folders import (
+    label as action_label,
+)
 from ..logging_setup import LOGGER_NAME, get_logger, setup_logging
 from ..planner import Plan, PlanError, build_plan
 from ..report import human_bytes, render_info, render_result
@@ -82,6 +90,17 @@ TEXT = {
     "yes": ("Yes, apply", "Ja, ausfuehren"),
     "no": ("Cancel", "Abbrechen"),
     "lang": ("Language", "Sprache"),
+    "existing": ("Existing folders", "Vorgefundene Ordner"),
+    "subfolder_action": ("Topic subfolders", "Thematische Unterordner"),
+    "dated_action": ("Dated folders", "Datierte Ordner"),
+    "mismatch_action": ("Wrong date inside", "Falsches Datum darin"),
+    "col_folder": ("Folder", "Ordner"),
+    "col_photos": ("Photos", "Fotos"),
+    "col_action": ("Decision", "Entscheidung"),
+    "cycle_hint": (
+        "Enter on a row cycles its decision and re-plans",
+        "Enter auf einer Zeile wechselt die Entscheidung und plant neu",
+    ),
 }
 
 
@@ -165,6 +184,8 @@ class LRFolderCraftApp(App[int]):
         self.debug_mode = debug
         self.initial_catalog = catalog or ""
         self.plan: Optional[Plan] = None
+        #: Per-folder decisions the operator made by cycling a table row.
+        self.folder_overrides: dict[int, str] = {}
         self.settings = Settings()
         self._handler: Optional[TuiLogHandler] = None
 
@@ -217,6 +238,29 @@ class LRFolderCraftApp(App[int]):
                     allow_blank=False,
                     id="missing",
                 )
+                yield Label(tr("existing", self.language), classes="section")
+                yield Label(tr("subfolder_action", self.language), classes="hint")
+                yield Select(
+                    [(a, a) for a in SUBFOLDER_ACTIONS],
+                    value="consolidate",
+                    allow_blank=False,
+                    id="subfolder-action",
+                )
+                yield Label(tr("dated_action", self.language), classes="hint")
+                yield Select(
+                    [(a, a) for a in DATED_FOLDER_ACTIONS],
+                    value="keep",
+                    allow_blank=False,
+                    id="dated-action",
+                )
+                yield Label(tr("mismatch_action", self.language), classes="hint")
+                yield Select(
+                    [(a, a) for a in MISMATCH_ACTIONS],
+                    value="move-out",
+                    allow_blank=False,
+                    id="mismatch-action",
+                )
+
                 yield Checkbox(tr("sidecars", self.language), value=True, id="sidecars")
                 yield Checkbox(tr("backup", self.language), value=True, id="backup")
                 yield Checkbox(tr("ascii", self.language), value=False, id="ascii")
@@ -229,6 +273,8 @@ class LRFolderCraftApp(App[int]):
                 yield Static(tr("no_catalog", self.language), id="catalog-info")
                 yield ProgressBar(id="progress", show_eta=False)
                 yield Static("", id="summary")
+                yield Label(tr("cycle_hint", self.language), classes="hint")
+                yield DataTable(id="cases", zebra_stripes=True, cursor_type="row")
                 yield DataTable(id="folders", zebra_stripes=True, cursor_type="row")
                 yield RichLog(id="log", markup=True, wrap=True, highlight=False)
         yield Footer()
@@ -236,6 +282,12 @@ class LRFolderCraftApp(App[int]):
     def on_mount(self) -> None:
         table = self.query_one("#folders", DataTable)
         table.add_columns(tr("folder", self.language), tr("files", self.language))
+        cases = self.query_one("#cases", DataTable)
+        cases.add_columns(
+            tr("col_folder", self.language),
+            tr("col_photos", self.language),
+            tr("col_action", self.language),
+        )
         self._attach_log_handler()
         self._update_preview()
         self.write_log(
@@ -297,6 +349,10 @@ class LRFolderCraftApp(App[int]):
         settings.target_root = target_root or None
         settings.conflict = str(self.query_one("#conflict", Select).value)
         settings.on_missing_date = str(self.query_one("#missing", Select).value)
+        settings.subfolder_action = str(self.query_one("#subfolder-action", Select).value)
+        settings.dated_folder_action = str(self.query_one("#dated-action", Select).value)
+        settings.mismatch_action = str(self.query_one("#mismatch-action", Select).value)
+        settings.folder_actions = dict(self.folder_overrides)
         settings.move_sidecars = self.query_one("#sidecars", Checkbox).value
         settings.backup_catalog = self.query_one("#backup", Checkbox).value
         settings.ascii_only = self.query_one("#ascii", Checkbox).value
@@ -482,6 +538,22 @@ class LRFolderCraftApp(App[int]):
             lines.append("[yellow]! {w}[/yellow]".format(w=warning))
         self.query_one("#summary", Static).update("\n".join(lines))
 
+        cases_table = self.query_one("#cases", DataTable)
+        cases_table.clear()
+        self._case_rows = []
+        for case in plan.folder_cases:
+            if not case.photo_count:
+                continue
+            decision = "-" if case.is_anchor else action_label(case.action, self.language)
+            if case.is_dated and case.mismatched_photos:
+                decision += " (+{n})".format(n=case.mismatched_photos)
+            cases_table.add_row(
+                (case.path_from_root or ".")[:40],
+                "{n:,}".format(n=case.photo_count),
+                decision,
+            )
+            self._case_rows.append(case)
+
         table = self.query_one("#folders", DataTable)
         table.clear()
         for name, count in plan.folder_summary():
@@ -491,6 +563,31 @@ class LRFolderCraftApp(App[int]):
                 n=stats.touched, f=stats.new_folders
             )
         )
+
+    @on(DataTable.RowSelected, "#cases")
+    def _cycle_folder_decision(self, event: DataTable.RowSelected) -> None:
+        """Step one folder through its allowed decisions, then re-plan."""
+        rows = getattr(self, "_case_rows", [])
+        if not 0 <= event.cursor_row < len(rows):
+            return
+        case = rows[event.cursor_row]
+        if case.is_anchor:
+            self.notify(
+                "Der Ankerordner steht nicht zur Wahl."
+                if self.language == "de"
+                else "The anchor folder is not up for a decision.",
+                severity="warning",
+            )
+            return
+        choices = DATED_FOLDER_ACTIONS if case.is_dated else SUBFOLDER_ACTIONS
+        current = self.folder_overrides.get(case.folder_id, case.action)
+        index = choices.index(current) if current in choices else 0
+        chosen = choices[(index + 1) % len(choices)]
+        self.folder_overrides[case.folder_id] = chosen
+        self.notify(
+            "{p}: {a}".format(p=case.path_from_root or ".", a=action_label(chosen, self.language))
+        )
+        self.action_plan()
 
     def on_unmount(self) -> None:
         if self._handler is not None:

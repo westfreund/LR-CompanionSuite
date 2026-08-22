@@ -423,3 +423,149 @@ def test_companion_is_never_treated_as_a_sidecar_document(builder, monkeypatch):
     plan = plan_for(builder, structure=("{yyyy}",))
     sources = [s for s, _ in by_name(plan)["A.CR2"].sidecars]
     assert len(sources) == len(set(sources)) == 1
+
+
+# -- existing folder structure ----------------------------------------------
+
+
+@pytest.fixture
+def mixed_library(builder):
+    """A grown library: flat files, topic folders and already dated folders."""
+    builder.add_photo("FLACH.CR2", "2019-01-03T10:00:00", folder="raw2019/")
+    builder.add_photo("U1.CR2", "2019-01-03T11:00:00", folder="raw2019/Urlaub/")
+    builder.add_photo("U2.CR2", "2019-05-20T11:00:00", folder="raw2019/Urlaub/")
+    builder.add_photo("F1.CR2", "2019-02-14T11:00:00", folder="raw2019/Familie/")
+    builder.add_photo("D1.CR2", "2019-03-10T11:00:00", folder="raw2019/2019-03-10/")
+    builder.add_photo("D2.CR2", "2019-04-15T11:00:00", folder="raw2019/2019-04-15 Ostern in Tirol/")
+    builder.add_photo("D3.CR2", "2019-06-01T11:00:00", folder="raw2019/2019_06_01 Hochzeit/")
+    builder.add_photo("X1.CR2", "2019-07-07T11:00:00", folder="raw2019/2019-04-15 Ostern in Tirol/")
+    return builder
+
+
+def test_dated_folders_with_descriptive_text_are_kept(mixed_library):
+    plan = plan_for(mixed_library, structure=("{yyyy}-{mm}-{dd}",))
+    moves = by_name(plan)
+    assert moves["D1.CR2"].status == STAY  # 2019-03-10
+    assert moves["D2.CR2"].status == STAY  # 2019-04-15 Ostern in Tirol
+    assert moves["D3.CR2"].status == STAY  # 2019_06_01 Hochzeit
+
+
+def test_a_misplaced_photo_leaves_a_kept_dated_folder(mixed_library):
+    plan = plan_for(mixed_library, structure=("{yyyy}-{mm}-{dd}",))
+    move = by_name(plan)["X1.CR2"]  # shot 07-07, sits in 04-15
+    assert move.status == MOVE
+    assert move.target_segments == ("raw2019", "2019-07-07")
+
+
+def test_mismatch_action_leave_keeps_it(mixed_library):
+    plan = plan_for(mixed_library, structure=("{yyyy}-{mm}-{dd}",), mismatch_action="leave")
+    assert by_name(plan)["X1.CR2"].status == STAY
+
+
+def test_topic_folders_are_consolidated_by_default(mixed_library):
+    plan = plan_for(mixed_library, structure=("{yyyy}-{mm}-{dd}",))
+    assert by_name(plan)["U1.CR2"].target_segments == ("raw2019", "2019-01-03")
+    assert by_name(plan)["F1.CR2"].target_segments == ("raw2019", "2019-02-14")
+
+
+def test_topic_folders_can_be_sorted_internally(mixed_library):
+    plan = plan_for(mixed_library, structure=("{yyyy}-{mm}-{dd}",), subfolder_action="sort-inside")
+    moves = by_name(plan)
+    assert moves["U1.CR2"].target_segments == ("raw2019", "Urlaub", "2019-01-03")
+    assert moves["U2.CR2"].target_segments == ("raw2019", "Urlaub", "2019-05-20")
+    assert moves["F1.CR2"].target_segments == ("raw2019", "Familie", "2019-02-14")
+    assert moves["FLACH.CR2"].target_segments == ("raw2019", "2019-01-03")
+
+
+def test_topic_folders_can_be_left_alone(mixed_library):
+    plan = plan_for(mixed_library, structure=("{yyyy}-{mm}-{dd}",), subfolder_action="leave")
+    moves = by_name(plan)
+    assert moves["U1.CR2"].status == STAY
+    assert moves["F1.CR2"].status == STAY
+    assert moves["FLACH.CR2"].status == MOVE  # the anchor itself still sorts
+
+
+def test_dated_folders_can_be_dissolved(mixed_library):
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}-{mm}-{dd}",),
+        dated_folder_action="consolidate",
+    )
+    assert by_name(plan)["D2.CR2"].target_segments == ("raw2019", "2019-04-15")
+    assert by_name(plan)["D3.CR2"].target_segments == ("raw2019", "2019-06-01")
+
+
+def test_one_folder_can_be_decided_differently(mixed_library):
+    urlaub = mixed_library.folders["raw2019/Urlaub/"]
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}-{mm}-{dd}",),
+        folder_actions={urlaub: "sort-inside"},
+    )
+    moves = by_name(plan)
+    assert moves["U1.CR2"].target_segments == ("raw2019", "Urlaub", "2019-01-03")
+    assert moves["F1.CR2"].target_segments == ("raw2019", "2019-02-14")  # Familie unchanged
+
+
+def test_the_operator_is_asked_and_answered(mixed_library):
+    asked = []
+
+    def decide(case):
+        asked.append(case.path_from_root)
+        return "leave" if case.name == "Urlaub" else None
+
+    settings = Settings(catalog=str(mixed_library.catalog_path), structure=("{yyyy}-{mm}-{dd}",))
+    with open_catalog(mixed_library.catalog_path) as conn:
+        plan = build_plan(CatalogReader(conn), settings, decide=decide)
+
+    assert "raw2019/Urlaub/" in asked
+    assert "raw2019/" not in asked  # never asked about the anchor
+    moves = by_name(plan)
+    assert moves["U1.CR2"].status == STAY
+    assert moves["F1.CR2"].status == MOVE
+    urlaub = next(c for c in plan.folder_cases if c.name == "Urlaub")
+    assert urlaub.action_source == "operator"
+
+
+def test_an_explicit_override_beats_the_operator(mixed_library):
+    urlaub = mixed_library.folders["raw2019/Urlaub/"]
+    settings = Settings(
+        catalog=str(mixed_library.catalog_path),
+        structure=("{yyyy}-{mm}-{dd}",),
+        folder_actions={urlaub: "sort-inside"},
+    )
+    with open_catalog(mixed_library.catalog_path) as conn:
+        plan = build_plan(CatalogReader(conn), settings, decide=lambda case: "leave")
+    assert by_name(plan)["U1.CR2"].target_segments == ("raw2019", "Urlaub", "2019-01-03")
+
+
+def test_folder_cases_are_reported(mixed_library):
+    plan = plan_for(mixed_library, structure=("{yyyy}-{mm}-{dd}",))
+    kinds = {c.path_from_root: c.kind for c in plan.folder_cases}
+    assert kinds["raw2019/2019-04-15 Ostern in Tirol/"] == "dated"
+    assert kinds["raw2019/Urlaub/"] == "plain"
+    ostern = next(c for c in plan.folder_cases if c.name == "2019-04-15 Ostern in Tirol")
+    assert ostern.matching_photos == 1 and ostern.mismatched_photos == 1
+
+
+def test_sorting_inside_is_idempotent(mixed_library):
+    """A second run must not build Urlaub/2019-01-03/2019-01-03."""
+    import shutil
+
+    from lrfoldercraft.executor import execute
+
+    settings = Settings(
+        catalog=str(mixed_library.catalog_path),
+        structure=("{yyyy}-{mm}-{dd}",),
+        subfolder_action="sort-inside",
+        dry_run=False,
+        backup_dir=str(mixed_library.root / "backups"),
+    )
+    with open_catalog(mixed_library.catalog_path) as conn:
+        plan = build_plan(CatalogReader(conn), settings)
+    execute(plan, settings)
+
+    with open_catalog(mixed_library.catalog_path) as conn:
+        plan2 = build_plan(CatalogReader(conn), settings)
+    assert not plan2.has_work, [(m.source_path, m.target_path) for m in plan2.active_moves]
+    del shutil
