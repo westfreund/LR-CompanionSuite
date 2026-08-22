@@ -1,0 +1,81 @@
+# LR-FolderCraft CI
+#
+# The test suite builds its own synthetic Lightroom catalog, so no fixture
+# downloads, no Lightroom installation and no external services are needed.
+#
+# SPDX-License-Identifier: MIT OR GPL-3.0-or-later
+
+stages: [lint, test, build]
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+cache:
+  key:
+    files: [pyproject.toml]
+  paths: [.cache/pip]
+
+.python: &python
+  image: python:3.12-slim
+  before_script:
+    - python -V
+    - python -m pip install --upgrade pip
+
+lint:
+  <<: *python
+  stage: lint
+  script:
+    - pip install ruff
+    - ruff check src tests
+    - ruff format --check src tests
+  allow_failure: true
+
+# The oldest supported interpreter is the important one: LR-FolderCraft must
+# run on the Python that ships with a stock macOS.
+test:3.9:
+  <<: *python
+  image: python:3.9-slim
+  stage: test
+  script:
+    - pip install -e ".[dev]"
+    - pytest -q --cov=lrfoldercraft --cov-report=term --cov-report=xml
+  coverage: '/^TOTAL.+?(\d+\%)$/'
+  artifacts:
+    when: always
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+test:
+  <<: *python
+  stage: test
+  parallel:
+    matrix:
+      - PYTHON_IMAGE: ["3.10", "3.11", "3.12", "3.13"]
+  image: python:$PYTHON_IMAGE-slim
+  script:
+    - pip install -e ".[dev]"
+    - pytest -q
+
+# A dry run must never write anything -- guarded here so a regression cannot
+# reach a release.
+safety:
+  <<: *python
+  stage: test
+  script:
+    - pip install -e ".[dev]"
+    - pytest -q tests/test_executor.py -k "dry_run or rollback or overwrite or preflight or undo"
+
+build:
+  <<: *python
+  stage: build
+  script:
+    - pip install build
+    - python -m build
+    - pip install dist/*.whl
+    - lrfc --version
+  artifacts:
+    paths: [dist/]
+    expire_in: 30 days
