@@ -71,7 +71,9 @@ class CatalogBuilder:
         self._conn = sqlite3.connect(str(self.catalog_path))
         self._conn.executescript(SCHEMA)
         self._var("Adobe_DBVersion", "18.0.0")
-        self._var("Adobe_entityIDCounter", "5000.0")
+        # Lightroom stores the id counter as a REAL, not a string. Getting this
+        # wrong in the fixture would hide a defect that makes catalogs unopenable.
+        self._var("Adobe_entityIDCounter", 5000.0)
         self.root_folder_id = self._new_id()
         self._conn.execute(
             "INSERT INTO AgLibraryRootFolder VALUES (?,?,?,?,?)",

@@ -131,6 +131,22 @@ class CatalogConnection:
             raise CatalogError("Adobe_entityIDCounter missing -- refusing to invent row ids")
         return float(raw)
 
+    def entity_id_counter_type(self) -> str:
+        """SQLite storage class Lightroom used for the id counter.
+
+        ``Adobe_variablesTable.value`` is declared without a type, so it has
+        BLOB affinity and stores exactly what it is handed. Lightroom writes the
+        counter as a REAL. Writing a string back leaves a value that *reads* the
+        same but has storage class ``text``: it passes every integrity check,
+        survives Lightroom's own catalog repair unchanged -- and stops Lightroom
+        from opening the catalog at all.
+        """
+        row = self.query_one(
+            "SELECT typeof(value) FROM Adobe_variablesTable WHERE name = ?",
+            (ENTITY_ID_COUNTER,),
+        )
+        return str(row[0]) if row is not None else "real"
+
     def allocate_ids(self, count: int) -> list[int]:
         """Reserve *count* new ``id_local`` values and advance the counter.
 
@@ -144,12 +160,37 @@ class CatalogConnection:
             return []
         start = int(self.peek_entity_id_counter())
         ids = list(range(start, start + count))
-        new_value = float(start + count)
+        # Write the counter back in the storage class it already had. Lightroom
+        # stores it as a REAL; handing SQLite a string silently turns it into
+        # TEXT, which passes every integrity check, survives Lightroom's own
+        # catalog repair unchanged, and stops Lightroom opening the catalog.
+        stored_type = self.entity_id_counter_type()
+        new_value: object = float(start + count)
+        if stored_type == "text":
+            new_value = repr(float(start + count))
+        elif stored_type == "integer":
+            new_value = start + count
         self.connection.execute(
             "UPDATE Adobe_variablesTable SET value = ? WHERE name = ?",
-            (repr(new_value), ENTITY_ID_COUNTER),
+            (new_value, ENTITY_ID_COUNTER),
         )
-        log.debug("Allocated ids %d..%d, counter -> %s", ids[0], ids[-1], new_value)
+        written = self.query_one(
+            "SELECT typeof(value) FROM Adobe_variablesTable WHERE name = ?",
+            (ENTITY_ID_COUNTER,),
+        )
+        if written is not None and written[0] != stored_type:
+            raise CatalogError(
+                "id counter changed storage class from {a} to {b}; refusing to continue".format(
+                    a=stored_type, b=written[0]
+                )
+            )
+        log.debug(
+            "Allocated ids %d..%d, counter -> %r (%s)",
+            ids[0],
+            ids[-1],
+            new_value,
+            stored_type,
+        )
         return ids
 
     @staticmethod

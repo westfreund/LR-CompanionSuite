@@ -1,6 +1,6 @@
 # Funktionsweise
 
-**Revision r1.0.4 · Build-Datum 2026-08-22**
+**Revision r1.0.5 · Build-Datum 2026-08-22**
 
 ## Warum der Katalog direkt bearbeitet werden muss
 
@@ -117,6 +117,17 @@ ihre IDs aus genau diesem Zähler, und der Zähler wird um exakt die Zahl der
 angelegten Zeilen erhöht. IDs selbst zu erfinden — etwa `MAX(id_local) + 1` —
 würde früher oder später mit einer ID kollidieren, die Lightroom später selbst
 vergibt.
+
+Der Zähler muss außerdem in derselben **SQLite-Speicherklasse** zurückgeschrieben
+werden. `Adobe_variablesTable.value` ist ohne Typ deklariert, hat also
+BLOB-Affinität und behält genau das, was man ihm gibt. Lightroom speichert den
+Zähler als REAL; schreibt man stattdessen die Zeichenkette `'4914941.0'` statt
+der Zahl `4914941.0`, entsteht ein Wert, der sich gleich liest,
+`integrity_check` besteht und bei einem Zeilenvergleich nicht auffällt — aber
+Lightroom weigert sich dann, den Katalog zu öffnen, und seine eigene Reparatur
+kopiert den Wert unverändert mit, repariert also endlos in eine byte-identische
+Datei. `allocate_ids()` liest nach dem Schreiben `typeof()` erneut und bricht
+den Lauf ab, wenn sich die Speicherklasse geändert hat.
 
 ## Die Ausführungsreihenfolge
 

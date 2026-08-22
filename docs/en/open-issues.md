@@ -1,13 +1,13 @@
 # Open issues and roadmap
 
-**Revision r1.0.4 · Build date 2026-08-22**
+**Revision r1.0.5 · Build date 2026-08-22**
 
 An honest list of what is not done, not verified, or deliberately left out.
 Each item is a starting point for the next session.
 
 ## Not yet verified
 
-### O-1 · The real library has been migrated ✔
+### O-1 · The real library has been migrated, Lightroom acceptance pending
 Done on 2026-08-22. The 9,452-file / 337 GiB catalog on `/Volumes/1TB-2` was
 reorganised into 152 day folders. Independently verified afterwards: every one
 of the 9,489 files present with an unchanged size, `integrity_check` ok,
@@ -21,6 +21,12 @@ The first attempt aborted at file 850 on the AppleDouble defect (see r1.0.3)
 and rolled back completely — 850 files restored, 152 directories removed, the
 catalog byte-identical. That was an unplanned but conclusive test of the
 rollback path on a real library.
+
+**Lightroom Classic then refused to open the result** and repaired it into a
+byte-identical file, repeatedly. The cause was the storage-class defect fixed in
+r1.0.5: the id counter had been written as TEXT instead of REAL. Every check the
+tool performed passed, because none of them looked at `typeof()`. Confirming
+that a catalog corrected by r1.0.5 opens in Lightroom is the remaining step.
 
 ### O-2 · No result has been opened in Lightroom itself
 Verification is at the database and filesystem level: integrity check, foreign

@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r1.0.4 · Build-Datum 2026-08-22**
+**Revision r1.0.5 · Build-Datum 2026-08-22**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom

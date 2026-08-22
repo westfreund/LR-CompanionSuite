@@ -1,6 +1,6 @@
 # Architecture
 
-**Revision r1.0.4 · Build date 2026-08-22**
+**Revision r1.0.5 · Build date 2026-08-22**
 
 ## Guiding rule
 
@@ -64,7 +64,7 @@ LR-FolderCraft/
 │       ├── app.py                   the Textual application
 │       └── app.tcss                 its stylesheet
 │
-├── tests/                           178 tests, synthetic catalog fixture
+├── tests/                           181 tests, synthetic catalog fixture
 ├── install/                         installers for macOS, Linux, Windows
 └── docs/  en/  de/  images/         this documentation, in both languages
 ```

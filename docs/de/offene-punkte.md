@@ -1,6 +1,6 @@
 # Offene Punkte und Fahrplan
 
-**Revision r1.0.4 · Build-Datum 2026-08-22**
+**Revision r1.0.5 · Build-Datum 2026-08-22**
 
 Eine ehrliche Aufstellung dessen, was nicht erledigt, nicht verifiziert oder
 bewusst ausgelassen ist. Jeder Punkt ist ein Ansatzpunkt für die nächste
@@ -8,7 +8,7 @@ Sitzung.
 
 ## Noch nicht verifiziert
 
-### O-1 · Die echte Bibliothek ist migriert ✔
+### O-1 · Die echte Bibliothek ist migriert, Lightroom-Abnahme offen
 Erledigt am 22.08.2026. Der Katalog mit 9.452 Dateien / 337 GiB auf
 `/Volumes/1TB-2` wurde in 152 Tagesordner umsortiert. Anschließend unabhängig
 verifiziert: alle 9.489 Dateien vorhanden mit unveränderter Größe,
@@ -23,6 +23,13 @@ Der erste Versuch brach bei Datei 850 am AppleDouble-Defekt ab (siehe r1.0.3)
 und rollte vollständig zurück — 850 Dateien zurückgelegt, 152 Ordner entfernt,
 Katalog bitgleich. Das war ein ungeplanter, aber aussagekräftiger Test des
 Rollback-Pfads an einer echten Bibliothek.
+
+**Lightroom Classic verweigerte danach das Öffnen** und reparierte den Katalog
+wiederholt in eine byte-identische Datei. Ursache war der in r1.0.5 behobene
+Speicherklassen-Defekt: Der ID-Zähler war als TEXT statt als REAL geschrieben
+worden. Alle Prüfungen des Werkzeugs waren bestanden, weil keine davon
+`typeof()` betrachtete. Die Bestätigung, dass ein mit r1.0.5 korrigierter
+Katalog in Lightroom öffnet, steht noch aus.
 
 ### O-2 · Noch kein Ergebnis in Lightroom selbst geöffnet
 Die Prüfung erfolgte auf Datenbank- und Dateisystemebene: Integritätsprüfung,

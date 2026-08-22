@@ -290,3 +290,114 @@ def test_side_file_check_flags_an_interrupted_journal(simple_catalog):
         assert "not delete" in check.message_en
     finally:
         journal.unlink()
+
+
+def test_id_counter_keeps_its_storage_class(simple_catalog):
+    """Lightroom stores Adobe_entityIDCounter as a REAL.
+
+    Writing it back as a string leaves a value that reads identically but has
+    storage class ``text``. That passes PRAGMA integrity_check, survives
+    Lightroom's own catalog repair unchanged -- and makes Lightroom refuse to
+    open the catalog, repairing it into a byte-identical file forever.
+    """
+    before = simple_catalog.query(
+        "SELECT typeof(value) FROM Adobe_variablesTable WHERE name = 'Adobe_entityIDCounter'"
+    )[0][0]
+    assert before == "real", "fixture must mirror Lightroom"
+
+    with open_catalog(simple_catalog.catalog_path, writable=True) as conn:
+        conn.allocate_ids(5)
+        conn.connection.commit()
+
+    after = simple_catalog.query(
+        "SELECT typeof(value), value FROM Adobe_variablesTable WHERE name = 'Adobe_entityIDCounter'"
+    )[0]
+    assert after[0] == "real", "the id counter turned into {t}".format(t=after[0])
+    assert after[1] == 5005.0
+
+
+def test_id_counter_stored_as_text_stays_text(tmp_path):
+    """A catalog that really does use TEXT must not be converted either."""
+    from conftest import CatalogBuilder
+
+    builder = CatalogBuilder(tmp_path / "textcounter")
+    builder._conn.execute(
+        "UPDATE Adobe_variablesTable SET value = '5000.0' WHERE name = 'Adobe_entityIDCounter'"
+    )
+    builder._conn.commit()
+    try:
+        with open_catalog(builder.catalog_path, writable=True) as conn:
+            assert conn.entity_id_counter_type() == "text"
+            conn.allocate_ids(3)
+            conn.connection.commit()
+        assert (
+            builder.query(
+                "SELECT typeof(value) FROM Adobe_variablesTable "
+                "WHERE name = 'Adobe_entityIDCounter'"
+            )[0][0]
+            == "text"
+        )
+    finally:
+        builder.close()
+
+
+def test_a_run_changes_no_storage_class_of_existing_rows(simple_catalog, tmp_path):
+    """Broad guard: a row that already existed must keep its column types.
+
+    Type drift is invisible both to row-value comparison and to
+    integrity_check, so it needs its own check. New rows may legitimately
+    introduce a storage class the table did not have before -- the first
+    subfolder gives AgLibraryFolder.parentId its first integer -- so only rows
+    present before *and* after are compared.
+    """
+    import shutil
+
+    from lrfoldercraft.config import Settings
+    from lrfoldercraft.executor import execute
+    from lrfoldercraft.planner import build_plan
+
+    before_path = tmp_path / "before.lrcat"
+    shutil.copy2(str(simple_catalog.catalog_path), str(before_path))
+
+    settings = Settings(
+        catalog=str(simple_catalog.catalog_path),
+        structure=("{yyyy}-{mm}-{dd}",),
+        dry_run=False,
+        backup_dir=str(tmp_path / "b"),
+    )
+    with open_catalog(simple_catalog.catalog_path) as conn:
+        plan = build_plan(CatalogReader(conn), settings)
+    execute(plan, settings)
+
+    def row_types(path):
+        conn = sqlite3.connect("file:{p}?mode=ro".format(p=path), uri=True)
+        out = {}
+        tables = [
+            r[0]
+            for r in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+            )
+        ]
+        for table in tables:
+            cols = [c[1] for c in conn.execute('PRAGMA table_info("%s")' % table)]
+            if "id_local" not in cols:
+                continue
+            selected = ", ".join('typeof("{c}")'.format(c=c) for c in cols)
+            for row in conn.execute('SELECT id_local, {s} FROM "{t}"'.format(s=selected, t=table)):
+                out[(table, row[0])] = (tuple(cols), tuple(row[1:]))
+        conn.close()
+        return out
+
+    before, after = row_types(before_path), row_types(simple_catalog.catalog_path)
+    drift = []
+    for key in set(before) & set(after):
+        cols, was = before[key]
+        _, now = after[key]
+        for column, old_type, new_type in zip(cols, was, now):
+            if old_type != new_type:
+                drift.append(
+                    "{t}.{c} (id {i}): {a} -> {b}".format(
+                        t=key[0], c=column, i=key[1], a=old_type, b=new_type
+                    )
+                )
+    assert not drift, "storage class drift on existing rows: " + "; ".join(drift)

@@ -12,6 +12,58 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
 ---
 
+## [1.0.5] — 2026-08-22
+
+**Root cause of the failure reported in 1.0.4.** Lightroom Classic could not
+open the reorganised catalog because the id counter had changed SQLite storage
+class.
+
+### Fixed
+
+- **`Adobe_entityIDCounter` was written back as TEXT instead of REAL.**
+  `allocate_ids()` stored the new value with `repr(float)`, producing the string
+  `'4914941.0'` where Lightroom keeps the number `4914941.0`.
+  `Adobe_variablesTable.value` is declared without a type, so it has BLOB
+  affinity and stores exactly what it is handed — the value *reads* the same and
+  nothing flags it:
+
+  * `PRAGMA integrity_check` and `foreign_key_check` pass;
+  * the schema is unchanged;
+  * comparing row values finds no difference, because both sides print
+    `4914941.0`;
+  * **Lightroom's own catalog repair copies the value through unchanged**, so it
+    produced a byte-identical file and failed again — repairing in a loop that
+    could never converge.
+
+  The counter is now written back in whatever storage class it already had, and
+  `allocate_ids()` re-reads `typeof()` afterwards and aborts the run if it
+  changed. Recovering an affected catalog needs one statement:
+
+  ```sql
+  UPDATE Adobe_variablesTable
+     SET value = CAST(value AS REAL)
+   WHERE name = 'Adobe_entityIDCounter';
+  ```
+
+### Added
+
+- Three regression tests: the counter keeps REAL, a catalog that genuinely uses
+  TEXT is not converted either, and a broad guard that compares the SQLite
+  storage class of every column of every row that exists before *and* after a
+  run. Type drift is invisible to both value comparison and `integrity_check`,
+  so it needs a check of its own.
+
+### How it was found
+
+Two controlled tests separated content from environment: the migrated catalog
+on an internal APFS disk still failed to open, while the untouched original on
+the same exFAT volume opened fine. That ruled out the filesystem and pointed at
+the data — after which comparing `typeof()` against the *original* (rather than
+against Lightroom's repair, where both sides were already TEXT) showed the one
+differing value.
+
+[1.0.5]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v1.0.5
+
 ## [1.0.4] — 2026-08-22
 
 Lightroom Classic refused to open the reorganised reference catalog with an
@@ -170,7 +222,7 @@ and rewriting the catalog in one reversible operation.
 - Debug mode and a per-run log file carrying a numbered `STEP` audit trail.
 
 **Project**
-- 178 tests, 88 % coverage, built on a synthetic catalog fixture so no
+- 181 tests, 88 % coverage, built on a synthetic catalog fixture so no
   Lightroom installation is needed.
 - GitLab CI: lint, tests on Python 3.9–3.13, a dedicated safety job, build.
 - Installers for macOS, Linux and Windows.

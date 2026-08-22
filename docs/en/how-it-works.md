@@ -1,6 +1,6 @@
 # How it works
 
-**Revision r1.0.4 · Build date 2026-08-22**
+**Revision r1.0.5 · Build date 2026-08-22**
 
 ## Why the catalog has to be edited directly
 
@@ -112,6 +112,16 @@ in `Adobe_variablesTable` under `Adobe_entityIDCounter`. New folder rows take
 their ids from that same counter, and the counter is advanced by exactly the
 number of rows created. Inventing ids — `MAX(id_local) + 1`, say — would
 eventually collide with an id Lightroom itself allocates later.
+
+The counter must also be written back in the **same SQLite storage class**.
+`Adobe_variablesTable.value` is declared without a type, so it has BLOB affinity
+and keeps whatever it is handed. Lightroom stores the counter as a REAL; writing
+the string `'4914941.0'` instead of the number `4914941.0` yields a value that
+reads the same, passes `integrity_check`, and is invisible to a row-value
+comparison — but Lightroom then refuses to open the catalog, and its own repair
+copies the value through unchanged, so it repairs into a byte-identical file
+forever. `allocate_ids()` re-reads `typeof()` after writing and aborts the run
+if the storage class changed.
 
 ## The execution order
 

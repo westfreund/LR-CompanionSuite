@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r1.0.4 · Build-Datum 2026-08-22**
+**Revision r1.0.5 · Build-Datum 2026-08-22**
 
 Dieses Dokument bewahrt die Anfrage, aus der LR-FolderCraft entstanden ist,
 einen generischen Prompt zur Neuerzeugung eines vergleichbaren Werkzeugs sowie
@@ -182,6 +182,16 @@ must all survive.
    usually the copy date, and it misfiles photos silently.
 5. ISO weeks: pair `{iso_week}` with `{iso_year}`, never with the calendar
    year. 30 December 2019 is week 1 of 2020.
+6. **Preserve SQLite storage classes.** `Adobe_variablesTable.value` is declared
+   without a type, so it has BLOB affinity and keeps exactly what you give it.
+   Lightroom stores `Adobe_entityIDCounter` as a REAL; writing it back as a
+   string (`repr(float)`, `str(...)`, an f-string) produces a value that reads
+   identically, passes `integrity_check`, shows no difference in a row-value
+   comparison — and makes Lightroom refuse to open the catalog. Lightroom's own
+   repair copies the value through unchanged, so it repairs the catalog into a
+   byte-identical file over and over. Bind numbers as numbers, and verify with
+   `typeof()` after writing. Test for type drift explicitly: it is invisible to
+   every other check.
 
 ## Functional requirements
 
@@ -253,7 +263,7 @@ offenen Fragen.
 ```bash
 git clone https://gitlab.com/andy-freund/LR-FolderCraft.git
 cd LR-FolderCraft && python3 -m venv .venv && source .venv/bin/activate
-python -m pip install -e '.[dev]' && pytest        # 178 Tests sollten grün sein
+python -m pip install -e '.[dev]' && pytest        # 181 Tests sollten grün sein
 ```
 
 Danach in dieser Reihenfolge lesen:
