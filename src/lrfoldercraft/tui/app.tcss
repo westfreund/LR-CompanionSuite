@@ -1,0 +1,101 @@
+Screen {
+    layers: base overlay;
+}
+
+#body {
+    height: 1fr;
+}
+
+#sidebar {
+    width: 46;
+    border-right: solid $panel-lighten-2;
+    padding: 0 1;
+}
+
+#main {
+    padding: 0 1;
+}
+
+.section {
+    color: $accent;
+    text-style: bold;
+    margin: 1 0 0 0;
+}
+
+.hint {
+    color: $text-muted;
+}
+
+#preview {
+    background: $boost;
+    border: round $panel-lighten-2;
+    padding: 0 1;
+    height: auto;
+    min-height: 3;
+}
+
+#catalog-info {
+    height: auto;
+    min-height: 5;
+    border: round $panel-lighten-2;
+    padding: 0 1;
+}
+
+#actions {
+    height: auto;
+    padding: 1 0;
+}
+
+#actions Button {
+    width: 100%;
+    margin-bottom: 1;
+}
+
+#progress {
+    height: 1;
+    display: none;
+}
+
+#progress.active {
+    display: block;
+}
+
+#summary {
+    height: auto;
+    min-height: 7;
+    border: round $panel-lighten-2;
+    padding: 0 1;
+}
+
+#folders {
+    height: 1fr;
+    min-height: 8;
+}
+
+#log {
+    height: 1fr;
+    min-height: 6;
+    border: round $panel-lighten-2;
+}
+
+ConfirmScreen {
+    align: center middle;
+}
+
+#dialog {
+    width: 76;
+    height: auto;
+    border: thick $warning;
+    background: $surface;
+    padding: 1 2;
+}
+
+#dialog-buttons {
+    height: auto;
+    align: center middle;
+    padding-top: 1;
+}
+
+#dialog-buttons Button {
+    margin: 0 1;
+}

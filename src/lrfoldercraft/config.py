@@ -94,7 +94,7 @@ class Settings:
     ascii_only: bool = False
 
     # -- edge cases -----------------------------------------------------
-    date_source: Tuple[str, ...] = ("capture", "exif-fields", "file-mtime")
+    date_source: Tuple[str, ...] = ("capture", "exif-fields")
     on_missing_date: str = "unsorted"
     unsorted_folder: str = "_unsorted"
     conflict: str = "rename"

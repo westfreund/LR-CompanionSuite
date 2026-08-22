@@ -338,6 +338,81 @@ def resolve_anchor(
 # ---------------------------------------------------------------------------
 
 
+#: Marker used while preparing photos, before the plan rows are built.
+_FILTERED = "filtered"
+_NO_DATE_SKIP = "no-date-skip"
+
+
+def _structure_segments(
+    photo: Photo, settings: Settings, needs_date: bool
+) -> Tuple[Optional[Tuple[str, ...]], str]:
+    """Render the structure for one photo.
+
+    Returns ``(segments, reason)``. ``segments`` is ``None`` when the photo has
+    no usable date and ``on-missing-date=skip``; *reason* then carries the
+    marker :data:`_NO_DATE_SKIP`.
+    """
+    when = resolve_date(photo, settings)
+    if when is None and needs_date:
+        if settings.on_missing_date == "skip":
+            return None, _NO_DATE_SKIP
+        if settings.on_missing_date == "abort":
+            raise PlanError(
+                "file {f} has no usable capture date (on-missing-date=abort)".format(
+                    f=photo.absolute_path
+                )
+            )
+        return (
+            (sanitise_segment(settings.unsorted_folder),),
+            "no capture date -> unsorted folder",
+        )
+    context = TokenContext(
+        when=when,
+        camera=photo.camera_model,
+        camera_serial=photo.camera_serial,
+        lens=photo.lens,
+        file_format=photo.file_format,
+        extension=photo.extension,
+        original_folder=_last_segment(photo.folder_path_from_root),
+        language=settings.language,
+    )
+    return (
+        render_structure(settings.structure, context, ascii_only=settings.ascii_only),
+        "",
+    )
+
+
+def _normalise_anchor(
+    anchor: Tuple[str, ...],
+    settings: Settings,
+    prepared: Sequence[Tuple[Photo, Optional[Tuple[str, ...]], str]],
+) -> Tuple[str, ...]:
+    """Strip an anchor tail that the structure itself would produce.
+
+    Without this, running the tool a second time on an already sorted library
+    would nest the structure inside itself: every photo of ``raw2019/2019-01-03``
+    shares that folder as its common prefix, so ``2019-01-03`` would be created
+    *inside* ``2019-01-03``. Detecting that the anchor already ends with what
+    the structure renders makes repeated runs idempotent.
+    """
+    if settings.placement != "in-place" or settings.anchor_folder_id is not None:
+        return anchor
+    depth = len(settings.structure)
+    if len(anchor) < depth:
+        return anchor
+    candidates = [segs for _, segs, reason in prepared if segs and not reason]
+    if not candidates:
+        return anchor
+    tail = tuple(anchor[-depth:])
+    if all(len(segs) == depth and segs == tail for segs in candidates):
+        log.info(
+            "Anchor %r already ends with the rendered structure; using %r instead",
+            "/".join(anchor), "/".join(anchor[:-depth]),
+        )
+        return anchor[:-depth]
+    return anchor
+
+
 def build_plan(reader: CatalogReader, settings: Settings) -> Plan:
     """Produce a :class:`Plan` for *settings* against the catalog behind *reader*."""
     settings.validate()
@@ -353,7 +428,17 @@ def build_plan(reader: CatalogReader, settings: Settings) -> Plan:
         raise PlanError("no photos matched the selection")
     step("Selected %d file(s) from the catalog", len(photos))
 
+    needs_date = structure_requires_date(settings.structure)
+    prepared: List[Tuple[Photo, Optional[Tuple[str, ...]], str]] = []
+    for photo in photos:
+        if not settings.accepts_extension(photo.extension):
+            prepared.append((photo, None, _FILTERED))
+            continue
+        segments, reason = _structure_segments(photo, settings, needs_date)
+        prepared.append((photo, segments, reason))
+
     root, anchor = resolve_anchor(reader, settings, photos)
+    anchor = _normalise_anchor(anchor, settings, prepared)
     step(
         "Anchor resolved: root=%s anchor=%r placement=%s",
         root.name, "/".join(anchor), settings.placement,
@@ -375,7 +460,6 @@ def build_plan(reader: CatalogReader, settings: Settings) -> Plan:
         created_at=datetime.now().isoformat(timespec="seconds"),
     )
 
-    needs_date = structure_requires_date(settings.structure)
     source_device = _device_of(root.normalised_path)
     target_device = _device_of(target_root_path)
     cross_volume = (
@@ -395,13 +479,14 @@ def build_plan(reader: CatalogReader, settings: Settings) -> Plan:
     folder_segments_seen: Set[Tuple[str, ...]] = set()
     index = DirectoryIndex()
 
-    for photo in photos:
+    for photo, segments, reason in prepared:
         move = _plan_one(
             photo=photo,
             settings=settings,
             anchor=anchor,
             target_root_path=target_root_path,
-            needs_date=needs_date,
+            structure_segments=segments,
+            date_reason=reason,
             claimed=claimed,
             cross_volume=cross_volume,
             index=index,
@@ -428,7 +513,8 @@ def _plan_one(
     settings: Settings,
     anchor: Tuple[str, ...],
     target_root_path: str,
-    needs_date: bool,
+    structure_segments: Optional[Tuple[str, ...]],
+    date_reason: str,
     claimed: Dict[str, int],
     cross_volume: bool,
     index: Optional[DirectoryIndex] = None,
@@ -449,48 +535,25 @@ def _plan_one(
         source_folder_id=photo.folder_id,
     )
 
-    if not settings.accepts_extension(photo.extension):
+    if date_reason == _FILTERED:
         base.status = SKIP_FILTERED
         base.reason = "extension .{e} excluded".format(e=photo.extension)
         return base
 
     try:
-        stat = os.stat(source_path)
-        base.size_bytes = stat.st_size
+        base.size_bytes = os.stat(source_path).st_size
     except OSError:
         base.status = SKIP_MISSING_SOURCE
         base.reason = "file not found on disk"
         return base
 
-    when = resolve_date(photo, settings)
-    if when is None and needs_date:
-        if settings.on_missing_date == "skip":
-            base.status = SKIP_NO_DATE
-            base.reason = "no capture date and on-missing-date=skip"
-            return base
-        if settings.on_missing_date == "abort":
-            raise PlanError(
-                "file {f} has no usable capture date (on-missing-date=abort)".format(
-                    f=source_path
-                )
-            )
-        segments = anchor + (sanitise_segment(settings.unsorted_folder),)
-        base.reason = "no capture date -> unsorted folder"
-    else:
-        context = TokenContext(
-            when=when,
-            camera=photo.camera_model,
-            camera_serial=photo.camera_serial,
-            lens=photo.lens,
-            file_format=photo.file_format,
-            extension=photo.extension,
-            original_folder=_last_segment(photo.folder_path_from_root),
-            language=settings.language,
-        )
-        segments = anchor + render_structure(
-            settings.structure, context, ascii_only=settings.ascii_only
-        )
+    if structure_segments is None:
+        base.status = SKIP_NO_DATE
+        base.reason = "no capture date and on-missing-date=skip"
+        return base
 
+    base.reason = date_reason
+    segments = anchor + structure_segments
     base.target_segments = segments
     target_dir = _join(target_root_path, segments)
     target_path = "{d}/{f}".format(d=target_dir, f=photo.filename)

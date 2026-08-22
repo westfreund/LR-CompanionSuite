@@ -20,6 +20,7 @@ from __future__ import annotations
 import hashlib
 import os
 import shutil
+import sqlite3
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -189,6 +190,7 @@ def _run(
     total = len(active)
     moved: List[PlannedMove] = []
     moved_sidecars: List[Tuple[str, str]] = []
+    created_dirs: List[Path] = []
 
     with open_catalog(
         catalog,
@@ -216,10 +218,7 @@ def _run(
                 len(folder_ids), result.folders_created,
             )
 
-            for move in active:
-                writer.reparent_file(move.file_id, folder_ids[move.target_segments])
-                if move.renamed:
-                    writer.rename_file(move.file_id, move.target_filename)
+            _stage_catalog_moves(writer, active, folder_ids)
             step("Staged %d catalog row update(s)", len(active))
 
             # --- 2. filesystem side, journalled ---------------------------
@@ -228,6 +227,7 @@ def _run(
                 if not directory.exists():
                     journal.write("mkdir", path=str(directory))
                     directory.mkdir(parents=True, exist_ok=True)
+                    created_dirs.append(directory)
                     log.debug("Created directory %s", directory)
 
             for index, move in enumerate(active, start=1):
@@ -276,7 +276,8 @@ def _run(
             writer.rollback()
             journal.write("rollback-begin", reason=str(exc))
             restored = _rollback_files(moved, moved_sidecars, journal)
-            journal.write("rollback-end", restored=restored)
+            removed = _remove_created_directories(created_dirs)
+            journal.write("rollback-end", restored=restored, directories=removed)
             result.rolled_back = True
             result.errors.append(
                 "rolled back: {n} file(s) restored to their original location".format(
@@ -290,6 +291,68 @@ def _run(
         _remove_empty_directories(plan, result)
     if settings.verify_after:
         _verify(plan, settings, result)
+
+
+def _stage_catalog_moves(
+    writer: CatalogWriter,
+    moves: Sequence[PlannedMove],
+    folder_ids: Dict[Tuple[str, ...], int],
+) -> None:
+    """Apply every catalog row change, order-independently.
+
+    ``AgLibraryFile`` has a UNIQUE index on ``(lc_idx_filename, folder)``. The
+    *final* layout always satisfies it -- the planner guarantees unique target
+    names -- but an intermediate step may not: moving ``a/X.jpg`` into ``b/``
+    fails while ``b/X.jpg`` is itself still waiting to be moved elsewhere.
+
+    So rows that cannot move yet are deferred and retried. SQLite rolls back
+    the offending statement only, leaving the surrounding transaction intact.
+    If a whole round makes no progress the remaining rows form a rename cycle,
+    which is broken by parking them under temporary names first.
+    """
+    pending: List[PlannedMove] = list(moves)
+    while pending:
+        deferred: List[PlannedMove] = []
+        for move in pending:
+            try:
+                writer.move_row(
+                    move.file_id,
+                    folder_ids[move.target_segments],
+                    move.target_filename if move.renamed else None,
+                )
+            except sqlite3.IntegrityError as exc:
+                log.debug("Deferring file %d: %s", move.file_id, exc)
+                deferred.append(move)
+        if len(deferred) == len(pending):
+            log.info("Breaking a rename cycle of %d row(s) via temporary names", len(deferred))
+            for move in deferred:
+                writer.rename_file(move.file_id, _temp_name(move))
+            for move in deferred:
+                writer.reparent_file(move.file_id, folder_ids[move.target_segments])
+            for move in deferred:
+                writer.rename_file(move.file_id, move.target_filename or move.filename)
+            return
+        pending = deferred
+
+
+def _temp_name(move: PlannedMove) -> str:
+    """Collision-proof placeholder name, unique through the row id."""
+    _, _, extension = move.filename.rpartition(".")
+    suffix = ".{e}".format(e=extension) if extension else ""
+    return "__lrfc_tmp_{i}{s}".format(i=move.file_id, s=suffix)
+
+
+def _remove_created_directories(directories: Sequence[Path]) -> int:
+    """Delete directories the run created, deepest first, if they are empty."""
+    removed = 0
+    for directory in sorted(directories, key=lambda d: len(d.parts), reverse=True):
+        try:
+            if directory.is_dir() and not any(directory.iterdir()):
+                directory.rmdir()
+                removed += 1
+        except OSError as exc:
+            log.debug("Kept directory %s: %s", directory, exc)
+    return removed
 
 
 def _move_file(source: str, target: str, cross_volume: bool) -> None:

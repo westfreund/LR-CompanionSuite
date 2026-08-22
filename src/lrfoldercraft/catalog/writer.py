@@ -22,6 +22,14 @@ from .model import Folder, lr_path_from_root
 log = get_logger("catalog.writer")
 
 
+def _split_filename(filename: str) -> Tuple[str, str]:
+    """Split ``name.ext`` into ``("name", "ext")``; no extension yields ``""``."""
+    base_name, _, extension = filename.rpartition(".")
+    if not base_name:
+        return filename, ""
+    return base_name, extension
+
+
 class CatalogWriter:
     """Applies folder creations and file re-parenting inside one transaction."""
 
@@ -167,6 +175,33 @@ class CatalogWriter:
         log.info("Re-parented %d file rows", len(rows))
         return len(rows)
 
+    def move_row(
+        self, file_id: int, new_folder_id: int, new_filename: Optional[str] = None
+    ) -> None:
+        """Re-parent and (optionally) rename a file in a single statement.
+
+        Doing both at once matters: ``AgLibraryFile`` carries a UNIQUE index on
+        ``(lc_idx_filename, folder)``. Moving first and renaming afterwards
+        would briefly place two identically named rows in the same folder and
+        trip that constraint, even though the final state is perfectly valid.
+        """
+        if new_filename is None:
+            self.reparent_file(file_id, new_folder_id)
+            return
+        base_name, extension = _split_filename(new_filename)
+        self.conn.connection.execute(
+            "UPDATE AgLibraryFile SET folder = ?, baseName = ?, extension = ?, "
+            "idx_filename = ?, lc_idx_filename = ?, lc_idx_filenameExtension = ? "
+            "WHERE id_local = ?",
+            (
+                new_folder_id, base_name, extension, new_filename,
+                new_filename.lower(), extension.lower(), file_id,
+            ),
+        )
+        log.debug(
+            "Moved file id=%d -> folder %d as %s", file_id, new_folder_id, new_filename
+        )
+
     def rename_file(self, file_id: int, new_filename: str) -> None:
         """Update the file-name columns of ``AgLibraryFile``.
 
@@ -174,9 +209,7 @@ class CatalogWriter:
         different name. ``originalFilename`` is deliberately left alone: it
         records the name at import time and Lightroom shows it as such.
         """
-        base_name, _, extension = new_filename.rpartition(".")
-        if not base_name:  # a file without an extension
-            base_name, extension = new_filename, ""
+        base_name, extension = _split_filename(new_filename)
         self.conn.connection.execute(
             "UPDATE AgLibraryFile SET baseName = ?, extension = ?, "
             "idx_filename = ?, lc_idx_filename = ?, lc_idx_filenameExtension = ? "

@@ -208,7 +208,8 @@ def _add_plan_flags(parser: argparse.ArgumentParser) -> None:
     behaviour = parser.add_argument_group("behaviour")
     behaviour.add_argument("--date-source", action="append", choices=DATE_SOURCES,
                            help="timestamp priority, repeatable (default: capture, "
-                                "exif-fields, file-mtime)")
+                                "exif-fields). Add file-mtime only if you accept "
+                                "the file date as a stand-in for the capture date.")
     behaviour.add_argument("--on-missing-date", choices=MISSING_DATE_MODES,
                            help="what to do without a capture date (default: unsorted)")
     behaviour.add_argument("--unsorted-folder", metavar="NAME",
