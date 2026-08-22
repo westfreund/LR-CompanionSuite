@@ -1,6 +1,6 @@
 # Development and continuation
 
-**Revision r1.0.1 · Build date 2026-08-22**
+**Revision r1.0.2 · Build date 2026-08-22**
 
 This document exists so that work can be picked up later — by you, by someone
 else, or by an AI assistant — without reconstructing context from the code.
@@ -19,7 +19,7 @@ Lightroom Classic catalog (schema 18.0.0, 9,452 files, 337 GiB, exFAT).
 | CLI | complete: 9 commands |
 | TUI | complete: load, plan, apply, live preview, EN/DE |
 | GUI | **not started** — the seam is prepared, see below |
-| Tests | 172 tests, 88 % coverage |
+| Tests | 174 tests, 88 % coverage |
 | CI | GitLab, Python 3.9–3.13 |
 | Docs | complete, EN and DE |
 | Installers | macOS, Linux, Windows |

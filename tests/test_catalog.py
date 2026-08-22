@@ -165,3 +165,62 @@ def test_capture_time_variants(raw, year):
 @pytest.mark.parametrize("raw", [None, "", "   ", "not-a-date"])
 def test_capture_time_rejects_junk(raw):
     assert parse_capture_time(raw) is None
+
+
+def test_readonly_falls_back_when_the_filesystem_has_no_locking(simple_catalog, monkeypatch):
+    """exFAT and FAT cannot provide SQLite's shared lock.
+
+    sqlite3.connect() is lazy, so such a volume fails on the first *statement*.
+    The fallback must therefore be driven by a probe query, not by connect().
+    """
+    import sqlite3 as sqlite3_module
+
+    from lrfoldercraft.catalog import db as db_module
+
+    real_connect = sqlite3_module.connect
+    attempts = []
+
+    class Unlockable:
+        """Connects fine, then refuses the first statement -- like exFAT."""
+
+        def __init__(self, inner):
+            self._inner = inner
+
+        def execute(self, *args, **kwargs):
+            raise sqlite3_module.OperationalError("unable to open database file")
+
+        def close(self):
+            self._inner.close()
+
+        def __getattr__(self, name):
+            return getattr(self._inner, name)
+
+    def fake_connect(target, *args, **kwargs):
+        attempts.append(target)
+        inner = real_connect(target, *args, **kwargs)
+        if "immutable=1" not in target:
+            return Unlockable(inner)
+        return inner
+
+    monkeypatch.setattr(db_module.sqlite3, "connect", fake_connect)
+
+    with db_module.open_catalog(simple_catalog.catalog_path) as conn:
+        assert CatalogReader(conn).info().files == 6
+
+    assert any("immutable=1" in uri for uri in attempts), attempts
+    assert any("mode=ro" in uri and "immutable" not in uri for uri in attempts), attempts
+
+
+def test_readonly_probe_does_not_hide_a_real_failure(simple_catalog, monkeypatch):
+    """If even immutable=1 cannot read the file, the error must surface."""
+    import sqlite3 as sqlite3_module
+
+    from lrfoldercraft.catalog import db as db_module
+
+    def always_broken(target, *args, **kwargs):
+        raise sqlite3_module.OperationalError("unable to open database file")
+
+    monkeypatch.setattr(db_module.sqlite3, "connect", always_broken)
+    with pytest.raises(sqlite3_module.OperationalError):
+        with db_module.open_catalog(simple_catalog.catalog_path):
+            pass

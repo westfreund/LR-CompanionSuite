@@ -261,21 +261,36 @@ def _connect_readonly(path: Path) -> sqlite3.Connection:
     "unable to open database file". Falling back to ``immutable=1`` skips
     locking entirely. That is only safe while nobody writes to the catalog,
     which the lock-file check above has already established.
+
+    The probe query matters: :func:`sqlite3.connect` is lazy and opens nothing,
+    so a volume that cannot provide the lock raises on the first *statement*,
+    not on connecting. Without forcing a statement here the fallback would
+    never run and the failure would surface deep inside a caller instead.
     """
     escaped = _uri_escape(path)
+    connection: Optional[sqlite3.Connection] = None
     try:
-        return sqlite3.connect("file:{p}?mode=ro".format(p=escaped), uri=True, timeout=30.0)
-    except sqlite3.OperationalError as exc:
-        log.debug("mode=ro failed (%s); retrying with immutable=1", exc)
-        connection = sqlite3.connect(
-            "file:{p}?mode=ro&immutable=1".format(p=escaped), uri=True, timeout=30.0
-        )
-        log.info(
-            "Filesystem does not support read-only SQLite locking; opened %s "
-            "with immutable=1 (safe: Lightroom is not holding the catalog).",
-            path.name,
-        )
+        connection = sqlite3.connect("file:{p}?mode=ro".format(p=escaped), uri=True, timeout=30.0)
+        connection.execute("SELECT count(*) FROM sqlite_master").fetchone()
         return connection
+    except sqlite3.Error as exc:
+        if connection is not None:
+            try:
+                connection.close()
+            except sqlite3.Error:  # pragma: no cover - closing a dead handle
+                pass
+        log.debug("mode=ro failed (%s); retrying with immutable=1", exc)
+
+    connection = sqlite3.connect(
+        "file:{p}?mode=ro&immutable=1".format(p=escaped), uri=True, timeout=30.0
+    )
+    connection.execute("SELECT count(*) FROM sqlite_master").fetchone()
+    log.info(
+        "Filesystem does not support read-only SQLite locking; opened %s "
+        "with immutable=1 (safe: Lightroom is not holding the catalog).",
+        path.name,
+    )
+    return connection
 
 
 def _uri_escape(path: Path) -> str:

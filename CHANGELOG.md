@@ -12,6 +12,28 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
 ---
 
+## [1.0.2] — 2026-08-22
+
+### Fixed
+
+- **The read-only fallback for lock-less filesystems never actually ran.**
+  `sqlite3.connect()` is lazy: it opens nothing, so a volume that cannot
+  provide SQLite's shared lock — exFAT and FAT, i.e. most external photo
+  drives — raises on the first *statement*, not on connecting. The `try` only
+  wrapped the connect call, so the `immutable=1` fallback was dead code and the
+  failure surfaced as an unhandled `unable to open database file` deep inside
+  the caller.
+
+  The fallback is now driven by a probe query. Two regression tests cover it: a
+  connection that connects and then refuses every statement must fall back, and
+  a genuinely unreadable file must still raise rather than be masked.
+
+  This hid itself for a long time: a stray `.lrcat-shm` file left behind by an
+  earlier read-write connection happened to make `mode=ro` succeed. Removing
+  that file exposed the defect.
+
+[1.0.2]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v1.0.2
+
 ## [1.0.1] — 2026-08-22
 
 ### Fixed
@@ -75,7 +97,7 @@ and rewriting the catalog in one reversible operation.
 - Debug mode and a per-run log file carrying a numbered `STEP` audit trail.
 
 **Project**
-- 172 tests, 88 % coverage, built on a synthetic catalog fixture so no
+- 174 tests, 88 % coverage, built on a synthetic catalog fixture so no
   Lightroom installation is needed.
 - GitLab CI: lint, tests on Python 3.9–3.13, a dedicated safety job, build.
 - Installers for macOS, Linux and Windows.

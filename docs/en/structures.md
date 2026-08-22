@@ -1,6 +1,6 @@
 # Folder structures and tokens
 
-**Revision r1.0.1 · Build date 2026-08-22**
+**Revision r1.0.2 · Build date 2026-08-22**
 
 A **structure** is an ordered list of **levels**. Each level becomes one
 directory, and each level is a **template** made of literal text and
