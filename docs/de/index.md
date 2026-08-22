@@ -1,6 +1,6 @@
 # LR-FolderCraft — Überblick
 
-**Revision r1.0.2 · Build-Datum 2026-08-22**
+**Revision r1.0.3 · Build-Datum 2026-08-22**
 
 LR-FolderCraft sortiert die Ordnerstruktur einer Adobe-Lightroom-Classic-
 Bibliothek neu. Es verschiebt die Bilddateien auf dem Datenträger und schreibt

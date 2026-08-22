@@ -362,21 +362,33 @@ def test_deeper_partial_overlap(builder):
 
 
 # -- AppleDouble companions -------------------------------------------------
+#
+# On macOS the kernel moves ._X together with X, so the tool must NOT move it
+# again. Elsewhere ._X is an ordinary file that a rename leaves behind, so it
+# must be carried along. Both branches are exercised by faking sys.platform.
 
 
-def test_appledouble_companion_moves_with_the_photo(builder):
-    """macOS stores xattrs of X in ._X on exFAT; leaving it behind loses them."""
+def test_macos_leaves_appledouble_to_the_kernel(builder, monkeypatch):
+    """Measured behaviour: macOS moves ._X itself; moving it again collides."""
+    monkeypatch.setattr("lrfoldercraft.planner.sys.platform", "darwin")
     builder.add_photo("A.CR2", "2019-01-03T10:00:00")
-    (builder.images_dir / "._A.CR2").write_bytes(b"\x00\x05\x16\x07resource fork")
+    (builder.images_dir / "._A.CR2").write_bytes(b"resource fork")
     plan = plan_for(builder, structure=("{yyyy}-{mm}-{dd}",))
-    move = by_name(plan)["A.CR2"]
-    targets = {Path(t).name for _, t in move.sidecars}
-    assert "._A.CR2" in targets
-    assert all(t.endswith("2019-01-03/" + Path(t).name) for _, t in move.sidecars)
+    assert by_name(plan)["A.CR2"].sidecars == ()
 
 
-def test_appledouble_moves_even_with_sidecars_disabled(builder):
+def test_other_platforms_carry_the_appledouble_along(builder, monkeypatch):
+    monkeypatch.setattr("lrfoldercraft.planner.sys.platform", "linux")
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00")
+    (builder.images_dir / "._A.CR2").write_bytes(b"resource fork")
+    plan = plan_for(builder, structure=("{yyyy}-{mm}-{dd}",))
+    targets = {Path(t).name for _, t in by_name(plan)["A.CR2"].sidecars}
+    assert targets == {"._A.CR2"}
+
+
+def test_appledouble_moves_even_with_sidecars_disabled(builder, monkeypatch):
     """It is part of the file, not a document beside it."""
+    monkeypatch.setattr("lrfoldercraft.planner.sys.platform", "linux")
     builder.add_photo("A.CR2", "2019-01-03T10:00:00", sidecars=["A.xmp"])
     (builder.images_dir / "._A.CR2").write_bytes(b"resource fork")
     plan = plan_for(builder, structure=("{yyyy}",), move_sidecars=False)
@@ -384,25 +396,28 @@ def test_appledouble_moves_even_with_sidecars_disabled(builder):
     assert names == {"._A.CR2"}  # the xmp stays, the companion travels
 
 
-def test_appledouble_follows_a_renamed_photo(builder):
+def test_appledouble_follows_a_renamed_photo(builder, monkeypatch):
+    monkeypatch.setattr("lrfoldercraft.planner.sys.platform", "linux")
     builder.add_photo("SAME.CR2", "2019-01-03T10:00:00", folder="a/")
     builder.add_photo("SAME.CR2", "2019-01-03T11:00:00", folder="b/")
     (builder.images_dir / "b" / "._SAME.CR2").write_bytes(b"resource fork")
     plan = plan_for(builder, structure=("{yyyy}-{mm}-{dd}",))
     renamed = next(m for m in plan.moves if m.status == RENAMED)
-    if renamed.filename == "SAME.CR2" and "b/" in renamed.source_path:
+    if "/b/" in renamed.source_path:
         targets = {Path(t).name for _, t in renamed.sidecars}
         assert "._SAME_1.CR2" in targets
 
 
-def test_no_companion_means_no_extra_move(builder):
+def test_no_companion_means_no_extra_move(builder, monkeypatch):
+    monkeypatch.setattr("lrfoldercraft.planner.sys.platform", "linux")
     builder.add_photo("A.CR2", "2019-01-03T10:00:00")
     plan = plan_for(builder, structure=("{yyyy}",))
     assert by_name(plan)["A.CR2"].sidecars == ()
 
 
-def test_companion_is_never_treated_as_a_sidecar_document(builder):
+def test_companion_is_never_treated_as_a_sidecar_document(builder, monkeypatch):
     """._A.CR2 must be reported once, not twice."""
+    monkeypatch.setattr("lrfoldercraft.planner.sys.platform", "linux")
     builder.add_photo("A.CR2", "2019-01-03T10:00:00")
     (builder.images_dir / "._A.CR2").write_bytes(b"resource fork")
     plan = plan_for(builder, structure=("{yyyy}",))

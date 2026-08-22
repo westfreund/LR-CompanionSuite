@@ -9,6 +9,7 @@ including conflicts, sidecars and cross-volume transfers -- is decided here.
 from __future__ import annotations
 
 import os
+import sys
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path, PurePosixPath
@@ -239,13 +240,24 @@ def discover_companions(photo: Photo, index: Optional[DirectoryIndex] = None) ->
 
     On filesystems that cannot store extended attributes and resource forks
     natively -- exFAT and FAT, which is what most external photo drives use --
-    macOS keeps them in an AppleDouble companion named ``._<filename>``. That
-    file is the other half of the photo, not an independent document: leaving
-    it behind orphans a 4 KiB stub and strips the moved file of its attributes.
+    macOS keeps them in an AppleDouble companion named ``._<filename>``.
 
-    It therefore moves unconditionally, regardless of ``--no-sidecars``, which
-    governs genuine sidecar documents such as XMP.
+    **On macOS the kernel moves that companion itself.** Measured on an exFAT
+    volume: writing an extended attribute to ``X.dat`` created ``._X.dat``, and
+    after ``os.replace("X.dat", "sub/X.dat")`` the companion had moved to
+    ``sub/`` on its own with the attributes still readable on the moved file.
+    Moving it explicitly would collide with the file macOS has already put at
+    the target -- which is exactly what aborted the first live run against the
+    reference library.
+
+    Other platforms have no such emulation: there ``._X`` is an ordinary file
+    that a rename leaves behind, orphaning the macOS metadata of a drive that
+    will eventually be plugged back into a Mac. So it is moved explicitly, and
+    unconditionally -- ``--no-sidecars`` governs genuine sidecar documents such
+    as XMP, not the other half of a file.
     """
+    if sys.platform == "darwin":
+        return []
     index = index or DirectoryIndex()
     directory = str(Path(photo.absolute_path).parent)
     actual = index.find(directory, appledouble_name(photo.filename))

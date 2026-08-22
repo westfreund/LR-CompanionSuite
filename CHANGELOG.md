@@ -12,6 +12,31 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
 ---
 
+## [1.0.3] — 2026-08-22
+
+### Fixed
+
+- **macOS already moves AppleDouble companions; 1.0.1 moved them a second
+  time.** The premise of the previous release was wrong. Measured on an exFAT
+  volume: writing an extended attribute to `X.dat` creates `._X.dat`, and after
+  `os.replace("X.dat", "sub/X.dat")` the companion has moved to `sub/` on its
+  own, with the attributes still readable on the moved file. The kernel's
+  AppleDouble emulation handles it transparently.
+
+  The explicit move therefore collided with the file macOS had already placed
+  at the target, and aborted the first live run against the reference library
+  at file 850 of 9,452. The rollback did its job: 850 files were restored, 152
+  directories removed, the catalog transaction discarded, and the library came
+  back byte-identical — catalog SHA-256 unchanged, all 9,489 files present with
+  identical sizes.
+
+  Companion handling is now platform-aware. On macOS the kernel is left to it.
+  On other platforms `._X` is an ordinary file that a rename leaves behind, so
+  it is still carried along explicitly to preserve the metadata of a drive that
+  will go back to a Mac. Both branches are covered by tests.
+
+[1.0.3]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v1.0.3
+
 ## [1.0.2] — 2026-08-22
 
 ### Fixed
@@ -97,7 +122,7 @@ and rewriting the catalog in one reversible operation.
 - Debug mode and a per-run log file carrying a numbered `STEP` audit trail.
 
 **Project**
-- 174 tests, 88 % coverage, built on a synthetic catalog fixture so no
+- 175 tests, 88 % coverage, built on a synthetic catalog fixture so no
   Lightroom installation is needed.
 - GitLab CI: lint, tests on Python 3.9–3.13, a dedicated safety job, build.
 - Installers for macOS, Linux and Windows.

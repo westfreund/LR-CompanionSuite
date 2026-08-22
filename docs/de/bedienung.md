@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r1.0.2 · Build-Datum 2026-08-22**
+**Revision r1.0.3 · Build-Datum 2026-08-22**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -223,13 +223,17 @@ Eine vorhandene Datei am Ziel wird in **keinem** Modus überschrieben.
 verschoben. Wird das Foto umbenannt, wird die Sidecar-Datei mit umbenannt.
 Abschaltbar mit `--no-sidecars`.
 
-**macOS-AppleDouble-Begleitdateien** (`._IMG_1234.CR2`) sind ein eigener Fall.
+**macOS-AppleDouble-Begleitdateien** (`._IMG_1234.CR2`) erfordern kein Zutun.
 Auf exFAT und FAT — den üblichen Dateisystemen externer Fotoplatten — legt
 macOS die erweiterten Attribute und den Resource-Fork einer Datei in einer
-solchen Begleitdatei ab. Sie ist die andere Hälfte der Datei, kein Dokument
-daneben, und wandert deshalb immer mit dem Foto mit, auch bei `--no-sidecars`.
-Sie zurückzulassen würde der verschobenen Datei ihre Attribute nehmen und einen
-4-KiB-Rest als Waise hinterlassen.
+solchen Begleitdatei ab, und der Kernel verschiebt sie zusammen mit der Datei.
+LR-FolderCraft überlässt das bewusst macOS; sie ein zweites Mal zu verschieben
+würde mit dem kollidieren, was das System bereits getan hat.
+
+Unter Linux und Windows gibt es diese Emulation nicht, dort bliebe eine früher
+von einem Mac geschriebene `._X` beim Umbenennen zurück. Dort nimmt das
+Werkzeug sie ausdrücklich mit, auch bei `--no-sidecars`, damit der Datenträger
+seine Metadaten für den nächsten Einsatz am Mac behält.
 
 ### Ordnernamen ohne ASCII
 

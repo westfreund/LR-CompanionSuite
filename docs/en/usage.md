@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r1.0.2 · Build date 2026-08-22**
+**Revision r1.0.3 · Build date 2026-08-22**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -229,12 +229,17 @@ An existing file at the target is **never** overwritten, in any mode.
 photo. If the photo is renamed, the sidecar is renamed to match. Disable with
 `--no-sidecars`.
 
-**macOS AppleDouble companions** (`._IMG_1234.CR2`) are a separate matter. On
-exFAT and FAT — the usual filesystems on external photo drives — macOS keeps a
-file's extended attributes and resource fork in such a companion. It is the
-other half of the file, not a document beside it, so it always travels with the
-photo, `--no-sidecars` included. Leaving it behind would strip the moved file of
-its attributes and orphan a 4 KiB stub.
+**macOS AppleDouble companions** (`._IMG_1234.CR2`) need no attention from you.
+On exFAT and FAT — the usual filesystems on external photo drives — macOS keeps
+a file's extended attributes and resource fork in such a companion, and the
+kernel moves it together with the file. LR-FolderCraft deliberately leaves that
+to macOS; moving it a second time would collide with what the system has
+already done.
+
+On Linux and Windows there is no such emulation, so a `._X` written earlier by
+a Mac would be left behind by a rename. There the tool carries it along
+explicitly, `--no-sidecars` included, so the drive keeps its metadata for the
+next time it is plugged into a Mac.
 
 ### Non-ASCII folder names
 

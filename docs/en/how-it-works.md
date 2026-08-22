@@ -1,6 +1,6 @@
 # How it works
 
-**Revision r1.0.2 · Build date 2026-08-22**
+**Revision r1.0.3 · Build date 2026-08-22**
 
 ## Why the catalog has to be edited directly
 
@@ -152,10 +152,14 @@ An existing file at the target is never overwritten. The executor checks again
 immediately before each move, so even a file that appeared after planning is
 safe.
 
-A file may have companions that must move with it: XMP sidecars, and on
-exFAT/FAT the macOS AppleDouble file `._<name>` holding the extended attributes
-and resource fork. Both are planned as part of the photo's move and appear in
-the journal under the same `file_id`.
+A file may have companions that must move with it. XMP sidecars are planned as
+part of the photo's move and appear in the journal under the same `file_id`.
+
+The macOS AppleDouble file `._<name>`, which holds extended attributes and the
+resource fork on exFAT/FAT, is a special case: on macOS the kernel moves it
+together with the file, so the tool must *not* move it as well — doing so
+collides with what the system has already done. On other platforms it is an
+ordinary file and is carried along explicitly.
 
 ## The journal
 
