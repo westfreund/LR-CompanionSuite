@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.debugpy",
+    "charliermarsh.ruff",
+    "alexcvzz.vscode-sqlite",
+    "yzhang.markdown-all-in-one"
+  ]
+}

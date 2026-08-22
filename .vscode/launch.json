@@ -1,0 +1,79 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "lrfc info (prompts for a catalog)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "lrfoldercraft",
+      "args": ["info", "${input:catalog}"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": { "PYTHONPATH": "${workspaceFolder}/src" }
+    },
+    {
+      "name": "lrfc plan --debug (read only)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "lrfoldercraft",
+      "args": ["plan", "${input:catalog}", "-s", "${input:structure}", "--debug"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": { "PYTHONPATH": "${workspaceFolder}/src" }
+    },
+    {
+      "name": "lrfc apply --debug (WRITES -- Lightroom must be closed)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "lrfoldercraft",
+      "args": ["apply", "${input:catalog}", "-s", "${input:structure}", "--debug"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": { "PYTHONPATH": "${workspaceFolder}/src" }
+    },
+    {
+      "name": "lrfc tui",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "lrfoldercraft",
+      "args": ["tui"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": { "PYTHONPATH": "${workspaceFolder}/src" }
+    },
+    {
+      "name": "pytest (all tests)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-q", "tests"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "catalog",
+      "type": "promptString",
+      "description": "Path to the .lrcat catalog",
+      "default": "/Volumes/1TB-2/Lightroom/2019/2019.lrcat"
+    },
+    {
+      "id": "structure",
+      "type": "pickString",
+      "description": "Folder structure",
+      "options": [
+        "day",
+        "year/day",
+        "year/month/day",
+        "year/week",
+        "iso-week",
+        "camera/day",
+        "day/camera",
+        "camera/year/month/day",
+        "year/quarter/month"
+      ],
+      "default": "day"
+    }
+  ]
+}

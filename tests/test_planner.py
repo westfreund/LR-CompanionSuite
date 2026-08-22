@@ -314,3 +314,44 @@ def test_mtime_is_not_a_default_date_source(builder):
     builder.add_photo("NODATE.CR2", capture_time=None, camera=None)
     plan = plan_for(builder, structure=("{yyyy}",), on_missing_date="skip")
     assert by_name(plan)["NODATE.CR2"].status == SKIP_NO_DATE
+
+
+def test_rerun_when_the_anchor_covers_only_part_of_the_structure(builder):
+    """One camera, one year -> the common parent is only the first 2 of 4 levels."""
+    builder.add_photo("A.CR2", "2019-01-20T10:00:00", camera="Canon EOS 70D",
+                      folder="canon-eos-70d/2019/01/20/")
+    builder.add_photo("B.CR2", "2019-03-12T10:00:00", camera="Canon EOS 70D",
+                      folder="canon-eos-70d/2019/03/12/")
+    plan = plan_for(builder, structure=("{camera_slug}", "{yyyy}", "{mm}", "{dd}"))
+    assert plan.anchor_segments == ()
+    assert all(m.status == STAY for m in plan.moves)
+    assert not plan.has_work
+
+
+def test_rerun_with_a_single_overlapping_level(builder):
+    """Photos already in year folders, asked for year/month/day."""
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00", folder="archive/2019/")
+    builder.add_photo("B.CR2", "2019-02-14T10:00:00", folder="archive/2019/")
+    plan = plan_for(builder, structure=("{yyyy}", "{mm}", "{dd}"))
+    # 'archive/2019' ends with the structure's first level, so it is not repeated
+    assert plan.anchor_segments == ("archive",)
+    assert by_name(plan)["A.CR2"].target_segments == ("archive", "2019", "01", "03")
+
+
+def test_a_date_ish_source_folder_is_not_mistaken_for_a_level(builder):
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00", folder="raw2019/")
+    builder.add_photo("B.CR2", "2019-02-14T10:00:00", folder="raw2019/")
+    plan = plan_for(builder, structure=("{yyyy}", "{mm}", "{dd}"))
+    assert plan.anchor_segments == ("raw2019",)
+    assert by_name(plan)["A.CR2"].target_segments == ("raw2019", "2019", "01", "03")
+
+
+def test_deeper_partial_overlap(builder):
+    """Common parent covers three of four levels."""
+    builder.add_photo("A.CR2", "2019-01-20T09:00:00", camera="Canon EOS 70D",
+                      folder="canon-eos-70d/2019/01/20/")
+    builder.add_photo("B.CR2", "2019-01-21T09:00:00", camera="Canon EOS 70D",
+                      folder="canon-eos-70d/2019/01/21/")
+    plan = plan_for(builder, structure=("{camera_slug}", "{yyyy}", "{mm}", "{dd}"))
+    assert plan.anchor_segments == ()
+    assert all(m.status == STAY for m in plan.moves)

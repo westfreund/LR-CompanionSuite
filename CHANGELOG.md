@@ -58,22 +58,48 @@ and rewriting the catalog in one reversible operation.
 - Debug mode and a per-run log file carrying a numbered `STEP` audit trail.
 
 **Project**
-- 153 tests, 88 % coverage, built on a synthetic catalog fixture so no
+- 166 tests, 88 % coverage, built on a synthetic catalog fixture so no
   Lightroom installation is needed.
 - GitLab CI: lint, tests on Python 3.9–3.13, a dedicated safety job, build.
 - Installers for macOS, Linux and Windows.
 - Complete documentation in English and German.
 - Dual licensed MIT OR GPL-3.0-or-later.
 
+### Fixed during development
+
+Defects the test suite and the end-to-end runs exposed before release, recorded
+because the same traps await anyone working on this kind of tool:
+
+- Sidecars were discovered twice on case-insensitive filesystems, because
+  `name.xmp` and `name.XMP` resolve to the same file. Replaced per-name probing
+  with a cached, case-insensitive directory index.
+- Re-running on an already sorted library nested the structure inside itself.
+  The anchor now drops any trailing segments that match a *prefix* of what the
+  structure renders — a partial overlap, not just a full one, since a common
+  parent folder may cover only the first levels of a multi-level structure.
+- Re-parenting a file and renaming it as two statements briefly violated the
+  UNIQUE index on `(lc_idx_filename, folder)`. Folder and name now change in one
+  statement, with a deferral loop and a temporary-name pass for rename cycles.
+- `mkdir(parents=True)` created several directory levels but journalled only the
+  leaf, so `undo` left empty intermediates behind. Every created level is now
+  journalled.
+- `file-mtime` was a default date source. It is usually the copy date, not the
+  capture date, and silently misfiled photos. It is now opt-in.
+
 ### Verified against
 
 - Lightroom Classic catalog schema **18.0.0** (Lightroom Classic 14), a real
   9,452-file / 337 GiB library on exFAT.
-- End-to-end run on a 40-file working copy: catalog integrity `ok`, foreign key
+- End-to-end apply / re-plan / undo cycles on reduced working copies (40 and 30
+  files, single- and four-level structures): catalog integrity `ok`, foreign key
   check clean, folder tree valid, all paths resolving, virtual copy still
   attached to its master, and a hash over `Adobe_images`,
   `Adobe_imageDevelopSettings`, `AgLibraryKeywordImage` and
-  `AgLibraryCollectionImage` **unchanged** before and after.
+  `AgLibraryCollectionImage` **unchanged** before and after. Re-planning after a
+  run reports every file as already in place, and `undo` restores the catalog,
+  the files and the directory tree exactly.
+- The macOS installer, executed for real: install, run from a clean environment
+  with no `PYTHONPATH`, read a live catalog, uninstall.
 
 ### Known limits
 

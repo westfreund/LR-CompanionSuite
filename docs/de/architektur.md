@@ -66,7 +66,7 @@ LR-FolderCraft/
 │       ├── app.py                   die Textual-Anwendung
 │       └── app.tcss                 deren Stylesheet
 │
-├── tests/                           153 Tests, synthetischer Katalog als Fixture
+├── tests/                           166 Tests, synthetischer Katalog als Fixture
 ├── install/                         Installationsskripte für macOS, Linux, Windows
 └── docs/  en/  de/  images/         diese Dokumentation, in beiden Sprachen
 ```

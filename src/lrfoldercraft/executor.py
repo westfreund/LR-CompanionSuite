@@ -221,11 +221,17 @@ def _run(
             step("Staged %d catalog row update(s)", len(active))
 
             # --- 2. filesystem side, journalled ---------------------------
+            root = Path(plan.target_root_path)
             for segments in plan.new_folder_segments:
-                directory = Path(plan.target_root_path).joinpath(*segments)
-                if not directory.exists():
+                # Journal every level that is actually created, not just the
+                # leaf: `mkdir(parents=True)` may create several, and an undo
+                # can only remove what it knows about.
+                for depth in range(1, len(segments) + 1):
+                    directory = root.joinpath(*segments[:depth])
+                    if directory.exists():
+                        continue
                     journal.write("mkdir", path=str(directory))
-                    directory.mkdir(parents=True, exist_ok=True)
+                    directory.mkdir()
                     created_dirs.append(directory)
                     log.debug("Created directory %s", directory)
 

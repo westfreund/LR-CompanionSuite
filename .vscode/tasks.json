@@ -1,0 +1,38 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Tests",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python -m pytest -q",
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Tests with coverage",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python -m pytest -q --cov=lrfoldercraft --cov-report=term-missing",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/ruff check src tests && ${workspaceFolder}/.venv/bin/ruff format --check src tests",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Format",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/ruff format src tests && ${workspaceFolder}/.venv/bin/ruff check --fix src tests",
+      "problemMatcher": []
+    },
+    {
+      "label": "Set up the development environment",
+      "type": "shell",
+      "command": "python3 -m venv .venv && .venv/bin/python -m pip install --upgrade pip && .venv/bin/python -m pip install -e '.[dev]'",
+      "problemMatcher": []
+    }
+  ]
+}

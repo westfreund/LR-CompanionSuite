@@ -389,27 +389,37 @@ def _normalise_anchor(
     """Strip an anchor tail that the structure itself would produce.
 
     Without this, running the tool a second time on an already sorted library
-    would nest the structure inside itself: every photo of ``raw2019/2019-01-03``
-    shares that folder as its common prefix, so ``2019-01-03`` would be created
-    *inside* ``2019-01-03``. Detecting that the anchor already ends with what
-    the structure renders makes repeated runs idempotent.
+    would nest the structure inside itself. After a first run with
+    ``{camera}/{yyyy}/{mm}/{dd}`` every photo of one camera and year shares
+    ``canon-eos-70d/2019`` as its common parent folder -- so a naive second run
+    would build ``canon-eos-70d/2019/canon-eos-70d/2019/01/03``.
+
+    The overlap is only ever a *prefix* of the rendered structure, and how much
+    of it survives as a common parent depends on how varied the library is. So
+    the longest k is found for which the last k anchor segments equal the first
+    k rendered segments of **every** photo, and those k are dropped. A source
+    folder that merely looks date-ish (``raw2019``) does not match and is kept.
     """
     if settings.placement != "in-place" or settings.anchor_folder_id is not None:
         return anchor
-    depth = len(settings.structure)
-    if len(anchor) < depth:
+    if not anchor:
         return anchor
     candidates = [segs for _, segs, reason in prepared if segs and not reason]
     if not candidates:
         return anchor
-    tail = tuple(anchor[-depth:])
-    if all(len(segs) == depth and segs == tail for segs in candidates):
-        log.info(
-            "Anchor %r already ends with the rendered structure; using %r instead",
-            "/".join(anchor),
-            "/".join(anchor[:-depth]),
-        )
-        return anchor[:-depth]
+
+    limit = min(len(anchor), min(len(segs) for segs in candidates))
+    for k in range(limit, 0, -1):
+        tail = tuple(anchor[-k:])
+        if all(tuple(segs[:k]) == tail for segs in candidates):
+            log.info(
+                "Anchor %r already contains the first %d level(s) of the "
+                "structure; using %r instead",
+                "/".join(anchor),
+                k,
+                "/".join(anchor[:-k]) or "(root)",
+            )
+            return anchor[:-k]
     return anchor
 
 

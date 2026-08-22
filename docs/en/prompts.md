@@ -247,7 +247,7 @@ already taken and the questions still open.
 ```bash
 git clone https://gitlab.com/andy-freund/LR-FolderCraft.git
 cd LR-FolderCraft && python3 -m venv .venv && source .venv/bin/activate
-python -m pip install -e '.[dev]' && pytest        # expect 160 passing
+python -m pip install -e '.[dev]' && pytest        # expect 166 passing
 ```
 
 Then read, in this order:

@@ -316,3 +316,21 @@ def test_swap_cycle_between_two_folders(builder, tmp_path):
         "SELECT lc_idx_filename, folder FROM AgLibraryFile "
         "GROUP BY lc_idx_filename, folder HAVING COUNT(*) > 1"
     )
+
+
+def test_undo_removes_every_directory_the_run_created(builder, tmp_path):
+    """Intermediate levels must be journalled too, not only the leaf."""
+    builder.add_photo("A.CR2", "2019-01-20T10:00:00", camera="Canon EOS 70D")
+    builder.add_photo("B.CR2", "2019-03-12T10:00:00", camera="Canon EOS 70D")
+    plan, settings = make_plan(
+        builder, tmp_path, structure=("{camera_slug}", "{yyyy}", "{mm}", "{dd}")
+    )
+    result = execute(plan, settings)
+    assert result.success
+    assert (builder.images_dir / "canon-eos-70d" / "2019" / "01" / "20").is_dir()
+
+    undo(result.journal_path)
+
+    leftovers = [p for p in builder.images_dir.rglob("*") if p.is_dir()]
+    assert leftovers == [], leftovers
+    assert (builder.images_dir / "A.CR2").exists()
