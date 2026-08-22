@@ -19,7 +19,7 @@ Lightroom Classic catalog (schema 18.0.0, 9,452 files, 337 GiB, exFAT).
 | CLI | complete: 9 commands |
 | TUI | complete: load, plan, apply, live preview, EN/DE |
 | GUI | complete: Qt, all settings, folder decisions, progress |
-| Tests | 256 tests, 88 % coverage |
+| Tests | 256 tests, 87 % coverage |
 | CI | GitLab, Python 3.9–3.13 |
 | Docs | complete, EN and DE |
 | Installers | macOS, Linux, Windows |
