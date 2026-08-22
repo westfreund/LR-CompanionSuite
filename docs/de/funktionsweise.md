@@ -1,6 +1,6 @@
 # Funktionsweise
 
-**Revision r1.0.0 · Build-Datum 2026-08-22**
+**Revision r1.0.1 · Build-Datum 2026-08-22**
 
 ## Warum der Katalog direkt bearbeitet werden muss
 
@@ -160,6 +160,12 @@ freien Speichers.
 Eine vorhandene Datei am Ziel wird nie überschrieben. Der Executor prüft
 unmittelbar vor jeder Verschiebung erneut, sodass selbst eine erst nach der
 Planung aufgetauchte Datei sicher ist.
+
+Zu einer Datei können Begleiter gehören, die mitwandern müssen:
+XMP-Sidecars und auf exFAT/FAT die macOS-AppleDouble-Datei `._<name>` mit den
+erweiterten Attributen und dem Resource-Fork. Beide werden als Teil der
+Verschiebung des Fotos geplant und erscheinen im Journal unter derselben
+`file_id`.
 
 ## Das Journal
 

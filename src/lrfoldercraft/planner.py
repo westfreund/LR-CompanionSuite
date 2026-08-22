@@ -225,6 +225,33 @@ class DirectoryIndex:
         return os.path.join(directory, actual) if actual else None
 
 
+#: Prefix macOS uses for AppleDouble companion files.
+APPLEDOUBLE_PREFIX = "._"
+
+
+def appledouble_name(filename: str) -> str:
+    """Name of the AppleDouble companion belonging to *filename*."""
+    return APPLEDOUBLE_PREFIX + filename
+
+
+def discover_companions(photo: Photo, index: Optional[DirectoryIndex] = None) -> List[str]:
+    """Return files that are physically *part of* the photo, not sidecars.
+
+    On filesystems that cannot store extended attributes and resource forks
+    natively -- exFAT and FAT, which is what most external photo drives use --
+    macOS keeps them in an AppleDouble companion named ``._<filename>``. That
+    file is the other half of the photo, not an independent document: leaving
+    it behind orphans a 4 KiB stub and strips the moved file of its attributes.
+
+    It therefore moves unconditionally, regardless of ``--no-sidecars``, which
+    governs genuine sidecar documents such as XMP.
+    """
+    index = index or DirectoryIndex()
+    directory = str(Path(photo.absolute_path).parent)
+    actual = index.find(directory, appledouble_name(photo.filename))
+    return [actual] if actual else []
+
+
 def discover_sidecars(
     photo: Photo, settings: Settings, index: Optional[DirectoryIndex] = None
 ) -> List[str]:
@@ -235,6 +262,9 @@ def discover_sidecars(
     converters). Extensions Lightroom itself recorded in
     ``AgLibraryFile.sidecarExtensions`` are always included. The photo's own
     file is never reported as its own sidecar.
+
+    AppleDouble companions are handled separately by :func:`discover_companions`
+    because they are part of the file rather than a document beside it.
     """
     if not settings.move_sidecars:
         return []
@@ -245,7 +275,7 @@ def discover_sidecars(
     extensions.update(e.lower().lstrip(".") for e in photo.sidecar_list)
     extensions.discard("")
 
-    seen: Set[str] = {photo.filename.lower()}
+    seen: Set[str] = {photo.filename.lower(), appledouble_name(photo.filename).lower()}
     found: List[str] = []
     for ext in sorted(extensions):
         for candidate_name in (
@@ -605,10 +635,24 @@ def _plan_one(
     if base.status == RENAMED:
         base.reason = reason or "target name already taken"
 
+    pairs: List[Tuple[str, str]] = []
+
+    # AppleDouble companions follow the file under its (possibly new) name.
+    for companion in discover_companions(photo, index):
+        companion_target = "{d}/{n}".format(d=target_dir, n=appledouble_name(target_filename))
+        if _key(companion_target) in claimed:
+            log.warning(
+                "AppleDouble target %s is already claimed; leaving %s in place",
+                companion_target,
+                companion,
+            )
+            continue
+        claimed[_key(companion_target)] = photo.file_id
+        pairs.append((companion, companion_target))
+
     sidecars = discover_sidecars(photo, settings, index)
     if sidecars:
         target_stem = _stem(target_filename)
-        pairs: List[Tuple[str, str]] = []
         for sidecar in sidecars:
             name = Path(sidecar).name
             # Keep the sidecar glued to its (possibly renamed) master file:
@@ -626,7 +670,8 @@ def _plan_one(
                 continue
             claimed[_key(sidecar_target)] = photo.file_id
             pairs.append((sidecar, sidecar_target))
-        base.sidecars = tuple(pairs)
+
+    base.sidecars = tuple(pairs)
     return base
 
 

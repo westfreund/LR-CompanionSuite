@@ -1,6 +1,6 @@
 # How it works
 
-**Revision r1.0.0 · Build date 2026-08-22**
+**Revision r1.0.1 · Build date 2026-08-22**
 
 ## Why the catalog has to be edited directly
 
@@ -151,6 +151,11 @@ refuses to start without 105 % of the required free space.
 An existing file at the target is never overwritten. The executor checks again
 immediately before each move, so even a file that appeared after planning is
 safe.
+
+A file may have companions that must move with it: XMP sidecars, and on
+exFAT/FAT the macOS AppleDouble file `._<name>` holding the extended attributes
+and resource fork. Both are planned as part of the photo's move and appear in
+the journal under the same `file_id`.
 
 ## The journal
 

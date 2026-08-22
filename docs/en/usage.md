@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r1.0.0 · Build date 2026-08-22**
+**Revision r1.0.1 · Build date 2026-08-22**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -228,6 +228,13 @@ An existing file at the target is **never** overwritten, in any mode.
 `IMG_1234.xmp` and `IMG_1234.CR2.xmp` are both recognised and moved with their
 photo. If the photo is renamed, the sidecar is renamed to match. Disable with
 `--no-sidecars`.
+
+**macOS AppleDouble companions** (`._IMG_1234.CR2`) are a separate matter. On
+exFAT and FAT — the usual filesystems on external photo drives — macOS keeps a
+file's extended attributes and resource fork in such a companion. It is the
+other half of the file, not a document beside it, so it always travels with the
+photo, `--no-sidecars` included. Leaving it behind would strip the moved file of
+its attributes and orphan a 4 KiB stub.
 
 ### Non-ASCII folder names
 

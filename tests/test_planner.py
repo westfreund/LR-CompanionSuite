@@ -359,3 +359,52 @@ def test_deeper_partial_overlap(builder):
     plan = plan_for(builder, structure=("{camera_slug}", "{yyyy}", "{mm}", "{dd}"))
     assert plan.anchor_segments == ()
     assert all(m.status == STAY for m in plan.moves)
+
+
+# -- AppleDouble companions -------------------------------------------------
+
+
+def test_appledouble_companion_moves_with_the_photo(builder):
+    """macOS stores xattrs of X in ._X on exFAT; leaving it behind loses them."""
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00")
+    (builder.images_dir / "._A.CR2").write_bytes(b"\x00\x05\x16\x07resource fork")
+    plan = plan_for(builder, structure=("{yyyy}-{mm}-{dd}",))
+    move = by_name(plan)["A.CR2"]
+    targets = {Path(t).name for _, t in move.sidecars}
+    assert "._A.CR2" in targets
+    assert all(t.endswith("2019-01-03/" + Path(t).name) for _, t in move.sidecars)
+
+
+def test_appledouble_moves_even_with_sidecars_disabled(builder):
+    """It is part of the file, not a document beside it."""
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00", sidecars=["A.xmp"])
+    (builder.images_dir / "._A.CR2").write_bytes(b"resource fork")
+    plan = plan_for(builder, structure=("{yyyy}",), move_sidecars=False)
+    names = {Path(s).name for s, _ in by_name(plan)["A.CR2"].sidecars}
+    assert names == {"._A.CR2"}  # the xmp stays, the companion travels
+
+
+def test_appledouble_follows_a_renamed_photo(builder):
+    builder.add_photo("SAME.CR2", "2019-01-03T10:00:00", folder="a/")
+    builder.add_photo("SAME.CR2", "2019-01-03T11:00:00", folder="b/")
+    (builder.images_dir / "b" / "._SAME.CR2").write_bytes(b"resource fork")
+    plan = plan_for(builder, structure=("{yyyy}-{mm}-{dd}",))
+    renamed = next(m for m in plan.moves if m.status == RENAMED)
+    if renamed.filename == "SAME.CR2" and "b/" in renamed.source_path:
+        targets = {Path(t).name for _, t in renamed.sidecars}
+        assert "._SAME_1.CR2" in targets
+
+
+def test_no_companion_means_no_extra_move(builder):
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00")
+    plan = plan_for(builder, structure=("{yyyy}",))
+    assert by_name(plan)["A.CR2"].sidecars == ()
+
+
+def test_companion_is_never_treated_as_a_sidecar_document(builder):
+    """._A.CR2 must be reported once, not twice."""
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00")
+    (builder.images_dir / "._A.CR2").write_bytes(b"resource fork")
+    plan = plan_for(builder, structure=("{yyyy}",))
+    sources = [s for s, _ in by_name(plan)["A.CR2"].sidecars]
+    assert len(sources) == len(set(sources)) == 1

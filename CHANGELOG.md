@@ -12,6 +12,23 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
 ---
 
+## [1.0.1] — 2026-08-22
+
+### Fixed
+
+- **macOS AppleDouble companions are moved with their photo.** On filesystems
+  that cannot store extended attributes and resource forks natively — exFAT and
+  FAT, which is what most external photo drives use — macOS keeps them in a
+  `._<filename>` companion. A plain rename does not carry it, so the companion
+  was orphaned in the source folder and the moved file lost its attributes.
+  Found on the reference library, where 37 of 9,452 files had one.
+
+  Companions move unconditionally, including with `--no-sidecars`: `._X` is the
+  other half of `X`, not an independent document like an XMP sidecar. A renamed
+  photo takes its companion under the new name.
+
+[1.0.1]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v1.0.1
+
 ## [1.0.0] — 2026-08-22 — “Daybreak”
 
 First release. Reorganises a Lightroom Classic folder tree by moving the files
@@ -58,7 +75,7 @@ and rewriting the catalog in one reversible operation.
 - Debug mode and a per-run log file carrying a numbered `STEP` audit trail.
 
 **Project**
-- 166 tests, 88 % coverage, built on a synthetic catalog fixture so no
+- 172 tests, 88 % coverage, built on a synthetic catalog fixture so no
   Lightroom installation is needed.
 - GitLab CI: lint, tests on Python 3.9–3.13, a dedicated safety job, build.
 - Installers for macOS, Linux and Windows.

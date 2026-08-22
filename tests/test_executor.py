@@ -334,3 +334,14 @@ def test_undo_removes_every_directory_the_run_created(builder, tmp_path):
     leftovers = [p for p in builder.images_dir.rglob("*") if p.is_dir()]
     assert leftovers == [], leftovers
     assert (builder.images_dir / "A.CR2").exists()
+
+
+def test_appledouble_companion_is_actually_moved(builder, tmp_path):
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00", content=b"image")
+    (builder.images_dir / "._A.CR2").write_bytes(b"resource fork")
+    builder.add_photo("B.CR2", "2019-02-14T10:00:00", content=b"image")
+    plan, settings = make_plan(builder, tmp_path)
+    result = execute(plan, settings)
+    assert result.success
+    assert (builder.images_dir / "2019-01-03" / "._A.CR2").read_bytes() == b"resource fork"
+    assert not (builder.images_dir / "._A.CR2").exists()

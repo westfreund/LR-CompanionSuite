@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r1.0.0 · Build-Datum 2026-08-22**
+**Revision r1.0.1 · Build-Datum 2026-08-22**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -222,6 +222,14 @@ Eine vorhandene Datei am Ziel wird in **keinem** Modus überschrieben.
 `IMG_1234.xmp` und `IMG_1234.CR2.xmp` werden beide erkannt und mit dem Foto
 verschoben. Wird das Foto umbenannt, wird die Sidecar-Datei mit umbenannt.
 Abschaltbar mit `--no-sidecars`.
+
+**macOS-AppleDouble-Begleitdateien** (`._IMG_1234.CR2`) sind ein eigener Fall.
+Auf exFAT und FAT — den üblichen Dateisystemen externer Fotoplatten — legt
+macOS die erweiterten Attribute und den Resource-Fork einer Datei in einer
+solchen Begleitdatei ab. Sie ist die andere Hälfte der Datei, kein Dokument
+daneben, und wandert deshalb immer mit dem Foto mit, auch bei `--no-sidecars`.
+Sie zurückzulassen würde der verschobenen Datei ihre Attribute nehmen und einen
+4-KiB-Rest als Waise hinterlassen.
 
 ### Ordnernamen ohne ASCII
 
