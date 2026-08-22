@@ -151,6 +151,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_tui.add_argument("catalog", nargs="?", help="optional catalog to preload")
     _add_global_flags(p_tui)
 
+    p_gui = sub.add_parser("gui", help="start the graphical interface")
+    p_gui.add_argument("catalog", nargs="?", help="optional catalog to preload")
+    _add_global_flags(p_gui)
+
     return parser
 
 
@@ -610,6 +614,22 @@ def _console_progress(done: int, total: int, message: str) -> None:
         sys.stderr.write("\n")
 
 
+def cmd_gui(args: argparse.Namespace) -> int:
+    try:
+        from .gui.app import run_gui
+    except ImportError as exc:
+        print(
+            "The graphical interface needs PySide6. Install it with:\n"
+            "    python3 -m pip install 'lr-foldercraft[gui]'\n"
+            "or\n"
+            "    python3 -m pip install PySide6-Essentials\n"
+            "({e})".format(e=exc),
+            file=sys.stderr,
+        )
+        return EXIT_ERROR
+    return run_gui(catalog=args.catalog or "", language=args.lang or "en", debug=args.debug)
+
+
 DISPATCH = {
     "info": cmd_info,
     "folders": cmd_folders,
@@ -620,6 +640,7 @@ DISPATCH = {
     "tokens": cmd_tokens,
     "presets": cmd_presets,
     "tui": cmd_tui,
+    "gui": cmd_gui,
 }
 
 

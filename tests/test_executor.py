@@ -435,3 +435,53 @@ def test_rollback_removes_a_created_target_tree(builder, tmp_path, monkeypatch):
     assert not (tmp_path / "Neu").exists()
     assert (builder.images_dir / "A.CR2").exists()
     assert (builder.images_dir / "B.CR2").exists()
+
+
+def test_two_root_folders_are_sorted_in_one_transaction(builder, tmp_path):
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00", folder="raw2019/")
+    second = tmp_path / "drive2" / "Fotos2020"
+    root_id = builder.add_root_folder(second, "Fotos2020")
+    builder.add_photo_to_root(root_id, "C.CR2", "2020-05-05T10:00:00")
+
+    plan, settings = make_plan(builder, tmp_path, structure=("{yyyy}-{mm}-{dd}",))
+    result = execute(plan, settings)
+
+    assert result.success and result.files_moved == 2
+    assert (builder.images_dir / "raw2019" / "2019-01-03" / "A.CR2").exists()
+    assert (second / "2020-05-05" / "C.CR2").exists()
+    for path in builder.catalog_paths():
+        assert os.path.exists(path), path
+
+    # and running again does nothing
+    with open_catalog(builder.catalog_path) as conn:
+        again = build_plan(CatalogReader(conn), settings)
+    assert not again.has_work
+
+
+def test_a_failure_in_the_second_root_rolls_back_the_first(builder, tmp_path, monkeypatch):
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00", folder="raw2019/")
+    second = tmp_path / "drive2" / "Fotos2020"
+    root_id = builder.add_root_folder(second, "Fotos2020")
+    builder.add_photo_to_root(root_id, "C.CR2", "2020-05-05T10:00:00")
+
+    import lrfoldercraft.executor as executor_module
+
+    real_move = executor_module._move_file
+    calls = {"n": 0}
+
+    def flaky(source, dest, cross_volume):
+        calls["n"] += 1
+        if calls["n"] == 2:
+            raise OSError("simulated failure in the second root")
+        return real_move(source, dest, cross_volume)
+
+    monkeypatch.setattr(executor_module, "_move_file", flaky)
+    before = builder.catalog_paths()
+
+    plan, settings = make_plan(builder, tmp_path, structure=("{yyyy}-{mm}-{dd}",))
+    with pytest.raises(OSError, match="second root"):
+        execute(plan, settings)
+
+    assert builder.catalog_paths() == before
+    for path in before:
+        assert os.path.exists(path), path

@@ -1,6 +1,6 @@
 # Installation
 
-**Revision r2.0.1 · Build date 2026-08-22**
+**Revision r3.0.0 · Build date 2026-08-22**
 
 LR-FolderCraft is a Python package. The installers create an isolated virtual
 environment so nothing is added to your system Python.
@@ -10,7 +10,7 @@ environment so nothing is added to your system Python.
 | | |
 | --- | --- |
 | Python | 3.9 or newer, with `sqlite3` and `venv` |
-| Disk space | about 60 MB for the environment (5 MB without the TUI) |
+| Disk space | 5 MB command line only, 60 MB with the TUI, 380 MB with the Qt interface |
 | Lightroom Classic | must be **closed** while the tool runs |
 | Catalog schema | 11.x–19.x, verified against 18.0.0 (Lightroom Classic 14) |
 
@@ -38,6 +38,7 @@ Options:
 | Flag | Effect |
 | --- | --- |
 | `--no-tui` | command line only, no Textual dependency |
+| `--with-gui` | also install PySide6 for `lrfc gui` (about 100 MB) |
 | `--prefix DIR` | install somewhere else |
 | `--bin DIR` | put the launcher somewhere else |
 | `--uninstall` | remove the environment and the launchers |
@@ -89,7 +90,12 @@ On Debian and Ubuntu you may need `sudo apt install python3-venv` first.
 ## Installing with pip instead
 
 ```bash
+# command line only -- no dependencies at all
+python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-FolderCraft.git'
+# with the text interface
 python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-FolderCraft.git#egg=lr-foldercraft[tui]'
+# with the graphical interface
+python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-FolderCraft.git#egg=lr-foldercraft[gui]'
 ```
 
 Or from a clone, for development:

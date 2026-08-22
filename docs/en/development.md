@@ -1,6 +1,6 @@
 # Development and continuation
 
-**Revision r2.0.1 · Build date 2026-08-22**
+**Revision r3.0.0 · Build date 2026-08-22**
 
 This document exists so that work can be picked up later — by you, by someone
 else, or by an AI assistant — without reconstructing context from the code.
@@ -18,8 +18,8 @@ Lightroom Classic catalog (schema 18.0.0, 9,452 files, 337 GiB, exFAT).
 | Safety | complete: 8 checks, backup, journal, rollback, undo, verification |
 | CLI | complete: 9 commands |
 | TUI | complete: load, plan, apply, live preview, EN/DE |
-| GUI | **not started** — the seam is prepared, see below |
-| Tests | 233 tests, 88 % coverage |
+| GUI | complete: Qt, all settings, folder decisions, progress |
+| Tests | 256 tests, 88 % coverage |
 | CI | GitLab, Python 3.9–3.13 |
 | Docs | complete, EN and DE |
 | Installers | macOS, Linux, Windows |
@@ -83,6 +83,7 @@ def test_custom(builder):                  # build your own case
 | `test_config.py` | validation, profiles |
 | `test_cli.py` | exit codes, output formats, read-only guarantees |
 | `test_tui.py` | headless Textual smoke tests |
+| `test_gui.py` | headless Qt tests (offscreen platform) |
 | `test_version.py` | revision consistency across the repository |
 
 When you touch the executor, keep `test_rollback_restores_everything_when_a_move_fails`
@@ -139,6 +140,7 @@ SELECT rf.absolutePath || fo.pathFromRoot || f.idx_filename
 | New pre-flight check | `safety.py` — return a bilingual `Check` |
 | New execution behaviour | `executor.py`, and a matching rollback test |
 | New TUI widget | `tui/app.py`, `tui/app.tcss` |
+| New GUI control | `gui/app.py`, strings in `gui/i18n.py` |
 
 Every token, preset and check carries both languages in its own definition, so
 help output, the docs tables and the TUI update themselves.
@@ -168,42 +170,27 @@ release: rX.Y.Z — <summary>
 
 Release steps are in [versioning.md](versioning.md).
 
-## The GUI seam
+## The three front ends
 
-The TUI already proves the seam works: it calls exactly three core functions
-and nothing else.
+`cli.py`, `tui/` and `gui/` reach the core through the same three calls:
 
 ```python
-from lrfoldercraft.catalog import CatalogReader, open_catalog
-from lrfoldercraft.config import Settings
-from lrfoldercraft.planner import build_plan
-from lrfoldercraft.safety import preflight
-from lrfoldercraft.executor import execute
-
-settings = Settings(catalog=path, structure=("{yyyy}", "{mm}", "{dd}"), dry_run=False)
-with open_catalog(settings.catalog) as conn:
-    plan = build_plan(CatalogReader(conn), settings)
+with open_catalog(path) as conn:
+    plan = build_plan(CatalogReader(conn), settings, decide=ask_about_folder)
 checks = preflight(plan)
 result = execute(plan, settings, progress=lambda done, total, msg: ...)
 ```
 
-A GUI would live in `src/lrfoldercraft/gui/`, be an optional extra in
-`pyproject.toml` (`[project.optional-dependencies] gui = [...]`) and be reached
-through a new `lrfc gui` subcommand that imports it lazily — the same pattern
-`cli.cmd_tui` already uses, so a missing dependency produces a helpful message
-instead of a traceback.
+Adding a fourth front end means writing those three calls and nothing else. Two
+rules the existing ones learned the hard way:
 
-Candidates, with the trade-off:
+* Take interface defaults from a fresh `Settings()`, never from the first entry
+  of a dropdown -- the GUI silently disagreed with the documentation until a
+  test caught it.
+* Wait for worker threads when the window closes. Destroying a running QThread
+  aborts the process.
 
-| Toolkit | For | Against |
-| --- | --- | --- |
-| **Textual Web** (`textual serve`) | reuses the existing TUI verbatim | runs in a browser, not a native window |
-| **Qt** (PySide6) | native, mature, good tables and file dialogs | large dependency, LGPL considerations |
-| **wxPython** | genuinely native widgets | heavier to build and ship |
-| **Tkinter** | in the standard library, nothing to install | dated look, weak large-table performance |
-
-The recommendation is Textual Web first: it costs almost nothing and answers
-whether a graphical version is actually wanted, before committing to Qt.
+Run the Qt tests headless with `QT_QPA_PLATFORM=offscreen pytest tests/test_gui.py`.
 
 ## Roadmap
 

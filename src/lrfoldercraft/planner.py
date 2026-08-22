@@ -15,7 +15,7 @@ from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import Callable, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
-from .catalog.model import Photo, RootFolder, lr_path_from_root
+from .catalog.model import Folder, Photo, RootFolder, lr_path_from_root
 from .catalog.reader import CatalogReader
 from .config import Settings
 from .folders import (
@@ -89,6 +89,8 @@ class PlannedMove:
     size_bytes: int = 0
     cross_volume: bool = False
     source_folder_id: int = 0
+    #: Index into :attr:`Plan.scopes`.
+    scope: int = 0
 
     @property
     def is_active(self) -> bool:
@@ -123,22 +125,68 @@ class PlanStats:
 
 
 @dataclass
+class RootScope:
+    """One source root folder and where its photos are sorted to.
+
+    A catalog can hold several root folders, possibly on different drives. Each
+    gets its own anchor, because "the folder every selected photo sits under"
+    only means something within one root. With ``new-tree`` placement all source
+    roots share a single scope: everything is consolidated into the new tree.
+    """
+
+    root_folder: RootFolder
+    anchor_segments: Tuple[str, ...]
+    #: Filesystem path the structure is built under.
+    target_root_path: str
+    #: Catalog ``AgLibraryRootFolder`` id the target folders belong to. Filled
+    #: in during execution, because a new tree has no row until it is created.
+    target_root_id: Optional[int] = None
+    cross_volume: bool = False
+
+    @property
+    def name(self) -> str:
+        return self.root_folder.name
+
+
+@dataclass
 class Plan:
     """The complete, reviewable result of planning a run."""
 
     settings: Settings
     catalog_path: str
-    root_folder: RootFolder
-    anchor_segments: Tuple[str, ...]
-    target_root_path: str
     placement: str
+    scopes: List[RootScope] = field(default_factory=list)
+    #: Source root folder id -> index into :attr:`scopes`.
+    scope_of: Dict[int, int] = field(default_factory=dict)
     moves: List[PlannedMove] = field(default_factory=list)
-    new_folder_segments: List[Tuple[str, ...]] = field(default_factory=list)
+    #: ``(scope index, segments)`` for every target folder that will hold files.
+    new_folders: List[Tuple[int, Tuple[str, ...]]] = field(default_factory=list)
     source_folder_ids: Tuple[int, ...] = ()
     folder_cases: List[FolderCase] = field(default_factory=list)
     stats: PlanStats = field(default_factory=PlanStats)
     warnings: List[str] = field(default_factory=list)
     created_at: str = ""
+
+    # -- convenience for the common single-root case ---------------------
+
+    @property
+    def root_folder(self) -> RootFolder:
+        return self.scopes[0].root_folder
+
+    @property
+    def anchor_segments(self) -> Tuple[str, ...]:
+        return self.scopes[0].anchor_segments
+
+    @property
+    def target_root_path(self) -> str:
+        return self.scopes[0].target_root_path
+
+    @property
+    def spans_several_roots(self) -> bool:
+        return len({id(s) for s in self.scopes}) > 1
+
+    def scope_for(self, move: PlannedMove) -> RootScope:
+        return self.scopes[move.scope]
 
     @property
     def active_moves(self) -> List[PlannedMove]:
@@ -343,50 +391,94 @@ def common_prefix(paths: Iterable[Tuple[str, ...]]) -> Tuple[str, ...]:
 
 
 def resolve_anchor(
-    reader: CatalogReader,
     settings: Settings,
+    root: RootFolder,
     photos: Sequence[Photo],
-) -> Tuple[RootFolder, Tuple[str, ...]]:
-    """Decide below which folder the new structure is built.
+    folders: Optional[Dict[int, Folder]] = None,
+) -> Tuple[str, ...]:
+    """Decide below which folder the new structure is built, within one root.
 
-    ``in-place``  the deepest folder that already contains every selected
-                  photo -- for the common "one year folder" case that is
+    ``in-place``  the deepest folder that already contains every selected photo
+                  of this root -- for the common "one year folder" case that is
                   exactly that year folder, so the day folders appear inside it.
     ``new-tree``  the structure starts at the configured target root, so the
                   anchor below the (new) root folder is empty.
     """
-    roots = {p.root_folder_id for p in photos}
-    if len(roots) > 1:
-        raise PlanError(
-            "selected photos span {n} root folders; restrict the selection with "
-            "--root-folder or --folder".format(n=len(roots))
-        )
-    root_id = next(iter(roots))
-    root = next(r for r in reader.root_folders() if r.id_local == root_id)
-
     if settings.placement == "new-tree":
-        return root, ()
+        return ()
 
     if settings.anchor_folder_id is not None:
-        folder = next(
-            (f for f in reader.folders(root_id) if f.id_local == settings.anchor_folder_id),
-            None,
-        )
+        # Look the folder up in the catalog, not among the photos: an anchor
+        # folder usually holds no files of its own, only subfolders.
+        folder = (folders or {}).get(settings.anchor_folder_id)
         if folder is None:
             raise PlanError(
-                "anchor folder id {i} not found in root folder {r}".format(
-                    i=settings.anchor_folder_id, r=root.name
+                "anchor folder id {i} not found in the catalog".format(i=settings.anchor_folder_id)
+            )
+        if folder.root_folder != root.id_local:
+            raise PlanError(
+                "anchor folder id {i} belongs to a different root folder".format(
+                    i=settings.anchor_folder_id
                 )
             )
-        return root, folder.segments
+        return folder.segments
 
-    anchor = common_prefix(
+    return common_prefix(
         tuple(p.folder_path_from_root.strip("/").split("/"))
         if p.folder_path_from_root.strip("/")
         else ()
         for p in photos
     )
-    return root, anchor
+
+
+def build_scopes(
+    reader: CatalogReader,
+    settings: Settings,
+    prepared: Sequence[Tuple[Photo, Optional[Tuple[str, ...]], str]],
+) -> Tuple[List[RootScope], Dict[int, int]]:
+    """Build one scope per source root folder, or a single shared one.
+
+    Returns the scopes and a mapping from source root folder id to scope index.
+    With ``new-tree`` every source root shares one scope, because everything is
+    consolidated into the new tree regardless of where it came from.
+    """
+    roots = {r.id_local: r for r in reader.root_folders()}
+    folders = {f.id_local: f for f in reader.folders()}
+    by_root: Dict[int, List[Photo]] = {}
+    for photo, _segments, _reason in prepared:
+        by_root.setdefault(photo.root_folder_id, []).append(photo)
+
+    scopes: List[RootScope] = []
+    scope_of: Dict[int, int] = {}
+
+    if settings.placement == "new-tree":
+        target = str(Path(settings.target_root or "").expanduser())
+        first = roots[sorted(by_root)[0]]
+        scope = RootScope(root_folder=first, anchor_segments=(), target_root_path=target)
+        scopes.append(scope)
+        for root_id in by_root:
+            scope_of[root_id] = 0
+        return scopes, scope_of
+
+    for root_id in sorted(by_root):
+        root = roots[root_id]
+        photos = by_root[root_id]
+        anchor = resolve_anchor(settings, root, photos, folders)
+        anchor = _normalise_anchor(
+            anchor,
+            settings,
+            [entry for entry in prepared if entry[0].root_folder_id == root_id],
+        )
+        scope_of[root_id] = len(scopes)
+        scopes.append(
+            RootScope(
+                root_folder=root,
+                anchor_segments=anchor,
+                target_root_path=root.normalised_path,
+                target_root_id=root.id_local,
+            )
+        )
+    return scopes, scope_of
 
 
 # ---------------------------------------------------------------------------
@@ -485,7 +577,7 @@ def build_folder_cases(
     settings: Settings,
     prepared: Sequence[Tuple[Photo, Optional[Tuple[str, ...]], str]],
     decide: Optional[FolderDecider] = None,
-    anchor: Tuple[str, ...] = (),
+    anchors: Optional[Dict[int, Tuple[str, ...]]] = None,
 ) -> Dict[int, FolderCase]:
     """Classify every source folder and settle what happens to it.
 
@@ -513,7 +605,7 @@ def build_folder_cases(
             # The anchor folder is the container the run sorts *into*; it is
             # not one of the subfolders whose fate is in question, so it is
             # never offered as a decision and always behaves as consolidate.
-            case.is_anchor = case.segments == anchor
+            case.is_anchor = case.segments == (anchors or {}).get(photo.root_folder_id, ())
             cases[photo.folder_id] = case
         case.photo_count += 1
         if case.folder_date is not None:
@@ -626,13 +718,12 @@ def build_plan(
         segments, reason = _structure_segments(photo, settings, needs_date)
         prepared.append((photo, segments, reason))
 
-    # The anchor is a property of the run, not of a subset: it is the folder
-    # every selected photo sits under. It must be known before any folder
-    # decision is taken, so the anchor folder itself is never put up for one.
-    root, anchor = resolve_anchor(reader, settings, photos)
-    anchor = _normalise_anchor(anchor, settings, prepared)
+    # Anchors must be known before any folder decision is taken, so that the
+    # anchor folder of each root is never itself put up for one.
+    scopes, scope_of = build_scopes(reader, settings, prepared)
+    anchors = {root_id: scopes[index].anchor_segments for root_id, index in scope_of.items()}
 
-    cases = build_folder_cases(reader, settings, prepared, decide, anchor=anchor)
+    cases = build_folder_cases(reader, settings, prepared, decide, anchors=anchors)
     if cases:
         step(
             "Classified %d source folder(s): %s",
@@ -642,65 +733,71 @@ def build_plan(
                 for c in sorted(cases.values(), key=lambda c: c.path_from_root)
             )[:400],
         )
-    step(
-        "Anchor resolved: root=%s anchor=%r placement=%s",
-        root.name,
-        "/".join(anchor),
-        settings.placement,
-    )
-
-    if settings.placement == "new-tree":
-        target_root_path = str(Path(settings.target_root or "").expanduser())
-    else:
-        target_root_path = root.normalised_path
+    for scope in scopes:
+        step(
+            "Scope: root=%s anchor=%r target=%s",
+            scope.root_folder.name,
+            "/".join(scope.anchor_segments),
+            scope.target_root_path,
+        )
 
     plan = Plan(
         settings=settings,
         catalog_path=str(reader.conn.path),
-        root_folder=root,
-        anchor_segments=anchor,
-        target_root_path=target_root_path,
         placement=settings.placement,
+        scopes=scopes,
+        scope_of=scope_of,
         source_folder_ids=tuple(sorted({p.folder_id for p in photos})),
         folder_cases=sorted(cases.values(), key=lambda c: c.path_from_root),
         created_at=datetime.now().isoformat(timespec="seconds"),
     )
 
-    source_device = _device_of(root.normalised_path)
-    target_device = _device_of(target_root_path)
-    cross_volume = (
-        source_device is not None and target_device is not None and source_device != target_device
-    )
-    if cross_volume:
+    for scope in scopes:
+        source_device = _device_of(scope.root_folder.normalised_path)
+        target_device = _device_of(scope.target_root_path)
+        scope.cross_volume = (
+            source_device is not None
+            and target_device is not None
+            and source_device != target_device
+        )
+    if any(scope.cross_volume for scope in scopes):
         plan.warnings.append(
             "Target is on a different volume than the source; files are copied "
             "and verified, then the originals are removed. This takes much "
             "longer than a same-volume move."
         )
+    if len(scopes) > 1:
+        plan.warnings.append(
+            "The selection spans {n} root folders. Each is sorted below its own "
+            "anchor, in one transaction.".format(n=len(scopes))
+        )
 
     # Claimed target paths -> the file that claimed them first.
     claimed: Dict[str, int] = {}
-    folder_segments_seen: Set[Tuple[str, ...]] = set()
+    folder_segments_seen: Set[Tuple[int, Tuple[str, ...]]] = set()
     index = DirectoryIndex()
 
     for photo, segments, reason in prepared:
+        scope_index = scope_of[photo.root_folder_id]
+        scope = scopes[scope_index]
         move = _plan_one(
             photo=photo,
             settings=settings,
-            anchor=anchor,
-            target_root_path=target_root_path,
+            anchor=scope.anchor_segments,
+            target_root_path=scope.target_root_path,
             structure_segments=segments,
             date_reason=reason,
             claimed=claimed,
-            cross_volume=cross_volume,
+            cross_volume=scope.cross_volume,
             index=index,
             case=cases.get(photo.folder_id),
         )
+        move.scope = scope_index
         plan.moves.append(move)
         if move.is_active:
-            folder_segments_seen.add(move.target_segments)
+            folder_segments_seen.add((scope_index, move.target_segments))
 
-    plan.new_folder_segments = sorted(folder_segments_seen)
+    plan.new_folders = sorted(folder_segments_seen)
     _fill_stats(plan)
     _add_warnings(plan)
     step(
@@ -708,7 +805,7 @@ def build_plan(
         plan.stats.touched,
         plan.stats.already_in_place,
         plan.stats.total - plan.stats.touched - plan.stats.already_in_place,
-        len(plan.new_folder_segments),
+        len(plan.new_folders),
     )
     return plan
 
@@ -887,7 +984,7 @@ def _resolve_conflict(
 def _fill_stats(plan: Plan) -> None:
     stats = plan.stats
     stats.total = len(plan.moves)
-    stats.new_folders = len(plan.new_folder_segments)
+    stats.new_folders = len(plan.new_folders)
     for move in plan.moves:
         if move.status == MOVE:
             stats.to_move += 1
@@ -989,4 +1086,4 @@ def _device_of(path: str) -> Optional[int]:
 
 def lr_folder_paths(plan: Plan) -> List[str]:
     """``pathFromRoot`` values the executor has to make sure exist."""
-    return sorted({lr_path_from_root(segs) for segs in plan.new_folder_segments})
+    return sorted({lr_path_from_root(segs) for _scope, segs in plan.new_folders})

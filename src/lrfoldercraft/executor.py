@@ -147,7 +147,7 @@ def execute(
                 {
                     "structure": list(settings.structure),
                     "placement": settings.placement,
-                    "target_root": plan.target_root_path,
+                    "target_roots": [sc.target_root_path for sc in plan.scopes],
                     "files": plan.stats.touched,
                     "folders": plan.stats.new_folders,
                 },
@@ -199,17 +199,21 @@ def _run(
         writer = CatalogWriter(conn)
         try:
             # --- 1. catalog side, still uncommitted -----------------------
-            if settings.placement == "new-tree":
-                target = Path(plan.target_root_path)
-                root_id = writer.ensure_root_folder(str(target), target.name)
-                step("Registered target root folder id=%d (%s)", root_id, target)
-            else:
-                root_id = plan.root_folder.id_local
+            for scope in plan.scopes:
+                if scope.target_root_id is None:
+                    target = Path(scope.target_root_path)
+                    scope.target_root_id = writer.ensure_root_folder(str(target), target.name)
+                    step(
+                        "Registered target root folder id=%d (%s)",
+                        scope.target_root_id,
+                        target,
+                    )
 
-            folder_ids: Dict[Tuple[str, ...], int] = {}
-            for segments in plan.new_folder_segments:
+            folder_ids: Dict[Tuple[int, Tuple[str, ...]], int] = {}
+            for scope_index, segments in plan.new_folders:
+                root_id = plan.scopes[scope_index].target_root_id
                 folder = writer.ensure_folder(root_id, segments)
-                folder_ids[segments] = folder.id_local
+                folder_ids[(scope_index, segments)] = folder.id_local
             result.folders_created = len(writer.created_folders)
             step(
                 "Prepared %d folder row(s) (%d newly created)",
@@ -221,14 +225,18 @@ def _run(
             step("Staged %d catalog row update(s)", len(active))
 
             # --- 2. filesystem side, journalled ---------------------------
-            root = Path(plan.target_root_path)
             # With placement new-tree the target root may not exist yet -- that
             # is the point of naming a new location. Create it, and every level
             # below it, one at a time: `mkdir(parents=True)` would make several
             # in one call and an undo can only remove what was journalled.
-            _ensure_directory(root, journal, created_dirs)
-            for segments in plan.new_folder_segments:
-                _ensure_directory(root.joinpath(*segments), journal, created_dirs)
+            for scope in plan.scopes:
+                _ensure_directory(Path(scope.target_root_path), journal, created_dirs)
+            for scope_index, segments in plan.new_folders:
+                _ensure_directory(
+                    Path(plan.scopes[scope_index].target_root_path).joinpath(*segments),
+                    journal,
+                    created_dirs,
+                )
 
             for index, move in enumerate(active, start=1):
                 journal.write(
@@ -314,7 +322,7 @@ def _stage_catalog_moves(
             try:
                 writer.move_row(
                     move.file_id,
-                    folder_ids[move.target_segments],
+                    folder_ids[(move.scope, move.target_segments)],
                     move.target_filename if move.renamed else None,
                 )
             except sqlite3.IntegrityError as exc:
@@ -325,7 +333,7 @@ def _stage_catalog_moves(
             for move in deferred:
                 writer.rename_file(move.file_id, _temp_name(move))
             for move in deferred:
-                writer.reparent_file(move.file_id, folder_ids[move.target_segments])
+                writer.reparent_file(move.file_id, folder_ids[(move.scope, move.target_segments)])
             for move in deferred:
                 writer.rename_file(move.file_id, move.target_filename or move.filename)
             return
@@ -426,10 +434,16 @@ def _restore(current: str, original: str, journal: Journal) -> bool:
 
 def _remove_empty_directories(plan: Plan, result: RunResult) -> None:
     """Delete source directories that fell empty, never the anchor itself."""
-    anchor = Path(plan.target_root_path).joinpath(*plan.anchor_segments)
+    anchors = {
+        Path(scope.target_root_path).joinpath(*scope.anchor_segments) for scope in plan.scopes
+    }
+    anchors |= {
+        Path(scope.root_folder.normalised_path).joinpath(*scope.anchor_segments)
+        for scope in plan.scopes
+    }
     candidates = {Path(m.source_path).parent for m in plan.active_moves}
     for directory in sorted(candidates, key=lambda p: len(p.parts), reverse=True):
-        if directory == anchor or anchor not in directory.parents:
+        if directory in anchors or not any(a in directory.parents for a in anchors):
             continue
         try:
             if not any(directory.iterdir()):

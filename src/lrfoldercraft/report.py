@@ -76,6 +76,7 @@ T = {
     "from_override": ("set explicitly", "ausdruecklich gesetzt"),
     "from_operator": ("chosen by you", "von Ihnen gewaehlt"),
     "anchor_folder": ("the run's anchor", "Ankerordner des Laufs"),
+    "scopes": ("ROOT FOLDERS", "STAMMORDNER"),
 }
 
 
@@ -166,11 +167,25 @@ def render_plan(
                 (t("structure", language), "/".join(plan.settings.structure)),
                 (t("example", language), describe_structure(plan.settings.structure, language)),
                 (t("placement", language), plan.placement),
-                (t("target_root", language), plan.target_root_path),
-                (t("anchor", language), "/".join(plan.anchor_segments) or "(root)"),
+                (t("target_root", language), plan.scopes[0].target_root_path),
+                (
+                    t("anchor", language),
+                    "/".join(plan.scopes[0].anchor_segments) or "(root)",
+                ),
             ]
         )
     )
+    if len(plan.scopes) > 1:
+        lines += ["", t("scopes", language) + ":"]
+        for index, scope in enumerate(plan.scopes):
+            lines.append("  [{i}] {r}".format(i=index, r=scope.root_folder.absolute_path))
+            lines.append(
+                "      {a} {p}".format(
+                    a=t("anchor", language),
+                    p="/".join(scope.anchor_segments) or "(root)",
+                )
+            )
+
     lines += ["", t("summary", language) + ":"]
     lines.extend(
         _kv_block(
@@ -273,17 +288,25 @@ def plan_to_dict(plan: Plan) -> Dict[str, Any]:
         "catalog": plan.catalog_path,
         "created_at": plan.created_at,
         "settings": plan.settings.to_dict(),
-        "root_folder": {
-            "id": plan.root_folder.id_local,
-            "name": plan.root_folder.name,
-            "path": plan.root_folder.absolute_path,
-        },
+        "scopes": [
+            {
+                "root_id": sc.root_folder.id_local,
+                "root_name": sc.root_folder.name,
+                "root_path": sc.root_folder.absolute_path,
+                "anchor": list(sc.anchor_segments),
+                "target_root": sc.target_root_path,
+                "cross_volume": sc.cross_volume,
+            }
+            for sc in plan.scopes
+        ],
         "placement": plan.placement,
         "target_root": plan.target_root_path,
         "anchor": list(plan.anchor_segments),
         "stats": asdict(plan.stats),
         "warnings": list(plan.warnings),
-        "new_folders": ["/".join(s) for s in plan.new_folder_segments],
+        "new_folders": [
+            {"scope": index, "path": "/".join(segments)} for index, segments in plan.new_folders
+        ],
         "folders": [
             {
                 "id": c.folder_id,
@@ -312,6 +335,7 @@ def plan_to_dict(plan: Plan) -> Dict[str, Any]:
                 "capture_time": m.capture_time,
                 "camera": m.camera,
                 "size_bytes": m.size_bytes,
+                "scope": m.scope,
             }
             for m in plan.moves
         ],

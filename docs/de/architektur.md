@@ -1,6 +1,6 @@
 # Architektur
 
-**Revision r2.0.1 · Build-Datum 2026-08-22**
+**Revision r3.0.0 · Build-Datum 2026-08-22**
 
 ## Leitregel
 
@@ -11,7 +11,7 @@ Implementierung.
 
 ```
                     ┌──────────┐   ┌──────────┐   ┌──────────┐
-   Frontends        │  cli.py  │   │  tui/    │   │  (GUI)   │
+   Frontends        │  cli.py  │   │  tui/    │   │  gui/    │
                     └────┬─────┘   └────┬─────┘   └────┬─────┘
                          └──────────────┼──────────────┘
                                         ▼
@@ -63,11 +63,15 @@ LR-FolderCraft/
 │   │   ├── model.py                 RootFolder, Folder, Photo, CatalogInfo
 │   │   ├── reader.py                sämtliche Leseabfragen
 │   │   └── writer.py                sämtliche Schreibanweisungen
-│   └── tui/
-│       ├── app.py                   die Textual-Anwendung
-│       └── app.tcss                 deren Stylesheet
+│   ├── tui/
+│   │   ├── app.py                   die Textual-Anwendung
+│   │   └── app.tcss                 deren Stylesheet
+│   └── gui/
+│       ├── app.py                   das Qt-Hauptfenster
+│       ├── workers.py               Katalog / Plan / Ausführung in Threads
+│       └── i18n.py                  Oberflächentexte, EN und DE
 │
-├── tests/                           233 Tests, synthetischer Katalog als Fixture
+├── tests/                           256 Tests, synthetischer Katalog als Fixture
 ├── install/                         Installationsskripte für macOS, Linux, Windows
 └── docs/  en/  de/  images/         diese Dokumentation, in beiden Sprachen
 ```
@@ -188,9 +192,10 @@ CatalogInfo
 Mehr ist nicht nötig: CLI, TUI, die Tabellen in der Dokumentation und die
 Hilfeausgabe werden alle aus `TOKEN_SPECS` erzeugt.
 
-## Später eine GUI ergänzen
+## Die drei Frontends
 
-Dieselben drei Aufrufe implementieren, die auch die TUI macht:
+`cli.py`, `tui/` und `gui/` erreichen den Kern über dieselben drei Aufrufe und
+sonst nichts:
 
 ```python
 with open_catalog(pfad) as conn:
@@ -201,7 +206,33 @@ result = execute(plan, settings, progress=callback)
 
 `decide` ist optional und der Weg, auf dem ein Frontend den Operator zu einem
 Ordner befragt, ohne dass der Planer von einer Oberfläche wüsste. Es bekommt
-einen `FolderCase` und liefert eine Aktion oder ``None`` für „Vorgabe".
+einen `FolderCase` und liefert eine Aktion oder `None` für „Vorgabe". `progress`
+wird als `progress(done, total, message)` während des Verschiebens aufgerufen.
 
-`execute` nimmt einen `progress(done, total, message)`-Rückruf entgegen. Mehr
-braucht es nicht — kein Kerncode muss geändert werden.
+### `gui/`
+
+PySide6, ein optionales Extra, von `cli.cmd_gui` verzögert importiert — eine
+fehlende Abhängigkeit erzeugt also eine Erklärung statt eines Tracebacks.
+
+- `app.py` baut ein Fenster und sammelt daraus ein `Settings`. Die Vorgabewerte
+  der Optionen stammen aus einem frischen `Settings()` statt aus dem ersten
+  Listeneintrag, damit die Oberfläche nicht von den dokumentierten Vorgaben
+  abdriften kann — ein Test prüft das.
+- `workers.py` führt Katalog lesen, Planen und Ausführen in `QThread`s aus und
+  meldet über Signale zurück. Dort steht auch die Regel, dass ein Thread
+  abgewartet und nicht fallen gelassen wird: Ein laufender `QThread`, der
+  zerstört wird, bricht den Prozess ab — genau das passiert beim Schließen des
+  Fensters während eines Laufs.
+- `i18n.py` hält alle Oberflächentexte in beiden Sprachen.
+
+## Stammordner und Scopes
+
+Ein Katalog kann mehrere Stammordner enthalten, auch auf verschiedenen
+Laufwerken. Jeder wird zu einem `RootScope` mit eigenem Anker, denn „der
+Ordner, unter dem alle ausgewählten Fotos liegen" ergibt nur innerhalb eines
+Stammordners einen Sinn. Jede `PlannedMove` trägt den Index ihres Scopes, und
+der Executor legt Ordnerzeilen und Verzeichnisse je Scope an — alles in
+derselben Transaktion und demselben Journal.
+
+Bei `new-tree` teilen sich alle Quell-Stammordner einen einzigen Scope: Es wird
+alles in den neuen Baum zusammengeführt, unabhängig von der Herkunft.

@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r2.0.1 · Build-Datum 2026-08-22**
+**Revision r3.0.0 · Build-Datum 2026-08-22**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -244,6 +244,41 @@ wenn die Bibliothek mit einem System geteilt wird, das mit Unicode Mühe hat.
 Unzulässige Zeichen (`< > : " / \ | ? *`), abschließende Punkte und
 Windows-Gerätenamen (`CON`, `LPT1`, …) werden ohnehin immer behandelt, auf
 jeder Plattform.
+
+## Die grafische Oberfläche
+
+```bash
+lrfc gui                       # oder gleich mit Katalog
+lrfc gui /Volumes/Fotos/2019/2019.lrcat
+```
+
+Sie benötigt das Extra `gui`: `pip install 'lr-foldercraft[gui]'`. Fehlt es,
+erklärt der Befehl die Installation, statt mit einem Traceback abzubrechen.
+
+Ein Fenster, von oben nach unten:
+
+| Bereich | Inhalt |
+| --- | --- |
+| **Katalog** | der `.lrcat`-Pfad mit Durchsuchen-Schaltfläche und, nach dem Laden, eine Zeile mit Dateien, Bildern, virtuellen Kopien und Aufnahmezeitraum |
+| **Quelle** | der zu bearbeitende Stammordner (oder alle) sowie Endungsfilter |
+| **Ziel** | unterhalb des aktuellen Ordners, oder in einen neuen Ordner über den Systemdialog — dessen Schaltfläche *Neuer Ordner* legt einen an, und ein noch nicht vorhandener Pfad wird beim Lauf erzeugt |
+| **Ordnerstruktur** | eine Vorlage oder ein eigenes Template, mit Live-Vorschau beim Tippen und einer Schaltfläche, die alle 25 Platzhalter auflistet |
+| **Optionen** | Namenskonflikte, Fotos ohne Datum und die drei Entscheidungen zu vorhandenen Ordnern, dazu Sidecars, Katalog-Backup und ASCII-Namen |
+| **Vorgefundene Ordner** | eine Zeile je Ordner mit Art, Fotozahl und Auswahlfeld für die Entscheidung — eine Änderung plant sofort neu |
+| **Schaltflächen** | Planen ändert nichts; Ausführen fragt vorher nach |
+| **Fortschritt** | Balken und Zähler während des Laufs, danach das vollständige Ergebnis |
+| **Protokoll** | was geschehen ist, samt aller Warnungen aus den Vorprüfungen |
+
+Über die Menüleiste lässt sich jederzeit zwischen Deutsch und Englisch
+wechseln.
+
+Die Vorgabewerte der Optionen stammen aus demselben `Settings`-Objekt, das auch
+die Kommandozeile verwendet — die Oberfläche kann der Dokumentation also nicht
+stillschweigend widersprechen. Ein Test prüft genau das.
+
+Lang laufende Vorgänge arbeiten in eigenen Threads, das Fenster bleibt also
+bedienbar, während neuntausend Dateien verschoben werden, und das Schließen
+wartet die Arbeit ab, statt sie abzuwürgen.
 
 ## Ordner, die Ihre Bibliothek schon hat
 

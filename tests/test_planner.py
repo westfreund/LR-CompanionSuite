@@ -569,3 +569,68 @@ def test_sorting_inside_is_idempotent(mixed_library):
         plan2 = build_plan(CatalogReader(conn), settings)
     assert not plan2.has_work, [(m.source_path, m.target_path) for m in plan2.active_moves]
     del shutil
+
+
+# -- several root folders in one run ----------------------------------------
+
+
+@pytest.fixture
+def two_roots(builder, tmp_path):
+    """A catalog whose photos live under two root folders, as on two drives."""
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00", folder="raw2019/")
+    builder.add_photo("B.CR2", "2019-02-14T10:00:00", folder="raw2019/")
+    second = tmp_path / "drive2" / "Fotos2020"
+    root_id = builder.add_root_folder(second, "Fotos2020")
+    builder.add_photo_to_root(root_id, "C.CR2", "2020-05-05T10:00:00")
+    builder.add_photo_to_root(root_id, "D.CR2", "2020-06-06T10:00:00")
+    return builder, root_id, second
+
+
+def test_a_run_spans_several_root_folders(two_roots):
+    builder, _root_id, second = two_roots
+    plan = plan_for(builder, structure=("{yyyy}-{mm}-{dd}",))
+    assert len(plan.scopes) == 2
+    assert plan.spans_several_roots
+    assert plan.stats.to_move == 4
+    assert any("spans 2 root folders" in w for w in plan.warnings)
+
+
+def test_each_root_gets_its_own_anchor(two_roots):
+    builder, _root_id, second = two_roots
+    plan = plan_for(builder, structure=("{yyyy}-{mm}-{dd}",))
+    anchors = {sc.root_folder.name: sc.anchor_segments for sc in plan.scopes}
+    assert anchors["images"] == ("raw2019",)  # both photos sit in raw2019
+    assert anchors["Fotos2020"] == ()  # they sit in the root itself
+    moves = by_name(plan)
+    assert moves["A.CR2"].target_segments == ("raw2019", "2019-01-03")
+    assert moves["C.CR2"].target_segments == ("2020-05-05",)
+
+
+def test_moves_carry_their_scope(two_roots):
+    builder, _root_id, second = two_roots
+    plan = plan_for(builder, structure=("{yyyy}",))
+    scopes = {m.filename: plan.scope_for(m).root_folder.name for m in plan.moves}
+    assert scopes["A.CR2"] == "images"
+    assert scopes["C.CR2"] == "Fotos2020"
+
+
+def test_one_root_can_still_be_selected(two_roots):
+    builder, root_id, second = two_roots
+    plan = plan_for(builder, structure=("{yyyy}",), root_folder_id=root_id)
+    assert len(plan.scopes) == 1
+    assert plan.stats.total == 2
+
+
+def test_an_anchor_from_another_root_is_refused(two_roots):
+    builder, root_id, second = two_roots
+    other = builder.folders["raw2019/"]
+    with pytest.raises(PlanError, match="different root folder"):
+        plan_for(builder, structure=("{yyyy}",), root_folder_id=root_id, anchor_folder_id=other)
+
+
+def test_new_tree_merges_every_root_into_one(two_roots, tmp_path):
+    builder, _root_id, second = two_roots
+    target = tmp_path / "Sortiert"
+    plan = plan_for(builder, structure=("{yyyy}",), placement="new-tree", target_root=str(target))
+    assert len(plan.scopes) == 1
+    assert all(m.target_path.startswith(str(target)) for m in plan.active_moves)

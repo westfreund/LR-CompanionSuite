@@ -16,6 +16,9 @@
 .PARAMETER NoTui
     Install the command line only, without Textual.
 
+.PARAMETER WithGui
+    Also install PySide6 so that `lrfc gui` works. About 100 MB.
+
 .PARAMETER Uninstall
     Remove a previous installation.
 
@@ -31,6 +34,7 @@ param(
     [string]$Prefix = "$env:LOCALAPPDATA\LR-FolderCraft",
     [string]$BinDir = "$env:LOCALAPPDATA\Programs\bin",
     [switch]$NoTui,
+    [switch]$WithGui,
     [switch]$Uninstall
 )
 
@@ -125,9 +129,13 @@ Write-Info 'Updating pip'
 
 # -- 3. install ----------------------------------------------------------------
 
-$target = if ($NoTui) { $ProjectDir } else { "$ProjectDir[tui]" }
-if ($NoTui) { Write-Info "Installing $AppName (command line only)" }
-else        { Write-Info "Installing $AppName with the TUI" }
+$extras = ''
+if     (-not $NoTui -and $WithGui) { $extras = '[tui,gui]'; Write-Info "Installing $AppName with the text and graphical interfaces" }
+elseif ($WithGui)                  { $extras = '[gui]';     Write-Info "Installing $AppName with the graphical interface" }
+elseif (-not $NoTui)               { $extras = '[tui]';     Write-Info "Installing $AppName with the TUI" }
+else                               { Write-Info "Installing $AppName (command line only)" }
+if ($WithGui) { Write-Info 'PySide6 is about 100 MB -- this takes a moment' }
+$target = "$ProjectDir" + $extras
 & $VenvPy -m pip install --quiet $target
 if ($LASTEXITCODE -ne 0) { Write-Fail 'Installation failed.' }
 
@@ -167,7 +175,8 @@ Next steps:
     lrfc info D:\Photos\Catalog.lrcat          inspect a catalog, read only
     lrfc presets                               see the ready made structures
     lrfc plan D:\Photos\Catalog.lrcat -s day   see what would happen
-    lrfc tui                                   interactive interface
+    lrfc tui                                   interactive text interface
+    lrfc gui                                   graphical interface (needs -WithGui)
 
 Quit Lightroom Classic before running 'lrfc apply'.
 '@

@@ -1,6 +1,6 @@
 # Open issues and roadmap
 
-**Revision r2.0.1 · Build date 2026-08-22**
+**Revision r3.0.0 · Build date 2026-08-22**
 
 An honest list of what is not done, not verified, or deliberately left out.
 Each item is a starting point for the next session.
@@ -58,10 +58,11 @@ test, and add a pre-flight warning if a network path is detected.
 
 ## Known limits
 
-### O-7 · One root folder per run
-If a selection spans several root folders the planner refuses and asks you to
-restrict it. Multi-root runs would need per-root anchors and a per-root
-transaction story. **Workaround:** run once per root folder.
+### O-7 · Several root folders in one run ✔
+Closed in r3.0.0. Each root folder becomes a scope with its own anchor, and all
+of them are handled in one transaction and one journal. Verified across two
+physical volumes: four files sorted below two different roots, all catalog
+paths resolving, and a second run reporting nothing to do.
 
 ### O-8 · No resume after interruption
 The journal records enough to resume, but only `undo` is implemented. A
@@ -97,10 +98,10 @@ It exists for inspecting a locked catalog. Nothing stops you passing it to
 
 ## Ideas, not commitments
 
-### O-15 · GUI
-The seam is prepared; see [development.md](development.md#the-gui-seam).
-Recommended first step: `textual serve` to reuse the existing TUI in a browser,
-before committing to Qt.
+### O-15 · GUI ✔
+Closed in r3.0.0: a Qt front end with all settings, per-folder decisions, a
+native target-folder chooser and a progress bar. `textual serve` would still be
+a cheap way to reach the text interface remotely, if that is ever wanted.
 
 ### O-16 · More grouping criteria
 Candidates: ISO speed band, lens focal length band, GPS location (city from

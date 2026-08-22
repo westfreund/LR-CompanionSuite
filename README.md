@@ -2,7 +2,7 @@
 
 **Reorganise Adobe Lightroom Classic folder trees — without losing the catalog connection.**
 
-[![Revision](https://img.shields.io/badge/revision-r2.0.1-blue)](CHANGELOG.md)
+[![Revision](https://img.shields.io/badge/revision-r3.0.0-blue)](CHANGELOG.md)
 [![Build date](https://img.shields.io/badge/build-2026--08--22-lightgrey)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20GPL--3.0--or--later-green)](LICENSE)
@@ -34,7 +34,13 @@ Only two things in the catalog ever change: new rows in `AgLibraryFolder`, and
 `AgLibraryFile.folder` pointing somewhere else. Photo rows are never touched —
 which is exactly why nothing about your edits can get lost.
 
+![LR-FolderCraft](docs/images/gui-en.png)
+
+<details><summary>…and the same thing in the terminal</summary>
+
 ![LR-FolderCraft TUI](docs/images/tui-en.svg)
+
+</details>
 
 ## Quick start
 
@@ -53,10 +59,11 @@ lrfc plan  /Volumes/Photos/2019/2019.lrcat -s day # see exactly what would happe
 lrfc apply /Volumes/Photos/2019/2019.lrcat -s day # do it
 ```
 
-Or use the interactive interface:
+Or use one of the interfaces:
 
 ```bash
-lrfc tui
+lrfc gui   # graphical, needs the gui extra
+lrfc tui   # text, in the terminal
 ```
 
 `plan` never writes anything. Read its output, then run `apply`.
@@ -129,8 +136,9 @@ Existing files are never overwritten. A name collision is resolved by renaming
   (verified against 18.0.0 / Lightroom Classic 14)
 - Lightroom Classic **closed** while the tool runs
 
-The command line needs nothing but the standard library. The TUI adds
-[Textual](https://textual.textualize.io/).
+The command line needs nothing but the standard library. `lrfc tui` adds
+[Textual](https://textual.textualize.io/), `lrfc gui` adds
+[PySide6](https://doc.qt.io/qtforpython/) -- each an optional extra.
 
 ## Documentation
 

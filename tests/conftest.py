@@ -80,6 +80,7 @@ class CatalogBuilder:
             (self.root_folder_id, self._uuid(), str(self.images_dir) + "/", "images", None),
         )
         self.folders = {}
+        self._extra_roots: dict[int, tuple[Path, dict]] = {}
         self.folders[""] = self._new_id()
         self._conn.execute(
             "INSERT INTO AgLibraryFolder VALUES (?,?,?,?,?,?)",
@@ -227,6 +228,80 @@ class CatalogBuilder:
             (new_id, value.lower(), value),
         )
         return new_id
+
+    def add_root_folder(self, directory: Path, name: str) -> int:
+        """Register a second root folder, as a catalog spanning drives has."""
+        directory.mkdir(parents=True, exist_ok=True)
+        root_id = self._new_id()
+        self._conn.execute(
+            "INSERT INTO AgLibraryRootFolder VALUES (?,?,?,?,?)",
+            (root_id, self._uuid(), str(directory) + "/", name, None),
+        )
+        folder_id = self._new_id()
+        self._conn.execute(
+            "INSERT INTO AgLibraryFolder VALUES (?,?,?,?,?,?)",
+            (folder_id, self._uuid(), None, "", root_id, None),
+        )
+        self._extra_roots[root_id] = (directory, {"": folder_id})
+        self._conn.commit()
+        return root_id
+
+    def add_photo_to_root(
+        self,
+        root_id: int,
+        filename: str,
+        capture_time: str,
+        folder: str = "",
+        content: bytes = b"binary-image-data",
+    ) -> int:
+        """Add a photo below a root registered with :meth:`add_root_folder`."""
+        directory, folders = self._extra_roots[root_id]
+        if folder and folder not in folders:
+            parent = folders[""]
+            current = ""
+            for segment in folder.strip("/").split("/"):
+                current = current + segment + "/"
+                if current not in folders:
+                    new_id = self._new_id()
+                    self._conn.execute(
+                        "INSERT INTO AgLibraryFolder VALUES (?,?,?,?,?,?)",
+                        (new_id, self._uuid(), parent, current, root_id, None),
+                    )
+                    folders[current] = new_id
+                    (directory / current).mkdir(parents=True, exist_ok=True)
+                parent = folders[current]
+        folder_id = folders[folder] if folder else folders[""]
+
+        base, _, extension = filename.rpartition(".")
+        file_id = self._new_id()
+        self._conn.execute(
+            "INSERT INTO AgLibraryFile "
+            "(id_local,id_global,baseName,extension,folder,idx_filename,"
+            "lc_idx_filename,lc_idx_filenameExtension,originalFilename,sidecarExtensions) "
+            "VALUES (?,?,?,?,?,?,?,?,?,NULL)",
+            (
+                file_id,
+                self._uuid(),
+                base,
+                extension,
+                folder_id,
+                filename,
+                filename.lower(),
+                extension.lower(),
+                filename,
+            ),
+        )
+        self._conn.execute(
+            "INSERT INTO Adobe_images "
+            "(id_local,id_global,captureTime,fileFormat,masterImage,rootFile) "
+            "VALUES (?,?,?,?,NULL,?)",
+            (self._new_id(), self._uuid(), capture_time, "RAW", file_id),
+        )
+        self._conn.commit()
+        target = directory / folder / filename if folder else directory / filename
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(content)
+        return file_id
 
     def close(self) -> None:
         self._conn.commit()

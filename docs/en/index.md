@@ -1,6 +1,6 @@
 # LR-FolderCraft — Overview
 
-**Revision r2.0.1 · Build date 2026-08-22**
+**Revision r3.0.0 · Build date 2026-08-22**
 
 LR-FolderCraft reorganises the folder tree of an Adobe Lightroom Classic
 library. It moves the image files on disk and rewrites the catalog in the same
@@ -60,6 +60,13 @@ that value never changes, everything hanging off it survives:
 lrfc info  CATALOG              # what is in this catalog? (read only)
 lrfc plan  CATALOG -s day       # what would change? (read only)
 lrfc apply CATALOG -s day       # do it
+```
+
+Or do the same in a window:
+
+```bash
+lrfc gui                        # graphical interface (needs the gui extra)
+lrfc tui                        # text interface in the terminal
 ```
 
 Everything else is a refinement of those three.

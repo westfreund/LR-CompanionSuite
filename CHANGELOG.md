@@ -12,6 +12,58 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
 ---
 
+## [3.0.0] — 2026-08-22 — "Weitwinkel"
+
+Two large additions: a graphical interface, and runs that span several root
+folders.
+
+### Added
+
+- **A Qt graphical interface**, `lrfc gui`, as the optional `gui` extra.
+  One window holds the catalog with a file chooser and a summary, the source
+  root folder and extension filters, the target (in place, or a new folder
+  picked with the system dialog — its *New Folder* button creates one, and a
+  path that does not exist yet is created during the run), the structure with a
+  live preview and a placeholder reference, every option, the folders that were
+  found with a dropdown each for their decision, a progress bar with a counter,
+  and a log. English and German, switchable at any time.
+
+  Catalog reading, planning and execution run on worker threads, so the window
+  stays responsive; closing it waits for the work rather than killing it.
+
+- **A run can span several root folders.** Each becomes a `RootScope` with its
+  own anchor, and all of them are handled in one transaction and one journal.
+  With `new-tree` placement they share a single scope and everything is
+  consolidated into the new tree. Verified across two physical volumes.
+  Closes O-7.
+
+- Pre-flight now checks every scope: each target must be writable or creatable,
+  and free space is summed **per target volume**, so two scopes copying onto
+  the same drive cannot both pass while together they do not fit.
+
+- The plan lists every root folder with its anchor when there is more than one,
+  in the text report and under `scopes` in the JSON export.
+
+- Installers grew `--with-gui` (macOS/Linux) and `-WithGui` (Windows), and CI
+  gained a headless Qt job.
+
+### Fixed
+
+- **The graphical interface used the first entry of each dropdown as its
+  default** instead of the documented one, so `subfolder_action` silently
+  started at `sort-inside` rather than `consolidate`. Every option default is
+  now read from a fresh `Settings()`, and a test compares the two.
+
+- **Closing the window while a worker was running aborted the process.**
+  Destroying a running `QThread` does that. Threads are now awaited on close
+  and dropped from the list when they finish.
+
+### Changed
+
+- `Plan.root_folder`, `.anchor_segments` and `.target_root_path` are now
+  convenience properties for the first scope; `Plan.scopes` is the real model
+  and `PlannedMove.scope` says which one a move belongs to.
+
 ## [2.0.1] — 2026-08-22
 
 ### Fixed
@@ -316,7 +368,7 @@ and rewriting the catalog in one reversible operation.
 - Debug mode and a per-run log file carrying a numbered `STEP` audit trail.
 
 **Project**
-- 233 tests, 88 % coverage, built on a synthetic catalog fixture so no
+- 256 tests, 88 % coverage, built on a synthetic catalog fixture so no
   Lightroom installation is needed.
 - GitLab CI: lint, tests on Python 3.9–3.13, a dedicated safety job, build.
 - Installers for macOS, Linux and Windows.

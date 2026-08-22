@@ -9,6 +9,7 @@
 # Usage:
 #   ./install/install-macos.sh                 # install into ~/.local/share
 #   ./install/install-macos.sh --no-tui        # skip the Textual dependency
+#   ./install/install-macos.sh --with-gui      # add the Qt graphical interface
 #   ./install/install-macos.sh --prefix DIR    # choose the install location
 #   ./install/install-macos.sh --bin DIR       # choose the launcher location
 #   ./install/install-macos.sh --uninstall
@@ -24,6 +25,7 @@ MIN_PY_MINOR=9
 PREFIX="${LRFC_PREFIX:-$HOME/.local/share/lr-foldercraft}"
 BIN_DIR="${LRFC_BIN:-$HOME/.local/bin}"
 WITH_TUI=1
+WITH_GUI=0
 UNINSTALL=0
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -36,6 +38,7 @@ die()   { printf '\033[1;31m[x]\033[0m %s\n' "$*" >&2; exit 1; }
 while [ $# -gt 0 ]; do
     case "$1" in
         --no-tui)    WITH_TUI=0; shift ;;
+        --with-gui)  WITH_GUI=1; shift ;;
         --prefix)    PREFIX="${2:?--prefix needs a directory}"; shift 2 ;;
         --bin)       BIN_DIR="${2:?--bin needs a directory}"; shift 2 ;;
         --uninstall) UNINSTALL=1; shift ;;
@@ -97,13 +100,20 @@ info "Updating pip"
 
 # -- 3. install ------------------------------------------------------------------
 
-if [ "$WITH_TUI" -eq 1 ]; then
-    info "Installing $APP_NAME with the TUI"
-    "$VENV_PY" -m pip install --quiet "$PROJECT_DIR[tui]"
+EXTRAS=""
+if [ "$WITH_TUI" -eq 1 ] && [ "$WITH_GUI" -eq 1 ]; then
+    EXTRAS="[tui,gui]"; info "Installing $APP_NAME with the text and graphical interfaces"
+elif [ "$WITH_GUI" -eq 1 ]; then
+    EXTRAS="[gui]";     info "Installing $APP_NAME with the graphical interface"
+elif [ "$WITH_TUI" -eq 1 ]; then
+    EXTRAS="[tui]";     info "Installing $APP_NAME with the TUI"
 else
     info "Installing $APP_NAME (command line only)"
-    "$VENV_PY" -m pip install --quiet "$PROJECT_DIR"
 fi
+if [ "$WITH_GUI" -eq 1 ]; then
+    info "PySide6 is about 100 MB -- this takes a moment"
+fi
+"$VENV_PY" -m pip install --quiet "$PROJECT_DIR$EXTRAS"
 
 # -- 4. launcher -------------------------------------------------------------------
 
@@ -141,7 +151,8 @@ Next steps:
     lrfc info /path/to/your.lrcat          # inspect a catalog, read only
     lrfc presets                           # see the ready made structures
     lrfc plan /path/to/your.lrcat -s day   # see what would happen
-    lrfc tui                               # interactive interface
+    lrfc tui                               # interactive text interface
+    lrfc gui                               # graphical interface (needs --with-gui)
 
 Quit Lightroom Classic before running 'lrfc apply'.
 NEXT

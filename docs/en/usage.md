@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r2.0.1 · Build date 2026-08-22**
+**Revision r3.0.0 · Build date 2026-08-22**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -249,6 +249,40 @@ next time it is plugged into a Mac.
 library is shared with a system that struggles with Unicode. Illegal characters
 (`< > : " / \ | ? *`), trailing dots and Windows device names (`CON`, `LPT1`, …)
 are always handled, on every platform.
+
+## The graphical interface
+
+```bash
+lrfc gui                       # or with a catalog already chosen
+lrfc gui /Volumes/Photos/2019/2019.lrcat
+```
+
+It needs the `gui` extra: `pip install 'lr-foldercraft[gui]'`. Without it the
+command explains how to install it rather than failing with a traceback.
+
+One window, top to bottom:
+
+| Section | What it holds |
+| --- | --- |
+| **Catalog** | the `.lrcat` path with a Browse button, and a one-line summary once loaded: files, images, virtual copies, capture range |
+| **Source** | the root folder to work on (or all of them), and extension filters |
+| **Target** | below the current folder, or into a new folder chosen with the system dialog — its *New Folder* button creates one, and a path that does not exist yet is created during the run |
+| **Folder structure** | a preset, or your own template, with a live preview that updates as you type, and a Placeholders button listing all 25 |
+| **Options** | name conflicts, photos without a date, and the three decisions about existing folders, plus sidecars, catalog backup and ASCII names |
+| **Folders found** | one row per folder with its kind, photo count and a dropdown for its decision — changing one re-plans immediately |
+| **Buttons** | Plan changes nothing; Apply asks for confirmation first |
+| **Progress** | a bar and a counter during the run, and the full result afterwards |
+| **Log** | what happened, including every warning from the pre-flight checks |
+
+The menu bar switches between English and German at any time.
+
+The option defaults are taken from the same `Settings` object the command line
+uses, so the interface cannot quietly disagree with the documentation. There is
+a test asserting exactly that.
+
+Long operations run on worker threads, so the window stays responsive while
+nine thousand files are moved, and closing it waits for the work to finish
+rather than killing it.
 
 ## Folders your library already has
 

@@ -1,6 +1,6 @@
 # Installation
 
-**Revision r2.0.1 · Build-Datum 2026-08-22**
+**Revision r3.0.0 · Build-Datum 2026-08-22**
 
 LR-FolderCraft ist ein Python-Paket. Die Installationsskripte legen eine
 isolierte virtuelle Umgebung an, sodass am System-Python nichts verändert wird.
@@ -10,7 +10,7 @@ isolierte virtuelle Umgebung an, sodass am System-Python nichts verändert wird.
 | | |
 | --- | --- |
 | Python | 3.9 oder neuer, mit `sqlite3` und `venv` |
-| Speicherplatz | rund 60 MB für die Umgebung (5 MB ohne TUI) |
+| Speicherplatz | 5 MB nur Kommandozeile, 60 MB mit TUI, 380 MB mit Qt-Oberfläche |
 | Lightroom Classic | muss **geschlossen** sein, während das Werkzeug läuft |
 | Katalogschema | 11.x–19.x, verifiziert gegen 18.0.0 (Lightroom Classic 14) |
 
@@ -39,6 +39,7 @@ Optionen:
 | Schalter | Wirkung |
 | --- | --- |
 | `--no-tui` | nur Kommandozeile, ohne Textual |
+| `--with-gui` | zusätzlich PySide6 für `lrfc gui` (rund 100 MB) |
 | `--prefix VERZ` | anderes Installationsverzeichnis |
 | `--bin VERZ` | anderes Starterverzeichnis |
 | `--uninstall` | Umgebung und Starter entfernen |
@@ -92,7 +93,12 @@ Unter Debian und Ubuntu ist unter Umständen vorher
 ## Installation mit pip
 
 ```bash
+# nur Kommandozeile -- ganz ohne Abhängigkeiten
+python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-FolderCraft.git'
+# mit Textoberfläche
 python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-FolderCraft.git#egg=lr-foldercraft[tui]'
+# mit grafischer Oberfläche
+python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-FolderCraft.git#egg=lr-foldercraft[gui]'
 ```
 
 Oder aus einem Klon heraus, für die Entwicklung:

@@ -1,6 +1,6 @@
 # Entwicklung und Fortsetzung
 
-**Revision r2.0.1 · Build-Datum 2026-08-22**
+**Revision r3.0.0 · Build-Datum 2026-08-22**
 
 Dieses Dokument existiert, damit die Arbeit später fortgesetzt werden kann —
 von Ihnen, von jemand anderem oder von einem KI-Assistenten — ohne den Kontext
@@ -20,8 +20,8 @@ exFAT).
 | Sicherheit | vollständig: 8 Prüfungen, Backup, Journal, Rollback, Undo, Verifikation |
 | CLI | vollständig: 9 Befehle |
 | TUI | vollständig: Laden, Planen, Ausführen, Live-Vorschau, EN/DE |
-| GUI | **nicht begonnen** — die Schnittstelle ist vorbereitet, siehe unten |
-| Tests | 233 Tests, 88 % Abdeckung |
+| GUI | vollständig: Qt, alle Einstellungen, Ordnerentscheidungen, Fortschritt |
+| Tests | 256 Tests, 88 % Abdeckung |
 | CI | GitLab, Python 3.9–3.13 |
 | Dokumentation | vollständig, EN und DE |
 | Installationsskripte | macOS, Linux, Windows |
@@ -88,6 +88,7 @@ def test_eigenes(builder):                 # eigenen Fall bauen
 | `test_config.py` | Validierung, Profile |
 | `test_cli.py` | Rückgabewerte, Ausgabeformate, Nur-Lesen-Zusagen |
 | `test_tui.py` | Textual-Rauchtests ohne Terminal |
+| `test_gui.py` | Qt-Tests ohne Bildschirm (Offscreen-Plattform) |
 | `test_version.py` | Revisionskonsistenz über das ganze Repository |
 
 Wer den Executor anfasst, muss
@@ -146,6 +147,7 @@ SELECT rf.absolutePath || fo.pathFromRoot || f.idx_filename
 | Neue Vorprüfung | `safety.py` — ein zweisprachiges `Check` zurückgeben |
 | Neues Ausführungsverhalten | `executor.py`, plus passender Rollback-Test |
 | Neues TUI-Element | `tui/app.py`, `tui/app.tcss` |
+| Neues GUI-Element | `gui/app.py`, Texte in `gui/i18n.py` |
 
 Jeder Platzhalter, jede Vorlage und jede Prüfung trägt beide Sprachen in ihrer
 eigenen Definition, sodass Hilfeausgabe, Dokumentationstabellen und TUI sich
@@ -178,42 +180,28 @@ release: rX.Y.Z — <Zusammenfassung>
 
 Die Release-Schritte stehen in [versionierung.md](versionierung.md).
 
-## Die GUI-Schnittstelle
+## Die drei Frontends
 
-Die TUI belegt bereits, dass die Trennung trägt: Sie ruft genau drei
-Kernfunktionen auf und sonst nichts.
+`cli.py`, `tui/` und `gui/` erreichen den Kern über dieselben drei Aufrufe:
 
 ```python
-from lrfoldercraft.catalog import CatalogReader, open_catalog
-from lrfoldercraft.config import Settings
-from lrfoldercraft.planner import build_plan
-from lrfoldercraft.safety import preflight
-from lrfoldercraft.executor import execute
-
-settings = Settings(catalog=pfad, structure=("{yyyy}", "{mm}", "{dd}"), dry_run=False)
-with open_catalog(settings.catalog) as conn:
-    plan = build_plan(CatalogReader(conn), settings)
+with open_catalog(pfad) as conn:
+    plan = build_plan(CatalogReader(conn), settings, decide=frage_zu_ordner)
 checks = preflight(plan)
 result = execute(plan, settings, progress=lambda done, total, msg: ...)
 ```
 
-Eine GUI läge in `src/lrfoldercraft/gui/`, wäre ein optionales Extra in
-`pyproject.toml` (`[project.optional-dependencies] gui = [...]`) und würde über
-einen neuen Unterbefehl `lrfc gui` erreichbar, der sie verzögert importiert —
-dasselbe Muster wie `cli.cmd_tui`, sodass eine fehlende Abhängigkeit eine
-hilfreiche Meldung statt eines Tracebacks erzeugt.
+Ein viertes Frontend zu ergänzen heißt, diese drei Aufrufe zu schreiben und
+sonst nichts. Zwei Regeln, welche die bestehenden schmerzhaft gelernt haben:
 
-Kandidaten, mit Abwägung:
+* Vorgabewerte der Oberfläche aus einem frischen `Settings()` nehmen, nie aus
+  dem ersten Eintrag eines Auswahlfeldes — die GUI widersprach der
+  Dokumentation stillschweigend, bis ein Test es fand.
+* Beim Schließen des Fensters auf die Worker-Threads warten. Ein laufender
+  QThread, der zerstört wird, bricht den Prozess ab.
 
-| Toolkit | Dafür | Dagegen |
-| --- | --- | --- |
-| **Textual Web** (`textual serve`) | verwendet die bestehende TUI unverändert | läuft im Browser, kein natives Fenster |
-| **Qt** (PySide6) | nativ, ausgereift, gute Tabellen und Dateidialoge | große Abhängigkeit, LGPL-Fragen |
-| **wxPython** | wirklich native Bedienelemente | aufwendiger zu bauen und auszuliefern |
-| **Tkinter** | in der Standardbibliothek, nichts zu installieren | angestaubte Optik, schwach bei großen Tabellen |
-
-Empfehlung: zuerst Textual Web. Das kostet fast nichts und beantwortet, ob eine
-grafische Variante überhaupt gewünscht ist, bevor man sich auf Qt festlegt.
+Die Qt-Tests laufen ohne Bildschirm mit
+`QT_QPA_PLATFORM=offscreen pytest tests/test_gui.py`.
 
 ## Fahrplan
 

@@ -13,7 +13,7 @@ import shutil
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from .catalog.db import is_locked, lock_file_for, sidecar_paths
 from .logging_setup import get_logger, step
@@ -223,45 +223,69 @@ def _check_id_counter_type(catalog: Path) -> Check:
     )
 
 
-def _check_target_writable(plan: Plan) -> Check:
-    root = Path(plan.target_root_path)
-    probe = root
+def _existing_ancestor(path: Path) -> Path:
+    """Nearest existing folder at or above *path*."""
+    probe = path
     while not probe.exists() and probe != probe.parent:
         probe = probe.parent
-    if not probe.exists():
-        return Check(
-            "target-writable",
-            ERROR,
-            "Target location {p} does not exist and cannot be created.".format(p=root),
-            "Zielort {p} existiert nicht und kann nicht angelegt werden.".format(p=root),
-        )
-    if not os.access(str(probe), os.W_OK):
-        return Check(
-            "target-writable",
-            ERROR,
-            "No write permission for {p}.".format(p=probe),
-            "Keine Schreibrechte fuer {p}.".format(p=probe),
-        )
-    if probe != root:
+    return probe
+
+
+def _check_target_writable(plan: Plan) -> Check:
+    """Every scope's target must be writable, or creatable below one that is."""
+    to_create = []
+    for scope in plan.scopes:
+        root = Path(scope.target_root_path)
+        probe = _existing_ancestor(root)
+        if not probe.exists():
+            return Check(
+                "target-writable",
+                ERROR,
+                "Target location {p} does not exist and cannot be created.".format(p=root),
+                "Zielort {p} existiert nicht und kann nicht angelegt werden.".format(p=root),
+            )
+        if not os.access(str(probe), os.W_OK):
+            return Check(
+                "target-writable",
+                ERROR,
+                "No write permission for {p}.".format(p=probe),
+                "Keine Schreibrechte fuer {p}.".format(p=probe),
+            )
+        if probe != root:
+            to_create.append((root, probe))
+    if to_create:
+        root, probe = to_create[0]
+        more = " (+{n} more)".format(n=len(to_create) - 1) if len(to_create) > 1 else ""
         return Check(
             "target-writable",
             OK,
-            "Target {r} does not exist yet and will be created below {p}.".format(r=root, p=probe),
-            "Ziel {r} existiert noch nicht und wird unterhalb von {p} angelegt.".format(
-                r=root, p=probe
+            "Target {r} does not exist yet and will be created below {p}.{m}".format(
+                r=root, p=probe, m=more
+            ),
+            "Ziel {r} existiert noch nicht und wird unterhalb von {p} angelegt.{m}".format(
+                r=root, p=probe, m=more
             ),
         )
     return Check(
         "target-writable",
         OK,
-        "Target location exists and is writable.",
-        "Zielort existiert und ist beschreibbar.",
+        "{n} target location(s) exist and are writable.".format(n=len(plan.scopes)),
+        "{n} Zielort(e) vorhanden und beschreibbar.".format(n=len(plan.scopes)),
     )
 
 
 def _check_free_space(plan: Plan) -> Check:
-    """Free space only matters when files cross a volume boundary."""
-    needed = plan.stats.cross_volume_bytes
+    """Free space only matters where files cross a volume boundary.
+
+    Summed per target volume: two scopes may copy onto the same drive, and each
+    checking on its own would not notice that together they do not fit.
+    """
+    needed: Dict[str, int] = {}
+    for move in plan.active_moves:
+        if not move.cross_volume:
+            continue
+        target = str(_existing_ancestor(Path(plan.scopes[move.scope].target_root_path)))
+        needed[target] = needed.get(target, 0) + move.size_bytes
     if not needed:
         return Check(
             "free-space",
@@ -269,31 +293,28 @@ def _check_free_space(plan: Plan) -> Check:
             "Same-volume move -- no additional space required.",
             "Verschieben auf demselben Volume -- kein zusaetzlicher Platz noetig.",
         )
-    root = Path(plan.target_root_path)
-    probe = root
-    while not probe.exists() and probe != probe.parent:
-        probe = probe.parent
-    free = shutil.disk_usage(str(probe)).free
-    margin = int(needed * 1.05)
-    if free < margin:
-        return Check(
-            "free-space",
-            ERROR,
-            "Need about {n:.1f} GiB on the target volume, only {f:.1f} GiB free.".format(
-                n=margin / 1024**3, f=free / 1024**3
-            ),
-            "Benoetigt werden rund {n:.1f} GiB auf dem Ziel-Volume, frei sind "
-            "nur {f:.1f} GiB.".format(n=margin / 1024**3, f=free / 1024**3),
-        )
+    for target, size in sorted(needed.items()):
+        free = shutil.disk_usage(target).free
+        margin = int(size * 1.05)
+        if free < margin:
+            return Check(
+                "free-space",
+                ERROR,
+                "Need about {n:.1f} GiB on {t}, only {f:.1f} GiB free.".format(
+                    n=margin / 1024**3, t=target, f=free / 1024**3
+                ),
+                "Benoetigt werden rund {n:.1f} GiB auf {t}, frei sind nur {f:.1f} GiB.".format(
+                    n=margin / 1024**3, t=target, f=free / 1024**3
+                ),
+            )
+    total = sum(needed.values())
     return Check(
         "free-space",
         OK,
-        "{f:.1f} GiB free on the target volume for {n:.1f} GiB of data.".format(
-            f=free / 1024**3, n=needed / 1024**3
+        "Room for {n:.1f} GiB across {v} target volume(s).".format(
+            n=total / 1024**3, v=len(needed)
         ),
-        "{f:.1f} GiB frei auf dem Ziel-Volume fuer {n:.1f} GiB Daten.".format(
-            f=free / 1024**3, n=needed / 1024**3
-        ),
+        "Platz fuer {n:.1f} GiB auf {v} Ziel-Volume(s).".format(n=total / 1024**3, v=len(needed)),
     )
 
 

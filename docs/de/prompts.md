@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r2.0.1 · Build-Datum 2026-08-22**
+**Revision r3.0.0 · Build-Datum 2026-08-22**
 
 Dieses Dokument bewahrt die Anfrage, aus der LR-FolderCraft entstanden ist,
 einen generischen Prompt zur Neuerzeugung eines vergleichbaren Werkzeugs sowie
@@ -193,6 +193,61 @@ must all survive.
    `typeof()` after writing. Test for type drift explicitly: it is invisible to
    every other check.
 
+7. **A catalog can have several root folders**, possibly on different drives.
+   "The folder every selected photo sits under" only means something within one
+   root, so compute one anchor per root, not one for the run. Deriving the
+   anchor from a *subset* of the photos (say, only the ones being consolidated)
+   looks tidier and breaks immediately: with a single such photo its own folder
+   becomes the anchor and it is sorted into itself.
+8. **Do not create a target directory with `mkdir(parents=True)`.** Create each
+   missing level separately and record each one, or an undo cannot take the
+   tree back down. And do create the target root itself -- naming a location
+   that does not exist yet is the whole point of a "new tree" mode.
+9. **On macOS, leave AppleDouble companions alone.** On exFAT/FAT the kernel
+   moves `._X` together with `X` on rename; moving it yourself collides with
+   what the system already did. On other platforms `._X` is an ordinary file a
+   rename leaves behind, so there it must be carried along.
+10. **Lightroom catalogs run in WAL mode.** Checkpoint after committing so the
+    `.lcat` file is self-contained, and never describe `.lrcat-wal` as a stale
+    file that can be deleted -- a non-empty one holds committed transactions.
+    Beware that a read opened with `immutable=1` ignores the WAL entirely, so a
+    verification pass using it validates a view the application will not see.
+
+## Requirements a grown library adds
+
+Real libraries are not one flat folder. They hold topic folders (`Urlaub`) and
+folders that already carry a date (`2019-04-15 Ostern in Tirol`). What should
+happen to each is a judgement call, so:
+
+* Classify folders: a name that *begins* with a date is a dated folder; a date
+  in the middle is ignored, because guessing there invents intent.
+* A dated folder only counts as "already sorted" when its granularity is at
+  least as fine as the structure asks for. A folder called `2019` is no answer
+  to a request for day folders.
+* Offer three decisions -- what to do with a topic folder, with a dated folder,
+  and with a photo inside a dated folder whose own date does not match -- each
+  with a default, a global switch, and a per-folder override.
+* Let the operator decide per folder. The planner must not prompt: front ends
+  pass a callback that receives one folder and returns an action, so the core
+  stays free of any user interface. Never put the anchor folder itself up for a
+  decision.
+
+## Front ends
+
+Build the core so that a command line, a text interface and a graphical one all
+reach it through the same three calls and nothing else: build a plan, run the
+pre-flight checks, execute with a progress callback. Then:
+
+* Take every interface default from the same settings object the command line
+  uses. Reading the first entry of each dropdown instead lets the graphical
+  front end quietly disagree with the documentation, per option, invisibly.
+  Write a test that compares them.
+* Run long work on threads and *wait* for them when the window closes.
+  Destroying a running thread aborts the process -- which is exactly what a
+  user closing the window mid-run does.
+* Use the operating system's own folder chooser: it already has a "new folder"
+  button, and re-implementing one is wasted work.
+
 ## Functional requirements
 
 * Folder structures as an ordered list of levels; each level a template of
@@ -227,8 +282,8 @@ must all survive.
   then delete, with a free-space pre-check.
 * A log file recording every executed step, numbered, plus a debug mode with
   source locations and SQL.
-* A TUI, structured so a GUI can be added later: no core module may know about
-  a user interface.
+* A text interface and a graphical one, both structured so that no core module
+  knows a user interface exists.
 * Unique revisioning where every feature extension is a MAJOR bump. Revision
   and build date shown in every interface and every log header, from a single
   source of truth.
@@ -263,7 +318,7 @@ offenen Fragen.
 ```bash
 git clone https://gitlab.com/andy-freund/LR-FolderCraft.git
 cd LR-FolderCraft && python3 -m venv .venv && source .venv/bin/activate
-python -m pip install -e '.[dev]' && pytest        # 233 Tests sollten grün sein
+python -m pip install -e '.[dev]' && pytest        # 256 Tests sollten grün sein
 ```
 
 Danach in dieser Reihenfolge lesen:
@@ -272,6 +327,8 @@ Danach in dieser Reihenfolge lesen:
 2. `docs/de/offene-punkte.md` — was als Nächstes ansteht (beginnend bei O-1)
 3. `docs/de/funktionsweise.md` — die Katalog-Interna
 4. `src/lrfoldercraft/planner.py` — das Herzstück des Werkzeugs
+5. `src/lrfoldercraft/folders.py` — wie vorhandene Ordner eingeordnet werden
+6. `src/lrfoldercraft/gui/app.py` — das Qt-Frontend, falls die Oberfläche dran ist
 
 ### Prompt zum Fortsetzen mit einem KI-Assistenten
 

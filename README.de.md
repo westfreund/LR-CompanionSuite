@@ -2,7 +2,7 @@
 
 **Ordnerstrukturen in Adobe Lightroom Classic neu sortieren — ohne die Katalogverbindung zu verlieren.**
 
-[![Revision](https://img.shields.io/badge/revision-r2.0.1-blue)](CHANGELOG.md)
+[![Revision](https://img.shields.io/badge/revision-r3.0.0-blue)](CHANGELOG.md)
 [![Build-Datum](https://img.shields.io/badge/build-2026--08--22-lightgrey)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![Lizenz](https://img.shields.io/badge/Lizenz-MIT%20ODER%20GPL--3.0--or--later-green)](LICENSE)
@@ -34,7 +34,13 @@ Am Katalog ändern sich nur zwei Dinge: neue Zeilen in `AgLibraryFolder` und ein
 anderer Wert in `AgLibraryFile.folder`. Die Bildzeilen werden nie angefasst —
 genau deshalb kann an den Bearbeitungen nichts verloren gehen.
 
+![LR-FolderCraft](docs/images/gui-de.png)
+
+<details><summary>…dasselbe im Terminal</summary>
+
 ![LR-FolderCraft TUI](docs/images/tui-de.svg)
+
+</details>
 
 ## Schnellstart
 
@@ -53,10 +59,11 @@ lrfc plan  /Volumes/Fotos/2019/2019.lrcat -s day # zeigt genau, was passieren w�
 lrfc apply /Volumes/Fotos/2019/2019.lrcat -s day # führt es aus
 ```
 
-Oder die interaktive Oberfläche:
+Oder eine der Oberflächen:
 
 ```bash
-lrfc tui
+lrfc gui   # grafisch, braucht das Extra gui
+lrfc tui   # Text, im Terminal
 ```
 
 `plan` schreibt nichts. Ausgabe prüfen, dann `apply` starten.
@@ -136,8 +143,9 @@ Umbenennen gelöst (der Katalog wird entsprechend nachgeführt), alternativ
   (verifiziert gegen 18.0.0 / Lightroom Classic 14)
 - Lightroom Classic **geschlossen**, während das Werkzeug läuft
 
-Die Kommandozeile benötigt nur die Standardbibliothek. Die TUI kommt mit
-[Textual](https://textual.textualize.io/).
+Die Kommandozeile benötigt nur die Standardbibliothek. `lrfc tui` bringt
+[Textual](https://textual.textualize.io/) mit, `lrfc gui`
+[PySide6](https://doc.qt.io/qtforpython/) — beides optionale Extras.
 
 ## Dokumentation
 

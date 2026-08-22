@@ -1,6 +1,6 @@
 # Offene Punkte und Fahrplan
 
-**Revision r2.0.1 · Build-Datum 2026-08-22**
+**Revision r3.0.0 · Build-Datum 2026-08-22**
 
 Eine ehrliche Aufstellung dessen, was nicht erledigt, nicht verifiziert oder
 bewusst ausgelassen ist. Jeder Punkt ist ein Ansatzpunkt für die nächste
@@ -65,11 +65,12 @@ Netzpfad erkannt wird.
 
 ## Bekannte Grenzen
 
-### O-7 · Ein Stammordner je Lauf
-Umfasst eine Auswahl mehrere Stammordner, verweigert der Planer und bittet um
-Eingrenzung. Mehrere Stammordner gleichzeitig bräuchten Anker je Stammordner
-und ein durchdachteres Transaktionskonzept. **Behelf:** einen Lauf je
-Stammordner.
+### O-7 · Mehrere Stammordner in einem Lauf ✔
+Abgeschlossen in r3.0.0. Jeder Stammordner wird zu einem Scope mit eigenem
+Anker, und alle werden in einer Transaktion und einem Journal abgearbeitet.
+Über zwei physische Volumes geprüft: vier Dateien unter zwei verschiedenen
+Stammordnern sortiert, alle Katalogpfade auflösbar, zweiter Lauf ohne
+Arbeit.
 
 ### O-8 · Kein Fortsetzen nach Unterbrechung
 Das Journal enthält genug Information zum Fortsetzen, implementiert ist aber
@@ -109,11 +110,11 @@ es an `apply` zu übergeben. Man könnte es auf lesende Befehle beschränken.
 
 ## Ideen, keine Zusagen
 
-### O-15 · GUI
-Die Schnittstelle ist vorbereitet, siehe
-[entwicklung.md](entwicklung.md#die-gui-schnittstelle). Empfohlener erster
-Schritt: `textual serve`, um die bestehende TUI im Browser
-weiterzuverwenden, bevor man sich auf Qt festlegt.
+### O-15 · GUI ✔
+Abgeschlossen in r3.0.0: ein Qt-Frontend mit allen Einstellungen,
+Entscheidungen je Ordner, nativer Zielordnerauswahl und Fortschrittsbalken.
+`textual serve` bliebe ein günstiger Weg, die Textoberfläche aus der Ferne zu
+bedienen, falls das je gewünscht ist.
 
 ### O-16 · Weitere Gruppierungskriterien
 Kandidaten: ISO-Bereiche, Brennweitenbereiche, GPS-Ort (Stadt per Reverse

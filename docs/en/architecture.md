@@ -1,6 +1,6 @@
 # Architecture
 
-**Revision r2.0.1 · Build date 2026-08-22**
+**Revision r3.0.0 · Build date 2026-08-22**
 
 ## Guiding rule
 
@@ -10,7 +10,7 @@ a matter of writing another front end, not another implementation.
 
 ```
                     ┌──────────┐   ┌──────────┐   ┌──────────┐
-   front ends       │  cli.py  │   │  tui/    │   │  (GUI)   │
+   front ends       │  cli.py  │   │  tui/    │   │  gui/    │
                     └────┬─────┘   └────┬─────┘   └────┬─────┘
                          └──────────────┼──────────────┘
                                         ▼
@@ -61,11 +61,15 @@ LR-FolderCraft/
 │   │   ├── model.py                 RootFolder, Folder, Photo, CatalogInfo
 │   │   ├── reader.py                every read query
 │   │   └── writer.py                every write statement
-│   └── tui/
-│       ├── app.py                   the Textual application
-│       └── app.tcss                 its stylesheet
+│   ├── tui/
+│   │   ├── app.py                   the Textual application
+│   │   └── app.tcss                 its stylesheet
+│   └── gui/
+│       ├── app.py                   the Qt main window
+│       ├── workers.py               catalog / plan / apply on worker threads
+│       └── i18n.py                  interface strings, EN and DE
 │
-├── tests/                           233 tests, synthetic catalog fixture
+├── tests/                           256 tests, synthetic catalog fixture
 ├── install/                         installers for macOS, Linux, Windows
 └── docs/  en/  de/  images/         this documentation, in both languages
 ```
@@ -179,9 +183,10 @@ CatalogInfo
 Nothing else needs to change: the CLI, the TUI, the docs tables and the help
 output are all generated from `TOKEN_SPECS`.
 
-## Adding a GUI later
+## The three front ends
 
-Implement the same three calls the TUI makes:
+`cli.py`, `tui/` and `gui/` all reach the core through the same three calls and
+nothing else:
 
 ```python
 with open_catalog(path) as conn:
@@ -191,8 +196,32 @@ result = execute(plan, settings, progress=callback)
 ```
 
 `decide` is optional and is how a front end asks the operator about a folder
-without the planner knowing that a user interface exists. It receives a
-`FolderCase` and returns an action or ``None`` for "use the default".
+without the planner knowing a user interface exists. It receives a `FolderCase`
+and returns an action or `None` for "use the default". `progress` is called as
+`progress(done, total, message)` while files move.
 
-`execute` takes a `progress(done, total, message)` callback. Nothing else is
-needed — no core code has to change.
+### `gui/`
+
+PySide6, an optional extra, imported lazily by `cli.cmd_gui` so a missing
+dependency produces an explanation rather than a traceback.
+
+- `app.py` builds one window and collects a `Settings` from its widgets. The
+  option defaults are read from a fresh `Settings()` rather than from the first
+  entry of each list, so the interface cannot drift away from the documented
+  defaults -- a test asserts it.
+- `workers.py` runs catalog reading, planning and execution on `QThread`s and
+  reports back through signals. It also owns the rule that a thread must be
+  waited for, not abandoned: destroying a running `QThread` aborts the process,
+  which is what happens when a window is closed mid-run.
+- `i18n.py` holds every interface string in both languages.
+
+## Root folders and scopes
+
+A catalog may hold several root folders, possibly on different drives. Each
+becomes a `RootScope` with its own anchor, because "the folder every selected
+photo sits under" only means anything within one root. Every `PlannedMove`
+carries the index of its scope, and the executor creates folder rows and
+directories per scope -- all inside the one transaction and the one journal.
+
+With `new-tree` placement every source root shares a single scope: everything
+is consolidated into the new tree regardless of where it came from.
