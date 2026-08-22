@@ -1,6 +1,6 @@
 # Sicherheit und Wiederherstellung
 
-**Revision r1.0.5 · Build-Datum 2026-08-22**
+**Revision r1.0.6 · Build-Datum 2026-08-22**
 
 > Dieses Werkzeug bearbeitet die Lightroom-Katalogdatenbank und verschiebt Ihre
 > Fotografien. Es ist sorgfältig gebaut und getestet, aber: **Halten Sie vor
@@ -32,6 +32,7 @@ Bevor irgendetwas geschrieben wird:
 | `lightroom-closed` — keine `.lrcat.lock`-Datei | ja |
 | `catalog-writable` — Datei existiert und ist beschreibbar | ja |
 | `catalog-side-files` — unterbrochenes `-journal` | Warnung |
+| `id-counter-type` — Katalog durch LR-FolderCraft 1.0.0–1.0.4 beschaedigt | Warnung |
 | `target-writable` — der Zielort ist beschreibbar | ja |
 | `free-space` — 105 % des Volume-übergreifenden Datenvolumens | ja |
 | `backup-space` — Platz für das Katalog-Backup | ja |

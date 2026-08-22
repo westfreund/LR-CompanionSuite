@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
@@ -68,6 +69,7 @@ def preflight(plan: Plan) -> PreflightResult:
     checks.append(_check_lock(catalog))
     checks.append(_check_catalog_writable(catalog))
     checks.append(_check_side_files(catalog))
+    checks.append(_check_id_counter_type(catalog))
     checks.append(_check_target_writable(plan))
     checks.append(_check_free_space(plan))
     checks.append(_check_backup_space(plan, catalog))
@@ -170,6 +172,54 @@ def _check_side_files(catalog: Path) -> Check:
         OK,
         "No interrupted transaction; the write-ahead log is empty.",
         "Keine unterbrochene Transaktion; das Write-Ahead-Log ist leer.",
+    )
+
+
+def _check_id_counter_type(catalog: Path) -> Check:
+    """Detect an id counter whose SQLite storage class was changed to TEXT.
+
+    Lightroom stores ``Adobe_entityIDCounter`` as a REAL. Revisions 1.0.0 to
+    1.0.4 of this tool wrote it back as a string, which reads identically,
+    passes every integrity check, survives Lightroom's own catalog repair --
+    and makes Lightroom refuse to open the catalog, repairing it into a
+    byte-identical file forever. A catalog in that state is already broken
+    before this tool touches it again, so say so.
+    """
+    try:
+        connection = sqlite3.connect("file:{p}?mode=ro&immutable=1".format(p=catalog), uri=True)
+        row = connection.execute(
+            "SELECT typeof(value) FROM Adobe_variablesTable WHERE name = 'Adobe_entityIDCounter'"
+        ).fetchone()
+        connection.close()
+    except sqlite3.Error as exc:  # pragma: no cover - reported by other checks
+        return Check(
+            "id-counter-type",
+            OK,
+            "Could not read the id counter ({e}).".format(e=exc),
+            "ID-Zaehler nicht lesbar ({e}).".format(e=exc),
+        )
+
+    if row is None or row[0] in ("real", "integer"):
+        return Check(
+            "id-counter-type",
+            OK,
+            "Id counter has Lightroom's numeric storage class.",
+            "ID-Zaehler hat Lightrooms numerische Speicherklasse.",
+        )
+
+    repair = (
+        "UPDATE Adobe_variablesTable SET value = CAST(value AS REAL) "
+        "WHERE name = 'Adobe_entityIDCounter';"
+    )
+    return Check(
+        "id-counter-type",
+        WARNING,
+        "Adobe_entityIDCounter is stored as {t}, not a number. Lightroom will "
+        "refuse to open this catalog. It was damaged by LR-FolderCraft 1.0.0 "
+        "to 1.0.4. Repair it with: {sql}".format(t=row[0], sql=repair),
+        "Adobe_entityIDCounter ist als {t} gespeichert, nicht als Zahl. "
+        "Lightroom wird diesen Katalog nicht oeffnen. Beschaedigt durch "
+        "LR-FolderCraft 1.0.0 bis 1.0.4. Reparatur: {sql}".format(t=row[0], sql=repair),
     )
 
 

@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r1.0.5 · Build-Datum 2026-08-22**
+**Revision r1.0.6 · Build-Datum 2026-08-22**
 
 Dieses Dokument bewahrt die Anfrage, aus der LR-FolderCraft entstanden ist,
 einen generischen Prompt zur Neuerzeugung eines vergleichbaren Werkzeugs sowie
@@ -263,7 +263,7 @@ offenen Fragen.
 ```bash
 git clone https://gitlab.com/andy-freund/LR-FolderCraft.git
 cd LR-FolderCraft && python3 -m venv .venv && source .venv/bin/activate
-python -m pip install -e '.[dev]' && pytest        # 181 Tests sollten grün sein
+python -m pip install -e '.[dev]' && pytest        # 182 Tests sollten grün sein
 ```
 
 Danach in dieser Reihenfolge lesen:

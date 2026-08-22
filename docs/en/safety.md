@@ -1,6 +1,6 @@
 # Safety and recovery
 
-**Revision r1.0.5 · Build date 2026-08-22**
+**Revision r1.0.6 · Build date 2026-08-22**
 
 > This tool edits your Lightroom catalog database and moves your photographs.
 > It is built carefully and it is tested, but **keep an independent, verified
@@ -28,6 +28,7 @@ Before anything is written:
 | `lightroom-closed` — no `.lrcat.lock` file | yes |
 | `catalog-writable` — the file exists and is writable | yes |
 | `catalog-side-files` — an interrupted `-journal` | warning |
+| `id-counter-type` — catalog damaged by LR-FolderCraft 1.0.0–1.0.4 | warning |
 | `target-writable` — the target location can be written | yes |
 | `free-space` — 105 % of the cross-volume data volume | yes |
 | `backup-space` — room for the catalog backup | yes |

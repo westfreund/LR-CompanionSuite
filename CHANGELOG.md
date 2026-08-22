@@ -12,6 +12,26 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
 ---
 
+## [1.0.6] — 2026-08-22
+
+### Added
+
+- **Pre-flight now detects a catalog damaged by 1.0.0–1.0.4.** If
+  `Adobe_entityIDCounter` has storage class `text` instead of a number, the
+  check reports it, names the revisions responsible, and prints the one
+  statement that repairs it. Such a catalog cannot be opened by Lightroom at
+  all, so reusing it silently would only deepen the confusion.
+
+### Confirmed
+
+The r1.0.5 diagnosis is verified against the reference library: a copy of the
+rejected catalog with `Adobe_entityIDCounter` cast back to REAL — and nothing
+else changed — opens in Lightroom Classic, with all 9,452 photos selectable in
+their new day folders. One value of the wrong SQLite storage class was the
+entire fault; the folder reorganisation itself had been correct from the start.
+
+[1.0.6]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v1.0.6
+
 ## [1.0.5] — 2026-08-22
 
 **Root cause of the failure reported in 1.0.4.** Lightroom Classic could not
@@ -222,7 +242,7 @@ and rewriting the catalog in one reversible operation.
 - Debug mode and a per-run log file carrying a numbered `STEP` audit trail.
 
 **Project**
-- 181 tests, 88 % coverage, built on a synthetic catalog fixture so no
+- 182 tests, 88 % coverage, built on a synthetic catalog fixture so no
   Lightroom installation is needed.
 - GitLab CI: lint, tests on Python 3.9–3.13, a dedicated safety job, build.
 - Installers for macOS, Linux and Windows.

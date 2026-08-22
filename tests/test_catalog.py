@@ -401,3 +401,24 @@ def test_a_run_changes_no_storage_class_of_existing_rows(simple_catalog, tmp_pat
                     )
                 )
     assert not drift, "storage class drift on existing rows: " + "; ".join(drift)
+
+
+def test_preflight_detects_a_text_id_counter(simple_catalog):
+    """Catalogs damaged by 1.0.0-1.0.4 must be recognised, not silently reused."""
+    from lrfoldercraft.safety import _check_id_counter_type
+
+    path = Path(simple_catalog.catalog_path)
+    assert _check_id_counter_type(path).level == "ok"
+
+    conn = sqlite3.connect(str(path))
+    conn.execute(
+        "UPDATE Adobe_variablesTable SET value = '5000.0' WHERE name = 'Adobe_entityIDCounter'"
+    )
+    conn.commit()
+    conn.close()
+
+    check = _check_id_counter_type(path)
+    assert check.level == "warning"
+    assert "CAST(value AS REAL)" in check.message_en
+    assert "CAST(value AS REAL)" in check.message_de
+    assert "1.0.4" in check.message_en
