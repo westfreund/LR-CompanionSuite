@@ -433,6 +433,22 @@ def _verify(plan: Plan, settings: Settings, result: RunResult) -> None:
         allow_unsupported=settings.allow_unsupported_catalog,
         ignore_lock=True,
     ) as conn:
+        if conn.ignores_wal:
+            # immutable=1 reads only the main database file. If the catalog's
+            # state still depended on its write-ahead log, this pass would
+            # confirm a view Lightroom will never see. The commit checkpoints
+            # the WAL, so this should not happen -- say so loudly if it does.
+            wal = Path("{p}-wal".format(p=plan.catalog_path))
+            pending = wal.stat().st_size if wal.exists() else 0
+            if pending:
+                problems.append(
+                    "verification had to ignore a {n}-byte write-ahead log; the "
+                    "catalog was not fully checkpointed".format(n=pending)
+                )
+            else:
+                log.info(
+                    "Verification reads the main database file directly (write-ahead log is empty)."
+                )
         reader = CatalogReader(conn)
         seen = 0
         for photo in reader.photos():

@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r1.0.3 · Build-Datum 2026-08-22**
+**Revision r1.0.4 · Build-Datum 2026-08-22**
 
 ## Sicherheit und Daten
 
@@ -182,10 +182,15 @@ Abhängigkeiten; die CLI kann alles. Textual wird nur für `lrfc tui` gebraucht.
 Siehe [installation.md](installation.md#wo-was-abgelegt-wird). Überschreibbar
 mit `LRFC_CONFIG_DIR`, `LRFC_LOG_DIR`, `LRFC_BACKUP_DIR`, `LRFC_REPORT_DIR`.
 
-### Es meldet „catalog side files present“. Ist das schlimm?
+### Was sind `.lrcat-wal` und `.lrcat-shm`? Soll ich die löschen?
 
-`.lrcat-wal` und `.lrcat-shm` sind SQLite-Arbeitsdateien. Für sich harmlos; den
-Katalog einmal in Lightroom öffnen und schließen, damit sie geleert werden.
+**Nein — ein nicht leeres `.lrcat-wal` niemals löschen.** Lightroom-Kataloge
+laufen im WAL-Modus, und diese Datei enthält bestätigte Transaktionen, die noch
+nicht in die `.lrcat` zurückgeschrieben wurden. Sie zu löschen verwirft diese
+Änderungen. LR-FolderCraft überträgt das WAL beim Commit, nach einem
+erfolgreichen Lauf steht der Katalog also für sich. Ein `.lrcat-journal`
+bedeutet eine unterbrochene Transaktion; auch das nicht löschen — Katalog in
+Lightroom öffnen und schließen und SQLite die Wiederherstellung überlassen.
 
 ### Es meldet „unable to open database file“ — die Datei ist aber da.
 

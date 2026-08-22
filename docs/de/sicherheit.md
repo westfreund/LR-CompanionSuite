@@ -1,6 +1,6 @@
 # Sicherheit und Wiederherstellung
 
-**Revision r1.0.3 · Build-Datum 2026-08-22**
+**Revision r1.0.4 · Build-Datum 2026-08-22**
 
 > Dieses Werkzeug bearbeitet die Lightroom-Katalogdatenbank und verschiebt Ihre
 > Fotografien. Es ist sorgfältig gebaut und getestet, aber: **Halten Sie vor
@@ -31,7 +31,7 @@ Bevor irgendetwas geschrieben wird:
 | --- | --- |
 | `lightroom-closed` — keine `.lrcat.lock`-Datei | ja |
 | `catalog-writable` — Datei existiert und ist beschreibbar | ja |
-| `catalog-side-files` — übrig gebliebene `-wal` / `-shm` | Warnung |
+| `catalog-side-files` — unterbrochenes `-journal` | Warnung |
 | `target-writable` — der Zielort ist beschreibbar | ja |
 | `free-space` — 105 % des Volume-übergreifenden Datenvolumens | ja |
 | `backup-space` — Platz für das Katalog-Backup | ja |
@@ -92,6 +92,23 @@ Umbenennen (mit nachgeführtem Katalog) oder Überspringen gelöst, nie durch
 
 Nach dem Commit wird der Katalogpfad jeder verschobenen Datei mit der Realität
 verglichen. Probleme werden aufgeführt und mit Rückgabewert `4` gemeldet.
+
+## `.lrcat-wal` niemals löschen
+
+Lightroom-Kataloge laufen im **WAL-Modus**. `<Katalog>.lrcat-wal` und
+`<Katalog>.lrcat-shm` sind gewöhnliche Arbeitsdateien, keine Überbleibsel: Das
+WAL enthält bestätigte Transaktionen, die noch nicht in die `.lrcat`-Datei
+zurückgeschrieben wurden. Ein nicht leeres Write-Ahead-Log zu löschen
+**verwirft diese Transaktionen**.
+
+LR-FolderCraft überträgt das WAL beim Commit in den Katalog, nach einem
+erfolgreichen Lauf steht die `.lrcat` also für sich. Sollten Sie doch einmal
+ein nicht leeres `-wal` vorfinden, öffnen und schließen Sie den Katalog einmal
+in Lightroom, statt etwas zu entfernen.
+
+Eine Datei `<Katalog>.lrcat-journal` ist etwas anderes: Sie bedeutet, dass eine
+Rollback-Journal-Transaktion unterbrochen wurde. Auch sie nicht löschen —
+SQLite macht damit die unvollständige Änderung rückgängig.
 
 ## Wiederherstellung
 

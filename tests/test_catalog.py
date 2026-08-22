@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from pathlib import Path
 
 import pytest
 
@@ -224,3 +225,68 @@ def test_readonly_probe_does_not_hide_a_real_failure(simple_catalog, monkeypatch
     with pytest.raises(sqlite3_module.OperationalError):
         with db_module.open_catalog(simple_catalog.catalog_path):
             pass
+
+
+def test_commit_checkpoints_the_write_ahead_log(simple_catalog):
+    """Lightroom catalogs run in WAL mode; the .lrcat must be self-contained."""
+    import sqlite3 as sqlite3_module
+
+    from lrfoldercraft.catalog.db import open_catalog as open_cat
+
+    path = Path(simple_catalog.catalog_path)
+    raw = sqlite3_module.connect(str(path))
+    raw.execute("PRAGMA journal_mode=WAL").fetchone()
+    raw.close()
+
+    with open_cat(path, writable=True) as conn:
+        writer = CatalogWriter(conn)
+        writer.ensure_folder(simple_catalog.root_folder_id, ("2019", "01", "03"))
+        writer.commit()
+
+    wal = path.with_name(path.name + "-wal")
+    assert not wal.exists() or wal.stat().st_size == 0, (
+        "the catalog still depends on its write-ahead log after commit"
+    )
+    # the rows must be readable from the main file alone
+    plain = sqlite3_module.connect("file:{p}?mode=ro&immutable=1".format(p=path), uri=True)
+    assert (
+        plain.execute(
+            "SELECT COUNT(*) FROM AgLibraryFolder WHERE pathFromRoot = '2019/01/03/'"
+        ).fetchone()[0]
+        == 1
+    )
+    plain.close()
+
+
+def test_side_file_check_never_calls_a_wal_stale(simple_catalog):
+    """An earlier revision told users to clear -wal files. That destroys data."""
+    from lrfoldercraft.safety import _check_side_files
+
+    path = Path(simple_catalog.catalog_path)
+    wal = path.with_name(path.name + "-wal")
+    wal.write_bytes(b"x" * 4096)
+    try:
+        check = _check_side_files(path)
+        assert check.level != "error"
+        for text in (check.message_en.lower(), check.message_de.lower()):
+            assert "stale" not in text
+            assert "delete" not in text or "never delete" in text or "not delete" in text
+            assert "loeschen" not in text or "niemals loeschen" in text or "nicht loeschen" in text
+        assert "4,096" in check.message_en
+    finally:
+        wal.unlink()
+
+
+def test_side_file_check_flags_an_interrupted_journal(simple_catalog):
+    from lrfoldercraft.safety import _check_side_files
+
+    path = Path(simple_catalog.catalog_path)
+    journal = path.with_name(path.name + "-journal")
+    journal.write_bytes(b"x" * 512)
+    try:
+        check = _check_side_files(path)
+        assert check.level == "warning"
+        assert "interrupted" in check.message_en
+        assert "not delete" in check.message_en
+    finally:
+        journal.unlink()

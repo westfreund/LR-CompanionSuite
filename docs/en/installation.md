@@ -1,6 +1,6 @@
 # Installation
 
-**Revision r1.0.3 · Build date 2026-08-22**
+**Revision r1.0.4 · Build date 2026-08-22**
 
 LR-FolderCraft is a Python package. The installers create an isolated virtual
 environment so nothing is added to your system Python.

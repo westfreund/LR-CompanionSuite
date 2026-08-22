@@ -130,22 +130,46 @@ def _check_catalog_writable(catalog: Path) -> Check:
 
 
 def _check_side_files(catalog: Path) -> Check:
-    leftovers = sidecar_paths(catalog)
-    if leftovers:
-        names = ", ".join(p.name for p in leftovers)
+    """Report on ``-wal`` / ``-shm`` / ``-journal`` without inviting damage.
+
+    Lightroom catalogs run in **WAL mode**, so ``<catalog>.lrcat-wal`` and
+    ``-shm`` are entirely normal working files, not leftovers. Deleting a
+    non-empty write-ahead log throws away committed transactions -- an earlier
+    revision of this check called them "stale" and suggested clearing them,
+    which was wrong and dangerous. A ``-journal`` file is different: it means a
+    rollback-journal transaction was interrupted.
+    """
+    journal = [p for p in sidecar_paths(catalog) if p.name.endswith("-journal")]
+    if journal:
         return Check(
             "catalog-side-files",
             WARNING,
-            "Catalog side files present ({n}). Open and close the catalog in "
-            "Lightroom once so it flushes them.".format(n=names),
-            "Katalog-Seitendateien vorhanden ({n}). Katalog einmal in Lightroom "
-            "oeffnen und schliessen, damit sie geleert werden.".format(n=names),
+            "{n} exists -- a transaction was interrupted. Open and close the "
+            "catalog in Lightroom once so it can recover. Do not delete the "
+            "file.".format(n=journal[0].name),
+            "{n} ist vorhanden -- eine Transaktion wurde unterbrochen. Katalog "
+            "einmal in Lightroom oeffnen und schliessen, damit er sich erholt. "
+            "Die Datei nicht loeschen.".format(n=journal[0].name),
+        )
+
+    wal = [p for p in sidecar_paths(catalog) if p.name.endswith("-wal")]
+    pending = sum(p.stat().st_size for p in wal)
+    if pending:
+        return Check(
+            "catalog-side-files",
+            OK,
+            "Write-ahead log holds {n:,} byte(s) the catalog depends on. It is "
+            "checkpointed into the catalog after the run. Never delete "
+            "it.".format(n=pending),
+            "Das Write-Ahead-Log enthaelt {n:,} Byte, auf die der Katalog "
+            "angewiesen ist. Es wird nach dem Lauf in den Katalog "
+            "uebernommen. Niemals loeschen.".format(n=pending),
         )
     return Check(
         "catalog-side-files",
         OK,
-        "No stale catalog side files.",
-        "Keine verwaisten Katalog-Seitendateien.",
+        "No interrupted transaction; the write-ahead log is empty.",
+        "Keine unterbrochene Transaktion; das Write-Ahead-Log ist leer.",
     )
 
 

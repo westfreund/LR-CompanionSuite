@@ -13,6 +13,7 @@ which never changes -- that is why the re-organisation is non destructive.
 
 from __future__ import annotations
 
+import sqlite3
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 from ..logging_setup import get_logger
@@ -258,8 +259,31 @@ class CatalogWriter:
     # -- transaction -------------------------------------------------------
 
     def commit(self) -> None:
+        """Commit, then fold the write-ahead log back into the catalog file.
+
+        Lightroom catalogs run in WAL mode, so a plain commit leaves the new
+        data in ``<catalog>.lrcat-wal`` until something checkpoints it. A
+        checkpoint here makes the ``.lrcat`` file self-contained before any
+        other program opens it, and leaves an empty WAL behind rather than one
+        whose content the catalog still depends on.
+        """
         self.conn.connection.commit()
         log.info("Catalog transaction committed")
+        try:
+            mode, pages, moved = self.conn.connection.execute(
+                "PRAGMA wal_checkpoint(TRUNCATE)"
+            ).fetchone()
+            if mode == 0:
+                log.info("WAL checkpointed: %s page(s) written, %s reclaimed", pages, moved)
+            else:
+                log.warning(
+                    "WAL checkpoint returned busy (mode=%s); the catalog still "
+                    "depends on its -wal file. Do not delete it.",
+                    mode,
+                )
+        except sqlite3.Error as exc:
+            # A catalog in rollback-journal mode has no WAL; that is fine.
+            log.debug("No WAL checkpoint performed: %s", exc)
 
     def rollback(self) -> None:
         self.conn.connection.rollback()

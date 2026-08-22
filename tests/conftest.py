@@ -265,9 +265,19 @@ def _parse(value: Optional[str]) -> Optional[datetime]:
 
 
 @pytest.fixture(autouse=True)
-def _logging(tmp_path_factory):
-    """Every test writes its log into the pytest temp tree, not the user's."""
-    setup_logging(log_dir=tmp_path_factory.mktemp("logs"), quiet=True)
+def _isolate_user_directories(tmp_path_factory, monkeypatch):
+    """Keep every test out of the user's real configuration and log directories.
+
+    Without this a test that runs ``lrfc apply`` writes catalog backups, run
+    journals and reports into the caller's own LR-FolderCraft directory -- which
+    it did until this fixture was added.
+    """
+    root = tmp_path_factory.mktemp("lrfc-home")
+    for variable in ("LRFC_CONFIG_DIR", "LRFC_BACKUP_DIR", "LRFC_REPORT_DIR"):
+        monkeypatch.setenv(variable, str(root / variable.lower()))
+    log_dir = root / "logs"
+    monkeypatch.setenv("LRFC_LOG_DIR", str(log_dir))
+    setup_logging(log_dir=log_dir, quiet=True)
 
 
 @pytest.fixture

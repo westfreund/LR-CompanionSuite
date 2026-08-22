@@ -1,6 +1,6 @@
 # Safety and recovery
 
-**Revision r1.0.3 · Build date 2026-08-22**
+**Revision r1.0.4 · Build date 2026-08-22**
 
 > This tool edits your Lightroom catalog database and moves your photographs.
 > It is built carefully and it is tested, but **keep an independent, verified
@@ -27,7 +27,7 @@ Before anything is written:
 | --- | --- |
 | `lightroom-closed` — no `.lrcat.lock` file | yes |
 | `catalog-writable` — the file exists and is writable | yes |
-| `catalog-side-files` — leftover `-wal` / `-shm` | warning |
+| `catalog-side-files` — an interrupted `-journal` | warning |
 | `target-writable` — the target location can be written | yes |
 | `free-space` — 105 % of the cross-volume data volume | yes |
 | `backup-space` — room for the catalog backup | yes |
@@ -86,6 +86,22 @@ catalog updated to match) or by skipping — never by overwriting.
 
 After the commit, every moved file's catalog path is compared with reality.
 Problems are listed and exit code `4` is returned.
+
+## Never delete `.lrcat-wal`
+
+Lightroom catalogs run in **WAL mode**. `<catalog>.lrcat-wal` and
+`<catalog>.lrcat-shm` are ordinary working files, not leftovers: the WAL holds
+committed transactions that have not yet been folded back into the `.lrcat`
+file. Deleting a non-empty write-ahead log **throws those transactions away**.
+
+LR-FolderCraft checkpoints the WAL into the catalog when it commits, so after a
+successful run the `.lrcat` stands on its own. If you ever find a non-empty
+`-wal`, open and close the catalog once in Lightroom instead of removing
+anything.
+
+A `<catalog>.lrcat-journal` file is a different thing: it means a
+rollback-journal transaction was interrupted. Also do not delete it — SQLite
+uses it to undo the incomplete change.
 
 ## Recovery
 

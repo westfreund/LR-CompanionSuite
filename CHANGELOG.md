@@ -12,6 +12,54 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
 ---
 
+## [1.0.4] — 2026-08-22
+
+Lightroom Classic refused to open the reorganised reference catalog with an
+"unexpected error" and quarantined it. Its own repair then produced a catalog
+whose **135 tables are byte-for-byte identical in content** to what this tool
+had written — every folder row, every file-to-folder mapping, every variable.
+The reorganisation was correct; what Lightroom objected to was the state of the
+*file*, and the investigation exposed three genuine defects.
+
+### Fixed
+
+- **The catalog is left self-contained after a run.** Lightroom catalogs run in
+  WAL mode. A plain commit leaves new data in `<catalog>.lrcat-wal` until
+  something checkpoints it, so the `.lrcat` file alone did not describe the
+  finished state. `commit()` now runs `PRAGMA wal_checkpoint(TRUNCATE)` and logs
+  the outcome, including when the checkpoint reports busy.
+
+- **Verification no longer looks through a blind view.** On filesystems without
+  POSIX locking — exFAT, i.e. the drive this library lives on — reads fall back
+  to `immutable=1`, and *that mode ignores the write-ahead log entirely*. The
+  post-run verification therefore validated the main database file rather than
+  what Lightroom would see, and reported "passed" regardless. Connections now
+  record whether they ignore the WAL, and verification fails with an explicit
+  problem if it had to read past a non-empty one.
+
+- **The pre-flight check no longer gives dangerous advice.** It called
+  `.lrcat-wal` and `.lrcat-shm` "stale side files" and suggested clearing them.
+  For a WAL-mode catalog they are ordinary working files, and deleting a
+  non-empty write-ahead log throws away committed transactions. The check now
+  reports how much the catalog depends on its WAL and says never to delete it,
+  and warns separately about a `-journal`, which really does indicate an
+  interrupted transaction.
+
+- **The test suite no longer writes into the user's directories.** Tests that
+  exercised `apply` deposited catalog backups, journals and reports in the
+  caller's real LR-FolderCraft configuration directory. An autouse fixture now
+  redirects all four location variables into the pytest temp tree.
+
+### Still unexplained
+
+The precise trigger for Lightroom's error could not be determined from outside
+the application: the file passed `integrity_check` and `foreign_key_check`, its
+schema was identical to the original, and its contents matched Lightroom's own
+repair exactly. The defects above are real and were worth fixing on their own
+merits, but none of them is *proven* to be the cause.
+
+[1.0.4]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v1.0.4
+
 ## [1.0.3] — 2026-08-22
 
 ### Fixed
@@ -122,7 +170,7 @@ and rewriting the catalog in one reversible operation.
 - Debug mode and a per-run log file carrying a numbered `STEP` audit trail.
 
 **Project**
-- 175 tests, 88 % coverage, built on a synthetic catalog fixture so no
+- 178 tests, 88 % coverage, built on a synthetic catalog fixture so no
   Lightroom installation is needed.
 - GitLab CI: lint, tests on Python 3.9–3.13, a dedicated safety job, build.
 - Installers for macOS, Linux and Windows.

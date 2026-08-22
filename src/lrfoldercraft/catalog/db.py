@@ -65,10 +65,21 @@ def is_locked(catalog_path: Path) -> bool:
 class CatalogConnection:
     """Thin wrapper around :class:`sqlite3.Connection` for a catalog."""
 
-    def __init__(self, path: Path, connection: sqlite3.Connection, writable: bool):
+    def __init__(
+        self,
+        path: Path,
+        connection: sqlite3.Connection,
+        writable: bool,
+        ignores_wal: bool = False,
+    ):
         self.path = path
         self.connection = connection
         self.writable = writable
+        #: True when the connection was opened with ``immutable=1``, which makes
+        #: SQLite ignore ``<catalog>.lrcat-wal`` entirely. Such a connection sees
+        #: only the main database file, which is *not* what Lightroom will see if
+        #: the WAL still holds committed data. Verification must know this.
+        self.ignores_wal = ignores_wal
         connection.row_factory = sqlite3.Row
 
     # -- introspection -------------------------------------------------
@@ -226,22 +237,33 @@ def open_catalog(
             raise CatalogLockedError(message)
         log.warning("%s -- continuing because --ignore-lock was given", message)
 
-    leftovers = sidecar_paths(path)
-    if leftovers:
-        log.warning(
-            "Catalog has uncommitted side files: %s. Open and close the catalog "
-            "in Lightroom once so it can flush them.",
-            ", ".join(p.name for p in leftovers),
-        )
+    for side in sidecar_paths(path):
+        size = side.stat().st_size
+        if side.name.endswith("-journal"):
+            log.warning(
+                "%s exists: a rollback-journal transaction was interrupted. "
+                "SQLite will roll it back on the next write. Do not delete it.",
+                side.name,
+            )
+        elif side.name.endswith("-wal") and size > 0:
+            log.info(
+                "%s holds %d byte(s): the catalog's current state depends on it. "
+                "Never delete a non-empty write-ahead log.",
+                side.name,
+                size,
+            )
+        else:
+            log.debug("%s present (%d bytes) -- normal for a WAL catalog", side.name, size)
 
+    ignores_wal = False
     if writable:
         log.info("Opening catalog READ-WRITE: %s", path)
         raw = sqlite3.connect("file:{p}".format(p=_uri_escape(path)), uri=True, timeout=30.0)
     else:
         log.info("Opening catalog read-only: %s", path)
-        raw = _connect_readonly(path)
+        raw, ignores_wal = _connect_readonly(path)
 
-    conn = CatalogConnection(path, raw, writable)
+    conn = CatalogConnection(path, raw, writable, ignores_wal=ignores_wal)
     try:
         if writable:
             raw.execute("PRAGMA foreign_keys = OFF")
@@ -252,7 +274,7 @@ def open_catalog(
         log.debug("Catalog connection closed: %s", path)
 
 
-def _connect_readonly(path: Path) -> sqlite3.Connection:
+def _connect_readonly(path: Path) -> tuple[sqlite3.Connection, bool]:
     """Open *path* read-only, working around filesystems without POSIX locks.
 
     Plain ``mode=ro`` needs a shared lock on the database file. Some volumes --
@@ -272,7 +294,7 @@ def _connect_readonly(path: Path) -> sqlite3.Connection:
     try:
         connection = sqlite3.connect("file:{p}?mode=ro".format(p=escaped), uri=True, timeout=30.0)
         connection.execute("SELECT count(*) FROM sqlite_master").fetchone()
-        return connection
+        return connection, False
     except sqlite3.Error as exc:
         if connection is not None:
             try:
@@ -287,10 +309,12 @@ def _connect_readonly(path: Path) -> sqlite3.Connection:
     connection.execute("SELECT count(*) FROM sqlite_master").fetchone()
     log.info(
         "Filesystem does not support read-only SQLite locking; opened %s "
-        "with immutable=1 (safe: Lightroom is not holding the catalog).",
+        "with immutable=1. NOTE: this view ignores %s-wal, so it is not "
+        "necessarily what Lightroom will see.",
+        path.name,
         path.name,
     )
-    return connection
+    return connection, True
 
 
 def _uri_escape(path: Path) -> str:
