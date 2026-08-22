@@ -1,6 +1,6 @@
 # Offene Punkte und Fahrplan
 
-**Revision r2.0.0 · Build-Datum 2026-08-22**
+**Revision r2.0.1 · Build-Datum 2026-08-22**
 
 Eine ehrliche Aufstellung dessen, was nicht erledigt, nicht verifiziert oder
 bewusst ausgelassen ist. Jeder Punkt ist ein Ansatzpunkt für die nächste
@@ -8,38 +8,38 @@ Sitzung.
 
 ## Noch nicht verifiziert
 
-### O-1 · Die echte Bibliothek ist migriert, Lightroom-Abnahme offen
-Erledigt am 22.08.2026. Der Katalog mit 9.452 Dateien / 337 GiB auf
-`/Volumes/1TB-2` wurde in 152 Tagesordner umsortiert. Anschließend unabhängig
-verifiziert: alle 9.489 Dateien vorhanden mit unveränderter Größe,
-`integrity_check` ok, `foreign_key_check` sauber, keine verwaisten Ordner,
-keine falschen Pfadpräfixe, alle 9.452 Katalogpfade auf der Platte auflösbar,
-alle 32 virtuellen Kopien weiterhin an ihrem Master, und ein Hash über
+### O-1 · Die Referenzbibliothek ist migriert und von Lightroom angenommen ✔
+Abgeschlossen am 22.08.2026. Der Katalog mit 9.452 Dateien / 337 GiB auf
+`/Volumes/1TB-2` wurde in 152 Tagesordner umsortiert, und **Lightroom Classic
+öffnet das Ergebnis, alle Bilder sind in ihrem neuen Ordner auswählbar**.
+
+Unabhängig vom Werkzeug geprüft: alle 9.489 Dateien vorhanden mit unveränderter
+Größe, `integrity_check` ok, `foreign_key_check` sauber, keine verwaisten
+Ordner, keine falschen Pfadpräfixe, alle 9.452 Katalogpfade auflösbar, alle 32
+virtuellen Kopien an ihrem Master, keine Speicherklassen-Drift über 272.962
+Zeilen, Write-Ahead-Log auf null eingecheckpointet, und ein Hash über
 `Adobe_images`, `Adobe_imageDevelopSettings`, `AgLibraryKeywordImage` und
 `AgLibraryCollectionImage` identisch zur Kopie von vor dem Lauf. Ein erneuter
 Plan meldet 0 zu verschieben und 9.452 bereits am Ziel.
 
-Der erste Versuch brach bei Datei 850 am AppleDouble-Defekt ab (siehe r1.0.3)
-und rollte vollständig zurück — 850 Dateien zurückgelegt, 152 Ordner entfernt,
-Katalog bitgleich. Das war ein ungeplanter, aber aussagekräftiger Test des
-Rollback-Pfads an einer echten Bibliothek.
+Es brauchte drei Anläufe, und jeder Fehlschlag war mehr wert als der Erfolg:
 
-**Lightroom Classic verweigerte danach das Öffnen** und reparierte den Katalog
-wiederholt in eine byte-identische Datei. Ursache war der in r1.0.5 behobene
-Speicherklassen-Defekt: Der ID-Zähler war als TEXT statt als REAL geschrieben
-worden. Alle Prüfungen des Werkzeugs waren bestanden, weil keine davon
-`typeof()` betrachtete. Die Bestätigung, dass ein mit r1.0.5 korrigierter
-Katalog in Lightroom öffnet, steht noch aus.
+1. Abbruch bei Datei 850 am AppleDouble-Defekt (r1.0.3). Der Rollback legte alle
+   850 Dateien zurück, entfernte 152 Ordner und ließ den Katalog bitgleich — ein
+   ungeplanter, aber aussagekräftiger Test des Rollback-Pfads an einer echten
+   Bibliothek.
+2. Durchgelaufen, aber Lightroom verweigerte das Öffnen und reparierte den
+   Katalog wieder und wieder in eine byte-identische Datei. Ursache war der
+   Speicherklassen-Defekt (r1.0.5): der ID-Zähler als TEXT statt REAL
+   geschrieben. Alle Prüfungen des Werkzeugs waren grün, weil keine davon
+   `typeof()` betrachtete.
+3. Durchgelaufen und angenommen.
 
-### O-2 · Noch kein Ergebnis in Lightroom selbst geöffnet
-Die Prüfung erfolgte auf Datenbank- und Dateisystemebene: Integritätsprüfung,
-Fremdschlüsselprüfung, Gültigkeit des Ordnerbaums, Pfadauflösung und ein
-unveränderter Hash über die Bild-, Entwicklungs-, Stichwort- und
-Sammlungstabellen. Die visuelle Bestätigung in Lightroom Classic — Katalog
-öffnen, Ordner-Bedienfeld prüfen, einige Entwicklungsverläufe und virtuelle
-Kopien stichprobenartig ansehen — ist der verbleibende Schritt.
-**Nächster Schritt:** `/Volumes/1TB-2/Lightroom/2019/2019.lrcat` in Lightroom
-Classic öffnen.
+### O-2 · Ein migrierter Katalog wurde in Lightroom geöffnet ✔
+Abgeschlossen am 22.08.2026 zusammen mit O-1. Zweimal bestätigt: zuerst an einer
+korrigierten Kopie des abgelehnten Katalogs — ein Wert zurück auf REAL, sonst
+nichts —, was die Diagnose bewies, und danach an der frisch migrierten
+Bibliothek.
 
 ### O-3 · Das Windows-Skript lief noch nie unter Windows
 `install/install-windows.ps1` wurde sorgfältig geschrieben und strukturell

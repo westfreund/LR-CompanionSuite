@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r2.0.0 · Build-Datum 2026-08-22**
+**Revision r2.0.1 · Build-Datum 2026-08-22**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -168,7 +168,9 @@ Lauf ändert dann nichts.
 Mit `--anchor-folder ID` lässt sich der Anker vorgeben (siehe `lrfc folders`).
 
 **`new-tree`** baut einen frischen Baum an anderer Stelle und registriert ihn
-als zusätzlichen Stammordner im Katalog:
+als zusätzlichen Stammordner im Katalog. Das Ziel muss noch nicht existieren --
+es wird samt aller fehlenden Ebenen darüber angelegt und von einem Rollback oder
+`lrfc undo` wieder entfernt:
 
 ```bash
 lrfc plan KATALOG -s year/month/day --target-root /Volumes/Fotos/sortiert

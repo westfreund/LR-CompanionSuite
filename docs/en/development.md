@@ -1,6 +1,6 @@
 # Development and continuation
 
-**Revision r2.0.0 · Build date 2026-08-22**
+**Revision r2.0.1 · Build date 2026-08-22**
 
 This document exists so that work can be picked up later — by you, by someone
 else, or by an AI assistant — without reconstructing context from the code.
@@ -19,16 +19,17 @@ Lightroom Classic catalog (schema 18.0.0, 9,452 files, 337 GiB, exFAT).
 | CLI | complete: 9 commands |
 | TUI | complete: load, plan, apply, live preview, EN/DE |
 | GUI | **not started** — the seam is prepared, see below |
-| Tests | 229 tests, 88 % coverage |
+| Tests | 233 tests, 88 % coverage |
 | CI | GitLab, Python 3.9–3.13 |
 | Docs | complete, EN and DE |
 | Installers | macOS, Linux, Windows |
 
 ### What has *not* been done
 
-- **The real 9,452-file library has been migrated and verified** (2026-08-22).
-  See O-1 in [open-issues.md](open-issues.md) for the evidence. What remains is
-  opening the result in Lightroom Classic itself.
+- The r2.0.0 handling of grown folder structures -- topic folders, dated
+  folders, per-folder decisions -- is covered by tests against synthetic
+  catalogs but **has not yet met a real library with such a structure**. That is
+  the next thing to try.
 - **The Windows PowerShell installer has not been executed on Windows.** It was
   written carefully and structurally checked, but no Windows machine was
   available. Treat the first Windows install as a test.

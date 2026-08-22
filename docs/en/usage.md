@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r2.0.0 · Build date 2026-08-22**
+**Revision r2.0.1 · Build date 2026-08-22**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -175,7 +175,9 @@ rendered level and steps back, so a second run changes nothing.
 Override it with `--anchor-folder ID` (see `lrfc folders`).
 
 **`new-tree`** builds a fresh tree somewhere else and registers it as an
-additional root folder in the catalog:
+additional root folder in the catalog. The target does not have to exist -- it
+and every missing level above it are created, and removed again by a rollback
+or `lrfc undo`:
 
 ```bash
 lrfc plan CATALOG -s year/month/day --target-root /Volumes/Photos/sorted

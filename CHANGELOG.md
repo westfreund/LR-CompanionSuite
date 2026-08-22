@@ -12,6 +12,20 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
 ---
 
+## [2.0.1] — 2026-08-22
+
+### Fixed
+
+- **A target root that does not exist yet is now created.** Naming a new
+  location is the whole point of `--placement new-tree`, but the run aborted
+  with `FileNotFoundError` because only the folders *below* the root were
+  created. Every missing level is now made, and journalled individually, so a
+  rollback or `lrfc undo` takes the whole tree back down again.
+
+- The `target-writable` pre-flight check said "target location is writable" for
+  a path that did not exist, because it walked up to the nearest existing
+  parent. It now says plainly that the target will be created, and where.
+
 ## [2.0.0] — 2026-08-22 — "Wegweiser"
 
 A grown library is not one flat folder. It has topic folders and folders that
@@ -302,7 +316,7 @@ and rewriting the catalog in one reversible operation.
 - Debug mode and a per-run log file carrying a numbered `STEP` audit trail.
 
 **Project**
-- 229 tests, 88 % coverage, built on a synthetic catalog fixture so no
+- 233 tests, 88 % coverage, built on a synthetic catalog fixture so no
   Lightroom installation is needed.
 - GitLab CI: lint, tests on Python 3.9–3.13, a dedicated safety job, build.
 - Installers for macOS, Linux and Windows.

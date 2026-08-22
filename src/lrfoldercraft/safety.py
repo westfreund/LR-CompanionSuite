@@ -242,11 +242,20 @@ def _check_target_writable(plan: Plan) -> Check:
             "No write permission for {p}.".format(p=probe),
             "Keine Schreibrechte fuer {p}.".format(p=probe),
         )
+    if probe != root:
+        return Check(
+            "target-writable",
+            OK,
+            "Target {r} does not exist yet and will be created below {p}.".format(r=root, p=probe),
+            "Ziel {r} existiert noch nicht und wird unterhalb von {p} angelegt.".format(
+                r=root, p=probe
+            ),
+        )
     return Check(
         "target-writable",
         OK,
-        "Target location is writable.",
-        "Zielort ist beschreibbar.",
+        "Target location exists and is writable.",
+        "Zielort existiert und ist beschreibbar.",
     )
 
 

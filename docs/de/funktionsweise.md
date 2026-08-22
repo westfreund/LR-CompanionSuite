@@ -1,6 +1,6 @@
 # Funktionsweise
 
-**Revision r2.0.0 · Build-Datum 2026-08-22**
+**Revision r2.0.1 · Build-Datum 2026-08-22**
 
 ## Warum der Katalog direkt bearbeitet werden muss
 

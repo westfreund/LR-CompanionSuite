@@ -1,6 +1,6 @@
 # Entwicklung und Fortsetzung
 
-**Revision r2.0.0 · Build-Datum 2026-08-22**
+**Revision r2.0.1 · Build-Datum 2026-08-22**
 
 Dieses Dokument existiert, damit die Arbeit später fortgesetzt werden kann —
 von Ihnen, von jemand anderem oder von einem KI-Assistenten — ohne den Kontext
@@ -21,17 +21,17 @@ exFAT).
 | CLI | vollständig: 9 Befehle |
 | TUI | vollständig: Laden, Planen, Ausführen, Live-Vorschau, EN/DE |
 | GUI | **nicht begonnen** — die Schnittstelle ist vorbereitet, siehe unten |
-| Tests | 229 Tests, 88 % Abdeckung |
+| Tests | 233 Tests, 88 % Abdeckung |
 | CI | GitLab, Python 3.9–3.13 |
 | Dokumentation | vollständig, EN und DE |
 | Installationsskripte | macOS, Linux, Windows |
 
 ### Was *nicht* erledigt ist
 
-- **Die echte Bibliothek mit 9.452 Dateien ist migriert und verifiziert**
-  (22.08.2026). Die Belege stehen unter O-1 in
-  [offene-punkte.md](offene-punkte.md). Offen bleibt, das Ergebnis in Lightroom
-  Classic selbst zu öffnen.
+- Der Umgang mit gewachsenen Ordnerstrukturen aus r2.0.0 -- thematische Ordner,
+  datierte Ordner, Entscheidungen je Ordner -- ist durch Tests gegen synthetische
+  Kataloge abgedeckt, **aber noch nie einer echten Bibliothek mit solcher
+  Struktur begegnet**. Das ist der nächste Schritt.
 - **Das Windows-PowerShell-Skript wurde nie unter Windows ausgeführt.** Es ist
   sorgfältig geschrieben und strukturell geprüft, es stand aber kein
   Windows-Rechner zur Verfügung. Die erste Installation dort ist als Test zu

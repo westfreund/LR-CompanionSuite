@@ -1,40 +1,41 @@
 # Open issues and roadmap
 
-**Revision r2.0.0 · Build date 2026-08-22**
+**Revision r2.0.1 · Build date 2026-08-22**
 
 An honest list of what is not done, not verified, or deliberately left out.
 Each item is a starting point for the next session.
 
 ## Not yet verified
 
-### O-1 · The real library has been migrated, Lightroom acceptance pending
-Done on 2026-08-22. The 9,452-file / 337 GiB catalog on `/Volumes/1TB-2` was
-reorganised into 152 day folders. Independently verified afterwards: every one
-of the 9,489 files present with an unchanged size, `integrity_check` ok,
-`foreign_key_check` clean, no orphan folders, no bad path prefixes, all 9,452
-catalog paths resolving on disk, all 32 virtual copies still attached to their
-masters, and a hash over `Adobe_images`, `Adobe_imageDevelopSettings`,
-`AgLibraryKeywordImage` and `AgLibraryCollectionImage` identical to the pre-run
-copy. Re-planning reports 0 to move and 9,452 already in place.
+### O-1 · The reference library is migrated and accepted by Lightroom ✔
+Closed on 2026-08-22. The 9,452-file / 337 GiB catalog on `/Volumes/1TB-2` was
+reorganised into 152 day folders, and **Lightroom Classic opens the result with
+every photo selectable in its new folder**.
 
-The first attempt aborted at file 850 on the AppleDouble defect (see r1.0.3)
-and rolled back completely — 850 files restored, 152 directories removed, the
-catalog byte-identical. That was an unplanned but conclusive test of the
-rollback path on a real library.
+Verified independently of the tool: all 9,489 files present at an unchanged
+size, `integrity_check` ok, `foreign_key_check` clean, no orphan folders, no bad
+path prefixes, all 9,452 catalog paths resolving, all 32 virtual copies still
+attached to their masters, no SQLite storage-class drift across 272,962 rows,
+the write-ahead log checkpointed to zero, and a hash over `Adobe_images`,
+`Adobe_imageDevelopSettings`, `AgLibraryKeywordImage` and
+`AgLibraryCollectionImage` identical to the pre-run copy. Re-planning reports
+0 to move and 9,452 already in place.
 
-**Lightroom Classic then refused to open the result** and repaired it into a
-byte-identical file, repeatedly. The cause was the storage-class defect fixed in
-r1.0.5: the id counter had been written as TEXT instead of REAL. Every check the
-tool performed passed, because none of them looked at `typeof()`. Confirming
-that a catalog corrected by r1.0.5 opens in Lightroom is the remaining step.
+It took three attempts, and each failure was worth more than the success:
 
-### O-2 · No result has been opened in Lightroom itself
-Verification is at the database and filesystem level: integrity check, foreign
-key check, folder tree validity, path resolution and an unchanged hash over the
-image, develop, keyword and collection tables. The visual confirmation in
-Lightroom Classic — open the catalog, check the Folders panel, spot-check a few
-develop histories and virtual copies — is the one remaining step. **Next:** open
-`/Volumes/1TB-2/Lightroom/2019/2019.lrcat` in Lightroom Classic.
+1. Aborted at file 850 on the AppleDouble defect (r1.0.3). The rollback restored
+   all 850 files, removed 152 directories and left the catalog byte-identical —
+   an unplanned but conclusive test of the rollback path on a real library.
+2. Completed, but Lightroom refused to open the result and repaired it into a
+   byte-identical file, over and over. The cause was the storage-class defect
+   (r1.0.5): the id counter written as TEXT instead of REAL. Every check the
+   tool ran passed, because none of them looked at `typeof()`.
+3. Completed and accepted.
+
+### O-2 · A migrated catalog has been opened in Lightroom ✔
+Closed on 2026-08-22 together with O-1. Confirmed twice: first on a corrected
+copy of the rejected catalog — one value cast back to REAL and nothing else —
+which proved the diagnosis, and then on the freshly migrated library.
 
 ### O-3 · The Windows installer has not run on Windows
 `install/install-windows.ps1` was written carefully and structurally checked,

@@ -222,18 +222,13 @@ def _run(
 
             # --- 2. filesystem side, journalled ---------------------------
             root = Path(plan.target_root_path)
+            # With placement new-tree the target root may not exist yet -- that
+            # is the point of naming a new location. Create it, and every level
+            # below it, one at a time: `mkdir(parents=True)` would make several
+            # in one call and an undo can only remove what was journalled.
+            _ensure_directory(root, journal, created_dirs)
             for segments in plan.new_folder_segments:
-                # Journal every level that is actually created, not just the
-                # leaf: `mkdir(parents=True)` may create several, and an undo
-                # can only remove what it knows about.
-                for depth in range(1, len(segments) + 1):
-                    directory = root.joinpath(*segments[:depth])
-                    if directory.exists():
-                        continue
-                    journal.write("mkdir", path=str(directory))
-                    directory.mkdir()
-                    created_dirs.append(directory)
-                    log.debug("Created directory %s", directory)
+                _ensure_directory(root.joinpath(*segments), journal, created_dirs)
 
             for index, move in enumerate(active, start=1):
                 journal.write(
@@ -355,6 +350,27 @@ def _remove_created_directories(directories: Sequence[Path]) -> int:
         except OSError as exc:
             log.debug("Kept directory %s: %s", directory, exc)
     return removed
+
+
+def _ensure_directory(path: Path, journal: Journal, created: List[Path]) -> None:
+    """Create *path* and any missing parent, journalling each level made.
+
+    Recording every level individually is what lets a rollback or an undo take
+    the tree back down again; a single ``mkdir(parents=True)`` would leave the
+    intermediate levels unaccounted for.
+    """
+    missing: List[Path] = []
+    probe = path
+    while not probe.exists():
+        missing.append(probe)
+        if probe.parent == probe:
+            break
+        probe = probe.parent
+    for directory in reversed(missing):
+        journal.write("mkdir", path=str(directory))
+        directory.mkdir()
+        created.append(directory)
+        log.debug("Created directory %s", directory)
 
 
 def _move_file(source: str, target: str, cross_volume: bool) -> None:
