@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+.venv/
+venv/
+env/
+.python-version
+
+# Tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editors / OS
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+.DS_Store
+._*
+
+# LR-FolderCraft runtime artefacts
+*.log
+logs/
+reports/
+backups/
+*.lrcat
+*.lrcat-wal
+*.lrcat-shm
+*.lrcat.lock
+*.lrfc-journal.json
