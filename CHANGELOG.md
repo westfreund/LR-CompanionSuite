@@ -164,6 +164,12 @@ because the same traps await anyone working on this kind of tool:
   the files and the directory tree exactly.
 - The macOS installer, executed for real: install, run from a clean environment
   with no `PYTHONPATH`, read a live catalog, uninstall.
+- **A full production migration** (2026-08-22): the reference library's 9,452
+  files / 337 GiB reorganised into 152 day folders, then independently checked —
+  every file present at an unchanged size, `integrity_check` ok,
+  `foreign_key_check` clean, no orphan folders, all catalog paths resolving, all
+  32 virtual copies still attached, and the develop/keyword/collection hash
+  identical to a pre-run copy. Re-planning afterwards reports nothing to do.
 
 ### Known limits
 

@@ -8,19 +8,31 @@ Sitzung.
 
 ## Noch nicht verifiziert
 
-### O-1 · Die echte Bibliothek wurde geplant, nie ausgeführt
-Der Katalog mit 9.452 Dateien auf `/Volumes/1TB-2` hat einen sauberen Plan —
-152 Tagesordner, 0 Konflikte, 0 Übersprungene, 32 mitgeführte virtuelle Kopien
-—, der scharfe Lauf steht aber nach Absprache noch aus. **Nächster Schritt:**
-`lrfc apply` ausführen, dann den Katalog in Lightroom Classic öffnen und das
-Ordner-Bedienfeld prüfen.
+### O-1 · Die echte Bibliothek ist migriert ✔
+Erledigt am 22.08.2026. Der Katalog mit 9.452 Dateien / 337 GiB auf
+`/Volumes/1TB-2` wurde in 152 Tagesordner umsortiert. Anschließend unabhängig
+verifiziert: alle 9.489 Dateien vorhanden mit unveränderter Größe,
+`integrity_check` ok, `foreign_key_check` sauber, keine verwaisten Ordner,
+keine falschen Pfadpräfixe, alle 9.452 Katalogpfade auf der Platte auflösbar,
+alle 32 virtuellen Kopien weiterhin an ihrem Master, und ein Hash über
+`Adobe_images`, `Adobe_imageDevelopSettings`, `AgLibraryKeywordImage` und
+`AgLibraryCollectionImage` identisch zur Kopie von vor dem Lauf. Ein erneuter
+Plan meldet 0 zu verschieben und 9.452 bereits am Ziel.
+
+Der erste Versuch brach bei Datei 850 am AppleDouble-Defekt ab (siehe r1.0.3)
+und rollte vollständig zurück — 850 Dateien zurückgelegt, 152 Ordner entfernt,
+Katalog bitgleich. Das war ein ungeplanter, aber aussagekräftiger Test des
+Rollback-Pfads an einer echten Bibliothek.
 
 ### O-2 · Noch kein Ergebnis in Lightroom selbst geöffnet
-Die bisherige Prüfung erfolgte auf Datenbank- und Dateisystemebene:
-Integritätsprüfung, Fremdschlüsselprüfung, Gültigkeit des Ordnerbaums,
-Pfadauflösung und ein unveränderter Hash über die Bild-, Entwicklungs-,
-Stichwort- und Sammlungstabellen. Die visuelle Bestätigung in Lightroom ist der
-verbleibende Schritt. **Nächster Schritt:** nach O-1.
+Die Prüfung erfolgte auf Datenbank- und Dateisystemebene: Integritätsprüfung,
+Fremdschlüsselprüfung, Gültigkeit des Ordnerbaums, Pfadauflösung und ein
+unveränderter Hash über die Bild-, Entwicklungs-, Stichwort- und
+Sammlungstabellen. Die visuelle Bestätigung in Lightroom Classic — Katalog
+öffnen, Ordner-Bedienfeld prüfen, einige Entwicklungsverläufe und virtuelle
+Kopien stichprobenartig ansehen — ist der verbleibende Schritt.
+**Nächster Schritt:** `/Volumes/1TB-2/Lightroom/2019/2019.lrcat` in Lightroom
+Classic öffnen.
 
 ### O-3 · Das Windows-Skript lief noch nie unter Windows
 `install/install-windows.ps1` wurde sorgfältig geschrieben und strukturell

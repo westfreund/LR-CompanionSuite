@@ -26,10 +26,9 @@ Lightroom Classic catalog (schema 18.0.0, 9,452 files, 337 GiB, exFAT).
 
 ### What has *not* been done
 
-- **The real 9,452-file library has only been planned, never applied.** The
-  full run on `/Volumes/1TB-2/Lightroom/2019/2019.lrcat` is deliberately still
-  pending; the plan is clean (9,452 moves into 152 day folders, 0 conflicts,
-  0 skips, 32 virtual copies carried).
+- **The real 9,452-file library has been migrated and verified** (2026-08-22).
+  See O-1 in [open-issues.md](open-issues.md) for the evidence. What remains is
+  opening the result in Lightroom Classic itself.
 - **The Windows PowerShell installer has not been executed on Windows.** It was
   written carefully and structurally checked, but no Windows machine was
   available. Treat the first Windows install as a test.

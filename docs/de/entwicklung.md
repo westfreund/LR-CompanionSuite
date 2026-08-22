@@ -28,10 +28,10 @@ exFAT).
 
 ### Was *nicht* erledigt ist
 
-- **Die echte Bibliothek mit 9.452 Dateien wurde nur geplant, nie ausgeführt.**
-  Der vollständige Lauf auf `/Volumes/1TB-2/Lightroom/2019/2019.lrcat` steht
-  bewusst noch aus; der Plan ist sauber (9.452 Verschiebungen in 152
-  Tagesordner, 0 Konflikte, 0 Übersprungene, 32 mitgeführte virtuelle Kopien).
+- **Die echte Bibliothek mit 9.452 Dateien ist migriert und verifiziert**
+  (22.08.2026). Die Belege stehen unter O-1 in
+  [offene-punkte.md](offene-punkte.md). Offen bleibt, das Ergebnis in Lightroom
+  Classic selbst zu öffnen.
 - **Das Windows-PowerShell-Skript wurde nie unter Windows ausgeführt.** Es ist
   sorgfältig geschrieben und strukturell geprüft, es stand aber kein
   Windows-Rechner zur Verfügung. Die erste Installation dort ist als Test zu

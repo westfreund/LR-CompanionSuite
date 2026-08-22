@@ -7,17 +7,28 @@ Each item is a starting point for the next session.
 
 ## Not yet verified
 
-### O-1 · The real library has been planned, never applied
-The 9,452-file catalog on `/Volumes/1TB-2` has a clean plan — 152 day folders,
-0 conflicts, 0 skips, 32 virtual copies carried — but the live run is still
-pending by agreement. **Next:** run `lrfc apply`, then open the catalog in
-Lightroom Classic and confirm the Folders panel.
+### O-1 · The real library has been migrated ✔
+Done on 2026-08-22. The 9,452-file / 337 GiB catalog on `/Volumes/1TB-2` was
+reorganised into 152 day folders. Independently verified afterwards: every one
+of the 9,489 files present with an unchanged size, `integrity_check` ok,
+`foreign_key_check` clean, no orphan folders, no bad path prefixes, all 9,452
+catalog paths resolving on disk, all 32 virtual copies still attached to their
+masters, and a hash over `Adobe_images`, `Adobe_imageDevelopSettings`,
+`AgLibraryKeywordImage` and `AgLibraryCollectionImage` identical to the pre-run
+copy. Re-planning reports 0 to move and 9,452 already in place.
+
+The first attempt aborted at file 850 on the AppleDouble defect (see r1.0.3)
+and rolled back completely — 850 files restored, 152 directories removed, the
+catalog byte-identical. That was an unplanned but conclusive test of the
+rollback path on a real library.
 
 ### O-2 · No result has been opened in Lightroom itself
-Verification so far is at the database and filesystem level: integrity check,
-foreign key check, folder tree validity, path resolution and an unchanged hash
-over the image, develop, keyword and collection tables. The visual confirmation
-in Lightroom is the one remaining step. **Next:** after O-1.
+Verification is at the database and filesystem level: integrity check, foreign
+key check, folder tree validity, path resolution and an unchanged hash over the
+image, develop, keyword and collection tables. The visual confirmation in
+Lightroom Classic — open the catalog, check the Folders panel, spot-check a few
+develop histories and virtual copies — is the one remaining step. **Next:** open
+`/Volumes/1TB-2/Lightroom/2019/2019.lrcat` in Lightroom Classic.
 
 ### O-3 · The Windows installer has not run on Windows
 `install/install-windows.ps1` was written carefully and structurally checked,
