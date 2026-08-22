@@ -68,7 +68,10 @@ gui:
   variables:
     QT_QPA_PLATFORM: offscreen
   script:
-    - apt-get update -qq && apt-get install -y -qq libgl1 libegl1 libdbus-1-3 libxkbcommon0 > /dev/null
+    # Qt needs these even on the offscreen platform.
+    - apt-get update -qq
+    - apt-get install -y -qq libglib2.0-0 libgl1 libegl1 libdbus-1-3 libxkbcommon0
+        libfontconfig1 libfreetype6 > /dev/null
     - pip install -e ".[dev,gui]"
     - pytest -q tests/test_gui.py
 

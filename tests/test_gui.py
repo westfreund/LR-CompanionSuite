@@ -12,7 +12,11 @@ import time
 import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-pytest.importorskip("PySide6")
+# Importing the top-level package is not enough: PySide6 is a namespace whose
+# submodules pull in the Qt shared libraries, and those are what a bare Linux
+# image lacks. Skipping on the submodule turns a missing libglib into a skip
+# instead of a collection error.
+pytest.importorskip("PySide6.QtWidgets")
 
 from PySide6.QtCore import QCoreApplication  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
