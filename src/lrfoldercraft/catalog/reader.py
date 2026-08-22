@@ -50,10 +50,7 @@ class CatalogReader:
     def __init__(self, connection: CatalogConnection):
         self.conn = connection
         self._tables = {
-            row[0]
-            for row in connection.query(
-                "SELECT name FROM sqlite_master WHERE type='table'"
-            )
+            row[0] for row in connection.query("SELECT name FROM sqlite_master WHERE type='table'")
         }
 
     # -- capability probing --------------------------------------------
@@ -81,9 +78,7 @@ class CatalogReader:
                 else ""
             ),
             lens_join=(
-                "LEFT JOIN AgInternedExifLens ln ON ln.id_local = e.lensRef"
-                if has_lens
-                else ""
+                "LEFT JOIN AgInternedExifLens ln ON ln.id_local = e.lensRef" if has_lens else ""
             ),
         )
 
@@ -144,7 +139,7 @@ class CatalogReader:
             visibility=row["visibility"],
         )
 
-    def folder_file_counts(self) -> "dict[int, int]":
+    def folder_file_counts(self) -> dict[int, int]:
         return {
             row["folder"]: row["n"]
             for row in self.conn.query(
@@ -164,14 +159,10 @@ class CatalogReader:
         clauses: List[str] = []
         params: List[object] = []
         if folder_ids:
-            clauses.append(
-                "f.folder IN ({q})".format(q=",".join("?" * len(folder_ids)))
-            )
+            clauses.append("f.folder IN ({q})".format(q=",".join("?" * len(folder_ids))))
             params.extend(folder_ids)
         if root_folder_ids:
-            clauses.append(
-                "fo.rootFolder IN ({q})".format(q=",".join("?" * len(root_folder_ids)))
-            )
+            clauses.append("fo.rootFolder IN ({q})".format(q=",".join("?" * len(root_folder_ids))))
             params.extend(root_folder_ids)
         if clauses:
             sql += " WHERE " + " AND ".join(clauses)
@@ -250,8 +241,7 @@ class CatalogReader:
             files=int(conn.scalar("SELECT COUNT(*) FROM AgLibraryFile") or 0),
             images=int(conn.scalar("SELECT COUNT(*) FROM Adobe_images") or 0),
             virtual_copies=int(
-                conn.scalar("SELECT COUNT(*) FROM Adobe_images WHERE masterImage IS NOT NULL")
-                or 0
+                conn.scalar("SELECT COUNT(*) FROM Adobe_images WHERE masterImage IS NOT NULL") or 0
             ),
             missing_capture_time=int(
                 conn.scalar(

@@ -24,16 +24,16 @@ from lrfoldercraft.rules import (
 
 
 def ctx(**kwargs) -> TokenContext:
-    defaults = dict(
-        when=datetime(2019, 1, 3, 17, 42),
-        camera="Canon EOS 70D",
-        camera_serial="053022010127",
-        lens="EF-S18-55mm f/3.5-5.6 IS STM",
-        file_format="RAW",
-        extension="CR2",
-        original_folder="raw2019",
-        language="en",
-    )
+    defaults = {
+        "when": datetime(2019, 1, 3, 17, 42),
+        "camera": "Canon EOS 70D",
+        "camera_serial": "053022010127",
+        "lens": "EF-S18-55mm f/3.5-5.6 IS STM",
+        "file_format": "RAW",
+        "extension": "CR2",
+        "original_folder": "raw2019",
+        "language": "en",
+    }
     defaults.update(kwargs)
     return TokenContext(**defaults)
 

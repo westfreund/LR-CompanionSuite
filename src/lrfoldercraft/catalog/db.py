@@ -48,7 +48,7 @@ def lock_file_for(catalog_path: Path) -> Path:
     return catalog_path.with_name(catalog_path.name + ".lock")
 
 
-def sidecar_paths(catalog_path: Path) -> "list[Path]":
+def sidecar_paths(catalog_path: Path) -> list[Path]:
     """Return catalog side files that belong to the same logical catalog."""
     candidates = [
         catalog_path.with_name(catalog_path.name + suffix)
@@ -73,23 +73,21 @@ class CatalogConnection:
 
     # -- introspection -------------------------------------------------
 
-    def query(self, sql: str, params: "tuple[object, ...]" = ()) -> "list[sqlite3.Row]":
+    def query(self, sql: str, params: tuple[object, ...] = ()) -> list[sqlite3.Row]:
         log.debug("SQL query: %s | params=%r", " ".join(sql.split()), params)
         return self.connection.execute(sql, params).fetchall()
 
-    def query_one(self, sql: str, params: "tuple[object, ...]" = ()) -> Optional[sqlite3.Row]:
+    def query_one(self, sql: str, params: tuple[object, ...] = ()) -> Optional[sqlite3.Row]:
         rows = self.query(sql, params)
         return rows[0] if rows else None
 
-    def scalar(self, sql: str, params: "tuple[object, ...]" = ()) -> object:
+    def scalar(self, sql: str, params: tuple[object, ...] = ()) -> object:
         row = self.query_one(sql, params)
         return row[0] if row is not None else None
 
     def variable(self, name: str) -> Optional[str]:
         """Read a value from ``Adobe_variablesTable``."""
-        row = self.query_one(
-            "SELECT value FROM Adobe_variablesTable WHERE name = ?", (name,)
-        )
+        row = self.query_one("SELECT value FROM Adobe_variablesTable WHERE name = ?", (name,))
         return None if row is None else row[0]
 
     def schema_version(self) -> Optional[str]:
@@ -119,12 +117,10 @@ class CatalogConnection:
     def peek_entity_id_counter(self) -> float:
         raw = self.variable(ENTITY_ID_COUNTER)
         if raw is None:
-            raise CatalogError(
-                "Adobe_entityIDCounter missing -- refusing to invent row ids"
-            )
+            raise CatalogError("Adobe_entityIDCounter missing -- refusing to invent row ids")
         return float(raw)
 
-    def allocate_ids(self, count: int) -> "list[int]":
+    def allocate_ids(self, count: int) -> list[int]:
         """Reserve *count* new ``id_local`` values and advance the counter.
 
         Lightroom hands out row ids from a single catalog-wide counter stored
@@ -155,7 +151,7 @@ class CatalogConnection:
     def close(self) -> None:
         self.connection.close()
 
-    def __enter__(self) -> "CatalogConnection":
+    def __enter__(self) -> CatalogConnection:
         return self
 
     def __exit__(self, *exc: object) -> None:
@@ -163,15 +159,11 @@ class CatalogConnection:
 
 
 def _validate(conn: CatalogConnection, allow_unsupported: bool) -> None:
-    names = {
-        row[0]
-        for row in conn.query("SELECT name FROM sqlite_master WHERE type='table'")
-    }
+    names = {row[0] for row in conn.query("SELECT name FROM sqlite_master WHERE type='table'")}
     missing = [table for table in REQUIRED_TABLES if table not in names]
     if missing:
         raise CatalogError(
-            "not a Lightroom Classic catalog -- missing tables: "
-            + ", ".join(missing)
+            "not a Lightroom Classic catalog -- missing tables: " + ", ".join(missing)
         )
 
     version = conn.schema_version()
@@ -187,8 +179,9 @@ def _validate(conn: CatalogConnection, allow_unsupported: bool) -> None:
     low, high = SUPPORTED_CATALOG_VERSION_RANGE
     if major is None or not (low <= major <= high):
         message = (
-            "catalog schema version {v!r} is outside the supported range "
-            "{low}.x-{high}.x".format(v=version, low=low, high=high)
+            "catalog schema version {v!r} is outside the supported range {low}.x-{high}.x".format(
+                v=version, low=low, high=high
+            )
         )
         if not allow_unsupported:
             raise CatalogError(message + " (use --allow-unsupported-catalog to override)")
@@ -204,7 +197,7 @@ def _validate(conn: CatalogConnection, allow_unsupported: bool) -> None:
 
 @contextmanager
 def open_catalog(
-    catalog_path: "str | Path",
+    catalog_path: str | Path,
     writable: bool = False,
     allow_unsupported: bool = False,
     ignore_lock: bool = False,
@@ -243,9 +236,7 @@ def open_catalog(
 
     if writable:
         log.info("Opening catalog READ-WRITE: %s", path)
-        raw = sqlite3.connect(
-            "file:{p}".format(p=_uri_escape(path)), uri=True, timeout=30.0
-        )
+        raw = sqlite3.connect("file:{p}".format(p=_uri_escape(path)), uri=True, timeout=30.0)
     else:
         log.info("Opening catalog read-only: %s", path)
         raw = _connect_readonly(path)
@@ -273,9 +264,7 @@ def _connect_readonly(path: Path) -> sqlite3.Connection:
     """
     escaped = _uri_escape(path)
     try:
-        return sqlite3.connect(
-            "file:{p}?mode=ro".format(p=escaped), uri=True, timeout=30.0
-        )
+        return sqlite3.connect("file:{p}?mode=ro".format(p=escaped), uri=True, timeout=30.0)
     except sqlite3.OperationalError as exc:
         log.debug("mode=ro failed (%s); retrying with immutable=1", exc)
         connection = sqlite3.connect(

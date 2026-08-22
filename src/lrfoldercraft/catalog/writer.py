@@ -93,9 +93,7 @@ class CatalogWriter:
             return root_row
         # A catalog may legitimately have no row for the bare root; create one
         # so every child has a valid parentId.
-        log.info(
-            "Root folder %d has no AgLibraryFolder row -- creating it", root_folder_id
-        )
+        log.info("Root folder %d has no AgLibraryFolder row -- creating it", root_folder_id)
         return self._insert_folder(root_folder_id, "", None)
 
     def _insert_folder(
@@ -194,13 +192,16 @@ class CatalogWriter:
             "idx_filename = ?, lc_idx_filename = ?, lc_idx_filenameExtension = ? "
             "WHERE id_local = ?",
             (
-                new_folder_id, base_name, extension, new_filename,
-                new_filename.lower(), extension.lower(), file_id,
+                new_folder_id,
+                base_name,
+                extension,
+                new_filename,
+                new_filename.lower(),
+                extension.lower(),
+                file_id,
             ),
         )
-        log.debug(
-            "Moved file id=%d -> folder %d as %s", file_id, new_folder_id, new_filename
-        )
+        log.debug("Moved file id=%d -> folder %d as %s", file_id, new_folder_id, new_filename)
 
     def rename_file(self, file_id: int, new_filename: str) -> None:
         """Update the file-name columns of ``AgLibraryFile``.

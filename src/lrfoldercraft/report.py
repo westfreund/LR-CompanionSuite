@@ -12,11 +12,11 @@ import io
 import json
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Sequence, Tuple
 
 from .catalog.model import CatalogInfo
 from .executor import RunResult
-from .planner import STATUS_LABELS, Plan, PlannedMove
+from .planner import STATUS_LABELS, Plan
 from .rules import describe_structure, token_help
 from .safety import PreflightResult
 from .version import REVISION, long_banner
@@ -84,7 +84,9 @@ def human_bytes(count: int) -> str:
     value = float(count)
     for unit in ("B", "KiB", "MiB", "GiB", "TiB"):
         if value < 1024 or unit == "TiB":
-            return "{v:.1f} {u}".format(v=value, u=unit) if unit != "B" else "{v:.0f} B".format(v=value)
+            if unit == "B":
+                return "{v:.0f} B".format(v=value)
+            return "{v:.1f} {u}".format(v=value, u=unit)
         value /= 1024
     return "{v:.1f} TiB".format(v=value)
 
@@ -206,9 +208,7 @@ def render_plan(
         for name, count in shown:
             lines.append("  {n:<52} {c:>7,}".format(n=name[:52], c=count))
         if len(folders) > len(shown):
-            lines.append(
-                "  ... {n} {m}".format(n=len(folders) - len(shown), m=t("more", language))
-            )
+            lines.append("  ... {n} {m}".format(n=len(folders) - len(shown), m=t("more", language)))
 
     samples = plan.active_moves
     if samples and not show_all:
@@ -273,17 +273,33 @@ def render_plan_csv(plan: Plan) -> str:
     writer = csv.writer(buffer, lineterminator="\n")
     writer.writerow(
         [
-            "file_id", "status", "reason", "source", "target", "target_folder",
-            "renamed_to", "virtual_copies", "capture_time", "camera", "size_bytes",
+            "file_id",
+            "status",
+            "reason",
+            "source",
+            "target",
+            "target_folder",
+            "renamed_to",
+            "virtual_copies",
+            "capture_time",
+            "camera",
+            "size_bytes",
         ]
     )
     for m in plan.moves:
         writer.writerow(
             [
-                m.file_id, m.status, m.reason, m.source_path, m.target_path,
+                m.file_id,
+                m.status,
+                m.reason,
+                m.source_path,
+                m.target_path,
                 "/".join(m.target_segments),
                 m.target_filename if m.renamed else "",
-                m.virtual_copy_count, m.capture_time or "", m.camera or "", m.size_bytes,
+                m.virtual_copy_count,
+                m.capture_time or "",
+                m.camera or "",
+                m.size_bytes,
             ]
         )
     return buffer.getvalue()

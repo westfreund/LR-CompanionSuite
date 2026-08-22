@@ -77,26 +77,20 @@ def test_undated_photo_goes_to_the_unsorted_folder(simple_catalog):
 
 
 def test_on_missing_date_skip(simple_catalog):
-    plan = plan_for(
-        simple_catalog, structure=("{yyyy}-{mm}-{dd}",), on_missing_date="skip"
-    )
+    plan = plan_for(simple_catalog, structure=("{yyyy}-{mm}-{dd}",), on_missing_date="skip")
     assert by_name(plan)["A0006.CR2"].status == SKIP_NO_DATE
     assert plan.stats.skipped_no_date == 1
 
 
 def test_on_missing_date_abort(simple_catalog):
     with pytest.raises(PlanError, match="no usable capture date"):
-        plan_for(
-            simple_catalog, structure=("{yyyy}-{mm}-{dd}",), on_missing_date="abort"
-        )
+        plan_for(simple_catalog, structure=("{yyyy}-{mm}-{dd}",), on_missing_date="abort")
 
 
 def test_file_mtime_fallback(builder):
     builder.add_photo("NODATE.CR2", capture_time=None, camera=None)
     os.utime(builder.images_dir / "NODATE.CR2", (1_500_000_000, 1_500_000_000))
-    plan = plan_for(
-        builder, structure=("{yyyy}",), date_source=("capture", "file-mtime")
-    )
+    plan = plan_for(builder, structure=("{yyyy}",), date_source=("capture", "file-mtime"))
     assert by_name(plan)["NODATE.CR2"].target_segments == ("2017",)
 
 
@@ -318,7 +312,5 @@ def test_anchor_is_kept_when_it_is_not_a_rendered_level(builder):
 def test_mtime_is_not_a_default_date_source(builder):
     """Silently filing a photo under its file date would be wrong."""
     builder.add_photo("NODATE.CR2", capture_time=None, camera=None)
-    plan = plan_for(
-        builder, structure=("{yyyy}",), on_missing_date="skip"
-    )
+    plan = plan_for(builder, structure=("{yyyy}",), on_missing_date="skip")
     assert by_name(plan)["NODATE.CR2"].status == SKIP_NO_DATE

@@ -26,7 +26,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
-from .catalog.db import CatalogError, open_catalog
+from .catalog.db import open_catalog
 from .catalog.reader import CatalogReader
 from .catalog.writer import CatalogWriter
 from .config import Settings
@@ -80,9 +80,7 @@ def backup_catalog(catalog: Path, backup_dir: Path) -> Path:
     target_digest = _digest(target)
     if source_digest != target_digest:
         target.unlink(missing_ok=True)
-        raise ExecutionError(
-            "catalog backup verification failed -- refusing to continue"
-        )
+        raise ExecutionError("catalog backup verification failed -- refusing to continue")
     log.info("Backup verified (sha256 %s...)", source_digest[:16])
     return target
 
@@ -153,7 +151,7 @@ def execute(
                     "files": plan.stats.touched,
                     "folders": plan.stats.new_folders,
                 },
-            )
+            ),
         )
         try:
             if settings.backup_catalog:
@@ -215,7 +213,8 @@ def _run(
             result.folders_created = len(writer.created_folders)
             step(
                 "Prepared %d folder row(s) (%d newly created)",
-                len(folder_ids), result.folders_created,
+                len(folder_ids),
+                result.folders_created,
             )
 
             _stage_catalog_moves(writer, active, folder_ids)
@@ -246,9 +245,7 @@ def _run(
                     result.files_renamed += 1
 
                 for source, target in move.sidecars:
-                    journal.write(
-                        "move-begin", file_id=move.file_id, source=source, target=target
-                    )
+                    journal.write("move-begin", file_id=move.file_id, source=source, target=target)
                     _move_file(source, target, move.cross_volume)
                     moved_sidecars.append((source, target))
                     result.sidecars_moved += 1
@@ -267,8 +264,9 @@ def _run(
                     step("Pruned %d empty folder row(s)", len(pruned))
 
             writer.commit()
-            journal.write("catalog-commit", folders=result.folders_created,
-                          files=result.files_moved)
+            journal.write(
+                "catalog-commit", folders=result.folders_created, files=result.files_moved
+            )
             step("Catalog committed")
 
         except Exception as exc:  # noqa: BLE001
@@ -280,9 +278,7 @@ def _run(
             journal.write("rollback-end", restored=restored, directories=removed)
             result.rolled_back = True
             result.errors.append(
-                "rolled back: {n} file(s) restored to their original location".format(
-                    n=restored
-                )
+                "rolled back: {n} file(s) restored to their original location".format(n=restored)
             )
             raise
 
@@ -361,9 +357,7 @@ def _move_file(source: str, target: str, cross_volume: bool) -> None:
     target_path = Path(target)
     target_path.parent.mkdir(parents=True, exist_ok=True)
     if target_path.exists():
-        raise ExecutionError(
-            "target already exists, refusing to overwrite: {t}".format(t=target)
-        )
+        raise ExecutionError("target already exists, refusing to overwrite: {t}".format(t=target))
     if not cross_volume:
         os.replace(str(source_path), str(target_path))
         return
@@ -448,7 +442,9 @@ def _verify(plan: Plan, settings: Settings, result: RunResult) -> None:
                     )
                 )
             elif not os.path.exists(actual):
-                problems.append("file {i}: missing on disk at {a}".format(i=photo.file_id, a=actual))
+                problems.append(
+                    "file {i}: missing on disk at {a}".format(i=photo.file_id, a=actual)
+                )
         if seen != len(expected):
             problems.append(
                 "verification saw {s} of {e} moved files".format(s=seen, e=len(expected))
@@ -460,7 +456,7 @@ def _verify(plan: Plan, settings: Settings, result: RunResult) -> None:
         step("Verification passed: %d file(s) confirmed", len(expected))
 
 
-def undo(journal_path: "str | Path", catalog_backup: Optional[str] = None) -> RunResult:
+def undo(journal_path: str | Path, catalog_backup: Optional[str] = None) -> RunResult:
     """Reverse a completed run using its journal.
 
     Files are put back first; the catalog is then restored from the backup the
@@ -503,9 +499,7 @@ def undo(journal_path: "str | Path", catalog_backup: Optional[str] = None) -> Ru
 
     # Directories the run created and that are empty again are removed, so an
     # undone run leaves no trace of the structure it built.
-    created = [
-        r.get("path") for r in records if r.get("event") == "mkdir" and r.get("path")
-    ]
+    created = [r.get("path") for r in records if r.get("event") == "mkdir" and r.get("path")]
     for directory in sorted(created, key=lambda d: len(Path(d).parts), reverse=True):
         try:
             path = Path(directory)

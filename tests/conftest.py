@@ -146,8 +146,16 @@ class CatalogBuilder:
             "lc_idx_filename,lc_idx_filenameExtension,originalFilename,sidecarExtensions) "
             "VALUES (?,?,?,?,?,?,?,?,?,?)",
             (
-                file_id, self._uuid(), base, extension, folder_id, filename,
-                filename.lower(), extension.lower(), filename, None,
+                file_id,
+                self._uuid(),
+                base,
+                extension,
+                folder_id,
+                filename,
+                filename.lower(),
+                extension.lower(),
+                filename,
+                None,
             ),
         )
         image_id = self._new_id()
@@ -163,8 +171,13 @@ class CatalogBuilder:
                 "(id_local,id_global,captureTime,fileFormat,copyName,masterImage,rootFile) "
                 "VALUES (?,?,?,?,?,?,?)",
                 (
-                    self._new_id(), self._uuid(), capture_time, file_format,
-                    "Copy {n}".format(n=index + 1), image_id, file_id,
+                    self._new_id(),
+                    self._uuid(),
+                    capture_time,
+                    file_format,
+                    "Copy {n}".format(n=index + 1),
+                    image_id,
+                    file_id,
                 ),
             )
 
@@ -178,7 +191,10 @@ class CatalogBuilder:
             "(id_local,image,cameraModelRef,cameraSNRef,dateDay,dateMonth,dateYear,lensRef) "
             "VALUES (?,?,?,?,?,?,?,?)",
             (
-                exif_id, image_id, camera_ref, serial_ref,
+                exif_id,
+                image_id,
+                camera_ref,
+                serial_ref,
                 when.day if when else None,
                 when.month if when else None,
                 when.year if when else None,
@@ -264,12 +280,18 @@ def builder(tmp_path: Path) -> Iterable[CatalogBuilder]:
 @pytest.fixture
 def simple_catalog(builder: CatalogBuilder) -> CatalogBuilder:
     """Six photos on three days from two cameras, one with a sidecar."""
-    builder.add_photo("A0001.CR2", "2019-01-03T10:00:00", camera="Canon EOS 70D",
-                      sidecars=["A0001.xmp"], virtual_copies=2)
+    builder.add_photo(
+        "A0001.CR2",
+        "2019-01-03T10:00:00",
+        camera="Canon EOS 70D",
+        sidecars=["A0001.xmp"],
+        virtual_copies=2,
+    )
     builder.add_photo("A0002.CR2", "2019-01-03T18:30:00", camera="Canon EOS 70D")
     builder.add_photo("A0003.CR2", "2019-02-14T09:15:00", camera="Canon EOS 5D Mark IV")
-    builder.add_photo("A0004.JPG", "2019-02-14T09:16:00", camera="Canon EOS 5D Mark IV",
-                      file_format="JPG")
+    builder.add_photo(
+        "A0004.JPG", "2019-02-14T09:16:00", camera="Canon EOS 5D Mark IV", file_format="JPG"
+    )
     builder.add_photo("A0005.CR2", "2019-12-29T23:59:00", camera="Canon EOS 70D")
     builder.add_photo("A0006.CR2", None, camera=None)
     return builder

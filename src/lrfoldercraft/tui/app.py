@@ -12,8 +12,7 @@ from __future__ import annotations
 
 import logging
 import traceback
-from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from textual import on, work
 from textual.app import App, ComposeResult
@@ -40,9 +39,9 @@ from ..executor import ExecutionError, execute
 from ..logging_setup import LOGGER_NAME, get_logger, setup_logging
 from ..planner import Plan, PlanError, build_plan
 from ..report import human_bytes, render_info, render_result
-from ..rules import PRESETS, PRESET_DESCRIPTIONS, RuleError, describe_structure, parse_structure
+from ..rules import PRESET_DESCRIPTIONS, PRESETS, RuleError, describe_structure, parse_structure
 from ..safety import preflight
-from ..version import APP_NAME, REVISION, __build_date__, __version__
+from ..version import APP_NAME, REVISION, __build_date__
 
 log = get_logger("tui")
 
@@ -94,7 +93,7 @@ def tr(key: str, language: str) -> str:
 class TuiLogHandler(logging.Handler):
     """Forwards package log records into the on-screen log pane."""
 
-    def __init__(self, app: "LRFolderCraftApp"):
+    def __init__(self, app: LRFolderCraftApp):
         super().__init__(level=logging.INFO)
         self.app_ref = app
 
@@ -240,9 +239,7 @@ class LRFolderCraftApp(App[int]):
         self._attach_log_handler()
         self._update_preview()
         self.write_log(
-            "[bold]{n}[/bold] {r} - build {d}".format(
-                n=APP_NAME, r=REVISION, d=__build_date__
-            )
+            "[bold]{n}[/bold] {r} - build {d}".format(n=APP_NAME, r=REVISION, d=__build_date__)
         )
         if self.initial_catalog:
             self.action_load_catalog()
@@ -288,9 +285,7 @@ class LRFolderCraftApp(App[int]):
             en, de = PRESET_DESCRIPTIONS.get(preset, ("", ""))
             note = "\n[dim]{d}[/dim]".format(d=de if self.language == "de" else en)
         widget.update(
-            "[bold]{p}[/bold]{n}".format(
-                p=describe_structure(structure, self.language), n=note
-            )
+            "[bold]{p}[/bold]{n}".format(p=describe_structure(structure, self.language), n=note)
         )
 
     def _collect_settings(self) -> Settings:
@@ -411,9 +406,7 @@ class LRFolderCraftApp(App[int]):
             self.call_from_thread(self.notify, str(exc), severity="error", timeout=10)
             self.call_from_thread(self.write_log, "[red]{e}[/red]".format(e=exc))
         except Exception as exc:  # noqa: BLE001
-            self.call_from_thread(
-                self.write_log, "[red]{t}[/red]".format(t=traceback.format_exc())
-            )
+            self.call_from_thread(self.write_log, "[red]{t}[/red]".format(t=traceback.format_exc()))
             self.call_from_thread(self.notify, str(exc), severity="error", timeout=10)
         finally:
             self.call_from_thread(self._busy, False)
@@ -443,9 +436,7 @@ class LRFolderCraftApp(App[int]):
             self.call_from_thread(self.notify, str(exc), severity="error", timeout=15)
             self.call_from_thread(self.write_log, "[red]{e}[/red]".format(e=exc))
         except Exception as exc:  # noqa: BLE001
-            self.call_from_thread(
-                self.write_log, "[red]{t}[/red]".format(t=traceback.format_exc())
-            )
+            self.call_from_thread(self.write_log, "[red]{t}[/red]".format(t=traceback.format_exc()))
             self.call_from_thread(self.notify, str(exc), severity="error", timeout=15)
         finally:
             self.call_from_thread(self._busy, False)
@@ -478,9 +469,15 @@ class LRFolderCraftApp(App[int]):
         ]
         for check in checks.checks:
             if check.level == "error":
-                lines.append("[red]FAIL {n}: {m}[/red]".format(n=check.name, m=check.message(self.language)))
+                lines.append(
+                    "[red]FAIL {n}: {m}[/red]".format(n=check.name, m=check.message(self.language))
+                )
             elif check.level == "warning":
-                lines.append("[yellow]warn {n}: {m}[/yellow]".format(n=check.name, m=check.message(self.language)))
+                lines.append(
+                    "[yellow]warn {n}: {m}[/yellow]".format(
+                        n=check.name, m=check.message(self.language)
+                    )
+                )
         for warning in plan.warnings:
             lines.append("[yellow]! {w}[/yellow]".format(w=warning))
         self.query_one("#summary", Static).update("\n".join(lines))

@@ -102,9 +102,7 @@ def setup_logging(
 
     file_handler = logging.FileHandler(path, encoding="utf-8")
     file_handler.setLevel(logging.DEBUG if debug else logging.INFO)
-    file_handler.setFormatter(
-        logging.Formatter(FILE_FORMAT_DEBUG if debug else FILE_FORMAT)
-    )
+    file_handler.setFormatter(logging.Formatter(FILE_FORMAT_DEBUG if debug else FILE_FORMAT))
     logger.addHandler(file_handler)
 
     console = logging.StreamHandler(stream=sys.stderr)
@@ -130,13 +128,14 @@ def _write_header(logger: logging.Logger, path: Path, debug: bool) -> None:
     logger.info(banner(), extra=only)
     logger.info(
         "Revision %s | version %s | build date %s",
-        REVISION, __version__, __build_date__, extra=only,
+        REVISION,
+        __version__,
+        __build_date__,
+        extra=only,
     )
     logger.info("Log file      : %s", path, extra=only)
     logger.info("Debug mode    : %s", "ON" if debug else "off", extra=only)
-    logger.info(
-        "Python        : %s (%s)", platform.python_version(), sys.executable, extra=only
-    )
+    logger.info("Python        : %s (%s)", platform.python_version(), sys.executable, extra=only)
     logger.info(
         "Platform      : %s %s (%s)",
         platform.system(),

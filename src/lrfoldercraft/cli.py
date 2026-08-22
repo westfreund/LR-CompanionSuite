@@ -18,7 +18,7 @@ import argparse
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Sequence
+from typing import Optional, Sequence
 
 from .catalog.db import CatalogError, open_catalog
 from .catalog.reader import CatalogReader
@@ -48,7 +48,7 @@ from .report import (
     render_tokens,
     write_plan_files,
 )
-from .rules import PRESETS, RuleError, parse_structure
+from .rules import RuleError, parse_structure
 from .safety import preflight
 from .version import REVISION, long_banner
 
@@ -101,29 +101,21 @@ def build_parser() -> argparse.ArgumentParser:
     _add_catalog_flags(p_plan)
     p_plan.add_argument("--json", action="store_true", help="print the plan as JSON")
     p_plan.add_argument("--csv", action="store_true", help="print the plan as CSV")
-    p_plan.add_argument(
-        "--out", metavar="DIR", help="also write plan.json and plan.csv into DIR"
-    )
-    p_plan.add_argument(
-        "--all", action="store_true", help="do not truncate the folder listing"
-    )
+    p_plan.add_argument("--out", metavar="DIR", help="also write plan.json and plan.csv into DIR")
+    p_plan.add_argument("--all", action="store_true", help="do not truncate the folder listing")
 
     p_apply = sub.add_parser("apply", help="move the files and update the catalog")
     p_apply.add_argument("catalog")
     _add_plan_flags(p_apply)
     _add_global_flags(p_apply)
     _add_catalog_flags(p_apply)
-    p_apply.add_argument(
-        "-y", "--yes", action="store_true", help="do not ask for confirmation"
-    )
+    p_apply.add_argument("-y", "--yes", action="store_true", help="do not ask for confirmation")
     p_apply.add_argument(
         "--no-backup",
         action="store_true",
         help="skip the catalog backup (strongly discouraged)",
     )
-    p_apply.add_argument(
-        "--no-verify", action="store_true", help="skip the post-run verification"
-    )
+    p_apply.add_argument("--no-verify", action="store_true", help="skip the post-run verification")
     p_apply.add_argument(
         "--keep-empty-folders",
         action="store_true",
@@ -156,7 +148,9 @@ def build_parser() -> argparse.ArgumentParser:
 def _add_global_flags(parser: argparse.ArgumentParser) -> None:
     group = parser.add_argument_group("general")
     group.add_argument("--debug", action="store_true", help="verbose logging with source locations")
-    group.add_argument("--verbose", action="store_true", help="show progress messages on the console")
+    group.add_argument(
+        "--verbose", action="store_true", help="show progress messages on the console"
+    )
     group.add_argument("--quiet", action="store_true", help="console output only for errors")
     group.add_argument("--lang", choices=("en", "de"), default=None, help="output language")
     group.add_argument("--log-file", metavar="PATH", help="explicit log file path")
@@ -180,46 +174,67 @@ def _add_catalog_flags(parser: argparse.ArgumentParser) -> None:
 def _add_plan_flags(parser: argparse.ArgumentParser) -> None:
     group = parser.add_argument_group("structure")
     group.add_argument(
-        "-s", "--structure",
+        "-s",
+        "--structure",
         help="preset name (see 'lrfc presets') or a template such as "
-             "'{camera_slug}/{yyyy}-{mm}-{dd}'",
+        "'{camera_slug}/{yyyy}-{mm}-{dd}'",
     )
     group.add_argument("--profile", help="load a saved profile as the basis")
     group.add_argument("--config", help="load settings from a JSON file")
     group.add_argument("--save-profile", metavar="NAME", help="store these settings as a profile")
     group.add_argument(
-        "--placement", choices=PLACEMENT_MODES,
+        "--placement",
+        choices=PLACEMENT_MODES,
         help="in-place: create folders below the current folder (default); "
-             "new-tree: build a fresh tree at --target-root",
+        "new-tree: build a fresh tree at --target-root",
     )
     group.add_argument("--target-root", metavar="DIR", help="target tree for --placement new-tree")
-    group.add_argument("--anchor-folder", type=int, metavar="ID",
-                       help="explicit catalog folder id to build below")
+    group.add_argument(
+        "--anchor-folder", type=int, metavar="ID", help="explicit catalog folder id to build below"
+    )
 
     selection = parser.add_argument_group("selection")
     selection.add_argument("--root-folder", type=int, metavar="ID", help="limit to one root folder")
-    selection.add_argument("--folder", type=int, action="append", metavar="ID",
-                           help="limit to a catalog folder id (repeatable)")
-    selection.add_argument("--include-ext", action="append", metavar="EXT",
-                           help="only these extensions (repeatable)")
-    selection.add_argument("--exclude-ext", action="append", metavar="EXT",
-                           help="skip these extensions (repeatable)")
+    selection.add_argument(
+        "--folder",
+        type=int,
+        action="append",
+        metavar="ID",
+        help="limit to a catalog folder id (repeatable)",
+    )
+    selection.add_argument(
+        "--include-ext", action="append", metavar="EXT", help="only these extensions (repeatable)"
+    )
+    selection.add_argument(
+        "--exclude-ext", action="append", metavar="EXT", help="skip these extensions (repeatable)"
+    )
 
     behaviour = parser.add_argument_group("behaviour")
-    behaviour.add_argument("--date-source", action="append", choices=DATE_SOURCES,
-                           help="timestamp priority, repeatable (default: capture, "
-                                "exif-fields). Add file-mtime only if you accept "
-                                "the file date as a stand-in for the capture date.")
-    behaviour.add_argument("--on-missing-date", choices=MISSING_DATE_MODES,
-                           help="what to do without a capture date (default: unsorted)")
-    behaviour.add_argument("--unsorted-folder", metavar="NAME",
-                           help="folder name for undated files (default: _unsorted)")
-    behaviour.add_argument("--conflict", choices=CONFLICT_MODES,
-                           help="name collision handling (default: rename)")
-    behaviour.add_argument("--no-sidecars", action="store_true",
-                           help="do not move XMP and other sidecar files")
-    behaviour.add_argument("--ascii", action="store_true",
-                           help="fold folder names to plain ASCII")
+    behaviour.add_argument(
+        "--date-source",
+        action="append",
+        choices=DATE_SOURCES,
+        help="timestamp priority, repeatable (default: capture, "
+        "exif-fields). Add file-mtime only if you accept "
+        "the file date as a stand-in for the capture date.",
+    )
+    behaviour.add_argument(
+        "--on-missing-date",
+        choices=MISSING_DATE_MODES,
+        help="what to do without a capture date (default: unsorted)",
+    )
+    behaviour.add_argument(
+        "--unsorted-folder",
+        metavar="NAME",
+        help="folder name for undated files (default: _unsorted)",
+    )
+    behaviour.add_argument(
+        "--conflict", choices=CONFLICT_MODES, help="name collision handling (default: rename)"
+    )
+    behaviour.add_argument(
+        "--no-sidecars", action="store_true", help="do not move XMP and other sidecar files"
+    )
+    behaviour.add_argument("--ascii", action="store_true", help="fold folder names to plain ASCII")
 
 
 # ---------------------------------------------------------------------------
@@ -392,9 +407,9 @@ def cmd_apply(args: argparse.Namespace) -> int:
 def cmd_undo(args: argparse.Namespace) -> int:
     language = args.lang or "en"
     if not args.yes:
-        answer = input(
-            "Reverse the run recorded in {j}? [y/N] ".format(j=args.journal)
-        ).strip().lower()
+        answer = (
+            input("Reverse the run recorded in {j}? [y/N] ".format(j=args.journal)).strip().lower()
+        )
         if answer not in ("y", "yes", "j", "ja"):
             print("Aborted.")
             return EXIT_ABORTED

@@ -15,7 +15,12 @@ def test_reader_reads_photos_and_metadata(simple_catalog):
     with open_catalog(simple_catalog.catalog_path) as conn:
         photos = {p.filename: p for p in CatalogReader(conn).photos()}
     assert set(photos) == {
-        "A0001.CR2", "A0002.CR2", "A0003.CR2", "A0004.JPG", "A0005.CR2", "A0006.CR2"
+        "A0001.CR2",
+        "A0002.CR2",
+        "A0003.CR2",
+        "A0004.JPG",
+        "A0005.CR2",
+        "A0006.CR2",
     }
     first = photos["A0001.CR2"]
     assert first.camera_model == "Canon EOS 70D"
@@ -30,7 +35,7 @@ def test_info_counts(simple_catalog):
     with open_catalog(simple_catalog.catalog_path) as conn:
         info = CatalogReader(conn).info()
     assert info.files == 6
-    assert info.images == 8            # six masters plus two virtual copies
+    assert info.images == 8  # six masters plus two virtual copies
     assert info.virtual_copies == 2
     assert info.missing_capture_time == 1
     assert info.schema_version == "18.0.0"
@@ -84,14 +89,10 @@ def test_writer_creates_the_full_folder_chain(simple_catalog):
         writer = CatalogWriter(conn)
         folder = writer.ensure_folder(simple_catalog.root_folder_id, ("2019", "01", "03"))
         writer.commit()
-    rows = dict(
-        simple_catalog.query("SELECT pathFromRoot, id_local FROM AgLibraryFolder")
-    )
+    rows = dict(simple_catalog.query("SELECT pathFromRoot, id_local FROM AgLibraryFolder"))
     assert "2019/" in rows and "2019/01/" in rows and "2019/01/03/" in rows
     assert folder.id_local == rows["2019/01/03/"]
-    parents = dict(
-        simple_catalog.query("SELECT pathFromRoot, parentId FROM AgLibraryFolder")
-    )
+    parents = dict(simple_catalog.query("SELECT pathFromRoot, parentId FROM AgLibraryFolder"))
     assert parents["2019/01/03/"] == rows["2019/01/"]
     assert parents["2019/01/"] == rows["2019/"]
 
@@ -117,7 +118,8 @@ def test_rename_file_updates_every_name_column(simple_catalog):
     row = simple_catalog.query(
         "SELECT baseName, extension, idx_filename, lc_idx_filename, "
         "lc_idx_filenameExtension, originalFilename FROM AgLibraryFile "
-        "WHERE id_local = ?", (file_id,)
+        "WHERE id_local = ?",
+        (file_id,),
     )[0]
     assert row == ("A0001_1", "CR2", "A0001_1.CR2", "a0001_1.cr2", "cr2", "A0001.CR2")
 
@@ -128,9 +130,12 @@ def test_prune_never_removes_the_root_row(simple_catalog):
         writer = CatalogWriter(conn)
         assert writer.prune_empty_folders([root_row]) == []
         writer.commit()
-    assert simple_catalog.query(
-        "SELECT COUNT(*) FROM AgLibraryFolder WHERE id_local = ?", (root_row,)
-    )[0][0] == 1
+    assert (
+        simple_catalog.query(
+            "SELECT COUNT(*) FROM AgLibraryFolder WHERE id_local = ?", (root_row,)
+        )[0][0]
+        == 1
+    )
 
 
 def test_rollback_leaves_no_trace(simple_catalog):

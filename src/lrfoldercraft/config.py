@@ -10,9 +10,9 @@ from __future__ import annotations
 import json
 import os
 import sys
-from dataclasses import asdict, dataclass, field, fields
+from dataclasses import asdict, dataclass, fields
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from .logging_setup import get_logger
 from .rules import RuleError, parse_structure, validate_structure
@@ -135,9 +135,7 @@ class Settings:
         except RuleError as exc:
             raise ConfigError(str(exc)) from exc
         if self.placement not in PLACEMENT_MODES:
-            raise ConfigError(
-                "placement must be one of {m}".format(m=", ".join(PLACEMENT_MODES))
-            )
+            raise ConfigError("placement must be one of {m}".format(m=", ".join(PLACEMENT_MODES)))
         if self.placement == "new-tree" and not self.target_root:
             raise ConfigError("placement 'new-tree' requires --target-root")
         if self.on_missing_date not in MISSING_DATE_MODES:
@@ -145,9 +143,7 @@ class Settings:
                 "on-missing-date must be one of {m}".format(m=", ".join(MISSING_DATE_MODES))
             )
         if self.conflict not in CONFLICT_MODES:
-            raise ConfigError(
-                "conflict must be one of {m}".format(m=", ".join(CONFLICT_MODES))
-            )
+            raise ConfigError("conflict must be one of {m}".format(m=", ".join(CONFLICT_MODES)))
         for source in self.date_source:
             if source not in DATE_SOURCES:
                 raise ConfigError(
@@ -163,8 +159,7 @@ class Settings:
             overlap = set(self.include_extensions) & set(self.exclude_extensions)
             if overlap:
                 raise ConfigError(
-                    "extension(s) both included and excluded: "
-                    + ", ".join(sorted(overlap))
+                    "extension(s) both included and excluded: " + ", ".join(sorted(overlap))
                 )
         if not self.unsorted_folder.strip():
             raise ConfigError("unsorted-folder name must not be empty")
@@ -179,13 +174,11 @@ class Settings:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Settings":
+    def from_dict(cls, data: Dict[str, Any]) -> Settings:
         known = {f.name for f in fields(cls)}
         unknown = set(data) - known
         if unknown:
-            log.warning(
-                "Ignoring unknown setting(s) in profile: %s", ", ".join(sorted(unknown))
-            )
+            log.warning("Ignoring unknown setting(s) in profile: %s", ", ".join(sorted(unknown)))
         return cls(**{k: v for k, v in data.items() if k in known})
 
     def save_profile(self, name: str, directory: Optional[Path] = None) -> Path:
@@ -202,7 +195,7 @@ class Settings:
         return path
 
     @classmethod
-    def load_profile(cls, name: str, directory: Optional[Path] = None) -> "Settings":
+    def load_profile(cls, name: str, directory: Optional[Path] = None) -> Settings:
         source_dir = Path(directory) if directory else profiles_dir()
         path = source_dir / "{n}.json".format(n=_safe_profile_name(name))
         if not path.exists():
@@ -213,7 +206,7 @@ class Settings:
         return settings
 
     @classmethod
-    def load_file(cls, path: "str | Path") -> "Settings":
+    def load_file(cls, path: str | Path) -> Settings:
         source = Path(path).expanduser()
         if not source.exists():
             raise ConfigError("config file not found: {p}".format(p=source))
@@ -224,7 +217,7 @@ class Settings:
     def resolved_backup_dir(self) -> Path:
         return Path(self.backup_dir).expanduser() if self.backup_dir else default_backup_dir()
 
-    def with_structure(self, spec: str) -> "Settings":
+    def with_structure(self, spec: str) -> Settings:
         """Return a copy whose structure comes from a preset name or template."""
         clone = Settings.from_dict(self.to_dict())
         clone.structure = parse_structure(spec)

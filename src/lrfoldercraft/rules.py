@@ -18,7 +18,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 from .logging_setup import get_logger
 
@@ -31,27 +31,43 @@ log = get_logger("rules")
 
 MONTH_NAMES: Dict[str, Tuple[str, ...]] = {
     "en": (
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December",
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
     ),
     "de": (
-        "Januar", "Februar", "Maerz", "April", "Mai", "Juni",
-        "Juli", "August", "September", "Oktober", "November", "Dezember",
+        "Januar",
+        "Februar",
+        "Maerz",
+        "April",
+        "Mai",
+        "Juni",
+        "Juli",
+        "August",
+        "September",
+        "Oktober",
+        "November",
+        "Dezember",
     ),
 }
 
 MONTH_SHORT: Dict[str, Tuple[str, ...]] = {
-    "en": ("Jan", "Feb", "Mar", "Apr", "May", "Jun",
-           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"),
-    "de": ("Jan", "Feb", "Mrz", "Apr", "Mai", "Jun",
-           "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"),
+    "en": ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"),
+    "de": ("Jan", "Feb", "Mrz", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"),
 }
 
 WEEKDAY_NAMES: Dict[str, Tuple[str, ...]] = {
-    "en": ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
-           "Saturday", "Sunday"),
-    "de": ("Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag",
-           "Samstag", "Sonntag"),
+    "en": ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"),
+    "de": ("Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"),
 }
 
 WEEKDAY_SHORT: Dict[str, Tuple[str, ...]] = {
@@ -83,20 +99,60 @@ TOKEN_SPECS: Tuple[TokenSpec, ...] = (
     TokenSpec("month_name", "January", "Full month name", "Ausgeschriebener Monatsname", "date"),
     TokenSpec("month_short", "Jan", "Abbreviated month name", "Abgekuerzter Monatsname", "date"),
     TokenSpec("quarter", "Q1", "Calendar quarter", "Kalenderquartal", "date"),
-    TokenSpec("iso_week", "01", "ISO-8601 calendar week, zero padded", "ISO-8601-Kalenderwoche, zweistellig", "date"),
+    TokenSpec(
+        "iso_week",
+        "01",
+        "ISO-8601 calendar week, zero padded",
+        "ISO-8601-Kalenderwoche, zweistellig",
+        "date",
+    ),
     TokenSpec("iso_year", "2019", "ISO-8601 week-numbering year", "ISO-8601-Wochenjahr", "date"),
     TokenSpec("weekday", "Thursday", "Full weekday name", "Ausgeschriebener Wochentag", "date"),
     TokenSpec("weekday_short", "Thu", "Abbreviated weekday name", "Abgekuerzter Wochentag", "date"),
     TokenSpec("doy", "003", "Day of year, zero padded", "Tag des Jahres, dreistellig", "date"),
-    TokenSpec("camera", "Canon EOS 70D", "Camera model as stored by Lightroom", "Kameramodell laut Lightroom", "camera"),
-    TokenSpec("camera_slug", "canon-eos-70d", "Camera model, lower case and hyphenated", "Kameramodell, klein und mit Bindestrichen", "camera"),
-    TokenSpec("camera_sn", "053022010127", "Camera serial number", "Seriennummer der Kamera", "camera"),
-    TokenSpec("lens", "EF-S18-55mm f/3.5-5.6 IS STM", "Lens as stored by Lightroom", "Objektiv laut Lightroom", "camera"),
-    TokenSpec("lens_slug", "ef-s18-55mm-f-3-5-5-6-is-stm", "Lens, lower case and hyphenated", "Objektiv, klein und mit Bindestrichen", "camera"),
-    TokenSpec("format", "RAW", "Lightroom file format class", "Lightroom-Dateiformatklasse", "file"),
+    TokenSpec(
+        "camera",
+        "Canon EOS 70D",
+        "Camera model as stored by Lightroom",
+        "Kameramodell laut Lightroom",
+        "camera",
+    ),
+    TokenSpec(
+        "camera_slug",
+        "canon-eos-70d",
+        "Camera model, lower case and hyphenated",
+        "Kameramodell, klein und mit Bindestrichen",
+        "camera",
+    ),
+    TokenSpec(
+        "camera_sn", "053022010127", "Camera serial number", "Seriennummer der Kamera", "camera"
+    ),
+    TokenSpec(
+        "lens",
+        "EF-S18-55mm f/3.5-5.6 IS STM",
+        "Lens as stored by Lightroom",
+        "Objektiv laut Lightroom",
+        "camera",
+    ),
+    TokenSpec(
+        "lens_slug",
+        "ef-s18-55mm-f-3-5-5-6-is-stm",
+        "Lens, lower case and hyphenated",
+        "Objektiv, klein und mit Bindestrichen",
+        "camera",
+    ),
+    TokenSpec(
+        "format", "RAW", "Lightroom file format class", "Lightroom-Dateiformatklasse", "file"
+    ),
     TokenSpec("ext", "CR2", "File extension, upper case", "Dateiendung, gross", "file"),
     TokenSpec("ext_lower", "cr2", "File extension, lower case", "Dateiendung, klein", "file"),
-    TokenSpec("orig_folder", "raw2019", "Name of the folder the file is in today", "Name des heutigen Ordners", "file"),
+    TokenSpec(
+        "orig_folder",
+        "raw2019",
+        "Name of the folder the file is in today",
+        "Name des heutigen Ordners",
+        "file",
+    ),
 )
 
 TOKEN_NAMES = tuple(spec.name for spec in TOKEN_SPECS)
@@ -142,7 +198,10 @@ ILLEGAL_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 
 #: Windows device names that may not be used as a directory name.
 RESERVED_NAMES = {
-    "CON", "PRN", "AUX", "NUL",
+    "CON",
+    "PRN",
+    "AUX",
+    "NUL",
     *("COM{n}".format(n=i) for i in range(1, 10)),
     *("LPT{n}".format(n=i) for i in range(1, 10)),
 }
@@ -154,9 +213,7 @@ class RuleError(ValueError):
     """Raised for malformed templates."""
 
 
-def sanitise_segment(
-    text: str, replacement: str = "-", ascii_only: bool = False
-) -> str:
+def sanitise_segment(text: str, replacement: str = "-", ascii_only: bool = False) -> str:
     """Turn arbitrary text into a portable directory name.
 
     Applies, in order: optional ASCII folding, illegal-character replacement,
@@ -165,11 +222,7 @@ def sanitise_segment(
     """
     value = text
     if ascii_only:
-        value = (
-            unicodedata.normalize("NFKD", value)
-            .encode("ascii", "ignore")
-            .decode("ascii")
-        )
+        value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
     value = ILLEGAL_CHARS.sub(replacement, value)
     value = re.sub(r"\s+", " ", value).strip()
     value = value.rstrip(". ")
@@ -184,12 +237,7 @@ def sanitise_segment(
 
 def slugify(text: str) -> str:
     """Lower-case, hyphen separated, ASCII only version of *text*."""
-    value = (
-        unicodedata.normalize("NFKD", text)
-        .encode("ascii", "ignore")
-        .decode("ascii")
-        .lower()
-    )
+    value = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii").lower()
     value = re.sub(r"[^a-z0-9]+", "-", value).strip("-")
     return value or "unknown"
 
@@ -302,19 +350,15 @@ def structure_requires_date(structure: Sequence[str]) -> bool:
     """True when any level uses a date token."""
     date_tokens = {spec.name for spec in TOKEN_SPECS if spec.category == "date"}
     return any(
-        token in date_tokens
-        for template in structure
-        for token in template_tokens(template)
+        token in date_tokens for template in structure for token in template_tokens(template)
     )
 
 
-def render_level(
-    template: str, context: TokenContext, ascii_only: bool = False
-) -> str:
+def render_level(template: str, context: TokenContext, ascii_only: bool = False) -> str:
     """Render one level template into a sanitised path segment."""
     values = context.values()
 
-    def substitute(match: "re.Match[str]") -> str:
+    def substitute(match: re.Match[str]) -> str:
         return values.get(match.group(1), "")
 
     return sanitise_segment(_TOKEN_RE.sub(substitute, template), ascii_only=ascii_only)

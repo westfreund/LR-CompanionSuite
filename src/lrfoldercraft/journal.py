@@ -39,7 +39,7 @@ class Journal:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self._handle: Optional[TextIO] = None
 
-    def open(self) -> "Journal":
+    def open(self) -> Journal:
         self._handle = self.path.open("a", encoding="utf-8")
         return self
 
@@ -64,7 +64,7 @@ class Journal:
             self._handle.close()
             self._handle = None
 
-    def __enter__(self) -> "Journal":
+    def __enter__(self) -> Journal:
         return self.open()
 
     def __exit__(self, *exc: object) -> None:
@@ -75,12 +75,10 @@ def build_journal_path(directory: Path, catalog: Path) -> Path:
     """Return a timestamped journal path for *catalog* inside *directory*."""
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     Path(directory).mkdir(parents=True, exist_ok=True)
-    return Path(directory) / "{n}-{s}{x}".format(
-        n=catalog.stem, s=stamp, x=JOURNAL_SUFFIX
-    )
+    return Path(directory) / "{n}-{s}{x}".format(n=catalog.stem, s=stamp, x=JOURNAL_SUFFIX)
 
 
-def read_journal(path: "str | Path") -> List[Dict[str, Any]]:
+def read_journal(path: str | Path) -> List[Dict[str, Any]]:
     """Load every well formed record from a journal file."""
     records: List[Dict[str, Any]] = []
     with Path(path).open("r", encoding="utf-8") as handle:

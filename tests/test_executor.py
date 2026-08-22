@@ -21,7 +21,7 @@ def make_plan(builder, tmp_path, **kwargs):
         catalog=str(builder.catalog_path),
         dry_run=False,
         backup_dir=str(tmp_path / "backups"),
-        **kwargs
+        **kwargs,
     )
     with open_catalog(builder.catalog_path) as conn:
         return build_plan(CatalogReader(conn), settings), settings
@@ -153,9 +153,7 @@ def test_renamed_collision_updates_the_catalog(builder, tmp_path):
     plan, settings = make_plan(builder, tmp_path)
     result = execute(plan, settings)
     assert result.files_renamed == 1
-    names = sorted(
-        row[0] for row in builder.query("SELECT idx_filename FROM AgLibraryFile")
-    )
+    names = sorted(row[0] for row in builder.query("SELECT idx_filename FROM AgLibraryFile"))
     assert names == ["SAME.CR2", "SAME_1.CR2"]
     for path in builder.catalog_paths():
         assert os.path.exists(path)
@@ -190,7 +188,10 @@ def test_new_tree_registers_a_second_root_folder(builder, tmp_path):
     target = tmp_path / "sorted"
     target.mkdir()
     plan, settings = make_plan(
-        builder, tmp_path, placement="new-tree", target_root=str(target),
+        builder,
+        tmp_path,
+        placement="new-tree",
+        target_root=str(target),
         structure=("{yyyy}", "{mm}"),
     )
     execute(plan, settings)

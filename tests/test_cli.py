@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import json
 
-import pytest
-
 from lrfoldercraft.cli import EXIT_OK, main
 
 
@@ -45,10 +43,16 @@ def test_plan_csv(simple_catalog, capsys):
 
 
 def test_plan_writes_files(simple_catalog, tmp_path, capsys):
-    main([
-        "plan", str(simple_catalog.catalog_path), "-s", "day",
-        "--out", str(tmp_path / "reports"),
-    ])
+    main(
+        [
+            "plan",
+            str(simple_catalog.catalog_path),
+            "-s",
+            "day",
+            "--out",
+            str(tmp_path / "reports"),
+        ]
+    )
     written = list((tmp_path / "reports").glob("plan-*"))
     assert {p.suffix for p in written} == {".json", ".csv"}
 
@@ -69,10 +73,17 @@ def test_missing_catalog_is_reported(tmp_path, capsys):
 
 
 def test_apply_moves_and_verifies(simple_catalog, tmp_path, capsys):
-    code = main([
-        "apply", str(simple_catalog.catalog_path), "-s", "day", "--yes",
-        "--out", str(tmp_path / "reports"),
-    ])
+    code = main(
+        [
+            "apply",
+            str(simple_catalog.catalog_path),
+            "-s",
+            "day",
+            "--yes",
+            "--out",
+            str(tmp_path / "reports"),
+        ]
+    )
     assert code == EXIT_OK
     assert "Files moved" in capsys.readouterr().out
     assert (simple_catalog.images_dir / "2019-01-03" / "A0001.CR2").exists()
@@ -92,10 +103,16 @@ def test_no_command_prints_help(capsys):
 
 def test_save_and_list_profile(simple_catalog, tmp_path, monkeypatch, capsys):
     monkeypatch.setenv("LRFC_CONFIG_DIR", str(tmp_path / "cfg"))
-    main([
-        "plan", str(simple_catalog.catalog_path), "-s", "camera/day",
-        "--save-profile", "cameras",
-    ])
+    main(
+        [
+            "plan",
+            str(simple_catalog.catalog_path),
+            "-s",
+            "camera/day",
+            "--save-profile",
+            "cameras",
+        ]
+    )
     capsys.readouterr()
     main(["profiles"])
     assert "cameras" in capsys.readouterr().out

@@ -14,7 +14,7 @@ from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
-from .catalog.model import Folder, Photo, RootFolder, lr_path_from_root
+from .catalog.model import Photo, RootFolder, lr_path_from_root
 from .catalog.reader import CatalogReader
 from .config import Settings
 from .logging_setup import get_logger, step
@@ -173,7 +173,10 @@ def resolve_date(photo: Photo, settings: Settings) -> Optional[datetime]:
                 except ValueError:
                     log.debug(
                         "Invalid harvested EXIF date for file %d: %r-%r-%r",
-                        photo.file_id, photo.exif_year, photo.exif_month, photo.exif_day,
+                        photo.file_id,
+                        photo.exif_year,
+                        photo.exif_month,
+                        photo.exif_day,
                     )
         elif source == "file-mtime":
             try:
@@ -309,11 +312,7 @@ def resolve_anchor(
 
     if settings.anchor_folder_id is not None:
         folder = next(
-            (
-                f
-                for f in reader.folders(root_id)
-                if f.id_local == settings.anchor_folder_id
-            ),
+            (f for f in reader.folders(root_id) if f.id_local == settings.anchor_folder_id),
             None,
         )
         if folder is None:
@@ -407,7 +406,8 @@ def _normalise_anchor(
     if all(len(segs) == depth and segs == tail for segs in candidates):
         log.info(
             "Anchor %r already ends with the rendered structure; using %r instead",
-            "/".join(anchor), "/".join(anchor[:-depth]),
+            "/".join(anchor),
+            "/".join(anchor[:-depth]),
         )
         return anchor[:-depth]
     return anchor
@@ -416,7 +416,11 @@ def _normalise_anchor(
 def build_plan(reader: CatalogReader, settings: Settings) -> Plan:
     """Produce a :class:`Plan` for *settings* against the catalog behind *reader*."""
     settings.validate()
-    step("Planning run: structure=%s placement=%s", "/".join(settings.structure), settings.placement)
+    step(
+        "Planning run: structure=%s placement=%s",
+        "/".join(settings.structure),
+        settings.placement,
+    )
 
     photos = list(
         reader.photos(
@@ -441,7 +445,9 @@ def build_plan(reader: CatalogReader, settings: Settings) -> Plan:
     anchor = _normalise_anchor(anchor, settings, prepared)
     step(
         "Anchor resolved: root=%s anchor=%r placement=%s",
-        root.name, "/".join(anchor), settings.placement,
+        root.name,
+        "/".join(anchor),
+        settings.placement,
     )
 
     if settings.placement == "new-tree":
@@ -463,9 +469,7 @@ def build_plan(reader: CatalogReader, settings: Settings) -> Plan:
     source_device = _device_of(root.normalised_path)
     target_device = _device_of(target_root_path)
     cross_volume = (
-        source_device is not None
-        and target_device is not None
-        and source_device != target_device
+        source_device is not None and target_device is not None and source_device != target_device
     )
     if cross_volume:
         plan.warnings.append(
@@ -559,8 +563,7 @@ def _plan_one(
     target_path = "{d}/{f}".format(d=target_dir, f=photo.filename)
 
     same_place = (
-        settings.placement == "in-place"
-        and tuple(_split(photo.folder_path_from_root)) == segments
+        settings.placement == "in-place" and tuple(_split(photo.folder_path_from_root)) == segments
     )
     if same_place and os.path.normpath(target_path) == os.path.normpath(source_path):
         base.status = STAY
@@ -601,13 +604,14 @@ def _plan_one(
             # Keep the sidecar glued to its (possibly renamed) master file:
             # IMG.xmp -> IMG_1.xmp and IMG.CR2.xmp -> IMG_1.CR2.xmp.
             if name.lower().startswith(photo.base_name.lower()):
-                suffix = name[len(photo.base_name):]
+                suffix = name[len(photo.base_name) :]
                 name = "{n}{s}".format(n=target_stem, s=suffix)
             sidecar_target = "{d}/{n}".format(d=target_dir, n=name)
             if _key(sidecar_target) in claimed:
                 log.warning(
                     "Sidecar target %s is already claimed; leaving %s in place",
-                    sidecar_target, sidecar,
+                    sidecar_target,
+                    sidecar,
                 )
                 continue
             claimed[_key(sidecar_target)] = photo.file_id
@@ -634,21 +638,20 @@ def _resolve_conflict(
     """Return ``(filename, status, reason)`` after conflict resolution."""
     candidate = "{d}/{f}".format(d=target_dir, f=filename)
     taken_by = claimed.get(_key(candidate))
-    on_disk = os.path.exists(candidate) and os.path.normpath(candidate) != os.path.normpath(source_path)
+    on_disk = os.path.exists(candidate) and os.path.normpath(candidate) != os.path.normpath(
+        source_path
+    )
     if taken_by is None and not on_disk:
         return filename, MOVE, ""
 
-    who = (
-        "another file in this run"
-        if taken_by is not None
-        else "an existing file on disk"
-    )
+    who = "another file in this run" if taken_by is not None else "an existing file on disk"
     if settings.conflict == "skip":
         return filename, SKIP_CONFLICT, "target name taken by {w}".format(w=who)
     if settings.conflict == "abort":
         raise PlanError(
-            "name collision at {c} (taken by {w}); rerun with --conflict "
-            "rename or skip".format(c=candidate, w=who)
+            "name collision at {c} (taken by {w}); rerun with --conflict rename or skip".format(
+                c=candidate, w=who
+            )
         )
 
     suffix = ".{e}".format(e=extension) if extension else ""
@@ -693,14 +696,13 @@ def _add_warnings(plan: Plan) -> None:
     if stats.missing_source:
         plan.warnings.append(
             "{n} file(s) referenced by the catalog are missing on disk and are "
-            "left untouched. Reconnect them in Lightroom first.".format(
-                n=stats.missing_source
-            )
+            "left untouched. Reconnect them in Lightroom first.".format(n=stats.missing_source)
         )
     if stats.skipped_conflict:
         plan.warnings.append(
-            "{n} file(s) were skipped because their target name was already "
-            "taken.".format(n=stats.skipped_conflict)
+            "{n} file(s) were skipped because their target name was already taken.".format(
+                n=stats.skipped_conflict
+            )
         )
     if stats.skipped_no_date:
         plan.warnings.append(
@@ -719,7 +721,7 @@ def _add_warnings(plan: Plan) -> None:
     if stats.cross_volume_bytes:
         plan.warnings.append(
             "{gb:.1f} GiB have to cross a volume boundary.".format(
-                gb=stats.cross_volume_bytes / (1024 ** 3)
+                gb=stats.cross_volume_bytes / (1024**3)
             )
         )
 

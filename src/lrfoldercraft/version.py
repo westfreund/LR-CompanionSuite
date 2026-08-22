@@ -31,9 +31,7 @@ SUPPORTED_CATALOG_VERSION_RANGE = (11, 19)
 
 def banner() -> str:
     """Return the one-line identification banner used across all front ends."""
-    return "{name} {rev} - {codename}".format(
-        name=APP_NAME, rev=REVISION, codename=__codename__
-    )
+    return "{name} {rev} - {codename}".format(name=APP_NAME, rev=REVISION, codename=__codename__)
 
 
 def long_banner() -> str:

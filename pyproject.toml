@@ -70,4 +70,15 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "C4"]
-ignore = ["UP006", "UP007", "UP035"]  # keep typing.* for the 3.9 baseline
+# The 3.9 baseline and the logging convention are deliberate, not oversights:
+#   UP006/UP007/UP035/UP045  keep typing.List / Optional[...] -- the package must
+#                            import on Python 3.9, where PEP 604 unions are only
+#                            legal inside annotations.
+#   UP032                    keep str.format() in messages, so logging calls stay
+#                            lazy and no message is formatted that is never emitted.
+ignore = ["UP006", "UP007", "UP035", "UP045", "UP032"]
+
+[tool.ruff.lint.per-file-ignores]
+# TOKEN_SPECS is a declarative table; one row per line reads far better than
+# wrapping every bilingual description across three lines.
+"src/lrfoldercraft/rules.py" = ["E501"]
