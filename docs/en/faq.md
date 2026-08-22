@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r3.0.0 · Build date 2026-08-22**
+**Revision r3.0.1 · Build date 2026-08-23**
 
 ## Safety and data
 
@@ -167,6 +167,28 @@ users.
 
 No. `pip install lr-foldercraft` without extras has no dependencies at all; the
 CLI does everything. Textual is only needed for `lrfc tui`.
+
+### I installed it but the terminal says `lrfc: command not found`
+
+The launcher lives in `~/.local/bin`, and macOS does not put that on the PATH by
+itself. Since r3.0.1 the installer adds it for you — but **a terminal window
+that was already open keeps the PATH it started with**. Open a new window, or
+run `source ~/.zshrc`.
+
+Check what is going on:
+
+```bash
+ls -l ~/.local/bin/lrfc          # is the launcher there?
+~/.local/bin/lrfc --version      # does it work by full path?
+echo $PATH | tr ':' '\n'         # is ~/.local/bin listed?
+```
+
+If the launcher works by full path but is not found by name, it is only the
+PATH. Add this to `~/.zshrc` and open a new window:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
 
 ### Where are logs, profiles and backups?
 

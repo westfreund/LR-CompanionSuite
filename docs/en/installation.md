@@ -1,6 +1,6 @@
 # Installation
 
-**Revision r3.0.0 · Build date 2026-08-22**
+**Revision r3.0.1 · Build date 2026-08-23**
 
 LR-FolderCraft is a Python package. The installers create an isolated virtual
 environment so nothing is added to your system Python.
@@ -31,7 +31,15 @@ The installer:
 3. creates `~/.local/share/lr-foldercraft/venv`,
 4. installs LR-FolderCraft with the TUI extra,
 5. writes launchers `lrfc` and `lr-foldercraft` into `~/.local/bin`,
-6. runs `lrfc --version` to prove the installation works.
+6. **puts that directory on your PATH** by appending one line to the startup
+   file your shell actually reads (`~/.zshrc` for zsh, `~/.bash_profile` or
+   `~/.bashrc` for bash, `~/.config/fish/config.fish` for fish), unless it is
+   already there,
+7. runs `lrfc --version` to prove the installation works.
+
+**Open a new terminal window afterwards.** A shell that is already running
+keeps the PATH it started with, so `lrfc` stays "command not found" in it. Or
+reload without restarting: `source ~/.zshrc`.
 
 Options:
 
@@ -41,10 +49,10 @@ Options:
 | `--with-gui` | also install PySide6 for `lrfc gui` (about 100 MB) |
 | `--prefix DIR` | install somewhere else |
 | `--bin DIR` | put the launcher somewhere else |
-| `--uninstall` | remove the environment and the launchers |
+| `--no-path` | do not touch the shell startup file |
+| `--uninstall` | remove the environment, the launchers and the PATH line |
 
-If `~/.local/bin` is not on your `PATH`, the installer tells you and prints the
-line to add to `~/.zshrc`.
+With `--no-path` the installer only prints the line for you to add yourself.
 
 ### No Python?
 
@@ -143,5 +151,8 @@ export LRFC_BACKUP_DIR=/Volumes/Backup/lrfc
 # Windows: powershell -File .\install\install-windows.ps1 -Uninstall
 ```
 
-Your catalogs, photos, profiles, logs and backups are never removed by the
-uninstaller. Delete the configuration directory by hand if you want it gone.
+The uninstaller also takes its own PATH line back out, leaving the rest of your
+startup file untouched.
+
+Your catalogs, photos, profiles, logs and backups are never removed. Delete the
+configuration directory by hand if you want it gone.

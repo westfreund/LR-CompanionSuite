@@ -1,6 +1,6 @@
 # Installation
 
-**Revision r3.0.0 · Build-Datum 2026-08-22**
+**Revision r3.0.1 · Build-Datum 2026-08-23**
 
 LR-FolderCraft ist ein Python-Paket. Die Installationsskripte legen eine
 isolierte virtuelle Umgebung an, sodass am System-Python nichts verändert wird.
@@ -32,7 +32,15 @@ Das Skript:
 3. legt `~/.local/share/lr-foldercraft/venv` an,
 4. installiert LR-FolderCraft samt TUI,
 5. schreibt die Starter `lrfc` und `lr-foldercraft` nach `~/.local/bin`,
-6. ruft `lrfc --version` auf, um die Installation zu belegen.
+6. **nimmt dieses Verzeichnis in den PATH auf**, indem es eine Zeile an die
+   Startdatei anhängt, die Ihre Shell tatsächlich liest (`~/.zshrc` bei zsh,
+   `~/.bash_profile` oder `~/.bashrc` bei bash,
+   `~/.config/fish/config.fish` bei fish) — sofern sie nicht schon dort steht,
+7. ruft `lrfc --version` auf, um die Installation zu belegen.
+
+**Danach ein neues Terminalfenster öffnen.** Eine bereits laufende Shell behält
+den PATH, mit dem sie gestartet ist, dort bleibt `lrfc` also unauffindbar. Oder
+ohne Neustart nachladen: `source ~/.zshrc`.
 
 Optionen:
 
@@ -42,10 +50,10 @@ Optionen:
 | `--with-gui` | zusätzlich PySide6 für `lrfc gui` (rund 100 MB) |
 | `--prefix VERZ` | anderes Installationsverzeichnis |
 | `--bin VERZ` | anderes Starterverzeichnis |
-| `--uninstall` | Umgebung und Starter entfernen |
+| `--no-path` | die Shell-Startdatei nicht anfassen |
+| `--uninstall` | Umgebung, Starter und PATH-Zeile entfernen |
 
-Liegt `~/.local/bin` nicht im `PATH`, weist das Skript darauf hin und nennt die
-Zeile für `~/.zshrc`.
+Mit `--no-path` gibt das Skript die Zeile nur aus, statt sie selbst zu setzen.
 
 ### Kein Python vorhanden?
 
@@ -147,5 +155,8 @@ export LRFC_BACKUP_DIR=/Volumes/Backup/lrfc
 # Windows: powershell -File .\install\install-windows.ps1 -Uninstall
 ```
 
-Kataloge, Fotos, Profile, Logdateien und Backups werden dabei nie entfernt. Das
+Die Deinstallation nimmt auch ihre eigene PATH-Zeile zurück und lässt den Rest
+Ihrer Startdatei unangetastet.
+
+Kataloge, Fotos, Profile, Logdateien und Backups werden nie entfernt. Das
 Konfigurationsverzeichnis gegebenenfalls von Hand löschen.

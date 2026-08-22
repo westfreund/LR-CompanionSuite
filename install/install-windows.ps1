@@ -59,6 +59,12 @@ if ($Uninstall) {
         $launcher = Join-Path $BinDir $name
         if (Test-Path $launcher) { Remove-Item -Force $launcher }
     }
+    $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+    if ($userPath -and $userPath.Split(';') -contains $BinDir) {
+        $kept = ($userPath.Split(';') | Where-Object { $_ -ne $BinDir }) -join ';'
+        [Environment]::SetEnvironmentVariable('Path', $kept, 'User')
+        Write-Info "Removed $BinDir from your user PATH"
+    }
     Write-Info 'Removed. Your catalogs, photos, logs and profiles were not touched.'
     Write-Host "    Config and profiles remain in: $env:APPDATA\LR-FolderCraft"
     exit 0
@@ -150,11 +156,18 @@ foreach ($name in @('lrfc.cmd', 'lr-foldercraft.cmd')) {
 
 # -- 5. PATH -----------------------------------------------------------------------
 
+# An installation that reports success but leaves an un-runnable command is not
+# finished, so the launcher directory goes on the user PATH here rather than in
+# an instruction the user has to follow.
 $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
-if ($userPath -notlike "*$BinDir*") {
+$entries = if ($userPath) { $userPath.Split(';') } else { @() }
+if ($entries -contains $BinDir) {
+    Write-Info "$BinDir is already on your user PATH."
+} else {
     Write-Info "Adding $BinDir to your user PATH"
-    [Environment]::SetEnvironmentVariable('Path', "$userPath;$BinDir", 'User')
-    Write-Warn 'Open a new terminal window for the PATH change to take effect.'
+    $joined = if ($userPath) { "$userPath;$BinDir" } else { $BinDir }
+    [Environment]::SetEnvironmentVariable('Path', $joined, 'User')
+    Write-Warn 'A running terminal keeps its old PATH. Open a new window before using lrfc.'
 }
 
 # -- 6. verify -----------------------------------------------------------------------

@@ -10,6 +10,7 @@
 #   ./install/install-macos.sh                 # install into ~/.local/share
 #   ./install/install-macos.sh --no-tui        # skip the Textual dependency
 #   ./install/install-macos.sh --with-gui      # add the Qt graphical interface
+#   ./install/install-macos.sh --no-path       # do not touch the shell startup file
 #   ./install/install-macos.sh --prefix DIR    # choose the install location
 #   ./install/install-macos.sh --bin DIR       # choose the launcher location
 #   ./install/install-macos.sh --uninstall
@@ -27,9 +28,65 @@ BIN_DIR="${LRFC_BIN:-$HOME/.local/bin}"
 WITH_TUI=1
 WITH_GUI=0
 UNINSTALL=0
+EDIT_PATH=1
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+
+# -- PATH ----------------------------------------------------------------------
+
+#: Startup file the user's login shell actually reads for interactive sessions.
+shell_startup_file() {
+    case "$(basename "${SHELL:-/bin/sh}")" in
+        zsh)  printf '%s' "$HOME/.zshrc" ;;
+        bash) if [ -f "$HOME/.bash_profile" ]; then
+                  printf '%s' "$HOME/.bash_profile"
+              else
+                  printf '%s' "$HOME/.bashrc"
+              fi ;;
+        fish) printf '%s' "$HOME/.config/fish/config.fish" ;;
+        *)    printf '%s' "$HOME/.profile" ;;
+    esac
+}
+
+# An installation that reports success but leaves an un-runnable command is not
+# finished. macOS in particular does not put ~/.local/bin on PATH, so without
+# this the launcher we just wrote is invisible.
+ensure_on_path() {
+    case ":$PATH:" in
+        *":$BIN_DIR:"*)
+            info "$BIN_DIR is already on your PATH."
+            return 0 ;;
+    esac
+
+    local rc line
+    rc="$(shell_startup_file)"
+    if [ "$(basename "${SHELL:-/bin/sh}")" = "fish" ]; then
+        line="set -gx PATH \"$BIN_DIR\" \$PATH"
+    else
+        line="export PATH=\"$BIN_DIR:\$PATH\""
+    fi
+
+    if [ "$EDIT_PATH" -eq 0 ]; then
+        warn "$BIN_DIR is not on your PATH. Add this line to $rc yourself:"
+        printf '\n    %s\n\n' "$line"
+        return 0
+    fi
+
+    if [ -f "$rc" ] && grep -Fq "$BIN_DIR" "$rc"; then
+        info "$rc already mentions $BIN_DIR -- open a new terminal window."
+        return 0
+    fi
+
+    mkdir -p "$(dirname "$rc")"
+    {
+        printf '\n# Added by the %s installer\n' "$APP_NAME"
+        printf '%s\n' "$line"
+    } >> "$rc"
+    info "Added $BIN_DIR to your PATH in $rc"
+    warn "Open a new terminal window, or run:  source $rc"
+}
 
 info()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 warn()  { printf '\033[1;33m[!]\033[0m %s\n' "$*" >&2; }
@@ -39,6 +96,7 @@ while [ $# -gt 0 ]; do
     case "$1" in
         --no-tui)    WITH_TUI=0; shift ;;
         --with-gui)  WITH_GUI=1; shift ;;
+        --no-path)   EDIT_PATH=0; shift ;;
         --prefix)    PREFIX="${2:?--prefix needs a directory}"; shift 2 ;;
         --bin)       BIN_DIR="${2:?--bin needs a directory}"; shift 2 ;;
         --uninstall) UNINSTALL=1; shift ;;
@@ -51,6 +109,17 @@ if [ "$UNINSTALL" -eq 1 ]; then
     info "Removing $APP_NAME"
     rm -rf "$PREFIX"
     rm -f "$BIN_DIR/lrfc" "$BIN_DIR/lr-foldercraft"
+    rc="$(shell_startup_file)"
+    if [ -f "$rc" ] && grep -Fq "Added by the $APP_NAME installer" "$rc"; then
+        # Remove the marker comment and the line after it, nothing else.
+        tmp="$(mktemp)"
+        awk -v marker="# Added by the $APP_NAME installer" '
+            $0 == marker { skip = 2; next }
+            skip > 0     { skip--; next }
+            { print }
+        ' "$rc" > "$tmp" && mv "$tmp" "$rc"
+        info "Removed the PATH line from $rc"
+    fi
     info "Removed. Your catalogs, photos, logs and profiles were not touched."
     printf '    Config and profiles remain in: %s\n' \
         "$HOME/Library/Application Support/LR-FolderCraft"
@@ -138,13 +207,7 @@ printf '    Command      : %s\n' "$BIN_DIR/lrfc"
 printf '    Environment  : %s\n' "$PREFIX/venv"
 printf '    Logs         : %s\n' "$HOME/Library/Logs/LR-FolderCraft"
 echo
-case ":$PATH:" in
-    *":$BIN_DIR:"*) ;;
-    *)
-        warn "$BIN_DIR is not on your PATH. Add this line to ~/.zshrc (or ~/.bashrc):"
-        printf '\n    export PATH="%s:$PATH"\n\n' "$BIN_DIR"
-        ;;
-esac
+ensure_on_path
 cat <<'NEXT'
 Next steps:
 

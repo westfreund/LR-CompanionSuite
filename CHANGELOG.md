@@ -12,6 +12,29 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
 ---
 
+## [3.0.1] — 2026-08-23
+
+### Fixed
+
+- **The installer left an un-runnable command.** It wrote the launcher into
+  `~/.local/bin` and then only *printed* a note that the directory is not on
+  the PATH — which macOS never puts there by itself. Reported from a real
+  installation: the script finished, said it had verified itself, and the
+  terminal answered `lrfc: command not found`.
+
+  The installer now appends the PATH line to the startup file the user's shell
+  actually reads (`~/.zshrc`, `~/.bash_profile`/`~/.bashrc`,
+  `~/.config/fish/config.fish`, else `~/.profile`), skips it when the directory
+  is already listed, and takes exactly that line back out on `--uninstall`,
+  leaving the rest of the file untouched. `--no-path` keeps the old
+  print-only behaviour.
+
+  On Windows the entry was already added; the uninstaller now removes it again,
+  and the message says plainly that an open terminal keeps its old PATH.
+
+- The installation guides and both FAQs explain the "command not found" case,
+  including how to tell a PATH problem from a broken installation.
+
 ## [3.0.0] — 2026-08-22 — "Weitwinkel"
 
 Two large additions: a graphical interface, and runs that span several root

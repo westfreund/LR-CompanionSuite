@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r3.0.0 · Build-Datum 2026-08-22**
+**Revision r3.0.1 · Build-Datum 2026-08-23**
 
 ## Sicherheit und Daten
 
@@ -176,6 +176,28 @@ Anwender entfällt damit ein Installationsschritt.
 
 Nein. `pip install lr-foldercraft` ohne Extras hat überhaupt keine
 Abhängigkeiten; die CLI kann alles. Textual wird nur für `lrfc tui` gebraucht.
+
+### Installiert, aber das Terminal sagt `lrfc: command not found`
+
+Der Starter liegt in `~/.local/bin`, und macOS nimmt dieses Verzeichnis nicht
+von selbst in den PATH auf. Seit r3.0.1 erledigt das Installationsskript das —
+aber **ein bereits geöffnetes Terminalfenster behält den PATH, mit dem es
+gestartet ist**. Neues Fenster öffnen, oder `source ~/.zshrc` ausführen.
+
+So prüfen Sie es nach:
+
+```bash
+ls -l ~/.local/bin/lrfc          # ist der Starter da?
+~/.local/bin/lrfc --version      # funktioniert er über den vollen Pfad?
+echo $PATH | tr ':' '\n'         # ist ~/.local/bin aufgeführt?
+```
+
+Funktioniert er über den vollen Pfad, aber nicht über den Namen, fehlt nur der
+PATH. Diese Zeile in `~/.zshrc` eintragen und ein neues Fenster öffnen:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
 
 ### Wo liegen Logdateien, Profile und Backups?
 
