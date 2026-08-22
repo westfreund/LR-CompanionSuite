@@ -318,10 +318,12 @@ def test_mtime_is_not_a_default_date_source(builder):
 
 def test_rerun_when_the_anchor_covers_only_part_of_the_structure(builder):
     """One camera, one year -> the common parent is only the first 2 of 4 levels."""
-    builder.add_photo("A.CR2", "2019-01-20T10:00:00", camera="Canon EOS 70D",
-                      folder="canon-eos-70d/2019/01/20/")
-    builder.add_photo("B.CR2", "2019-03-12T10:00:00", camera="Canon EOS 70D",
-                      folder="canon-eos-70d/2019/03/12/")
+    builder.add_photo(
+        "A.CR2", "2019-01-20T10:00:00", camera="Canon EOS 70D", folder="canon-eos-70d/2019/01/20/"
+    )
+    builder.add_photo(
+        "B.CR2", "2019-03-12T10:00:00", camera="Canon EOS 70D", folder="canon-eos-70d/2019/03/12/"
+    )
     plan = plan_for(builder, structure=("{camera_slug}", "{yyyy}", "{mm}", "{dd}"))
     assert plan.anchor_segments == ()
     assert all(m.status == STAY for m in plan.moves)
@@ -348,10 +350,12 @@ def test_a_date_ish_source_folder_is_not_mistaken_for_a_level(builder):
 
 def test_deeper_partial_overlap(builder):
     """Common parent covers three of four levels."""
-    builder.add_photo("A.CR2", "2019-01-20T09:00:00", camera="Canon EOS 70D",
-                      folder="canon-eos-70d/2019/01/20/")
-    builder.add_photo("B.CR2", "2019-01-21T09:00:00", camera="Canon EOS 70D",
-                      folder="canon-eos-70d/2019/01/21/")
+    builder.add_photo(
+        "A.CR2", "2019-01-20T09:00:00", camera="Canon EOS 70D", folder="canon-eos-70d/2019/01/20/"
+    )
+    builder.add_photo(
+        "B.CR2", "2019-01-21T09:00:00", camera="Canon EOS 70D", folder="canon-eos-70d/2019/01/21/"
+    )
     plan = plan_for(builder, structure=("{camera_slug}", "{yyyy}", "{mm}", "{dd}"))
     assert plan.anchor_segments == ()
     assert all(m.status == STAY for m in plan.moves)
