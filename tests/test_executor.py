@@ -360,7 +360,10 @@ def test_a_missing_target_root_is_created(builder, tmp_path):
     assert not target.exists()
 
     plan, settings = make_plan(
-        builder, tmp_path, placement="new-tree", target_root=str(target),
+        builder,
+        tmp_path,
+        placement="new-tree",
+        target_root=str(target),
         structure=("{yyyy}", "{mm}", "{dd}"),
     )
     result = execute(plan, settings)
@@ -375,9 +378,7 @@ def test_a_missing_target_root_is_created(builder, tmp_path):
 def test_preflight_says_the_target_will_be_created(builder, tmp_path):
     builder.add_photo("A.CR2", "2019-01-03T10:00:00")
     target = tmp_path / "does" / "not" / "exist"
-    plan, _ = make_plan(
-        builder, tmp_path, placement="new-tree", target_root=str(target)
-    )
+    plan, _ = make_plan(builder, tmp_path, placement="new-tree", target_root=str(target))
     check = next(c for c in preflight(plan).checks if c.name == "target-writable")
     assert check.level == "ok"
     assert "does not exist yet" in check.message_en
@@ -388,7 +389,10 @@ def test_undo_removes_a_created_target_tree(builder, tmp_path):
     builder.add_photo("A.CR2", "2019-01-03T10:00:00", content=b"image")
     target = tmp_path / "Neu" / "Sortiert"
     plan, settings = make_plan(
-        builder, tmp_path, placement="new-tree", target_root=str(target),
+        builder,
+        tmp_path,
+        placement="new-tree",
+        target_root=str(target),
         structure=("{yyyy}-{mm}-{dd}",),
     )
     result = execute(plan, settings)
@@ -419,7 +423,10 @@ def test_rollback_removes_a_created_target_tree(builder, tmp_path, monkeypatch):
     monkeypatch.setattr(executor_module, "_move_file", flaky)
 
     plan, settings = make_plan(
-        builder, tmp_path, placement="new-tree", target_root=str(target),
+        builder,
+        tmp_path,
+        placement="new-tree",
+        target_root=str(target),
         structure=("{yyyy}-{mm}-{dd}",),
     )
     with pytest.raises(OSError, match="simulated failure"):
