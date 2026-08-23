@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r15.0.0 · Build-Datum 2026-08-23**
+**Revision r15.0.1 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -443,6 +443,9 @@ zu vergraben ist nicht, was „das dorthin verschieben" heißt.
 Sie bewirkt nur etwas, wenn der Lauf den Ordner überhaupt woandershin legen
 kann, also mit gesetztem Zielordner. Beim Sortieren am selben Ort bleibt ein
 `relocate`-Ordner genau, wo er ist — `plan` weist das als „bereits am Ziel" aus.
+
+`{folder_label}` *zusätzlich* in die Struktur zu setzen ist überflüssig; die
+Ebene bleibt dann unangetastet, statt den Text doppelt zu tragen.
 
 `refile` ist für Bibliotheken, deren Datumsordner Sessionnamen tragen. Der
 Ordner wird dort eingereiht, wo die Struktur ihn hinstellt, und sein Text an die

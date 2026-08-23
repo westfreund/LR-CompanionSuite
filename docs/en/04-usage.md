@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r15.0.0 · Build date 2026-08-23**
+**Revision r15.0.1 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -437,6 +437,9 @@ burying the folder one level deeper is not what "move this there" means.
 It only does something when the run has somewhere else to put the folder, that
 is with a target folder set. Sorting in place leaves a relocated folder exactly
 where it is, which `plan` reports as "already in place".
+
+Putting `{folder_label}` in the structure *as well* is redundant, and the
+level is left alone rather than carrying the text twice.
 
 `refile` is for a library whose dated folders carry session names. It files the
 folder where the structure says, and appends its text to the deepest date

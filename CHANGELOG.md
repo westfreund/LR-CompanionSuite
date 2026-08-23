@@ -16,6 +16,22 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [15.0.1] — 2026-08-23
+
+### Fixed
+
+- **`refile` repeated a label the structure had already placed.** A structure
+  containing `{folder_label}` renders the text into the deepest level, and
+  `refile` then appended it a second time: `2026-06-18 Voelki Voelki`. Two
+  mechanisms doing the same job, with nothing to say so. `refile` now leaves
+  the level alone when it already carries the folder's text, compared after the
+  same ASCII folding so the check holds with that option on.
+
+  Found by driving a full cycle through the command line with a structure that
+  used both, which is a mistake a reader of the documentation could easily make.
+
+---
+
 ## [15.0.0] — 2026-08-23 — "Gleichstand"
 
 The text interface is a peer again. It had fallen behind by seven settings and

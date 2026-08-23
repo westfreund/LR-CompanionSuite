@@ -1,6 +1,6 @@
 # Project history
 
-**Revision r15.0.0 · Build date 2026-08-23**
+**Revision r15.0.1 · Build date 2026-08-23**
 
 The [CHANGELOG](../../CHANGELOG.md) says what changed in each revision. This
 document says **why**, and what happened in between: the decisions taken, the

@@ -1014,3 +1014,38 @@ def test_leave_and_relocate_are_no_longer_the_same_thing(mixed_library, tmp_path
     assert left.status == STAY
     assert relocated.status == MOVE
     assert left.target_path != relocated.target_path
+
+
+def test_refile_does_not_repeat_a_label_the_structure_already_placed(mixed_library):
+    """{folder_label} in the structure plus refile gave "Ostern Ostern"."""
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}-{mm}-{dd} {folder_label}",),
+        folder_rules=("dated+label=refile", "*=consolidate"),
+        mismatch_action="leave",
+    )
+    assert by_name(plan)["D2.CR2"].target_segments == ("raw2019", "2019-04-15 Ostern in Tirol")
+
+
+def test_refile_still_appends_when_the_structure_does_not(mixed_library):
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}-{mm}-{dd}",),
+        folder_rules=("dated+label=refile", "*=consolidate"),
+        mismatch_action="leave",
+    )
+    assert by_name(plan)["D2.CR2"].target_segments == ("raw2019", "2019-04-15 Ostern in Tirol")
+
+
+def test_the_check_survives_ascii_folding(builder, tmp_path):
+    """The rendered level is folded; the raw label is not, so compare like for like."""
+    builder.add_photo("A.CR2", "2026-06-18T10:00:00", folder="mobileRAW/2026-06-18 Völki/")
+    # A second folder, so the anchor is mobileRAW rather than the folder itself.
+    builder.add_photo("B.CR2", "2026-07-01T10:00:00", folder="mobileRAW/Sonstiges/")
+    plan = plan_for(
+        builder,
+        structure=("{yyyy}-{mm}-{dd} {folder_label}",),
+        folder_rules=("dated+label=refile", "*=consolidate"),
+        ascii_only=True,
+    )
+    assert by_name(plan)["A.CR2"].target_segments == ("mobileRAW", "2026-06-18 Voelki")

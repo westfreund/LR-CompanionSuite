@@ -700,6 +700,12 @@ def _render_at(photo: Photo, settings: Settings, when: datetime) -> Tuple[str, .
     return render_structure(settings.effective_structure, context, ascii_only=settings.ascii_only)
 
 
+def _already_named(segment: str, label: str, settings: Settings) -> bool:
+    """True when the rendered level already carries the folder's own text."""
+    rendered = sanitise_segment(label, ascii_only=settings.ascii_only).casefold()
+    return bool(rendered) and rendered in segment.casefold()
+
+
 def _keeps_the_session_together(
     photo: Photo, case: FolderCase, settings: Settings
 ) -> Optional[Tuple[str, ...]]:
@@ -756,7 +762,10 @@ def _segments_for(
         # would throw away the only thing that distinguishes the session.
         together = _keeps_the_session_together(photo, case, settings)
         segments = together if together is not None else structure_segments
-        if case.label and segments:
+        # A structure containing {folder_label} has already put the text there.
+        # Appending it again gave "2026-06-18 Voelki Voelki", which nothing
+        # warned about and nobody wants.
+        if case.label and segments and not _already_named(segments[-1], case.label, settings):
             named = sanitise_segment(
                 "{last} {label}".format(last=segments[-1], label=case.label),
                 ascii_only=settings.ascii_only,
