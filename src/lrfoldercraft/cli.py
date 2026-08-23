@@ -270,6 +270,16 @@ def _add_plan_flags(parser: argparse.ArgumentParser) -> None:
 
     behaviour = parser.add_argument_group("behaviour")
     behaviour.add_argument(
+        "--no-move-log",
+        action="store_true",
+        help="do not write the human readable record of the run beside the library",
+    )
+    behaviour.add_argument(
+        "--move-log-dir",
+        metavar="DIR",
+        help="write that record here instead of beside the .lrcat file",
+    )
+    behaviour.add_argument(
         "--date-source",
         action="append",
         choices=DATE_SOURCES,
@@ -362,6 +372,10 @@ def settings_from_args(args: argparse.Namespace) -> Settings:
                 ) from None
     if getattr(args, "interactive", False):
         settings.interactive_folders = True
+    if getattr(args, "no_move_log", False):
+        settings.move_log = False
+    if getattr(args, "move_log_dir", None):
+        settings.move_log_dir = args.move_log_dir
     if getattr(args, "no_sidecars", False):
         settings.move_sidecars = False
     if getattr(args, "ascii", False):

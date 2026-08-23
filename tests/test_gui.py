@@ -101,9 +101,9 @@ def test_planning_fills_the_folder_table(qt_app, mixed_gui_catalog):
     assert window.folder_table.rowCount() == len(window.cases)
 
     anchor_row = paths.index("raw2019/")
-    assert window.folder_table.cellWidget(anchor_row, 3) is None  # never decided
+    assert window.folder_table.cellWidget(anchor_row, 4) is None  # never decided
     urlaub_row = paths.index("raw2019/Urlaub/")
-    assert window.folder_table.cellWidget(urlaub_row, 3).currentData() == "consolidate"
+    assert window.folder_table.cellWidget(urlaub_row, 4).currentData() == "consolidate"
 
 
 def test_changing_a_decision_replans(qt_app, mixed_gui_catalog):
@@ -114,7 +114,7 @@ def test_changing_a_decision_replans(qt_app, mixed_gui_catalog):
     assert pump(lambda: window.plan is not None)
 
     paths = [c.path_from_root for c in window.cases]
-    combo = window.folder_table.cellWidget(paths.index("raw2019/Urlaub/"), 3)
+    combo = window.folder_table.cellWidget(paths.index("raw2019/Urlaub/"), 4)
     combo.setCurrentIndex([combo.itemData(i) for i in range(combo.count())].index("sort-inside"))
     assert pump(lambda: window.plan is not None)
 
@@ -251,3 +251,68 @@ def test_shrinking_below_the_minimum_is_refused(qt_app):
     assert window.height() >= window.minimumHeight()
     assert _bottom_of(window, window.plan_button) <= window.height()
     window.close()
+
+
+# -- the ordered rule list ---------------------------------------------------
+
+
+def test_rules_are_carried_into_the_settings(qt_app, mixed_gui_catalog):
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.rules = [("_extern", "leave"), ("dated+label", "resort")]
+    window._redraw_rules()
+    settings = window.collect_settings()
+    assert settings.folder_rules == ("_extern=leave", "dated+label=resort")
+
+
+def test_a_rule_decides_the_folder_and_says_so(qt_app, mixed_gui_catalog):
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.preset_combo.setCurrentText("day")
+    window.rules = [("Urlaub", "leave"), ("*", "consolidate")]
+    window._redraw_rules()
+    window.do_plan()
+    assert pump(lambda: window.plan is not None)
+
+    paths = [c.path_from_root for c in window.cases]
+    row = paths.index("raw2019/Urlaub/")
+    assert window.folder_table.cellWidget(row, 4).currentData() == "leave"
+    assert window.folder_table.item(row, 3).text() == "1. Urlaub"
+
+
+def test_reordering_rules_changes_which_one_wins(qt_app, mixed_gui_catalog):
+    """Order is the whole point: the first match decides."""
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.preset_combo.setCurrentText("day")
+    window.rules = [("*", "consolidate"), ("Urlaub", "leave")]
+    window._redraw_rules()
+    window.do_plan()
+    assert pump(lambda: window.plan is not None)
+    paths = [c.path_from_root for c in window.cases]
+    assert window.folder_table.item(paths.index("raw2019/Urlaub/"), 3).text() == "1. *"
+
+    window.rule_table.selectRow(1)
+    window._move_rule(-1)
+    assert pump(lambda: window.plan is not None)
+    paths = [c.path_from_root for c in window.cases]
+    assert window.folder_table.item(paths.index("raw2019/Urlaub/"), 3).text() == "1. Urlaub"
+
+
+def test_an_empty_pattern_is_dropped_rather_than_breaking_the_run(qt_app, mixed_gui_catalog):
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.rules = [("", "leave"), ("*", "consolidate")]
+    assert window.collect_settings().folder_rules == ("*=consolidate",)
+
+
+def test_adding_and_removing_a_rule_keeps_the_table_in_step(qt_app, mixed_gui_catalog):
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window._add_rule()
+    assert pump(lambda: window.plan is not None)
+    assert window.rule_table.rowCount() == len(window.rules) == 1
+    window.rule_table.selectRow(0)
+    window._remove_rule()
+    assert pump(lambda: window.plan is not None)
+    assert window.rule_table.rowCount() == len(window.rules) == 0

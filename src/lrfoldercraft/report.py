@@ -62,6 +62,7 @@ T = {
     "pruned": ("Empty folders removed", "Entfernte leere Ordner"),
     "backup": ("Catalog backup", "Katalog-Backup"),
     "journal": ("Journal", "Journal"),
+    "move_log": ("Move log", "Verschiebeprotokoll"),
     "verification": ("Verification", "Pruefung"),
     "passed": ("passed", "bestanden"),
     "errors": ("Errors", "Fehler"),
@@ -429,6 +430,8 @@ def render_result(result: RunResult, language: str = "en") -> str:
         rows.append((t("backup", language), result.backup_path))
     if result.journal_path:
         rows.append((t("journal", language), result.journal_path))
+    if result.move_log_path:
+        rows.append((t("move_log", language), result.move_log_path))
     rows.append(
         (
             t("verification", language),

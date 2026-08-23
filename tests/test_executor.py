@@ -587,3 +587,59 @@ def test_only_four_tables_are_ever_written(builder, tmp_path):
         "Adobe_variablesTable",  # the id counter
     }
     assert changed <= allowed, "unexpected tables written: {u}".format(u=sorted(changed - allowed))
+
+
+# -- the record beside the library -------------------------------------------
+
+
+def test_a_move_log_is_written_beside_the_catalog(simple_catalog, tmp_path):
+    plan, settings = make_plan(simple_catalog, tmp_path)
+    result = execute(plan, settings)
+
+    assert result.move_log_path is not None
+    log_file = Path(result.move_log_path)
+    assert log_file.parent == simple_catalog.catalog_path.parent
+    assert log_file.name.startswith("LR-FolderCraft_")
+    assert simple_catalog.catalog_path.stem in log_file.name
+
+    text = log_file.read_text(encoding="utf-8")
+    assert "MOVED FILES" in text
+    assert "Files moved" in text
+    for move in plan.active_moves:
+        assert move.source_path in text
+        assert move.target_path in text
+
+
+def test_the_move_log_records_the_rules_that_were_used(simple_catalog, tmp_path):
+    plan, settings = make_plan(simple_catalog, tmp_path, folder_rules=("*=consolidate",))
+    result = execute(plan, settings)
+    text = Path(result.move_log_path).read_text(encoding="utf-8")
+    assert "1. *=consolidate" in text
+
+
+def test_the_move_log_can_be_switched_off(simple_catalog, tmp_path):
+    plan, settings = make_plan(simple_catalog, tmp_path, move_log=False)
+    result = execute(plan, settings)
+    assert result.success
+    assert result.move_log_path is None
+    beside = list(simple_catalog.catalog_path.parent.glob("LR-FolderCraft_*.log"))
+    assert beside == []
+
+
+def test_a_log_that_cannot_be_written_does_not_fail_the_run(simple_catalog, tmp_path):
+    """The photos are already moved and verified. Losing the record is not a failure."""
+    unwritable = tmp_path / "nowhere" / "at" / "all"
+    plan, settings = make_plan(simple_catalog, tmp_path, move_log_dir=str(unwritable))
+    result = execute(plan, settings)
+
+    assert result.success
+    assert result.move_log_path is None
+    assert any("move log" in note for note in result.notes)
+
+
+def test_a_dry_run_writes_no_move_log(simple_catalog, tmp_path):
+    plan, settings = make_plan(simple_catalog, tmp_path)
+    settings.dry_run = True
+    result = execute(plan, settings)
+    assert result.move_log_path is None
+    assert list(simple_catalog.catalog_path.parent.glob("LR-FolderCraft_*.log")) == []

@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction, QFont, QGuiApplication
@@ -46,6 +46,8 @@ from PySide6.QtWidgets import (
 from ..catalog.model import CatalogInfo, RootFolder
 from ..config import CONFLICT_MODES, MISSING_DATE_MODES, Settings
 from ..folders import (
+    ALL_ACTIONS,
+    CONSOLIDATE,
     DATED_FOLDER_ACTIONS,
     MISMATCH_ACTIONS,
     SUBFOLDER_ACTIONS,
@@ -77,6 +79,8 @@ class MainWindow(QMainWindow):
         self.language = language if language in ("en", "de") else "en"
         self.plan: Optional[Plan] = None
         self.folder_decisions: Dict[int, str] = {}
+        #: The ordered rule list, as (pattern, action) pairs. Order is meaning.
+        self.rules: List[Tuple[str, str]] = []
         self.cases: List[FolderCase] = []
         self.roots: List[RootFolder] = []
         self._threads: list = []
@@ -320,17 +324,128 @@ class MainWindow(QMainWindow):
         self.summary_label = QLabel()
         self.summary_label.setWordWrap(True)
         layout.addWidget(self.summary_label)
-        self.folder_table = QTableWidget(0, 4)
+        layout.addWidget(self._rules_widget())
+        self.folder_table = QTableWidget(0, 5)
         self.folder_table.verticalHeader().setVisible(False)
         self.folder_table.setSelectionBehavior(QTableWidget.SelectRows)
         header = self.folder_table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.Stretch)
-        for column in (1, 2, 3):
+        for column in (1, 2, 3, 4):
             header.setSectionResizeMode(column, QHeaderView.ResizeToContents)
         self.folder_table.setMinimumHeight(110)
         layout.addWidget(self.folder_table, 1)
         self.folders_group = box
         return box
+
+    def _rules_widget(self) -> QWidget:
+        """The ordered rule list: a handful of lines instead of one answer per folder."""
+        holder = QWidget()
+        column = QVBoxLayout(holder)
+        column.setContentsMargins(0, 0, 0, 0)
+
+        self.rules_hint = QLabel()
+        self.rules_hint.setWordWrap(True)
+        column.addWidget(self.rules_hint)
+
+        self.rule_table = QTableWidget(0, 2)
+        self.rule_table.verticalHeader().setVisible(False)
+        self.rule_table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.rule_table.setSelectionMode(QTableWidget.SingleSelection)
+        rule_header = self.rule_table.horizontalHeader()
+        rule_header.setSectionResizeMode(0, QHeaderView.Stretch)
+        rule_header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.rule_table.setMaximumHeight(140)
+        self.rule_table.itemChanged.connect(self._rule_edited)
+        column.addWidget(self.rule_table)
+
+        buttons = QHBoxLayout()
+        self.rule_add_button = QPushButton()
+        self.rule_add_button.clicked.connect(self._add_rule)
+        self.rule_remove_button = QPushButton()
+        self.rule_remove_button.clicked.connect(self._remove_rule)
+        self.rule_up_button = QPushButton("\u2191")
+        self.rule_up_button.clicked.connect(lambda: self._move_rule(-1))
+        self.rule_down_button = QPushButton("\u2193")
+        self.rule_down_button.clicked.connect(lambda: self._move_rule(1))
+        for button in (
+            self.rule_add_button,
+            self.rule_remove_button,
+            self.rule_up_button,
+            self.rule_down_button,
+        ):
+            buttons.addWidget(button)
+        buttons.addStretch(1)
+        column.addLayout(buttons)
+        return holder
+
+    # -- the rule list ------------------------------------------------------
+
+    def _redraw_rules(self) -> None:
+        """Rewrite the rule table from :attr:`rules` without re-firing edits."""
+        table = self.rule_table
+        table.blockSignals(True)
+        table.setRowCount(len(self.rules))
+        for row, (pattern, action) in enumerate(self.rules):
+            table.setItem(row, 0, QTableWidgetItem(pattern))
+            combo = QComboBox()
+            for choice in ALL_ACTIONS:
+                combo.addItem(action_label(choice, self.language), choice)
+            if action in ALL_ACTIONS:
+                combo.setCurrentIndex(list(ALL_ACTIONS).index(action))
+            combo.currentIndexChanged.connect(
+                lambda _index, r=row, c=combo: self._rule_action_changed(r, c)
+            )
+            table.setCellWidget(row, 1, combo)
+        table.blockSignals(False)
+
+    def _rule_edited(self, item: QTableWidgetItem) -> None:
+        if item.column() != 0 or item.row() >= len(self.rules):
+            return
+        _pattern, action = self.rules[item.row()]
+        self.rules[item.row()] = (item.text().strip(), action)
+        self._rules_changed()
+
+    def _rule_action_changed(self, row: int, combo: QComboBox) -> None:
+        if row >= len(self.rules):
+            return
+        pattern, _action = self.rules[row]
+        self.rules[row] = (pattern, combo.currentData())
+        self._rules_changed()
+
+    def _add_rule(self) -> None:
+        self.rules.append(("*", CONSOLIDATE))
+        self._redraw_rules()
+        self._rules_changed()
+
+    def _remove_rule(self) -> None:
+        row = self.rule_table.currentRow()
+        if 0 <= row < len(self.rules):
+            del self.rules[row]
+            self._redraw_rules()
+            self._rules_changed()
+
+    def _move_rule(self, delta: int) -> None:
+        """Order is meaning here: the first matching rule decides."""
+        row = self.rule_table.currentRow()
+        target = row + delta
+        if 0 <= row < len(self.rules) and 0 <= target < len(self.rules):
+            self.rules[row], self.rules[target] = self.rules[target], self.rules[row]
+            self._redraw_rules()
+            self.rule_table.selectRow(target)
+            self._rules_changed()
+
+    def _rules_changed(self) -> None:
+        """A changed rule invalidates every decision it might have made."""
+        self.folder_decisions.clear()
+        if self.catalog_edit.text().strip():
+            self.do_plan()
+
+    def _rule_strings(self) -> Tuple[str, ...]:
+        return tuple(
+            "{p}={a}".format(p=pattern, a=action)
+            for pattern, action in self.rules
+            if pattern.strip()
+        )
 
     def _actions_box(self) -> QWidget:
         holder = QWidget()
@@ -387,9 +502,19 @@ class MainWindow(QMainWindow):
                 tr("col_folder", language),
                 tr("col_kind", language),
                 tr("col_photos", language),
+                tr("col_decided_by", language),
                 tr("col_decision", language),
             ]
         )
+        self.rule_table.setHorizontalHeaderLabels(
+            [tr("col_pattern", language), tr("col_decision", language)]
+        )
+        self.rules_hint.setText(tr("rules_hint", language))
+        self.rule_add_button.setText(tr("rule_add", language))
+        self.rule_remove_button.setText(tr("rule_remove", language))
+        self.rule_up_button.setToolTip(tr("rule_up", language))
+        self.rule_down_button.setToolTip(tr("rule_down", language))
+        self._redraw_rules()
         self.plan_button.setText(tr("plan", language))
         self.apply_button.setText(tr("apply", language))
         self.status_label.setText(tr("ready", language))
@@ -465,6 +590,7 @@ class MainWindow(QMainWindow):
         settings.backup_catalog = self.backup_check.isChecked()
         settings.ascii_only = self.ascii_check.isChecked()
         settings.language = self.language
+        settings.folder_rules = self._rule_strings()
         settings.folder_actions = dict(self.folder_decisions)
         settings.__post_init__()
         settings.validate()
@@ -605,10 +731,17 @@ class MainWindow(QMainWindow):
             if case.is_dated and case.mismatched_photos:
                 photos += "  " + tr("mismatched", self.language).format(n=case.mismatched_photos)
             table.setItem(row, 2, QTableWidgetItem(photos))
+            if case.action_source == "override":
+                decided_by = tr("decided_by_you", self.language)
+            elif case.matched_rule:
+                decided_by = case.matched_rule
+            else:
+                decided_by = tr("decided_by_default", self.language)
+            table.setItem(row, 3, QTableWidgetItem(decided_by))
             if case.is_anchor:
                 item = QTableWidgetItem("-")
                 item.setFlags(Qt.ItemIsEnabled)
-                table.setItem(row, 3, item)
+                table.setItem(row, 4, item)
                 continue
             combo = QComboBox()
             choices = DATED_FOLDER_ACTIONS if case.is_dated else SUBFOLDER_ACTIONS
@@ -620,7 +753,7 @@ class MainWindow(QMainWindow):
             combo.currentIndexChanged.connect(
                 lambda _index, c=combo, f=case.folder_id: self._decide(f, c)
             )
-            table.setCellWidget(row, 3, combo)
+            table.setCellWidget(row, 4, combo)
 
     def _decide(self, folder_id: int, combo: QComboBox) -> None:
         self.folder_decisions[folder_id] = combo.currentData()

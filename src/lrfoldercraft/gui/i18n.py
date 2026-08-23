@@ -94,6 +94,25 @@ TEXT: Dict[str, Tuple[str, str]] = {
     "volume": ("Data volume", "Datenvolumen"),
     "virtual_copies": ("Virtual copies carried", "Mitgeführte virtuelle Kopien"),
     "language": ("Deutsch", "English"),
+    # the ordered rule list
+    "rules_hint": (
+        "Rules, in order -- the first one that matches decides a folder. A pattern is "
+        "a folder path (covering everything below it) or one of: *, dated, "
+        "dated+label, dated-only, plain. A decision you make in the table below "
+        "still wins.",
+        "Regeln, der Reihe nach -- die erste passende entscheidet einen Ordner. Ein "
+        "Muster ist ein Ordnerpfad (der alles darunter mit einschliesst) oder eines "
+        "von: *, dated, dated+label, dated-only, plain. Eine Entscheidung, die Sie "
+        "unten in der Tabelle treffen, sticht trotzdem.",
+    ),
+    "col_pattern": ("Pattern", "Muster"),
+    "col_decided_by": ("Decided by", "Entschieden durch"),
+    "decided_by_you": ("you", "von Ihnen"),
+    "decided_by_default": ("default", "Voreinstellung"),
+    "rule_add": ("Add rule", "Regel hinzufügen"),
+    "rule_remove": ("Remove", "Entfernen"),
+    "rule_up": ("Move up -- earlier rules win", "Nach oben -- frühere Regeln gewinnen"),
+    "rule_down": ("Move down", "Nach unten"),
 }
 
 

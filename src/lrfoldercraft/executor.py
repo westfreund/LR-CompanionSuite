@@ -32,6 +32,7 @@ from .catalog.writer import CatalogWriter
 from .config import Settings
 from .journal import Journal, build_journal_path, journal_header
 from .logging_setup import get_logger, step
+from .movelog import write_move_log
 from .planner import Plan, PlannedMove
 from .safety import PreflightResult, preflight
 from .version import __version__
@@ -64,6 +65,11 @@ class RunResult:
     folders_pruned: int = 0
     bytes_moved: int = 0
     errors: List[str] = field(default_factory=list)
+    #: Things worth saying that are not failures, e.g. a log that could not
+    #: be written after an otherwise successful run.
+    notes: List[str] = field(default_factory=list)
+    #: The human readable record written beside the library, if there is one.
+    move_log_path: Optional[str] = None
     verification: List[str] = field(default_factory=list)
     rolled_back: bool = False
     tool_version: str = __version__
@@ -171,6 +177,11 @@ def execute(
             raise
         finally:
             result.finished_at = datetime.now().isoformat(timespec="seconds")
+            # Beside the library, for whoever wonders months later where a
+            # photo went. Never allowed to turn a finished run into a failure.
+            written = write_move_log(plan, result, settings)
+            if written is not None:
+                result.move_log_path = str(written)
 
     return result
 

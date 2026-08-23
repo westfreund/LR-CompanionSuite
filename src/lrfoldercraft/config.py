@@ -125,6 +125,13 @@ class Settings:
     #: Ask the operator about every folder that could reasonably go either way.
     interactive_folders: bool = False
 
+    #: Write a human readable record of the run beside the library. It is
+    #: named after the tool, the date and the catalog, so it is found by
+    #: whoever wonders months later where a photo went.
+    move_log: bool = True
+    #: Where that record goes. ``None`` means beside the ``.lrcat`` file.
+    move_log_dir: Optional[str] = None
+
     # -- edge cases -----------------------------------------------------
     date_source: Tuple[str, ...] = ("capture", "exif-fields")
     on_missing_date: str = "unsorted"
