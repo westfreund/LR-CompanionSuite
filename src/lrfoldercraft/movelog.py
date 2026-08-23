@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 from .logging_setup import get_logger
+from .runs import MOVE_LOG_FILE
 from .version import APP_NAME, __build_date__, __version__
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -50,8 +51,14 @@ def write_move_log(
     if not settings.move_log:
         return None
     catalog = Path(plan.catalog_path)
-    directory = Path(settings.move_log_dir) if settings.move_log_dir else None
-    path = move_log_path(catalog, when or datetime.now(), directory)
+    if settings.move_log_dir:
+        path = move_log_path(catalog, when or datetime.now(), Path(settings.move_log_dir))
+    elif result.run_directory:
+        # Everything about one run in one place: the prose account belongs with
+        # the journal and the settings it describes.
+        path = Path(result.run_directory) / MOVE_LOG_FILE
+    else:
+        path = move_log_path(catalog, when or datetime.now())
     try:
         path.write_text(render_move_log(plan, result, settings), encoding="utf-8")
     except OSError as error:

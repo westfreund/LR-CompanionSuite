@@ -61,6 +61,7 @@ from .report import (
     write_plan_files,
 )
 from .rules import RuleError, parse_structure
+from .runs import directory_of, history, journal_of, runs_directory
 from .safety import preflight
 from .version import REVISION, long_banner
 
@@ -139,7 +140,16 @@ def build_parser() -> argparse.ArgumentParser:
     p_undo.add_argument("journal", help="path to a *{s} file".format(s=JOURNAL_SUFFIX))
     p_undo.add_argument("--catalog-backup", help="explicit catalog backup to restore")
     p_undo.add_argument("-y", "--yes", action="store_true")
+    p_undo.add_argument(
+        "--force",
+        action="store_true",
+        help="undo a run that is already recorded as undone -- almost never right",
+    )
     _add_global_flags(p_undo)
+
+    p_history = sub.add_parser("history", help="list the runs recorded beside a catalog")
+    p_history.add_argument("catalog", help="path to the .lrcat file")
+    _add_global_flags(p_history)
 
     p_profiles = sub.add_parser("profiles", help="list saved profiles")
     _add_global_flags(p_profiles)
@@ -581,9 +591,38 @@ def cmd_undo(args: argparse.Namespace) -> int:
         if answer not in ("y", "yes", "j", "ja"):
             print("Aborted.")
             return EXIT_ABORTED
-    result = undo(args.journal, args.catalog_backup)
+    result = undo(args.journal, args.catalog_backup, force=getattr(args, "force", False))
     print(render_result(result, language))
     return EXIT_OK if result.success else EXIT_ERROR
+
+
+def cmd_history(args: argparse.Namespace) -> int:
+    """What has been done to this catalog, newest first."""
+    language = args.lang or "en"
+    records = history(Path(args.catalog))
+    if not records:
+        print(
+            "Keine Läufe für diesen Katalog aufgezeichnet."
+            if language == "de"
+            else "No runs recorded for this catalog."
+        )
+        print("  {d}".format(d=runs_directory(Path(args.catalog))))
+        return EXIT_OK
+    print(
+        "{n} Lauf/Läufe, neueste zuerst:".format(n=len(records))
+        if language == "de"
+        else "{n} run(s), newest first:".format(n=len(records))
+    )
+    for record in records:
+        print("  " + record.describe(language))
+        print("    {d}".format(d=directory_of(record)))
+        if record.can_be_undone:
+            print(
+                "    {w} lrfc undo {j}".format(
+                    w="rückgängig:" if language == "de" else "undo:", j=journal_of(record)
+                )
+            )
+    return EXIT_OK
 
 
 def cmd_profiles(args: argparse.Namespace) -> int:
@@ -737,6 +776,7 @@ DISPATCH = {
     "plan": cmd_plan,
     "apply": cmd_apply,
     "undo": cmd_undo,
+    "history": cmd_history,
     "profiles": cmd_profiles,
     "tokens": cmd_tokens,
     "presets": cmd_presets,

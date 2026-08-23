@@ -250,6 +250,28 @@ TEXT: Dict[str, Tuple[str, str]] = {
         "nicht wegbestätigen.",
     ),
     "menu_actions": ("Actions", "Aktionen"),
+    "history_menu": ("Run history…", "Verlauf der Läufe…"),
+    "history_title": ("Runs recorded for this catalog", "Aufgezeichnete Läufe dieses Katalogs"),
+    "history_intro": (
+        "Every run writes its record into a folder beside this catalog, so the "
+        "runs of another library can never be mistaken for these. Pick the one "
+        "to reverse.",
+        "Jeder Lauf legt seine Aufzeichnung in einen Ordner neben diesem Katalog, "
+        "damit die Läufe einer anderen Bibliothek nicht mit diesen verwechselt "
+        "werden können. Wählen Sie den zurückzunehmenden aus.",
+    ),
+    "history_when": ("When", "Wann"),
+    "history_what": ("Structure", "Struktur"),
+    "history_files": ("Files", "Dateien"),
+    "history_state": ("State", "Zustand"),
+    "history_can_undo": ("can be undone", "kann zurückgenommen werden"),
+    "history_undone": ("undone {w}", "zurückgenommen {w}"),
+    "history_failed": ("failed", "fehlgeschlagen"),
+    "history_undo_this": ("Undo this run", "Diesen Lauf zurücknehmen"),
+    "history_empty": (
+        "No runs recorded for this catalog yet.",
+        "Für diesen Katalog sind noch keine Läufe aufgezeichnet.",
+    ),
     "undo_run": ("Undo a run…", "Lauf rückgängig machen…"),
     "undo_button": ("Undo…", "Rückgängig…"),
     "pick_journal": (

@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r12.0.0 · Build-Datum 2026-08-23**
+**Revision r13.0.0 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -628,6 +628,69 @@ Einstellung und stimmen deshalb immer überein.
 
 Regeln stechen weiterhin, wo sie gesetzt sind — das Ankreuzfeld ist die
 Voreinstellung darunter, kein Gegenspieler.
+
+## Was ein Lauf hinterlässt
+
+Alles, was ein Lauf erzeugt, landet in einem Ordner **neben dem Katalog, den er
+verändert hat**:
+
+```
+Masterkatalog.Neu/
+    Masterkatalog.Neu.lrcat
+    LR-FolderCraft/
+        2026-08-23_165247/
+            run.json        was getan wurde, wie viel, und ob es zurückgenommen ist
+            settings.json   jede genutzte Option, in der Form eines Profils
+            journal.jsonl   die maschinenlesbare Aufzeichnung, aus der Undo arbeitet
+            moves.log       dasselbe in Prosa, für Menschen
+```
+
+Das zählt genau dort, wo es am leichtesten schiefgeht: auf einem externen
+Laufwerk mit mehreren Bibliotheken. Deren Journale lagen bisher gemeinsam in
+einem Konfigurationsverzeichnis unter ähnlichen Namen, und das falsche
+zurückzunehmen versetzt eine Bibliothek in einen Zustand, in dem sie nie war.
+Jetzt liegen die Läufe jedes Katalogs unter diesem Katalog.
+
+Die **Katalogsicherung liegt bewusst nicht dort.** Eine 700-MB-Kopie neben dem
+Original, auf demselben Laufwerk, übersteht einen Fehler, aber nicht das
+Laufwerk. Sie geht weiterhin ins Konfigurationsverzeichnis, und `run.json`
+vermerkt wohin. Wer Portabilität höher gewichtet als die Unabhängigkeit vom
+Laufwerk, richtet `--backup-dir` auf den Katalogordner.
+
+Ist das Volume schreibgeschützt oder voll, läuft der Lauf trotzdem: Die
+Aufzeichnungen fallen auf das Konfigurationsverzeichnis zurück, und das Ergebnis
+sagt es.
+
+### `lrfc history KATALOG`
+
+Führt auf, was mit diesem Katalog geschehen ist, neueste zuerst, mit dem Befehl
+zum Zurücknehmen jedes noch stehenden Laufs:
+
+```console
+$ lrfc history /Volumes/Extreme\ Pro/.../Masterkatalog.Neu.lrcat
+2 Lauf/Läufe, neueste zuerst:
+  2026-08-23 16:52  51.049 Datei(en)  {yyyy}/{yyyy}-{mm}/{yyyy}-{mm}-{dd}  [kann zurückgenommen werden]
+    .../LR-FolderCraft/2026-08-23_165247
+    rückgängig: lrfc undo .../LR-FolderCraft/2026-08-23_165247/journal.jsonl
+  2026-08-23 11:40  51.049 Datei(en)  {yyyy}/{mm}/{dd}  [zurückgenommen 2026-08-23 12:45]
+    .../LR-FolderCraft/2026-08-23_114055
+```
+
+Im Fenster ist dieselbe Liste **Aktionen → Verlauf der Läufe…**, und
+*Rückgängig* öffnet sie statt eines Dateidialogs — der zurückgenommene Lauf ist
+also immer einer von *diesem* Katalog.
+
+### Ein Lauf wird einmal zurückgenommen
+
+Ihn zweimal zurückzunehmen würde verschieben, was inzwischen an jenen Pfaden
+liegt. Ein als zurückgenommen vermerkter Lauf wird deshalb verweigert;
+`--force` übergeht das und ist fast nie richtig.
+
+Das Journal wird **behalten**, nicht gelöscht. Nach einem teilweise
+gescheiterten Undo ist es die einzige Auskunft darüber, was tatsächlich bewegt
+wurde — es genau dann wegzuwerfen, wenn es gebraucht wird, wäre die falsche Art
+von Ordnung. Was das erneute Anbieten verhindert, ist der Vermerk am Lauf.
+
 
 ## Profile
 

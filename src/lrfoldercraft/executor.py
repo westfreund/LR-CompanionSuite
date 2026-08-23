@@ -35,6 +35,15 @@ from .logging_setup import get_logger, step
 from .movelog import write_move_log
 from .orphans import collection_directories
 from .planner import Plan, PlannedMove
+from .runs import (
+    JOURNAL_FILE,
+    RunRecord,
+    find_record_for_journal,
+    mark_undone,
+    new_run_directory,
+    write_record,
+    write_settings,
+)
 from .safety import PreflightResult, preflight
 from .version import __version__
 
@@ -73,6 +82,8 @@ class RunResult:
     notes: List[str] = field(default_factory=list)
     #: The human readable record written beside the library, if there is one.
     move_log_path: Optional[str] = None
+    #: The run's own folder beside the catalog, holding all of its records.
+    run_directory: Optional[str] = None
     verification: List[str] = field(default_factory=list)
     rolled_back: bool = False
     tool_version: str = __version__
@@ -92,6 +103,23 @@ def backup_catalog(catalog: Path, backup_dir: Path) -> Path:
         raise ExecutionError("catalog backup verification failed -- refusing to continue")
     log.info("Backup verified (sha256 %s...)", source_digest[:16])
     return target
+
+
+def _profile_shaped(settings: Settings) -> dict:
+    """The run's options, minus what belongs to this one library.
+
+    Same shape a saved profile has, so the record of a run can be loaded
+    straight back as a way of working.
+    """
+    from .config import NEVER_IN_A_PROFILE, PER_LIBRARY_FIELDS
+
+    payload = settings.to_dict()
+    # The catalog and the target are worth keeping *here* -- this file
+    # documents one particular run -- but the escape hatches are not, for the
+    # same reason a profile leaves them out.
+    for name in (PER_LIBRARY_FIELDS | NEVER_IN_A_PROFILE) - {"catalog", "target_root"}:
+        payload.pop(name, None)
+    return payload
 
 
 def _digest(path: Path, chunk: int = 4 * 1024 * 1024) -> str:
@@ -145,8 +173,33 @@ def execute(
         result.finished_at = datetime.now().isoformat(timespec="seconds")
         return result
 
-    journal_path = build_journal_path(settings.resolved_backup_dir(), catalog)
+    # Everything this run leaves behind goes into one folder beside the
+    # catalog, so two libraries on two drives can never be confused for one
+    # another. The catalog backup is the exception; see runs.py for why.
+    run_directory = None
+    record = None
+    try:
+        run_directory = new_run_directory(catalog)
+        record = RunRecord(
+            stamp=run_directory.name,
+            catalog=str(catalog),
+            started_at=result.started_at,
+            tool_version=result.tool_version,
+            structure="/".join(settings.effective_structure),
+            placement=settings.placement,
+            target_roots=[scope.target_root_path for scope in plan.scopes],
+        )
+        write_record(run_directory, record)
+        write_settings(run_directory, _profile_shaped(settings))
+        journal_path = run_directory / JOURNAL_FILE
+    except OSError as error:
+        # A read-only or full volume must not stop a run that is otherwise
+        # fine; fall back to where the records always used to go.
+        log.warning("Cannot write run records beside the catalog: %s", error)
+        result.notes.append("run records kept in the backup directory: {e}".format(e=error))
+        journal_path = build_journal_path(settings.resolved_backup_dir(), catalog)
     result.journal_path = str(journal_path)
+    result.run_directory = str(run_directory) if run_directory else None
 
     with Journal(journal_path) as journal:
         journal.write(
@@ -180,6 +233,18 @@ def execute(
             raise
         finally:
             result.finished_at = datetime.now().isoformat(timespec="seconds")
+            if record is not None and run_directory is not None:
+                record.finished_at = result.finished_at
+                record.files_moved = result.files_moved
+                record.folders_created = result.folders_created
+                record.orphans_moved = result.orphans_moved
+                record.bytes_moved = result.bytes_moved
+                record.backup_path = result.backup_path
+                record.success = result.success
+                try:
+                    write_record(run_directory, record)
+                except OSError as error:  # pragma: no cover - reported, not fatal
+                    log.warning("Could not update the run record: %s", error)
             # Beside the library, for whoever wonders months later where a
             # photo went. Never allowed to turn a finished run into a failure.
             written = write_move_log(plan, result, settings)
@@ -550,7 +615,11 @@ def _verify(plan: Plan, settings: Settings, result: RunResult) -> None:
         step("Verification passed: %d file(s) confirmed", len(expected))
 
 
-def undo(journal_path: str | Path, catalog_backup: Optional[str] = None) -> RunResult:
+def undo(
+    journal_path: str | Path,
+    catalog_backup: Optional[str] = None,
+    force: bool = False,
+) -> RunResult:
     """Reverse a completed run using its journal.
 
     Files are put back first; the catalog is then restored from the backup the
@@ -566,6 +635,17 @@ def undo(journal_path: str | Path, catalog_backup: Optional[str] = None) -> RunR
         journal_path=str(journal_path),
     )
     step("Undoing run recorded in %s", journal_path)
+
+    # A run that has already been reversed must not be reversed a second time:
+    # the files are back where they started, so "putting them back" would move
+    # whatever now sits at those paths.
+    run_record = find_record_for_journal(Path(journal_path))
+    if run_record is not None and run_record.undone_at and not force:
+        raise ExecutionError(
+            "this run was already undone on {w}. Undoing it twice would move "
+            "whatever is at those paths now. Pass force=True only if you are "
+            "certain.".format(w=run_record.undone_at)
+        )
 
     backup = catalog_backup
     catalog = None
@@ -617,4 +697,15 @@ def undo(journal_path: str | Path, catalog_backup: Optional[str] = None) -> RunR
 
     result.success = not result.errors
     result.finished_at = datetime.now().isoformat(timespec="seconds")
+
+    # Mark the run spent so it is not offered again. The journal itself is
+    # kept: after a partly failed undo it is the only account of what actually
+    # moved, and discarding it exactly when it is needed would be the wrong
+    # kind of tidiness.
+    if run_record is not None:
+        try:
+            mark_undone(run_record, result.files_moved, result.errors)
+        except OSError as error:  # pragma: no cover - reported, not fatal
+            log.warning("Could not mark the run as undone: %s", error)
+            result.notes.append("could not mark the run as undone: {e}".format(e=error))
     return result

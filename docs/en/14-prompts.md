@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r12.0.0 · Build date 2026-08-23**
+**Revision r13.0.0 · Build date 2026-08-23**
 
 This document preserves the request that created LR-FolderCraft, a generic
 prompt for regenerating a comparable tool from scratch, and the context needed
@@ -286,6 +286,20 @@ pre-flight checks, execute with a progress callback. Then:
   meaning, so provide move-up and move-down. Changing a rule must clear the
   manual decisions it might have made and replan, or the display stops matching
   what would run.
+* **Write each run's record beside the thing it changed.** Journals from
+  several libraries sitting together in one configuration directory, under
+  names that differ by a timestamp, is how the wrong library gets rolled back
+  -- and the operator has no way to tell which is which. One folder per run,
+  beside that catalog, holding the journal, the settings used and a prose
+  account of what moved. Offer a history command and a history view that read
+  it, and make undo pick from *that catalog's* runs rather than from a file
+  chooser. Keep the large backup out of it: a copy beside the original, on the
+  same drive, survives a mistake but not the drive.
+* **Mark a reversed run, do not delete its journal.** Undoing twice would move
+  whatever now sits at those paths, so refuse it -- but the journal after a
+  partly failed undo is the only account of what actually moved, and discarding
+  it exactly when it is needed is the wrong kind of tidiness. Record the
+  reversal on the run; that is what stops it being offered again.
 * **A saved profile must carry the way of working and nothing of one library.**
   Leave out the catalog, the target folder, the root folder, the rule list and
   the per-folder decisions -- and leave out the escape hatches too, the "ignore

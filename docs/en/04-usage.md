@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r12.0.0 · Build date 2026-08-23**
+**Revision r13.0.0 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -618,6 +618,66 @@ they always agree.
 
 Rules still win where they are set — the checkbox is the default underneath
 them, not a competitor.
+
+## What a run leaves behind
+
+Everything one run produces goes into a folder **beside the catalog it
+changed**:
+
+```
+Masterkatalog.Neu/
+    Masterkatalog.Neu.lrcat
+    LR-FolderCraft/
+        2026-08-23_165247/
+            run.json        what was done, how much, and whether it was undone
+            settings.json   every option used, in the shape of a profile
+            journal.jsonl   the machine readable record undo works from
+            moves.log       the same thing in prose, for a person
+```
+
+This matters most where it is easiest to go wrong: an external drive holding
+several libraries. Their journals used to sit together in one configuration
+directory under similar names, and reversing the wrong one puts a library back
+into a state it was never in. Now each catalog's runs are under that catalog.
+
+The **catalog backup is deliberately not there.** A 700 MB copy beside the
+original, on the same drive, survives a mistake but not the drive. It keeps
+going to the configuration directory and `run.json` records where. Point
+`--backup-dir` at the catalog folder if portability matters more to you than
+surviving a dead disk.
+
+If the volume is read-only or full, the run still happens: the records fall
+back to the configuration directory and the result says so.
+
+### `lrfc history CATALOG`
+
+Lists what has been done to that catalog, newest first, with the command to
+reverse each run that still stands:
+
+```console
+$ lrfc history /Volumes/Extreme\ Pro/.../Masterkatalog.Neu.lrcat
+2 run(s), newest first:
+  2026-08-23 16:52  51,049 file(s)  {yyyy}/{yyyy}-{mm}/{yyyy}-{mm}-{dd}  [can be undone]
+    .../LR-FolderCraft/2026-08-23_165247
+    undo: lrfc undo .../LR-FolderCraft/2026-08-23_165247/journal.jsonl
+  2026-08-23 11:40  51,049 file(s)  {yyyy}/{mm}/{dd}  [undone 2026-08-23 12:45]
+    .../LR-FolderCraft/2026-08-23_114055
+```
+
+In the window the same list is **Actions → Run history…**, and choosing *Undo*
+opens it rather than a file chooser, so the run being reversed is always one of
+*this* catalog's.
+
+### A run is undone once
+
+Reversing a run twice would move whatever now sits at those paths, so a run
+recorded as undone is refused — `--force` overrides it, and almost never should.
+
+The journal is **kept**, not deleted. After a partly failed undo it is the only
+account of what actually moved, and discarding it exactly when it is needed
+would be the wrong kind of tidiness. Marking the run is what stops it being
+offered again.
+
 
 ## Profiles
 

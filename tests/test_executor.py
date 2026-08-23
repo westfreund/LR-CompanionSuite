@@ -598,9 +598,9 @@ def test_a_move_log_is_written_beside_the_catalog(simple_catalog, tmp_path):
 
     assert result.move_log_path is not None
     log_file = Path(result.move_log_path)
-    assert log_file.parent == simple_catalog.catalog_path.parent
-    assert log_file.name.startswith("LR-FolderCraft_")
-    assert simple_catalog.catalog_path.stem in log_file.name
+    # It lives with the journal and the settings of the same run.
+    assert log_file.parent == Path(result.run_directory)
+    assert log_file.name == "moves.log"
 
     text = log_file.read_text(encoding="utf-8")
     assert "MOVED FILES" in text

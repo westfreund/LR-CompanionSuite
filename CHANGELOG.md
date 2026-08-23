@@ -16,6 +16,54 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [13.0.0] — 2026-08-23 — "Laufakte"
+
+The user runs this over several libraries on several external drives, and asked
+for the rollback records to stop being a hazard. Their own third suggestion was
+the right one and this follows it.
+
+### Added
+
+- **One folder per run, beside the catalog it changed**:
+  `<catalog folder>/LR-FolderCraft/<timestamp>/` holding `run.json` (what was
+  done, how much, whether it has been undone), `settings.json` (every option
+  used, in the shape of a profile), `journal.jsonl` and `moves.log`.
+
+  Journals from several libraries used to sit together in one configuration
+  directory under names differing only by a timestamp. Reversing the wrong one
+  puts a library into a state it was never in, and nothing on screen said which
+  was which.
+
+  The **catalog backup deliberately stays out**: a 700 MB copy beside the
+  original, on the same drive, survives a mistake but not the drive. It still
+  goes to the configuration directory and `run.json` records where.
+
+  A read-only or full volume costs the records, never the run: they fall back
+  to the configuration directory and the result says so.
+
+- **`lrfc history CATALOG`** lists what has been done to that catalog, newest
+  first, with the command to reverse each run that still stands. In the window
+  it is **Actions → Run history…**, and *Undo* now opens that list instead of a
+  file chooser, so the run being reversed is always one of this catalog's.
+
+- **A run can only be undone once.** Doing it twice would move whatever now
+  sits at those paths, so a run recorded as undone is refused; `--force`
+  overrides it and almost never should.
+
+  The journal is **kept rather than deleted**, which is where this departs from
+  what was asked. After a partly failed undo the journal is the only account of
+  what actually moved, and discarding it exactly when it is needed would be the
+  wrong kind of tidiness. Marking the run is what stops it being offered again,
+  and it does so without destroying evidence.
+
+### Fixed
+
+- Two runs starting in the same second shared a record folder and the second
+  overwrote the first, silently. Unlikely for a large library, trivially
+  reachable for a small one.
+
+---
+
 ## [12.0.0] — 2026-08-23 — "Arbeitsweise"
 
 For using one way of working across several libraries, which is what the user

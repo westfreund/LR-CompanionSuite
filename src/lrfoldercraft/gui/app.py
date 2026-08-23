@@ -88,6 +88,7 @@ from ..rules import (
     parse_structure,
     token_help,
 )
+from ..runs import history, journal_of
 from ..safety import preconditions
 from ..version import APP_NAME, APP_URL, REVISION, __build_date__
 from .i18n import tr
@@ -206,6 +207,86 @@ class PreconditionDialog(QDialog):
 
     def _acknowledgement_changed(self, checked: bool) -> None:
         self.ok_button.setEnabled(checked and not self._blocked)
+
+
+class RunPickerDialog(QDialog):
+    """The runs recorded beside this catalog, and which of them can be undone.
+
+    A file chooser full of similarly named journals is exactly how the wrong
+    library gets rolled back. This lists the runs of *this* catalog, says what
+    each one did, and refuses to select one that has already been reversed.
+    """
+
+    def __init__(self, records, language: str, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(tr("history_title", language))
+        self.setMinimumWidth(680)
+        self.records = list(records)
+        layout = QVBoxLayout(self)
+
+        intro = QLabel(tr("history_intro", language))
+        intro.setWordWrap(True)
+        layout.addWidget(intro)
+
+        self.table = QTableWidget(len(self.records), 4)
+        self.table.verticalHeader().setVisible(False)
+        self.table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.table.setSelectionMode(QTableWidget.SingleSelection)
+        self.table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.table.setHorizontalHeaderLabels(
+            [
+                tr("history_when", language),
+                tr("history_what", language),
+                tr("history_files", language),
+                tr("history_state", language),
+            ]
+        )
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        for row, record in enumerate(self.records):
+            self.table.setItem(row, 0, QTableWidgetItem(record.started_at.replace("T", "  ")[:16]))
+            self.table.setItem(row, 1, QTableWidgetItem(record.structure or "-"))
+            self.table.setItem(row, 2, QTableWidgetItem("{n:,}".format(n=record.files_moved)))
+            if record.undone_at:
+                state = tr("history_undone", language).format(
+                    w=record.undone_at.replace("T", " ")[:16]
+                )
+            elif record.success:
+                state = tr("history_can_undo", language)
+            else:
+                state = tr("history_failed", language)
+            item = QTableWidgetItem(state)
+            if not record.can_be_undone:
+                item.setForeground(_LEVEL_COLOURS[NOTE])
+            self.table.setItem(row, 3, item)
+        self.table.itemSelectionChanged.connect(self._selection_changed)
+        layout.addWidget(self.table, 1)
+
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        self.ok_button = buttons.button(QDialogButtonBox.Ok)
+        self.ok_button.setText(tr("history_undo_this", language))
+        self.ok_button.setEnabled(False)
+        layout.addWidget(buttons)
+
+        for row, record in enumerate(self.records):
+            if record.can_be_undone:
+                self.table.selectRow(row)
+                break
+
+    def _selection_changed(self) -> None:
+        record = self.selected()
+        self.ok_button.setEnabled(record is not None and record.can_be_undone)
+
+    def selected(self):
+        row = self.table.currentRow()
+        if 0 <= row < len(self.records):
+            return self.records[row]
+        return None
 
 
 class MainWindow(QMainWindow):
@@ -374,6 +455,10 @@ class MainWindow(QMainWindow):
         menu.addAction(self.about_action)
 
         menu.addSeparator()
+
+        self.history_action = QAction(tr("history_menu", self.language), self)
+        self.history_action.triggered.connect(self.show_history)
+        menu.addAction(self.history_action)
 
         self.undo_action = QAction(tr("undo_run", self.language), self)
         self.undo_action.triggered.connect(self.do_undo)
@@ -1000,6 +1085,7 @@ class MainWindow(QMainWindow):
         self.purpose_label.setText(tr("purpose", language))
         self.about_action.setText(tr("about", language))
         self.language_action.setText(tr("language", language))
+        self.history_action.setText(tr("history_menu", language))
         self.undo_action.setText(tr("undo_run", language))
         self.undo_button.setText(tr("undo_button", language))
         if self.root_combo.count():
@@ -1369,7 +1455,33 @@ class MainWindow(QMainWindow):
         worker.failed.connect(self._worker_failed)
         run_in_thread(worker, self._threads)
 
+    def _recorded_runs(self):
+        catalog = self.catalog_edit.text().strip()
+        return history(Path(catalog)) if catalog else []
+
+    def show_history(self) -> None:
+        """What has been done to this catalog, and what can still be taken back."""
+        records = self._recorded_runs()
+        if not records:
+            QMessageBox.information(self, APP_NAME, tr("history_empty", self.language))
+            return
+        RunPickerDialog(records, self.language, self).exec()
+
     def _choose_journal(self) -> str:
+        """Pick a run of *this* catalog, or fall back to choosing a file.
+
+        A file chooser full of similarly named journals from several libraries
+        is how the wrong one gets rolled back, so the recorded runs of the
+        catalog on screen come first.
+        """
+        records = self._recorded_runs()
+        if records:
+            dialog = RunPickerDialog(records, self.language, self)
+            if dialog.exec() != QDialog.Accepted:
+                return ""
+            record = dialog.selected()
+            return str(journal_of(record)) if record is not None else ""
+
         start = self.last_journal or str(Settings().resolved_backup_dir())
         path, _filter = QFileDialog.getOpenFileName(
             self,
