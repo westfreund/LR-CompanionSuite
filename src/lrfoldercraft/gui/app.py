@@ -232,14 +232,25 @@ class MainWindow(QMainWindow):
         self.splitter.setSizes(sizes)
 
     def _build_menu(self) -> None:
-        language_action = QAction(tr("language", self.language), self)
-        language_action.triggered.connect(self.toggle_language)
-        self.language_action = language_action
-        self.menuBar().addAction(language_action)
+        """Entries have to live inside a menu, not on the menu bar itself.
+
+        Qt documents that adding an action directly to a QMenuBar is not
+        supported on macOS, where the bar is the system-wide one. Both entries
+        were therefore invisible on exactly the platform this was developed on:
+        the language switch nobody found, and an undo nobody could reach.
+        """
+        menu = self.menuBar().addMenu(tr("menu_actions", self.language))
+        self.actions_menu = menu
+
+        self.language_action = QAction(tr("language", self.language), self)
+        self.language_action.triggered.connect(self.toggle_language)
+        menu.addAction(self.language_action)
+
+        menu.addSeparator()
 
         self.undo_action = QAction(tr("undo_run", self.language), self)
         self.undo_action.triggered.connect(self.do_undo)
-        self.menuBar().addAction(self.undo_action)
+        menu.addAction(self.undo_action)
 
     def _catalog_box(self) -> QGroupBox:
         box = QGroupBox()
@@ -590,11 +601,16 @@ class MainWindow(QMainWindow):
         self.apply_button = QPushButton()
         self.apply_button.clicked.connect(self.do_apply)
         self.apply_button.setEnabled(False)
+        # The way back belongs beside the way forward. A rollback reachable
+        # only through a menu is one nobody finds when they need it.
+        self.undo_button = QPushButton()
+        self.undo_button.clicked.connect(self.do_undo)
         self.progress = QProgressBar()
         self.progress.setValue(0)
         self.status_label = QLabel()
         row.addWidget(self.plan_button)
         row.addWidget(self.apply_button)
+        row.addWidget(self.undo_button)
         row.addWidget(self.progress, 1)
         row.addWidget(self.status_label)
         return holder
@@ -666,8 +682,10 @@ class MainWindow(QMainWindow):
         self.plan_button.setText(tr("plan", language))
         self.apply_button.setText(tr("apply", language))
         self.status_label.setText(tr("ready", language))
+        self.actions_menu.setTitle(tr("menu_actions", language))
         self.language_action.setText(tr("language", language))
         self.undo_action.setText(tr("undo_run", language))
+        self.undo_button.setText(tr("undo_button", language))
         if self.root_combo.count():
             self.root_combo.setItemText(0, tr("all_roots", language))
         if not self.catalog_info.text() or self.catalog_info.text().startswith(
@@ -708,6 +726,8 @@ class MainWindow(QMainWindow):
 
     def _busy(self, busy: bool, message: str = "") -> None:
         self.plan_button.setEnabled(not busy)
+        self.undo_button.setEnabled(not busy)
+        self.undo_action.setEnabled(not busy)
         self.apply_button.setEnabled(not busy and self.plan is not None)
         self.progress.setRange(0, 0 if busy else 100)
         if not busy:

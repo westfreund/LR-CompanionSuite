@@ -134,7 +134,9 @@ TEXT: Dict[str, Tuple[str, str]] = {
         "'Gesteuert durch' genannte Einstellung ändern und erneut planen.",
     ),
     "findings_more": ("... and {n:,} more", "... und {n:,} weitere"),
+    "menu_actions": ("Actions", "Aktionen"),
     "undo_run": ("Undo a run…", "Lauf rückgängig machen…"),
+    "undo_button": ("Undo…", "Rückgängig…"),
     "pick_journal": (
         "Choose the journal of the run to undo",
         "Journal des rückgängig zu machenden Laufs wählen",

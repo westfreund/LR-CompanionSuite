@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r8.0.0 · Build-Datum 2026-08-23**
+**Revision r8.0.1 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -253,9 +253,9 @@ lrfc gui --lang de                              # deutsch
 lrfc gui --lang de /Volumes/Fotos/2019/2019.lrcat   # deutsch, Katalog gleich mit
 ```
 
-Ohne Neustart lässt sich die Sprache auch im Fenster umschalten: der
-Menüeintrag oben zeigt immer die **andere** Sprache an, in der deutschen
-Oberfläche also „English".
+Ohne Neustart lässt sich die Sprache auch im Fenster umschalten, im Menü
+**Aktionen**. Der Eintrag zeigt immer die **andere** Sprache an, in der
+deutschen Oberfläche also „English".
 
 ### Was sich das Fenster merkt
 
@@ -290,8 +290,8 @@ Ein Fenster, von oben nach unten:
 | **Fortschritt** | Balken und Zähler während des Laufs, danach das vollständige Ergebnis |
 | **Protokoll** | was geschehen ist, samt aller Warnungen aus den Vorprüfungen |
 
-Über die Menüleiste lässt sich jederzeit zwischen Deutsch und Englisch
-wechseln.
+Über das Menü **Aktionen** lässt sich jederzeit zwischen Deutsch und Englisch
+wechseln, und dort steht auch das Rückgängigmachen.
 
 ### Die Bereiche lassen sich aufziehen — Wichtig
 
@@ -557,8 +557,8 @@ Bei einer Fehlermeldung bitte das Log **und** den Plan als JSON beilegen.
 
 ### Einen Lauf aus dem Fenster zurücknehmen
 
-Der Menüeintrag **Lauf rückgängig machen…** dreht einen abgeschlossenen Lauf
-um. Er fragt nach dessen Journal — der neueste wird zuerst angeboten, weil fast
+Die Schaltfläche **Rückgängig…** neben *Ausführen* — und derselbe Eintrag im
+Menü **Aktionen** — dreht einen abgeschlossenen Lauf um. Er fragt nach dessen Journal — der neueste wird zuerst angeboten, weil fast
 immer er gemeint ist —, sagt unmissverständlich, was geschieht, und stellt dann
 jede verschobene Datei an ihren Platz zurück, entfernt die vom Lauf angelegten
 Ordner, sofern sie leer sind, und spielt den Katalog aus der Sicherung dieses

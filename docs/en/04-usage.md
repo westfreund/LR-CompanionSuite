@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r8.0.0 · Build date 2026-08-23**
+**Revision r8.0.1 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -258,9 +258,9 @@ lrfc gui --lang de                                # German
 lrfc gui --lang de /Volumes/Photos/2019/2019.lrcat  # German, catalog chosen
 ```
 
-The language can also be switched inside the window without restarting: the
-menu entry at the top always names the **other** language, so in the English
-interface it reads "Deutsch".
+The language can also be switched inside the window without restarting, from
+the **Actions** menu. The entry always names the **other** language, so in the
+English interface it reads "Deutsch".
 
 ### What the window remembers
 
@@ -295,7 +295,8 @@ One window, top to bottom:
 | **Progress** | a bar and a counter during the run, and the full result afterwards |
 | **Log** | what happened, including every warning from the pre-flight checks |
 
-The menu bar switches between English and German at any time.
+The **Actions** menu switches between English and German at any time, and
+holds the undo entry.
 
 ### The sections can be pulled open — important
 
@@ -546,7 +547,8 @@ Attach the log **and** the plan JSON when reporting a problem.
 
 ### Undoing a run from the window
 
-The **Undo a run…** entry in the menu bar reverses a completed run. It asks for
+The **Undo…** button beside *Apply* — and the same entry in the **Actions**
+menu — reverses a completed run. It asks for
 the run's journal — the newest is offered first, because it is nearly always
 the one meant — states plainly what will happen, and then puts every moved file
 back where it was, removes the folders the run created if they are empty, and

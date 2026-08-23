@@ -16,6 +16,27 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [8.0.1] — 2026-08-23
+
+### Fixed
+
+- **The menu entries were invisible on macOS.** Qt documents that adding an
+  action directly to a `QMenuBar` is not supported there, because the bar is
+  the system-wide one — and that is exactly what both entries did. The language
+  switch nobody had found and the undo shipped in r8.0.0 were therefore
+  unreachable on the platform the tool is developed on. Reported by the user,
+  who looked for the undo after a real 51,049-file run and could not find it.
+
+  Both now live in an **Actions** menu, and undo is additionally a button
+  beside *Apply*: a rollback reachable only through a menu is one nobody finds
+  when they need it. Both are disabled while a run is in progress. A test
+  asserts that every top-level entry on the bar opens a menu.
+
+- The documentation said the language could be switched "from the menu bar",
+  which was advice that could not be followed. It now names the Actions menu.
+
+---
+
 ## [8.0.0] — 2026-08-23 — "Rueckfahrkarte"
 
 ### Added

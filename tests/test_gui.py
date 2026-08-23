@@ -595,3 +595,40 @@ def test_undoing_puts_the_library_back(qt_app, mixed_gui_catalog, monkeypatch):
 
     assert mixed_gui_catalog.catalog_paths() == before_catalog
     window.close()
+
+
+def test_menu_entries_live_inside_a_menu_not_on_the_bar(qt_app):
+    """Qt does not support bare actions on the menu bar on macOS.
+
+    Both entries were invisible there, which is how an undo nobody could reach
+    shipped in r8.0.0.
+    """
+    window = MainWindow()
+    # Every top-level entry on the bar must open a menu; a bare action there
+    # is what macOS silently drops.
+    top_level = window.menuBar().actions()
+    assert top_level
+    assert all(action.menu() is not None for action in top_level)
+
+    entries = [entry.text() for entry in window.actions_menu.actions()]
+    assert window.undo_action.text() in entries
+    assert window.language_action.text() in entries
+    window.close()
+
+
+def test_undo_is_also_a_button_beside_apply(qt_app):
+    """A rollback reachable only through a menu is one nobody finds in time."""
+    window = MainWindow()
+    assert window.undo_button.text()
+    assert window.undo_button.isEnabled()
+    window.close()
+
+
+def test_undo_cannot_be_started_while_something_is_running(qt_app):
+    window = MainWindow()
+    window._busy(True, "…")
+    assert not window.undo_button.isEnabled()
+    assert not window.undo_action.isEnabled()
+    window._busy(False)
+    assert window.undo_button.isEnabled()
+    window.close()
