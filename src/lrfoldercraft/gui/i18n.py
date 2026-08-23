@@ -250,6 +250,18 @@ TEXT: Dict[str, Tuple[str, str]] = {
         "nicht wegbestätigen.",
     ),
     "menu_actions": ("Actions", "Aktionen"),
+    "interrupted_found": (
+        "An earlier run was cut short and is still half done.\n\n{d}\n\n"
+        "Put those {n} file(s) back now? Nothing can be planned until this is "
+        "settled.",
+        "Ein früherer Lauf wurde abgebrochen und liegt halb fertig.\n\n{d}\n\n"
+        "Diese {n} Datei(en) jetzt zurückstellen? Vorher lässt sich nichts "
+        "planen.",
+    ),
+    "interrupted_fixed": (
+        "{n:,} file(s) put back, {d} directory/directories removed.",
+        "{n:,} Datei(en) zurückgestellt, {d} Ordner entfernt.",
+    ),
     "history_menu": ("Run history…", "Verlauf der Läufe…"),
     "history_title": ("Runs recorded for this catalog", "Aufgezeichnete Läufe dieses Katalogs"),
     "history_intro": (

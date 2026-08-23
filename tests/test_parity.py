@@ -86,3 +86,10 @@ def test_every_writing_interface_has_the_safety_net(what, needle):
 @pytest.mark.parametrize("what,needle", sorted(CAPABILITIES.items()))
 def test_the_interfaces_offer_the_same_capabilities(what, needle):
     assert (needle in GUI) == (needle in TUI), what
+
+
+#: Finishing an interrupted run belongs everywhere a run can be started.
+@pytest.mark.parametrize("needle", ["find_interruptions", "revert_files"])
+def test_every_writing_interface_can_finish_an_interrupted_run(needle):
+    assert needle in GUI, needle
+    assert needle in TUI, needle

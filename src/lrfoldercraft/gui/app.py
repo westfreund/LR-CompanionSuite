@@ -80,6 +80,7 @@ from ..logging_setup import get_logger, setup_logging
 from ..planner import Plan
 from ..report import human_bytes, render_result
 from ..resources import logo_for
+from ..resume import find_interruptions, remove_created_directories, revert_files
 from ..rules import (
     PRESETS,
     RuleError,
@@ -1215,6 +1216,12 @@ class MainWindow(QMainWindow):
             self.target_new_tree.setChecked(True)
 
     def load_catalog(self) -> None:
+        # Before anything is read: an earlier run left half done blocks every
+        # plan, so it is the first thing to settle.
+        self._offer_to_finish_an_interrupted_run()
+        self._load_catalog()
+
+    def _load_catalog(self) -> None:
         path = self.catalog_edit.text().strip()
         if not path:
             return
@@ -1475,6 +1482,41 @@ class MainWindow(QMainWindow):
     def _recorded_runs(self):
         catalog = self.catalog_edit.text().strip()
         return history(Path(catalog)) if catalog else []
+
+    def _offer_to_finish_an_interrupted_run(self) -> bool:
+        """Ask about a half-done earlier run before anything else happens.
+
+        Pre-flight refuses to plan on top of one, so the operator would
+        otherwise meet a refusal with no way to act on it from here.
+        """
+        catalog = self.catalog_edit.text().strip()
+        if not catalog:
+            return False
+        try:
+            pending = find_interruptions(Path(catalog))
+        except Exception as exc:  # noqa: BLE001 - shown to the user
+            self.say(str(exc))
+            return False
+        if not pending:
+            return False
+        found = pending[0]
+        answer = QMessageBox.warning(
+            self,
+            APP_NAME,
+            tr("interrupted_found", self.language).format(
+                d=found.describe(self.language), n=len(found.to_revert)
+            ),
+            QMessageBox.Yes | QMessageBox.Cancel,
+            QMessageBox.Yes,
+        )
+        if answer != QMessageBox.Yes:
+            return False
+        restored, errors = revert_files(found)
+        removed = remove_created_directories(found)
+        self.say(tr("interrupted_fixed", self.language).format(n=restored, d=removed))
+        for error in errors:
+            self.say(error)
+        return True
 
     def show_history(self) -> None:
         """What has been done to this catalog, and what can still be taken back."""

@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r15.0.2 · Build date 2026-08-23**
+**Revision r16.0.0 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -705,6 +705,41 @@ The journal is **kept**, not deleted. After a partly failed undo it is the only
 account of what actually moved, and discarding it exactly when it is needed
 would be the wrong kind of tidiness. Marking the run is what stops it being
 offered again.
+
+
+## When a run is cut short
+
+A run stages the catalog, moves the files, and commits — in that order. If the
+process dies partway, the built-in rollback never gets to run and the library
+is left between two states.
+
+The journal recorded every step, so what happened is knowable rather than
+guessable:
+
+```console
+$ lrfc resume .../LR-FolderCraft/2026-08-23_220136/journal.jsonl
+Interrupted before the catalog was committed. The catalog still describes the
+old layout, but 23,050 file(s) already sit at their new paths. They belong back.
+Put 23,050 file(s) back? [y/N]
+```
+
+Which direction "finishing" means is decided by where it stopped, not by a
+guess:
+
+| Where it stopped | What that means | What happens |
+| --- | --- | --- |
+| Before the catalog was committed | SQLite discarded the staged transaction, so the catalog still describes the old layout | the files go back |
+| After the commit | catalog and files agree; the run was effectively complete | nothing moves |
+| During a reversal | undo restores the catalog last, so it is still describing the new layout | continue with `lrfc undo` |
+
+The third case is safe to simply repeat: a file is moved only while it is still
+at the place it is being moved from, so running undo again finishes it.
+
+**A new run is refused while one is unfinished.** Planning on top of a
+half-moved library produces a plan for a library that does not exist, and
+applying it makes the tangle worse. `lrfc history` marks the run and prints the
+command; the window offers to settle it when the catalog is loaded; the text
+interface has it on `Ctrl+E`.
 
 
 ## Profiles

@@ -56,6 +56,7 @@ from ..folders import (
 from ..logging_setup import LOGGER_NAME, get_logger, setup_logging
 from ..planner import Plan, PlanError, build_plan
 from ..report import human_bytes, render_info, render_result
+from ..resume import find_interruptions, remove_created_directories, revert_files
 from ..rules import PRESET_DESCRIPTIONS, PRESETS, RuleError, describe_structure, parse_structure
 from ..runs import history, journal_of
 from ..safety import preconditions, preflight
@@ -109,6 +110,19 @@ TEXT = {
     "preconditions_blocked": (
         "Something above prevents the run. Put it right first.",
         "Etwas davon verhindert den Lauf. Bitte zuerst beheben.",
+    ),
+    "interrupted_title": ("Unfinished run", "Abgebrochener Lauf"),
+    "interrupted_found": (
+        "{d}\n\nPut those {n} file(s) back now? Nothing can be planned until this is settled.",
+        "{d}\n\nDiese {n} Datei(en) jetzt zurückstellen? Vorher lässt sich nichts planen.",
+    ),
+    "interrupted_fixed": (
+        "{n:,} file(s) put back, {d} directory/directories removed.",
+        "{n:,} Datei(en) zurückgestellt, {d} Ordner entfernt.",
+    ),
+    "interrupted_none": (
+        "No interrupted run is waiting.",
+        "Kein abgebrochener Lauf wartet.",
     ),
     "history_title": ("Runs recorded for this catalog", "Aufgezeichnete Läufe dieses Katalogs"),
     "history_intro": (
@@ -423,6 +437,7 @@ class LRFolderCraftApp(App[int]):
         Binding("ctrl+p", "plan", "Plan", priority=True),
         Binding("ctrl+r", "apply", "Apply", priority=True),
         Binding("ctrl+z", "history", "History", priority=True),
+        Binding("ctrl+e", "resume", "Resume", priority=True),
         Binding("f1", "toggle_language", "EN/DE", priority=True),
         Binding("ctrl+q", "quit", "Quit", priority=True),
     ]
@@ -805,6 +820,39 @@ class LRFolderCraftApp(App[int]):
             ConfirmScreen(
                 tr("confirm_title", self.language),
                 tr("confirm_body", self.language).format(n=plan.stats.touched),
+                tr("yes", self.language),
+                tr("no", self.language),
+            ),
+            proceed,
+        )
+
+    def action_resume(self) -> None:
+        """Finish an earlier run that was cut short."""
+        catalog = self.query_one("#catalog-path", Input).value.strip()
+        if not catalog:
+            self.notify(tr("no_catalog_yet", self.language), severity="warning")
+            return
+        pending = find_interruptions(Path(catalog))
+        if not pending:
+            self.notify(tr("interrupted_none", self.language))
+            return
+        found = pending[0]
+
+        def proceed(confirmed: Optional[bool]) -> None:
+            if not confirmed:
+                return
+            restored, errors = revert_files(found)
+            removed = remove_created_directories(found)
+            self.write_log(tr("interrupted_fixed", self.language).format(n=restored, d=removed))
+            for error in errors:
+                self.write_log("[red]{e}[/red]".format(e=error))
+
+        self.push_screen(
+            ConfirmScreen(
+                tr("interrupted_title", self.language),
+                tr("interrupted_found", self.language).format(
+                    d=found.describe(self.language), n=len(found.to_revert)
+                ),
                 tr("yes", self.language),
                 tr("no", self.language),
             ),

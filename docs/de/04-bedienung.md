@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r15.0.2 · Build-Datum 2026-08-23**
+**Revision r16.0.0 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -722,6 +722,44 @@ Das Journal wird **behalten**, nicht gelöscht. Nach einem teilweise
 gescheiterten Undo ist es die einzige Auskunft darüber, was tatsächlich bewegt
 wurde — es genau dann wegzuwerfen, wenn es gebraucht wird, wäre die falsche Art
 von Ordnung. Was das erneute Anbieten verhindert, ist der Vermerk am Lauf.
+
+
+## Wenn ein Lauf abbricht
+
+Ein Lauf bereitet den Katalog vor, verschiebt die Dateien und schreibt fest —
+in dieser Reihenfolge. Stirbt der Prozess dazwischen, kommt die eingebaute
+Rückabwicklung nicht mehr zum Zug, und die Bibliothek steht zwischen zwei
+Zuständen.
+
+Das Journal hat jeden Schritt festgehalten, das Geschehene ist also erkennbar
+und muss nicht geraten werden:
+
+```console
+$ lrfc resume .../LR-FolderCraft/2026-08-23_220136/journal.jsonl
+Abgebrochen, bevor der Katalog festgeschrieben wurde. Der Katalog beschreibt
+noch den alten Stand, 23.050 Datei(en) liegen aber schon am neuen Ort. Sie
+gehören zurück.
+23.050 Datei(en) zurückstellen? [y/N]
+```
+
+In welche Richtung „abschließen" heißt, entscheidet die Abbruchstelle, keine
+Vermutung:
+
+| Abbruchstelle | Bedeutung | Folge |
+| --- | --- | --- |
+| Vor dem Festschreiben des Katalogs | SQLite hat die vorbereitete Transaktion verworfen, der Katalog beschreibt also noch den alten Stand | die Dateien gehen zurück |
+| Nach dem Festschreiben | Katalog und Dateien stimmen überein, der Lauf war praktisch fertig | nichts bewegt sich |
+| Während einer Rücknahme | Undo spielt den Katalog zuletzt zurück, er beschreibt also noch den neuen Stand | mit `lrfc undo` fortsetzen |
+
+Der dritte Fall lässt sich gefahrlos wiederholen: Eine Datei wird nur bewegt,
+solange sie noch dort liegt, woher sie geholt werden soll.
+
+**Ein neuer Lauf wird verweigert, solange einer unabgeschlossen ist.** Auf einer
+halb verschobenen Bibliothek zu planen ergibt einen Plan für eine Bibliothek,
+die es nicht gibt, und ihn auszuführen verschlimmert das Durcheinander. `lrfc
+history` weist den Lauf aus und nennt den Befehl; das Fenster bietet die
+Bereinigung beim Laden des Katalogs an; die Textoberfläche hat sie auf
+`Strg+E`.
 
 
 ## Profile

@@ -72,6 +72,7 @@ def preflight(plan: Plan) -> PreflightResult:
     catalog = Path(plan.catalog_path)
 
     checks.append(_check_lock(catalog))
+    checks.append(_check_unfinished_run(catalog))
     checks.append(_check_catalog_writable(catalog))
     checks.append(_check_side_files(catalog))
     checks.append(_check_id_counter_type(catalog))
@@ -110,6 +111,43 @@ def _check_lock(catalog: Path) -> Check:
         OK,
         "No Lightroom lock file -- the catalog is free.",
         "Keine Lightroom-Sperrdatei -- der Katalog ist frei.",
+    )
+
+
+def _check_unfinished_run(catalog: Path) -> Check:
+    """Refuse to start while an earlier run is lying half done.
+
+    A run cut short leaves the catalog describing one layout and some files at
+    another. Planning on top of that produces a plan for a library that does
+    not exist, and applying it makes the tangle worse. Finishing the earlier
+    run first is not optional.
+    """
+    from .resume import find_interruptions
+
+    try:
+        interruptions = find_interruptions(catalog)
+    except Exception as error:  # noqa: BLE001 - reported, never raised on
+        return Check(
+            "unfinished-run",
+            WARNING,
+            "Could not check for interrupted runs: {e}".format(e=error),
+            "Abgebrochene Läufe nicht prüfbar: {e}".format(e=error),
+        )
+    if not interruptions:
+        return Check(
+            "unfinished-run",
+            OK,
+            "No interrupted run is waiting to be finished.",
+            "Kein abgebrochener Lauf wartet auf Abschluss.",
+        )
+    first = interruptions[0]
+    return Check(
+        "unfinished-run",
+        ERROR,
+        "An earlier run was cut short and is still half done. {d} Finish it "
+        "first: lrfc resume {j}".format(d=first.describe("en"), j=first.journal_path),
+        "Ein früherer Lauf wurde abgebrochen und liegt halb fertig. {d} Bitte "
+        "zuerst abschließen: lrfc resume {j}".format(d=first.describe("de"), j=first.journal_path),
     )
 
 

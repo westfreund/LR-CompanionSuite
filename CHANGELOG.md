@@ -16,6 +16,36 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [16.0.0] — 2026-08-23 — "Wiederaufnahme"
+
+### Added
+
+- **A run cut short can be finished.** `lrfc resume JOURNAL` reads the journal,
+  compares it with what is on disk now, states what it found, and completes the
+  job. Prompted by an interruption I caused myself while driving the window
+  from a script: 27,660 files back, 23,050 still at their new paths, and
+  nothing in the tool to say so.
+
+  The direction is decided by where it stopped, not guessed:
+
+  | Where it stopped | What happens |
+  | --- | --- |
+  | Before the catalog was committed | the files go back — SQLite discarded the staged transaction, so the catalog still describes the old layout |
+  | After the commit | nothing moves — catalog and files already agree |
+  | During a reversal | continue with `lrfc undo`, which is safe to repeat |
+
+  The list of files to move back is **empty unless reverting is right**, so a
+  caller cannot revert a committed run by reading the obvious-looking field.
+  That distinction is tested, because it is the one that would do damage.
+
+- **A new run is refused while one is unfinished** — a new pre-flight check.
+  Planning on top of a half-moved library produces a plan for a library that
+  does not exist. `lrfc history` marks the run and prints the command to settle
+  it, the window offers to do it when the catalog is loaded, and the text
+  interface has it on `Ctrl+E`.
+
+---
+
 ## [15.0.2] — 2026-08-23
 
 ### Fixed

@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r15.0.2 · Build-Datum 2026-08-23**
+**Revision r16.0.0 · Build-Datum 2026-08-23**
 
 Dieses Dokument bewahrt die Anfrage, aus der LR-FolderCraft entstanden ist,
 einen generischen Prompt zur Neuerzeugung eines vergleichbaren Werkzeugs sowie
@@ -391,6 +391,19 @@ pre-flight checks, execute with a progress callback. Then:
   require that any interface which *writes* offers the preconditions, the
   history and the undo. The check costs half an hour and is the only thing that
   keeps the promise honest.
+* **Plan for the process dying mid-run, because it will.** A crash, a pulled
+  cable, a closed terminal: the built-in rollback never gets to run and the
+  library sits between two states. The journal already knows every step, so
+  make a command that reads it, compares it with what is on disk *now*, says
+  plainly what it found, and finishes the job. The order of the run decides the
+  direction and no guessing is needed: interrupted before the commit means the
+  catalog is untouched and the files go back; after the commit means the two
+  agree and nothing moves; an interrupted reversal continues, because undo
+  restores the catalog last. Refuse to start a new run while one is unfinished
+  -- planning on a half-moved library plans for a library that is not there.
+  And make the "files to move back" list *empty* unless reverting is the right
+  direction, so that no caller can revert a committed run by reading the
+  obvious-looking field.
 * **Put undo in every front end, not only on the command line.** A rollback
   that exists but cannot be reached from the window the operator actually uses
   is a rollback they will not have when they need it. Reverse the file moves in

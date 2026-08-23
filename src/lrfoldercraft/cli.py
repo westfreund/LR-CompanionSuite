@@ -60,6 +60,7 @@ from .report import (
     render_tokens,
     write_plan_files,
 )
+from .resume import NEEDS_RECORD, NEEDS_UNDO, inspect, remove_created_directories, revert_files
 from .rules import RuleError, parse_structure
 from .runs import directory_of, history, journal_of, runs_directory
 from .safety import preflight
@@ -146,6 +147,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="undo a run that is already recorded as undone -- almost never right",
     )
     _add_global_flags(p_undo)
+
+    p_resume = sub.add_parser("resume", help="finish a run that was cut short")
+    p_resume.add_argument("journal", help="path to the interrupted run's journal")
+    p_resume.add_argument("-y", "--yes", action="store_true")
+    _add_global_flags(p_resume)
 
     p_history = sub.add_parser("history", help="list the runs recorded beside a catalog")
     p_history.add_argument("catalog", help="path to the .lrcat file")
@@ -596,6 +602,54 @@ def cmd_undo(args: argparse.Namespace) -> int:
     return EXIT_OK if result.success else EXIT_ERROR
 
 
+def cmd_resume(args: argparse.Namespace) -> int:
+    """Finish what an interrupted run left half done."""
+    language = args.lang or "en"
+    found = inspect(args.journal)
+    print(found.describe(language))
+    if not found.needs_work:
+        return EXIT_OK
+
+    if found.state == NEEDS_RECORD:
+        print(
+            "Nichts zu bewegen. Der Katalog und die Dateien stimmen überein."
+            if language == "de"
+            else "Nothing to move. The catalog and the files agree."
+        )
+        return EXIT_OK
+
+    if found.state == NEEDS_UNDO:
+        print(
+            "Bitte die Rücknahme fortsetzen: lrfc undo {j}".format(j=args.journal)
+            if language == "de"
+            else "Continue the reversal instead: lrfc undo {j}".format(j=args.journal)
+        )
+        return EXIT_OK
+
+    if not args.yes:
+        question = (
+            "{n} Datei(en) zurückstellen? [y/N] "
+            if language == "de"
+            else "Put {n} file(s) back? [y/N] "
+        ).format(n=len(found.to_revert))
+        if input(question).strip().lower() not in ("y", "yes", "j", "ja"):
+            print("Aborted." if language != "de" else "Abgebrochen.")
+            return EXIT_ABORTED
+
+    restored, errors = revert_files(found)
+    removed = remove_created_directories(found)
+    print(
+        "{r} Datei(en) zurückgestellt, {d} Ordner entfernt.".format(r=restored, d=removed)
+        if language == "de"
+        else "{r} file(s) put back, {d} directory/directories removed.".format(
+            r=restored, d=removed
+        )
+    )
+    for error in errors:
+        print("  " + error, file=sys.stderr)
+    return EXIT_OK if not errors else EXIT_ERROR
+
+
 def cmd_history(args: argparse.Namespace) -> int:
     """What has been done to this catalog, newest first."""
     language = args.lang or "en"
@@ -616,6 +670,12 @@ def cmd_history(args: argparse.Namespace) -> int:
     for record in records:
         print("  " + record.describe(language))
         print("    {d}".format(d=directory_of(record)))
+        journal = journal_of(record)
+        if journal.exists():
+            found = inspect(journal)
+            if found.needs_work:
+                print("    [!] " + found.describe(language))
+                print("        lrfc resume {j}".format(j=journal))
         if record.can_be_undone:
             print(
                 "    {w} lrfc undo {j}".format(
@@ -776,6 +836,7 @@ DISPATCH = {
     "plan": cmd_plan,
     "apply": cmd_apply,
     "undo": cmd_undo,
+    "resume": cmd_resume,
     "history": cmd_history,
     "profiles": cmd_profiles,
     "tokens": cmd_tokens,
