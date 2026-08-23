@@ -12,6 +12,76 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
 ---
 
+## [5.0.0] — 2026-08-23 — "Regelwerk"
+
+Expressing what a grown library actually needs. Prompted by a master catalog
+whose 39 folders held four distinct intentions and could not be described with
+the vocabulary the tool had.
+
+### Added
+
+- **`resort`, a fifth folder action.** Rebuilds a folder *where it stands*,
+  below its own parent: `raw2026/2026-06-28 Makro Blume im Garten` becomes
+  `raw2026/2026-06-28/Makro Blume im Garten`. Neither `consolidate` (which
+  drags the photos out of `raw2026`) nor `sort-inside` (which nests the
+  structure below the folder itself) could express this.
+
+- **The `{folder_label}` token** — the descriptive text after a folder name's
+  date prefix, empty when there is none. Together with `resort` this is what
+  splits a dated folder into a date level and a description level instead of
+  losing the description.
+
+- **Levels that render empty now collapse** instead of becoming a folder called
+  `unnamed`, which is what makes `{folder_label}` usable as a level of its own:
+  `{yyyy}-{mm}-{dd}/{folder_label}` gives a plain day folder for a photo whose
+  folder carries no text.
+
+- **An ordered rule list**, `PATTERN=ACTION`, first match wins, via `--rule`
+  and the `folder_rules` setting. Patterns are path globs — covering everything
+  below the folder they name — or the keywords `dated`, `dated+label`,
+  `dated-only`, `plain` and `*`. Precedence: per-folder override, then rule,
+  then the interactive question, then the kind default. A rule silences the
+  question it already answers, and each folder records which rule decided it.
+
+  The master catalog's 39 folders are now five lines rather than 39 dropdowns.
+
+- **A rule table in the graphical interface**, above the folder table, with
+  add, remove and reorder. The folder table gains a "Decided by" column naming
+  the rule that settled each row, or marking the decision as the user's own.
+  Changing a rule clears the manual decisions it might have made and replans.
+
+- **A move log beside the library** (O-24). A plain text record named after the
+  tool, the date and the catalog, written next to the `.lrcat` file: every
+  source and target path, the rules used, the backup and journal locations, and
+  a summary. The JSON-Lines journal remains what it was — a machine-readable
+  record for undo; this is the one a person reads months later. Written in the
+  run's `finally`, so a failed run is recorded too, and strictly non-fatal: an
+  unwritable directory leaves a note on the result and nothing else.
+  `--no-move-log` and `--move-log-dir` control it.
+
+- **A preparation page** in both languages (O-21, O-22):
+  [before-you-start.md](docs/en/before-you-start.md) /
+  [vorbereitung.md](docs/de/vorbereitung.md) — reconnecting a library whose
+  drive was renamed or restored, and converting the catalog to the installed
+  Lightroom Classic first. Linked from both indexes.
+
+### Fixed
+
+- **`resort` tore sessions in two.** A shoot that runs past midnight leaves
+  photos whose own date disagrees with the folder naming the session. Rebuilding
+  such a folder filed each photo by its own date, which is precisely what
+  `--mismatch-action leave` says must not happen. That setting now governs
+  `resort` as well, so a stray photo follows its folder's date and the session
+  stays whole.
+
+  Found by simulating the new rules against the real master catalog before
+  writing a line of it to disk: 1 of 23 sessions split, the twelve frames of
+  `2026-06-27 Test 150mm Spiegelobjektiv` that were shot the evening before.
+  The fault is invisible in the counts and does not occur in any synthetic
+  catalog.
+
+---
+
 ## [4.0.2] — 2026-08-23
 
 ### Fixed

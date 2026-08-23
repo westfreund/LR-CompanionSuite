@@ -1,6 +1,6 @@
 # LR-FolderCraft — Overview
 
-**Revision r4.0.2 · Build date 2026-08-23**
+**Revision r5.0.0 · Build date 2026-08-23**
 
 LR-FolderCraft reorganises the folder tree of an Adobe Lightroom Classic
 library. It moves the image files on disk and rewrites the catalog in the same
@@ -43,6 +43,8 @@ that value never changes, everything hanging off it survives:
 ## Documents
 
 - [installation.md](installation.md) — install on macOS, Windows and Linux
+- [before-you-start.md](before-you-start.md) — **read this first**: reconnecting
+  folders and converting the catalog
 - [usage.md](usage.md) — every command, every option, worked examples
 - [structures.md](structures.md) — presets and the full token reference
 - [how-it-works.md](how-it-works.md) — the catalog internals
@@ -55,6 +57,10 @@ that value never changes, everything hanging off it survives:
 - [prompts.md](prompts.md) — original and generic regeneration prompt
 
 ## The three commands you need
+
+Two preconditions first — see [before-you-start.md](before-you-start.md): every
+folder connected in Lightroom, and the catalog opened once with your current
+Lightroom Classic.
 
 ```bash
 lrfc info  CATALOG              # what is in this catalog? (read only)

@@ -1,6 +1,6 @@
 # Folder structures and tokens
 
-**Revision r4.0.2 · Build date 2026-08-23**
+**Revision r5.0.0 · Build date 2026-08-23**
 
 A **structure** is an ordered list of **levels**. Each level becomes one
 directory, and each level is a **template** made of literal text and
@@ -85,6 +85,7 @@ Values come from the photo's capture time (see
 | `{ext}` | `CR2` | File extension, upper case |
 | `{ext_lower}` | `cr2` | File extension, lower case |
 | `{orig_folder}` | `raw2019` | Name of the folder the file is in today |
+| `{folder_label}` | `Makro Blume im Garten` | Text after the date in that folder's name, empty if none |
 
 `lrfc tokens` prints the same reference. `--lang de` gives German descriptions.
 
@@ -177,3 +178,23 @@ lrfc apply CATALOG -s '{yyyy}/{quarter}/{mm}'
 
 Always run `plan` first and read the target folder list.
 
+
+
+## Levels that render empty
+
+A level whose tokens all render to nothing is **dropped**, not turned into a
+folder called `unnamed`. This is what makes `{folder_label}` usable as a level
+of its own:
+
+| Folder the photo is in | `{yyyy}-{mm}-{dd}/{folder_label}` gives |
+| --- | --- |
+| `2026-06-28 Makro Blume im Garten` | `2026-06-28/Makro Blume im Garten` |
+| `2026-06-28` | `2026-06-28` |
+| `raw2020` | `2020-01-03` |
+
+The same holds anywhere in the structure: `{yyyy}/{folder_label}/{mm}-{dd}`
+collapses to `2026/06-28` when there is no text to place.
+
+A structure whose levels *all* render empty puts the photo at the anchor
+itself. `{folder_label}` alone is therefore a structure that files everything
+without a folder label into one directory — legal, rarely what anyone means.

@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r4.0.2 · Build-Datum 2026-08-23**
+**Revision r5.0.0 · Build-Datum 2026-08-23**
 
 Dieses Dokument bewahrt die Anfrage, aus der LR-FolderCraft entstanden ist,
 einen generischen Prompt zur Neuerzeugung eines vergleichbaren Werkzeugs sowie
@@ -231,6 +231,34 @@ happen to each is a judgement call, so:
   pass a callback that receives one folder and returns an action, so the core
   stays free of any user interface. Never put the anchor folder itself up for a
   decision.
+* Provide five actions, not three. Beyond "pull the photos up" (consolidate),
+  "build the structure inside this folder" (sort-inside), "do not touch"
+  (leave) and "honour the date in the name" (keep), a grown library needs
+  **rebuild this folder where it stands**: the structure replaces the folder
+  below its own parent, so `raw2026/2026-06-28 Makro Blume im Garten` becomes
+  `raw2026/2026-06-28/Makro Blume im Garten`. Neither consolidate (which drags
+  the photos out of `raw2026`) nor sort-inside (which nests the structure below
+  the folder) can express that, and it is the single most-asked-for shape.
+* Offer a token for the descriptive text after a folder name's date prefix.
+  Without it the text is simply lost when a dated folder is rebuilt. And make a
+  level whose tokens all render empty **collapse** rather than become a folder
+  called `unnamed`, or the token is unusable as a level of its own.
+* **Rules, not one answer per folder.** Asking about thirty-nine folders when
+  the operator has four intentions is a failure of interface design. Provide an
+  ordered `PATTERN=ACTION` list, first match wins, where a pattern is a path
+  glob (covering everything below the folder it names) or a keyword selecting
+  by kind: every folder, dated, dated-with-text, dated-without-text, undated.
+  Precedence: per-folder override, then rule, then the interactive question,
+  then the kind default -- and a rule must *silence* the question it already
+  answers. Record on each folder which rule decided it, and show that, or a
+  rule set cannot be checked before it is run.
+* **A "leave mismatched photos alone" setting must govern the rebuild action
+  too.** This is easy to miss and was missed: a shoot running past midnight
+  leaves photos whose own date disagrees with the folder naming the session.
+  Rebuilding by each photo's own date tears the session in two. Under that
+  setting a stray photo must follow its *folder's* date instead of its own.
+  Test it against real data -- a synthetic catalog will not have the case, and
+  the fault is invisible in the counts.
 
 ## Front ends
 
@@ -247,6 +275,18 @@ pre-flight checks, execute with a progress callback. Then:
   user closing the window mid-run does.
 * Use the operating system's own folder chooser: it already has a "new folder"
   button, and re-implementing one is wasted work.
+* Give the rule list a small editable table above the folder table, with the
+  folder table gaining a column naming the rule that decided each row. Order is
+  meaning, so provide move-up and move-down. Changing a rule must clear the
+  manual decisions it might have made and replan, or the display stops matching
+  what would run.
+* Write a human-readable record of each run **beside the library**, named after
+  the tool, the date and the catalog. The machine-readable journal lives in the
+  backup directory and exists for undo; this is the one a person finds months
+  later. Write it in the run's `finally` so a failed run is recorded too, make
+  it switchable and relocatable, and make it strictly non-fatal: by the time it
+  is written the photos are already moved and verified, so a full disk must
+  leave a note on the result, never fail the run.
 
 ## Functional requirements
 

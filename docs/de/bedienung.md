@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r4.0.2 · Build-Datum 2026-08-23**
+**Revision r5.0.0 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -318,23 +318,96 @@ Bilder werden ordentlich einsortiert. Umgekehrt genügt ein Tagesordner dem
 Wunsch nach Jahresordnern. Enthält die Struktur überhaupt keine
 Datums-Platzhalter, sagen Ordnerdaten nichts aus und werden ignoriert.
 
-### Die drei Entscheidungen
+### Die vier Aktionen
 
-| Situation | Schalter | Auswahl | Vorgabe |
-| --- | --- | --- | --- |
-| Thematischer Unterordner | `--subfolder-action` | `consolidate` · `sort-inside` · `leave` | `consolidate` |
-| Datierter Ordner | `--dated-folder-action` | `keep` · `consolidate` · `sort-inside` · `leave` | `keep` |
-| Foto in einem behaltenen datierten Ordner, dessen Datum nicht passt | `--mismatch-action` | `move-out` · `leave` | `move-out` |
+| Aktion | Wirkung |
+| --- | --- |
+| `consolidate` | Fotos herausholen und unterhalb des Ankers einsortieren |
+| `sort-inside` | Ordner behalten und die Struktur *darin* aufbauen |
+| `resort` | den Ordner **an seiner Stelle** neu aufbauen, unter seinem eigenen Elternordner |
+| `leave` | die Fotos dieses Ordners gar nicht anfassen |
+| `keep` | datierter Ordner: die Fotos, die er korrekt beschreibt, bleiben |
 
-- `consolidate` — Fotos herausholen und unterhalb des Ankers einsortieren.
-- `sort-inside` — Ordner behalten und die Struktur *darin* aufbauen.
-- `leave` — die Fotos dieses Ordners gar nicht anfassen.
-- `keep` — datierter Ordner: die Fotos, die er korrekt beschreibt, bleiben.
+`resort` braucht ein Beispiel. Gegeben
+`raw2026/2026-06-28 Makro Blume im Garten` und die Struktur
+`{yyyy}-{mm}-{dd}/{folder_label}`:
+
+| Aktion | Ergebnis |
+| --- | --- |
+| `consolidate` | `2026-06-28/Makro Blume im Garten` — aus `raw2026` herausgezogen |
+| `sort-inside` | `raw2026/2026-06-28 Makro Blume im Garten/2026-06-28/…` — verschachtelt |
+| `resort` | `raw2026/2026-06-28/Makro Blume im Garten` — aufgeteilt, an Ort und Stelle |
+
+### Die drei Vorgaben
+
+| Situation | Schalter | Vorgabe |
+| --- | --- | --- |
+| Thematischer Unterordner | `--subfolder-action` | `consolidate` |
+| Datierter Ordner | `--dated-folder-action` | `keep` |
+| Foto in einem behaltenen oder neu aufgebauten datierten Ordner, dessen Datum nicht passt | `--mismatch-action` | `move-out` |
 
 Mit den Vorgaben behält `2019-04-15 Ostern in Tirol` Namen und Bilder, während
 ein Foto darin, das an einem anderen Tag entstand, in seinen eigenen
 Datumsordner wandert. Thematische Ordner gehen in der gemeinsamen
 Datumsstruktur auf.
+
+`--mismatch-action leave` wiegt schwerer, als es aussieht. Eine Session, die
+über Mitternacht läuft, hinterlässt Fotos, deren eigenes Datum dem Ordnernamen
+widerspricht. Unter `keep` bleiben diese Fotos einfach liegen. Unter `resort`
+folgen sie dem Datum **des Ordners** statt ihrem eigenen, sodass die Session
+ganz neu aufgebaut wird, statt über zwei Tagesordner zerrissen zu werden.
+
+### Regeln: ganze Ordnerklassen auf einmal entscheiden
+
+Ordner einzeln zu beantworten skaliert nicht. Eine gewachsene Bibliothek hat
+Dutzende Ordner und vielleicht vier verschiedene Absichten. `--rule` drückt die
+Absichten aus:
+
+```bash
+lrfc plan KATALOG -s '{yyyy}-{mm}-{dd}/{folder_label}' \
+    --rule '_extern=leave' \
+    --rule '_fineart=leave' \
+    --rule 'dated+label=resort' \
+    --rule 'dated=keep' \
+    --rule '*=sort-inside' \
+    --mismatch-action leave
+```
+
+Regeln sind **geordnet**, und die **erste passende gewinnt** — die speziellen
+also nach vorn. Ein Muster ist entweder ein Pfad-Glob oder eines von fünf
+Schlüsselwörtern:
+
+| Muster | Trifft |
+| --- | --- |
+| `*` | jeden Ordner, den keine frühere Regel getroffen hat |
+| `dated` | Ordner, deren Name mit einem Datum beginnt |
+| `dated+label` | datierte Ordner, die zusätzlich Text tragen |
+| `dated-only` | datierte Ordner mit nichts als dem Datum |
+| `plain` | Ordner ohne Datum im Namen |
+| `_extern`, `raw20*`, `_in_Arbeit/*` | ein Pfad unterhalb der Wurzel, `*` und `?` erlaubt |
+
+Ein Pfadmuster erfasst auch alles **unterhalb** des benannten Ordners, sodass
+`_extern` ohne zweite Regel bis `_extern/2019` reicht.
+
+`keep` auf einen Ordner ohne Datum im Namen angewandt wird zu `leave`
+abgemildert — die ehrliche Lesart von „das Datum im Namen achten", wenn es
+keines gibt.
+
+### Vorrang
+
+Von stark nach schwach:
+
+1. `--folder-action ID=AKTION` — ein namentlich benannter Katalogordner
+2. die erste passende `--rule`
+3. Ihre Antwort unter `--interactive`
+4. die Vorgabe `--subfolder-action` / `--dated-folder-action` für die Ordnerart
+
+Eine Regel **unterdrückt die Frage, die sie bereits beantwortet** — genau darum
+geht es: Mit fünf Regeln fragt `--interactive` nur noch nach Ordnern, über die
+keine Regel spricht.
+
+`plan` listet jeden Ordner mit der Regel, die ihn entschieden hat, sodass sich
+ein Regelsatz vor dem Lauf prüfen lässt.
 
 ### Einzelne Ordner abweichend entscheiden
 
@@ -343,7 +416,8 @@ lrfc folders KATALOG                      # Ordner-IDs ermitteln
 lrfc plan KATALOG -s day --folder-action 4711=sort-inside
 ```
 
-`--folder-action ID=AKTION` ist wiederholbar und sticht die globalen Vorgaben.
+`--folder-action ID=AKTION` ist wiederholbar und sticht sowohl die Regeln als
+auch die globalen Vorgaben.
 
 ### Gefragt werden
 
@@ -361,9 +435,15 @@ Schicksal zur Debatte steht.
 In der TUI trifft man dieselbe Wahl mit Enter auf einer Zeile der Ordnertabelle
 — das wechselt die Entscheidung dieses Ordners und plant sofort neu.
 
+In der grafischen Oberfläche ist die Regelliste eine kleine Tabelle über der
+Ordnertabelle: dort Regeln hinzufügen, entfernen und umsortieren — die
+Ordnertabelle darunter zeigt, welche Regel jeden Ordner entschieden hat. Eine
+dort von Hand getroffene Entscheidung sticht weiterhin jede Regel und wird als
+Ihre ausgewiesen.
+
 Wie auch immer Sie wählen: `plan` führt jeden gefundenen Ordner auf, welcher
-Art er ist, was entschieden wurde und ob das aus einer Vorgabe, einem
-ausdrücklichen `--folder-action` oder Ihrer eigenen Antwort stammt. Der
+Art er ist, was entschieden wurde und ob das aus einer Vorgabe, einer Regel,
+einem ausdrücklichen `--folder-action` oder Ihrer eigenen Antwort stammt. Der
 JSON-Export enthält dasselbe unter `folders`.
 
 ## Profile
@@ -402,3 +482,31 @@ die vollständige Befehlszeile fest, sodass sich ein Log später eindeutig einer
 Werkzeugrevision zuordnen lässt.
 
 Bei einer Fehlermeldung bitte das Log **und** den Plan als JSON beilegen.
+
+### Das Verschiebeprotokoll, neben der Bibliothek
+
+Ein `apply`-Lauf hinterlässt neben der `.lrcat`-Datei einen Klartext-Bericht:
+
+```
+Lightroom.Kataloge/Masterkatalog.Neu/
+    Masterkatalog.Neu.lrcat
+    LR-FolderCraft_2026-08-23_143012_Masterkatalog.Neu.log
+```
+
+Das ist nicht das Debug-Log. Das Debug-Log dient der Fehlersuche am Werkzeug;
+dies dient der Person, die sich Monate später fragt, wo ein Foto geblieben ist.
+Es führt jeden Quell- und Zielpfad auf, die verwendeten Regeln, wo
+Katalogsicherung und Journal liegen, und eine Zusammenfassung.
+
+| Schalter | Wirkung |
+| --- | --- |
+| `--no-move-log` | nicht schreiben |
+| `--move-log-dir VERZ` | hierhin schreiben statt neben den Katalog |
+
+Das Schreiben kann einen Lauf nie zum Scheitern bringen. Ist das Verzeichnis
+nicht beschreibbar — schreibgeschütztes Volume, volle Platte — gelingt der Lauf
+trotzdem, und das Ergebnis trägt einen Hinweis, dass der Bericht nicht
+geschrieben werden konnte. Zum Zeitpunkt des Schreibens sind die Fotos längst
+verschoben und geprüft.
+
+Trockenläufe schreiben kein Verschiebeprotokoll: es wurde nichts verschoben.

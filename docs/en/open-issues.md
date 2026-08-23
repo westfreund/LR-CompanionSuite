@@ -1,6 +1,6 @@
 # Open issues and roadmap
 
-**Revision r4.0.2 · Build date 2026-08-23**
+**Revision r5.0.0 · Build date 2026-08-23**
 
 An honest list of what is not done, not verified, or deliberately left out.
 Each item is a starting point for the next session.
@@ -99,10 +99,16 @@ It exists for inspecting a locked catalog. Nothing stops you passing it to
 ## Agreed and deferred
 
 Requested on 2026-08-23 and deliberately postponed until after the second test
-run, so the tests are not chasing a moving target. To pick them up, say
-"do O-21 to O-26" — each item below carries enough detail to start from.
+run, so the tests are not chasing a moving target. O-21, O-22 and O-24 were
+delivered in r5.0.0 because all three serve the master-catalog run directly.
+To pick up what is left, say "do O-23, O-25 and O-26" — each item below carries
+enough detail to start from.
 
-### O-21 · A page about reconnecting a copied library
+### O-21 · A page about reconnecting a copied library ✔ r5.0.0
+Delivered as [before-you-start.md](before-you-start.md) /
+[vorbereitung.md](../de/vorbereitung.md), linked from both indexes. The
+original requirement follows.
+
 A catalog records the **absolute** path of its root folders. Copy a library to
 another drive, rename a volume, or restore from a backup, and the catalog still
 points at the old location: every photo shows as missing, and this tool refuses
@@ -115,7 +121,9 @@ folder, Find Missing Folder), and the alternative of renaming the volume back.
 Include how to see the recorded path (`lrfc folders CATALOG`) so the reader can
 tell what the catalog expects.
 
-### O-22 · Recommend converting the catalog first
+### O-22 · Recommend converting the catalog first ✔ r5.0.0
+Delivered as section 2 of the same page. The original requirement follows.
+
 A catalog written by an older Lightroom Classic opens in a newer one only after
 conversion. Working on an unconverted catalog with this tool means writing to a
 schema the installed Lightroom has not accepted yet. Observed in practice: a
@@ -137,7 +145,11 @@ recent copy) so the acknowledgement means something.
 The command line has the pre-flight report for this; the two interfaces show it
 only after planning.
 
-### O-24 · A move log beside the library
+### O-24 · A move log beside the library ✔ r5.0.0
+Delivered in `movelog.py`, controlled by `--no-move-log` and `--move-log-dir`.
+Written in the `finally` of the run so a failed or rolled-back run is recorded
+too, and strictly non-fatal. The original requirement follows.
+
 Wanted: a human-readable record of what a run did, written into the library's
 own folder rather than only into `~/Library/Logs`, so it travels with the
 library when it is moved or archived — and so it can be found months later

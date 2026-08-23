@@ -1,6 +1,6 @@
 # LR-FolderCraft — Überblick
 
-**Revision r4.0.2 · Build-Datum 2026-08-23**
+**Revision r5.0.0 · Build-Datum 2026-08-23**
 
 LR-FolderCraft sortiert die Ordnerstruktur einer Adobe-Lightroom-Classic-
 Bibliothek neu. Es verschiebt die Bilddateien auf dem Datenträger und schreibt
@@ -46,6 +46,8 @@ dieser Wert ändert sich nie. Deshalb überlebt alles, was daran hängt:
 ## Dokumente
 
 - [installation.md](installation.md) — Installation unter macOS, Windows, Linux
+- [vorbereitung.md](vorbereitung.md) — **zuerst lesen**: Ordner verknüpfen und
+  Katalog konvertieren
 - [bedienung.md](bedienung.md) — alle Befehle, alle Optionen, Beispiele
 - [strukturen.md](strukturen.md) — Vorlagen und die vollständige Platzhalterliste
 - [funktionsweise.md](funktionsweise.md) — die Katalog-Interna
@@ -58,6 +60,10 @@ dieser Wert ändert sich nie. Deshalb überlebt alles, was daran hängt:
 - [prompts.md](prompts.md) — ursprünglicher und generischer Prompt
 
 ## Die drei Befehle, die man braucht
+
+Zuvor zwei Voraussetzungen — siehe [vorbereitung.md](vorbereitung.md): jeder
+Ordner in Lightroom verknüpft, und der Katalog einmal mit dem aktuellen
+Lightroom Classic geöffnet.
 
 ```bash
 lrfc info  KATALOG              # was steckt im Katalog? (nur lesen)

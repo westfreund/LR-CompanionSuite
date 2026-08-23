@@ -1,6 +1,6 @@
 # Offene Punkte und Fahrplan
 
-**Revision r4.0.2 · Build-Datum 2026-08-23**
+**Revision r5.0.0 · Build-Datum 2026-08-23**
 
 Eine ehrliche Aufstellung dessen, was nicht erledigt, nicht verifiziert oder
 bewusst ausgelassen ist. Jeder Punkt ist ein Ansatzpunkt für die nächste
@@ -111,10 +111,16 @@ es an `apply` zu übergeben. Man könnte es auf lesende Befehle beschränken.
 ## Zugesagt und zurückgestellt
 
 Am 23.08.2026 gewünscht und bewusst bis nach dem zweiten Testlauf verschoben,
-damit die Tests kein bewegliches Ziel haben. Zum Starten genügt „mach O-21 bis
-O-26" — jeder Punkt unten enthält genug, um damit zu beginnen.
+damit die Tests kein bewegliches Ziel haben. O-21, O-22 und O-24 wurden in
+r5.0.0 vorgezogen, weil alle drei dem Masterkatalog-Lauf unmittelbar dienen.
+Für den Rest genügt „mach O-23, O-25 und O-26" — jeder Punkt unten enthält
+genug, um damit zu beginnen.
 
-### O-21 · Eine Seite zum Neuverknüpfen einer kopierten Bibliothek
+### O-21 · Eine Seite zum Neuverknüpfen einer kopierten Bibliothek ✔ r5.0.0
+Geliefert als [vorbereitung.md](vorbereitung.md) /
+[before-you-start.md](../en/before-you-start.md), aus beiden Übersichten
+verlinkt. Die ursprüngliche Anforderung folgt.
+
 Ein Katalog merkt sich den **absoluten** Pfad seiner Stammordner. Kopiert man
 eine Bibliothek auf ein anderes Laufwerk, benennt ein Volume um oder stellt aus
 einer Sicherung wieder her, zeigt der Katalog weiterhin auf den alten Ort: Alle
@@ -128,7 +134,9 @@ den Ordner, Fehlenden Ordner suchen) und der Alternative, das Volume wieder
 umzubenennen. Dazu, wie man den vermerkten Pfad sieht (`lrfc folders KATALOG`),
 damit man erkennt, was der Katalog erwartet.
 
-### O-22 · Empfehlung, den Katalog vorher zu konvertieren
+### O-22 · Empfehlung, den Katalog vorher zu konvertieren ✔ r5.0.0
+Geliefert als Abschnitt 2 derselben Seite. Die ursprüngliche Anforderung folgt.
+
 Ein von einer älteren Lightroom-Classic-Fassung geschriebener Katalog lässt
 sich in einer neueren erst nach Konvertierung öffnen. Mit einem nicht
 konvertierten Katalog zu arbeiten hieße, in ein Schema zu schreiben, das das
@@ -152,7 +160,12 @@ bedeutet.
 Die Kommandozeile hat dafür den Vorprüfungsbericht; die beiden Oberflächen
 zeigen ihn erst nach dem Planen.
 
-### O-24 · Ein Verschiebeprotokoll neben der Bibliothek
+### O-24 · Ein Verschiebeprotokoll neben der Bibliothek ✔ r5.0.0
+Geliefert in `movelog.py`, gesteuert über `--no-move-log` und
+`--move-log-dir`. Im `finally` des Laufs geschrieben, sodass auch ein
+gescheiterter oder zurückgerollter Lauf festgehalten wird, und strikt
+nicht-fatal. Die ursprüngliche Anforderung folgt.
+
 Gewünscht: eine lesbare Aufzeichnung dessen, was ein Lauf getan hat, im Ordner
 der Bibliothek selbst statt nur in `~/Library/Logs` — damit sie mitwandert,
 wenn die Bibliothek umzieht oder archiviert wird, und damit man sie Monate

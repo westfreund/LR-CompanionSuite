@@ -1,6 +1,6 @@
 # Ordnerstrukturen und Platzhalter
 
-**Revision r4.0.2 · Build-Datum 2026-08-23**
+**Revision r5.0.0 · Build-Datum 2026-08-23**
 
 Eine **Struktur** ist eine geordnete Liste von **Ebenen**. Jede Ebene wird zu
 einem Verzeichnis, und jede Ebene ist ein **Template** aus festem Text und
@@ -87,6 +87,7 @@ in [bedienung.md](bedienung.md#fotos-ohne-aufnahmedatum)).
 | `{ext}` | `CR2` | Dateiendung, gross |
 | `{ext_lower}` | `cr2` | Dateiendung, klein |
 | `{orig_folder}` | `raw2019` | Name des heutigen Ordners |
+| `{folder_label}` | `Makro Blume im Garten` | Text hinter dem Datum in diesem Ordnernamen, sonst leer |
 
 `lrfc tokens --lang de` gibt dieselbe Referenz aus.
 
@@ -181,3 +182,23 @@ lrfc apply KATALOG -s '{yyyy}/{quarter}/{mm}'
 
 Immer zuerst `plan` laufen lassen und die Zielordnerliste lesen.
 
+
+
+## Ebenen, die leer bleiben
+
+Eine Ebene, deren Platzhalter sämtlich leer ausfallen, wird **weggelassen** und
+nicht zu einem Ordner namens `unnamed`. Erst das macht `{folder_label}` als
+eigene Ebene brauchbar:
+
+| Ordner, in dem das Foto liegt | `{yyyy}-{mm}-{dd}/{folder_label}` ergibt |
+| --- | --- |
+| `2026-06-28 Makro Blume im Garten` | `2026-06-28/Makro Blume im Garten` |
+| `2026-06-28` | `2026-06-28` |
+| `raw2020` | `2020-01-03` |
+
+Dasselbe gilt an jeder Stelle der Struktur: `{yyyy}/{folder_label}/{mm}-{dd}`
+fällt zu `2026/06-28` zusammen, wenn kein Text zu setzen ist.
+
+Eine Struktur, deren Ebenen *alle* leer ausfallen, legt das Foto direkt in den
+Anker. `{folder_label}` allein ist damit eine Struktur, die alles ohne
+Ordnertext in ein einziges Verzeichnis legt — zulässig, selten gemeint.

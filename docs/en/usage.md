@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r4.0.2 · Build date 2026-08-23**
+**Revision r5.0.0 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -318,22 +318,92 @@ it is treated as a topic folder and its photos are sorted properly. A day
 folder does satisfy a request for year folders. If the structure has no date
 tokens at all, folder dates say nothing and are ignored.
 
-### The three decisions
+### The four actions
 
-| Situation | Flag | Choices | Default |
-| --- | --- | --- | --- |
-| A topic subfolder | `--subfolder-action` | `consolidate` · `sort-inside` · `leave` | `consolidate` |
-| A dated folder | `--dated-folder-action` | `keep` · `consolidate` · `sort-inside` · `leave` | `keep` |
-| A photo in a kept dated folder whose date does not match | `--mismatch-action` | `move-out` · `leave` | `move-out` |
+| Action | What it does |
+| --- | --- |
+| `consolidate` | move the photos up and sort them below the run's anchor |
+| `sort-inside` | keep the folder and build the structure *inside* it |
+| `resort` | rebuild the folder **where it stands**, below its own parent |
+| `leave` | do not touch the photos in this folder at all |
+| `keep` | a dated folder: leave the photos it correctly describes |
 
-- `consolidate` — move the photos up and sort them below the run's anchor.
-- `sort-inside` — keep the folder and build the structure *inside* it.
-- `leave` — do not touch the photos in this folder at all.
-- `keep` — a dated folder: leave the photos it correctly describes.
+`resort` is the one that needs an example. Given
+`raw2026/2026-06-28 Makro Blume im Garten` and the structure
+`{yyyy}-{mm}-{dd}/{folder_label}`:
+
+| Action | Result |
+| --- | --- |
+| `consolidate` | `2026-06-28/Makro Blume im Garten` — pulled out of `raw2026` |
+| `sort-inside` | `raw2026/2026-06-28 Makro Blume im Garten/2026-06-28/…` — nested |
+| `resort` | `raw2026/2026-06-28/Makro Blume im Garten` — split, in place |
+
+### The three defaults
+
+| Situation | Flag | Default |
+| --- | --- | --- |
+| A topic subfolder | `--subfolder-action` | `consolidate` |
+| A dated folder | `--dated-folder-action` | `keep` |
+| A photo in a kept or resorted dated folder whose date does not match | `--mismatch-action` | `move-out` |
 
 With the defaults, `2019-04-15 Ostern in Tirol` keeps its name and its photos,
 while a photo in it that was shot on a different day moves to its own date
 folder. Topic folders are merged into the shared date structure.
+
+`--mismatch-action leave` matters more than it looks. A shoot that runs past
+midnight leaves photos whose own date disagrees with the folder naming the
+session. Under `keep` those photos simply stay. Under `resort` they follow the
+**folder's** date rather than their own, so the session is rebuilt whole
+instead of being torn across two day folders.
+
+### Rules: deciding whole classes of folders at once
+
+Answering one folder at a time does not scale. A grown library has dozens of
+folders and perhaps four distinct intentions. `--rule` expresses the
+intentions:
+
+```bash
+lrfc plan CATALOG -s '{yyyy}-{mm}-{dd}/{folder_label}' \
+    --rule '_extern=leave' \
+    --rule '_fineart=leave' \
+    --rule 'dated+label=resort' \
+    --rule 'dated=keep' \
+    --rule '*=sort-inside' \
+    --mismatch-action leave
+```
+
+Rules are **ordered** and the **first match wins**, so put the specific ones
+first. A pattern is either a path glob or one of five keywords:
+
+| Pattern | Selects |
+| --- | --- |
+| `*` | every folder no earlier rule matched |
+| `dated` | folders whose name starts with a date |
+| `dated+label` | dated folders that also carry descriptive text |
+| `dated-only` | dated folders with nothing but the date |
+| `plain` | folders without a date in the name |
+| `_extern`, `raw20*`, `_in_Arbeit/*` | a path below the root, `*` and `?` allowed |
+
+A path pattern also covers everything **below** the folder it names, so
+`_extern` reaches `_extern/2019` without a second rule.
+
+`keep` asked of a folder with no date in its name softens to `leave` — the
+honest reading of "honour the date in the name" when there is none.
+
+### Precedence
+
+Strongest first:
+
+1. `--folder-action ID=ACTION` — one named catalog folder
+2. the first matching `--rule`
+3. your answer under `--interactive`
+4. the `--subfolder-action` / `--dated-folder-action` default for its kind
+
+A rule **silences the question it already answers**, which is the point: five
+rules and `--interactive` will ask only about folders no rule speaks about.
+
+`plan` lists every folder with which rule decided it, so a rule set can be
+checked before it is run.
 
 ### Deciding one folder at a time
 
@@ -342,7 +412,8 @@ lrfc folders CATALOG                      # find the folder ids
 lrfc plan CATALOG -s day --folder-action 4711=sort-inside
 ```
 
-`--folder-action ID=ACTION` is repeatable and beats the global defaults.
+`--folder-action ID=ACTION` is repeatable and beats both the rules and the
+global defaults.
 
 ### Being asked
 
@@ -359,9 +430,15 @@ into, not a subfolder whose fate is in question.
 In the TUI the same choice is made by pressing Enter on a row of the folder
 table — it cycles that folder's decision and re-plans immediately.
 
+In the graphical interface the rule list is a small table above the folder
+table: add, remove and reorder rules there, and the folder table below shows
+which rule decided each folder. A decision made by hand in that table still
+beats every rule and is marked as yours.
+
 Whatever you choose, `plan` lists every folder it found, what kind it is, what
-was decided and whether that came from a default, an explicit `--folder-action`
-or your own answer. The JSON export carries the same under `folders`.
+was decided and whether that came from a default, a rule, an explicit
+`--folder-action` or your own answer. The JSON export carries the same under
+`folders`.
 
 ## Profiles
 
@@ -398,3 +475,30 @@ The log file always records the revision, build date, Python version, platform
 and full command line, so a log can be tied to an exact tool revision later.
 
 Attach the log **and** the plan JSON when reporting a problem.
+
+### The move log, beside the library
+
+An `apply` run leaves a plain text record next to the `.lrcat` file:
+
+```
+Lightroom.Kataloge/Masterkatalog.Neu/
+    Masterkatalog.Neu.lrcat
+    LR-FolderCraft_2026-08-23_143012_Masterkatalog.Neu.log
+```
+
+That is not the debug log. The debug log is for diagnosing the tool; this is
+for the person who, months later, wonders where a photo went. It lists every
+source and target path, the rules that were used, where the catalog backup and
+the journal went, and a summary.
+
+| Flag | Effect |
+| --- | --- |
+| `--no-move-log` | do not write it |
+| `--move-log-dir DIR` | write it here instead of beside the catalog |
+
+Writing it can never fail a run. If the directory is not writable — a
+read-only volume, a full disk — the run still succeeds and the result carries a
+note saying the record could not be written. By the time it is written the
+photos are already moved and verified.
+
+Dry runs write no move log: nothing moved.
