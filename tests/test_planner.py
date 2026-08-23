@@ -849,3 +849,125 @@ def test_relocate_ignores_the_structure_entirely(mixed_library, tmp_path):
         folder_rules=("Urlaub=relocate", "*=consolidate"),
     )
     assert by_name(plan)["U1.CR2"].target_segments == ("raw2019", "Urlaub")
+
+
+# -- date levels that name the whole date ------------------------------------
+
+
+def test_cumulative_dates_repeat_the_levels_above(simple_catalog):
+    plan = plan_for(simple_catalog, structure=("{yyyy}", "{mm}", "{dd}"), cumulative_dates=True)
+    assert by_name(plan)["A0001.CR2"].target_segments == ("2019", "2019-01", "2019-01-03")
+
+
+def test_a_level_that_is_not_a_date_is_not_repeated(simple_catalog):
+    plan = plan_for(
+        simple_catalog,
+        structure=("{camera_slug}", "{yyyy}", "{mm}"),
+        cumulative_dates=True,
+    )
+    segments = by_name(plan)["A0001.CR2"].target_segments
+    assert segments[1:] == ("2019", "2019-01")
+    assert not segments[0].startswith("2019")
+
+
+def test_the_structure_the_operator_wrote_is_kept_as_written(simple_catalog):
+    """Turning the option off has to give back exactly what was typed."""
+    settings = Settings(
+        catalog=str(simple_catalog.catalog_path),
+        structure=("{yyyy}", "{mm}", "{dd}"),
+        cumulative_dates=True,
+    )
+    assert settings.structure == ("{yyyy}", "{mm}", "{dd}")
+    assert settings.effective_structure == ("{yyyy}", "{yyyy}-{mm}", "{yyyy}-{mm}-{dd}")
+    settings.cumulative_dates = False
+    assert settings.effective_structure == ("{yyyy}", "{mm}", "{dd}")
+
+
+def test_cumulative_dates_do_not_change_the_granularity_rule(mixed_library):
+    """A day structure is still a day structure, so dated folders still count."""
+    plan = plan_for(mixed_library, structure=("{yyyy}", "{mm}", "{dd}"), cumulative_dates=True)
+    assert by_name(plan)["D1.CR2"].status == STAY  # 2019-03-10, kept as before
+
+
+# -- filing a described folder into the structure ----------------------------
+
+
+def test_refile_keeps_the_description_on_the_day_folder(mixed_library):
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}", "{mm}", "{dd}"),
+        cumulative_dates=True,
+        folder_rules=("dated+label=refile", "*=consolidate"),
+        mismatch_action="leave",
+    )
+    moves = by_name(plan)
+    assert moves["D2.CR2"].target_segments == (
+        "raw2019",
+        "2019",
+        "2019-04",
+        "2019-04-15 Ostern in Tirol",
+    )
+    assert moves["D3.CR2"].target_segments == (
+        "raw2019",
+        "2019",
+        "2019-06",
+        "2019-06-01 Hochzeit",
+    )
+
+
+def test_a_described_folder_sits_beside_a_plain_one_for_the_same_day(builder):
+    """The whole point: they must not merge."""
+    builder.add_photo("LOSE.CR2", "2019-04-15T09:00:00", folder="raw2019/")
+    builder.add_photo("FEST.CR2", "2019-04-15T11:00:00", folder="raw2019/2019-04-15 Ostern/")
+    plan = plan_for(
+        builder,
+        structure=("{yyyy}-{mm}-{dd}",),
+        folder_rules=("dated+label=refile", "*=consolidate"),
+    )
+    moves = by_name(plan)
+    assert moves["LOSE.CR2"].target_segments == ("raw2019", "2019-04-15")
+    assert moves["FEST.CR2"].target_segments == ("raw2019", "2019-04-15 Ostern")
+    assert moves["LOSE.CR2"].target_segments != moves["FEST.CR2"].target_segments
+
+
+def test_refile_without_a_description_is_just_the_date(builder):
+    builder.add_photo("A.CR2", "2019-04-15T11:00:00", folder="raw2019/2019-04-15/")
+    plan = plan_for(
+        builder,
+        structure=("{yyyy}-{mm}-{dd}",),
+        folder_rules=("dated=refile", "*=consolidate"),
+    )
+    assert by_name(plan)["A.CR2"].target_segments == ("raw2019", "2019-04-15")
+
+
+def test_refile_keeps_a_session_that_ran_past_midnight_together(mixed_library):
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}-{mm}-{dd}",),
+        folder_rules=("dated+label=refile", "*=consolidate"),
+        mismatch_action="leave",
+    )
+    moves = by_name(plan)
+    assert moves["X1.CR2"].target_segments == moves["D2.CR2"].target_segments
+
+
+def test_refile_and_cumulative_dates_together_on_the_shape_that_asked_for_them(builder):
+    """The two requests, in one structure: 2026/2026-06/2026-06-28 Makro."""
+    builder.add_photo("LOSE.CR2", "2026-06-28T09:00:00", folder="mobileRAW/")
+    builder.add_photo(
+        "MAKRO.CR2", "2026-06-28T11:00:00", folder="mobileRAW/2026-06-28 Makro Blume/"
+    )
+    plan = plan_for(
+        builder,
+        structure=("{yyyy}", "{mm}", "{dd}"),
+        cumulative_dates=True,
+        folder_rules=("dated+label=refile", "*=consolidate"),
+    )
+    moves = by_name(plan)
+    assert moves["LOSE.CR2"].target_segments == ("mobileRAW", "2026", "2026-06", "2026-06-28")
+    assert moves["MAKRO.CR2"].target_segments == (
+        "mobileRAW",
+        "2026",
+        "2026-06",
+        "2026-06-28 Makro Blume",
+    )

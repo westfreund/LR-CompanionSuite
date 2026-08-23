@@ -37,20 +37,25 @@ KEEP = "keep"
 #: turns "2026-06-28 Makro Blume im Garten" into "2026-06-28/Makro Blume im
 #: Garten" without dragging the photos out of the year folder they sit in.
 RESORT = "resort"
+#: File the folder into the run's target structure, but keep its descriptive
+#: text on the deepest date level. "2026-06-28 Makro Blume im Garten" becomes
+#: ".../2026-06-28 Makro Blume im Garten", which sits beside an ordinary
+#: ".../2026-06-28" rather than merging into it.
+REFILE = "refile"
 #: Carry the folder to the new location exactly as it is: same name, same
 #: contents, same sub-structure, no sorting applied. Only meaningful when the
 #: run has somewhere else to put it -- sorting in place leaves it where it is.
 RELOCATE = "relocate"
 
 SUBFOLDER_ACTIONS = (SORT_INSIDE, CONSOLIDATE, RESORT, RELOCATE, LEAVE)
-DATED_FOLDER_ACTIONS = (KEEP, RESORT, CONSOLIDATE, SORT_INSIDE, RELOCATE, LEAVE)
+DATED_FOLDER_ACTIONS = (KEEP, REFILE, RESORT, CONSOLIDATE, SORT_INSIDE, RELOCATE, LEAVE)
 
 #: What to do with a photo inside a kept dated folder whose date does not match.
 MOVE_OUT = "move-out"
 MISMATCH_ACTIONS = (MOVE_OUT, LEAVE)
 
 #: Everything a folder rule may ask for, in the order they are offered.
-ALL_ACTIONS = (KEEP, RESORT, SORT_INSIDE, CONSOLIDATE, RELOCATE, LEAVE)
+ALL_ACTIONS = (KEEP, REFILE, RESORT, SORT_INSIDE, CONSOLIDATE, RELOCATE, LEAVE)
 
 ACTION_LABELS = {
     SORT_INSIDE: (
@@ -69,6 +74,10 @@ ACTION_LABELS = {
     RESORT: (
         "rebuild this folder where it stands",
         "diesen Ordner an seiner Stelle neu aufbauen",
+    ),
+    REFILE: (
+        "file into the target structure, keeping the descriptive text",
+        "in die Zielstruktur einreihen, Zusatztext behalten",
     ),
     RELOCATE: (
         "move the folder unchanged to the new location",

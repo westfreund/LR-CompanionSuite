@@ -837,3 +837,30 @@ def test_the_application_carries_the_icon_for_the_dock(qt_app):
     icon = window_icon()
     assert not icon.isNull()
     assert {size.width() for size in icon.availableSizes()} >= {16, 256}
+
+
+# -- date levels that name the whole date ------------------------------------
+
+
+def test_the_preview_shows_the_cumulative_form(qt_app):
+    """The preview has to show what will be built, not what was typed."""
+    window = MainWindow()
+    window.preset_combo.setCurrentText("year/month/day")
+    plain = window.preview_label.text()
+    window.cumulative_check.setChecked(True)
+    cumulative = window.preview_label.text()
+    assert plain != cumulative
+    assert "2019-01-03" in cumulative
+    window.close()
+
+
+def test_the_option_reaches_the_settings_and_is_remembered(qt_app, mixed_gui_catalog):
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.cumulative_check.setChecked(True)
+    assert window.collect_settings().cumulative_dates is True
+    window.close()
+
+    again = MainWindow()
+    assert again.cumulative_check.isChecked()
+    again.close()

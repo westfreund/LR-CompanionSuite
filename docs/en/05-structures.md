@@ -1,6 +1,6 @@
 # Folder structures and tokens
 
-**Revision r10.1.0 · Build date 2026-08-23**
+**Revision r11.0.0 · Build date 2026-08-23**
 
 A **structure** is an ordered list of **levels**. Each level becomes one
 directory, and each level is a **template** made of literal text and
@@ -179,6 +179,40 @@ lrfc apply CATALOG -s '{yyyy}/{quarter}/{mm}'
 Always run `plan` first and read the target folder list.
 
 
+
+## Date levels that name the whole date
+
+By default `{yyyy}/{mm}/{dd}` builds `2019/01/03`: each level names only its
+own part. Switch **cumulative dates** on and it builds
+
+```
+2019/2019-01/2019-01-03
+```
+
+Every folder name is then complete on its own — a folder still says which day
+it is when it turns up in a search result, a file dialog, or dragged out of its
+tree.
+
+```bash
+lrfc plan CATALOG -s year/month/day --cumulative-dates
+```
+
+In the window it is the checkbox **"Every date level names the whole date"**,
+and the live preview shows the cumulative form as soon as it is ticked.
+
+Only date levels take part. `{camera_slug}/{yyyy}/{mm}` becomes
+`{camera_slug}/{yyyy}/{yyyy}-{mm}` — the camera is not a date and is not
+repeated. A level that already spells the whole date gains nothing, because
+each level inherits only from the date levels **above** it.
+
+The structure you typed is kept as you typed it: turning the option off gives
+back exactly `{yyyy}/{mm}/{dd}`. Two presets have it built in if you would
+rather not use the switch:
+
+| Preset | Result |
+| --- | --- |
+| `year/year-month/full-day` | `2019/2019-01/2019-01-03` |
+| `year/full-day` | `2019/2019-01-03` |
 
 ## Levels that render empty
 

@@ -16,6 +16,49 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [11.0.0] — 2026-08-23 — "Vollstaendig"
+
+Two requests from the user, and the documentation checked by machine rather
+than by eye.
+
+### Added
+
+- **Cumulative date levels** (`--cumulative-dates`, and a checkbox in the
+  window). `{yyyy}/{mm}/{dd}` builds `2019/2019-01/2019-01-03` instead of
+  `2019/01/03`, so every folder name is complete on its own — a folder named
+  `01` says nothing once it turns up in a search result or a file dialog.
+
+  Only date levels take part: `{camera_slug}/{yyyy}/{mm}` becomes
+  `{camera_slug}/{yyyy}/{yyyy}-{mm}`, because a camera is not a date. The
+  authored structure is kept exactly as typed and the rewrite happens through
+  `Settings.effective_structure`, so switching the option off returns what was
+  written rather than an approximation of it. The live preview in the window
+  shows the cumulative form as soon as the box is ticked.
+
+  Two presets have it built in: `year/year-month/full-day` and `year/full-day`.
+
+- **`refile`, a seventh folder action.** A dated folder carrying a session name
+  is filed into the target structure with its text appended to the deepest date
+  level:
+
+      mobileRAW/2026-06-28 Makro Blume im Garten/
+        -> 2026/2026-06/2026-06-28 Makro Blume im Garten/
+      mobileRAW/(loose photos of 28 June)
+        -> 2026/2026-06/2026-06-28/
+
+  The two sit **side by side**, which is the point: merging them would discard
+  the only thing distinguishing the session. `--mismatch-action leave` governs
+  it as it does `resort`, so a shoot running past midnight stays whole.
+
+- **`tests/test_docs.py`** checks that every folder action, every token, every
+  preset and every long command-line flag appears in **both** language trees,
+  that the trees hold the same numbered documents, and that every document
+  carries the current revision. It found three flags documented nowhere on its
+  first run: `--structure` (only ever written as `-s`), `--yes` and
+  `--catalog-backup`.
+
+---
+
 ## [10.1.0] — 2026-08-23
 
 ### Fixed

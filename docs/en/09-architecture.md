@@ -1,6 +1,6 @@
 # Architecture
 
-**Revision r10.1.0 · Build date 2026-08-23**
+**Revision r11.0.0 · Build date 2026-08-23**
 
 ## Guiding rule
 

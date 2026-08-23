@@ -78,7 +78,14 @@ from ..logging_setup import get_logger, setup_logging
 from ..planner import Plan
 from ..report import human_bytes, render_result
 from ..resources import logo_for
-from ..rules import PRESETS, RuleError, describe_structure, parse_structure, token_help
+from ..rules import (
+    PRESETS,
+    RuleError,
+    describe_structure,
+    make_cumulative,
+    parse_structure,
+    token_help,
+)
 from ..safety import preconditions
 from ..version import APP_NAME, APP_URL, REVISION, __build_date__
 from .i18n import tr
@@ -539,6 +546,9 @@ class MainWindow(QMainWindow):
         self.backup_check.setChecked(defaults.backup_catalog)
         self.ascii_check = QCheckBox()
         self.ascii_check.setChecked(defaults.ascii_only)
+        self.cumulative_check = QCheckBox()
+        self.cumulative_check.setChecked(defaults.cumulative_dates)
+        self.cumulative_check.toggled.connect(self.update_preview)
         self.orphans_check = QCheckBox()
         self.orphans_check.setChecked(defaults.collect_orphans)
         self.orphans_check.toggled.connect(self._orphans_toggled)
@@ -547,6 +557,7 @@ class MainWindow(QMainWindow):
         right.addWidget(self.sidecars_check)
         right.addWidget(self.backup_check)
         right.addWidget(self.ascii_check)
+        right.addWidget(self.cumulative_check)
         right.addWidget(self.orphans_check)
         right.addWidget(self.orphan_edit)
         right.addStretch(1)
@@ -824,6 +835,8 @@ class MainWindow(QMainWindow):
         self.sidecars_check.setText(tr("sidecars", language))
         self.backup_check.setText(tr("backup", language))
         self.ascii_check.setText(tr("ascii", language))
+        self.cumulative_check.setText(tr("cumulative_dates", language))
+        self.cumulative_check.setToolTip(tr("cumulative_dates_hint", language))
         self.orphans_check.setText(tr("collect_orphans", language))
         self.orphans_check.setToolTip(tr("collect_orphans_hint", language))
         self.orphan_edit.setToolTip(tr("orphan_folder_hint", language))
@@ -925,6 +938,8 @@ class MainWindow(QMainWindow):
     def update_preview(self) -> None:
         try:
             structure = self.current_structure()
+            if self.cumulative_check.isChecked():
+                structure = make_cumulative(structure)
         except RuleError as exc:
             self.preview_label.setText(str(exc))
             self.preview_label.setStyleSheet("color: #b00;")
@@ -954,6 +969,7 @@ class MainWindow(QMainWindow):
         settings.move_sidecars = self.sidecars_check.isChecked()
         settings.backup_catalog = self.backup_check.isChecked()
         settings.ascii_only = self.ascii_check.isChecked()
+        settings.cumulative_dates = self.cumulative_check.isChecked()
         settings.collect_orphans = self.orphans_check.isChecked()
         settings.orphan_folder = self.orphan_edit.text().strip() or Settings().orphan_folder
         settings.language = self.language
@@ -1300,6 +1316,7 @@ class MainWindow(QMainWindow):
             "mismatch_action": self.mismatch_combo.currentText(),
             "move_sidecars": self.sidecars_check.isChecked(),
             "ascii_only": self.ascii_check.isChecked(),
+            "cumulative_dates": self.cumulative_check.isChecked(),
             "collect_orphans": self.orphans_check.isChecked(),
             "orphan_folder": self.orphan_edit.text().strip(),
             "folder_rules": [list(rule) for rule in self.rules],
@@ -1338,6 +1355,8 @@ class MainWindow(QMainWindow):
             self.sidecars_check.setChecked(state["move_sidecars"])
         if isinstance(state.get("ascii_only"), bool):
             self.ascii_check.setChecked(state["ascii_only"])
+        if isinstance(state.get("cumulative_dates"), bool):
+            self.cumulative_check.setChecked(state["cumulative_dates"])
         if isinstance(state.get("collect_orphans"), bool):
             self.orphans_check.setChecked(state["collect_orphans"])
         self._restore_text(self.orphan_edit, state.get("orphan_folder"))

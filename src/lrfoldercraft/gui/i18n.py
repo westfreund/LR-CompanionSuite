@@ -134,6 +134,18 @@ TEXT: Dict[str, Tuple[str, str]] = {
         "'Gesteuert durch' genannte Einstellung ändern und erneut planen.",
     ),
     "findings_more": ("... and {n:,} more", "... und {n:,} weitere"),
+    "cumulative_dates": (
+        "Every date level names the whole date",
+        "Jede Datumsebene nennt das ganze Datum",
+    ),
+    "cumulative_dates_hint": (
+        "2019 / 2019-01 / 2019-01-03 instead of 2019 / 01 / 03. Every folder "
+        "name is then complete on its own, so a folder still says which day it "
+        "is when it turns up in a search result or a file dialog.",
+        "2019 / 2019-01 / 2019-01-03 statt 2019 / 01 / 03. Jeder Ordnername ist "
+        "dann für sich vollständig — ein Ordner sagt also auch dann noch, welcher "
+        "Tag er ist, wenn er in einem Suchergebnis oder Dateidialog auftaucht.",
+    ),
     "collect_orphans": (
         "Collect files not in the catalog",
         "Nicht im Katalog enthaltene Dateien einsammeln",

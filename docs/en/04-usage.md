@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r10.1.0 · Build date 2026-08-23**
+**Revision r11.0.0 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -55,6 +55,9 @@ $ lrfc folders /Volumes/Photos/2019/2019.lrcat --counts
 
 Builds the complete plan and prints it, together with the pre-flight checks.
 **Writes nothing.**
+
+`-s` is short for `--structure`, and takes either a preset name or a template
+of your own.
 
 ```console
 $ lrfc plan /Volumes/Photos/2019/2019.lrcat -s day
@@ -120,6 +123,9 @@ lrfc undo ~/Library/Application\ Support/LR-FolderCraft/backups/2019-20260822-16
 ```
 
 The journal path is printed at the end of every run and recorded in the log.
+`--yes` skips the confirmation. `--catalog-backup PATH` names the catalog copy
+to restore from, for the rare case where the journal's own record of it is no
+longer right — normally the journal knows.
 
 ## `lrfc tui`
 
@@ -379,6 +385,7 @@ tokens at all, folder dates say nothing and are ignored.
 | `consolidate` | move the photos up and sort them below the run's anchor |
 | `sort-inside` | keep the folder and build the structure *inside* it |
 | `resort` | rebuild the folder **where it stands**, below its own parent |
+| `refile` | file it into the target structure, but **keep its descriptive text** on the deepest date level |
 | `relocate` | carry the folder to the new location **unchanged** — same name, same contents, no sorting |
 | `leave` | do not touch the photos in this folder at all |
 | `keep` | a dated folder: leave the photos it correctly describes |
@@ -392,6 +399,7 @@ tokens at all, folder dates say nothing and are ignored.
 | `consolidate` | `2026-06-28/Makro Blume im Garten` — pulled out of `raw2026` |
 | `sort-inside` | `raw2026/2026-06-28 Makro Blume im Garten/2026-06-28/…` — nested |
 | `resort` | `raw2026/2026-06-28/Makro Blume im Garten` — split, in place |
+| `refile` | `2026-06-28 Makro Blume im Garten` under the target structure — beside a plain `2026-06-28`, not merged into it |
 | `relocate` | `<new root>/raw2026/2026-06-28 Makro Blume im Garten` — carried over as it is |
 
 `relocate` is the one for material that should come along without being
@@ -404,6 +412,19 @@ burying the folder one level deeper is not what "move this there" means.
 It only does something when the run has somewhere else to put the folder, that
 is with a target folder set. Sorting in place leaves a relocated folder exactly
 where it is, which `plan` reports as "already in place".
+
+`refile` is for a library whose dated folders carry session names. It files the
+folder where the structure says, and appends its text to the deepest date
+level, so the session keeps its name inside the new tree:
+
+```
+mobileRAW/2026-06-28 Makro Blume im Garten/   ->  2026/2026-06/2026-06-28 Makro Blume im Garten/
+mobileRAW/(loose photos of 28 June)           ->  2026/2026-06/2026-06-28/
+```
+
+The two live **side by side**. Merging them would throw away the only thing
+that distinguishes the session, which is why `refile` exists next to
+`consolidate` rather than instead of it.
 
 ### The three defaults
 

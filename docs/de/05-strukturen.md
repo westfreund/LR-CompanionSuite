@@ -1,6 +1,6 @@
 # Ordnerstrukturen und Platzhalter
 
-**Revision r10.1.0 · Build-Datum 2026-08-23**
+**Revision r11.0.0 · Build-Datum 2026-08-23**
 
 Eine **Struktur** ist eine geordnete Liste von **Ebenen**. Jede Ebene wird zu
 einem Verzeichnis, und jede Ebene ist ein **Template** aus festem Text und
@@ -183,6 +183,40 @@ lrfc apply KATALOG -s '{yyyy}/{quarter}/{mm}'
 Immer zuerst `plan` laufen lassen und die Zielordnerliste lesen.
 
 
+
+## Datumsebenen, die das ganze Datum nennen
+
+Voreingestellt baut `{yyyy}/{mm}/{dd}` den Pfad `2019/01/03`: Jede Ebene nennt
+nur ihren eigenen Teil. Mit **kumulativen Datumsangaben** wird daraus
+
+```
+2019/2019-01/2019-01-03
+```
+
+Jeder Ordnername ist dann für sich vollständig — ein Ordner sagt also auch
+dann noch, welcher Tag er ist, wenn er in einem Suchergebnis, einem Dateidialog
+oder aus seinem Baum herausgezogen auftaucht.
+
+```bash
+lrfc plan KATALOG -s year/month/day --cumulative-dates
+```
+
+Im Fenster ist es das Ankreuzfeld **„Jede Datumsebene nennt das ganze Datum"**,
+und die Live-Vorschau zeigt die kumulative Form, sobald es gesetzt ist.
+
+Nur Datumsebenen nehmen teil. Aus `{camera_slug}/{yyyy}/{mm}` wird
+`{camera_slug}/{yyyy}/{yyyy}-{mm}` — die Kamera ist kein Datum und wird nicht
+wiederholt. Eine Ebene, die das Datum bereits vollständig schreibt, gewinnt
+nichts hinzu, denn jede Ebene erbt nur von den Datumsebenen **über** ihr.
+
+Die von Ihnen getippte Struktur bleibt, wie Sie sie getippt haben: Die Option
+abzuschalten gibt exakt `{yyyy}/{mm}/{dd}` zurück. Zwei Vorlagen haben es
+eingebaut, falls Sie den Schalter nicht verwenden möchten:
+
+| Vorlage | Ergebnis |
+| --- | --- |
+| `year/year-month/full-day` | `2019/2019-01/2019-01-03` |
+| `year/full-day` | `2019/2019-01-03` |
 
 ## Ebenen, die leer bleiben
 

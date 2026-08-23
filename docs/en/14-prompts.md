@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r10.1.0 · Build date 2026-08-23**
+**Revision r11.0.0 · Build date 2026-08-23**
 
 This document preserves the request that created LR-FolderCraft, a generic
 prompt for regenerating a comparable tool from scratch, and the context needed
@@ -286,6 +286,22 @@ pre-flight checks, execute with a progress callback. Then:
   meaning, so provide move-up and move-down. Changing a rule must clear the
   manual decisions it might have made and replan, or the display stops matching
   what would run.
+* **Offer cumulative date levels.** `{yyyy}/{mm}/{dd}` giving `2019/01/03` is
+  only half of what people want: a folder named `01` says nothing once it is
+  out of its tree, in a search result or a file dialog. An option that rewrites
+  each date level to repeat the ones above it -- `2019/2019-01/2019-01-03` --
+  costs a dozen lines and is asked for by every photographer sooner or later.
+  Apply it only to date levels, so a camera or a label level is not repeated,
+  and keep the authored structure untouched so switching the option off returns
+  exactly what was typed.
+* **Offer an action that files a described folder into the structure by name.**
+  A dated folder called `2026-06-28 Makro Blume im Garten` holds a session, and
+  the description is the only thing distinguishing it from the other photos of
+  that day. Filing it into the target structure while appending its text to the
+  deepest date level keeps the session identifiable, and the plain day folder
+  for the same date must sit **beside** it rather than swallowing it. This is
+  distinct from splitting the text onto its own level and from rebuilding the
+  folder in place; a grown library wants all three at different moments.
 * **Offer to collect what the catalog does not know.** A library worked in for
   years accumulates files the application cannot see, and they are why a
   reorganised tree still has odds and ends in it. Sweeping them into one named

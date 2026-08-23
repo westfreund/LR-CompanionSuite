@@ -154,7 +154,7 @@ def execute(
             **journal_header(
                 catalog,
                 {
-                    "structure": list(settings.structure),
+                    "structure": list(settings.effective_structure),
                     "placement": settings.placement,
                     "target_roots": [sc.target_root_path for sc in plan.scopes],
                     "files": plan.stats.touched,

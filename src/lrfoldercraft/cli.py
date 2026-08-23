@@ -313,6 +313,13 @@ def _add_plan_flags(parser: argparse.ArgumentParser) -> None:
 
     behaviour = parser.add_argument_group("behaviour")
     behaviour.add_argument(
+        "--cumulative-dates",
+        action="store_true",
+        help="repeat the coarser date parts in every date level, so "
+        "'{yyyy}/{mm}/{dd}' gives 2019/2019-01/2019-01-03 instead of "
+        "2019/01/03 -- every folder name then says the whole date",
+    )
+    behaviour.add_argument(
         "--collect-orphans",
         action="store_true",
         help="sweep files that are on disk but not in the catalog into one "
@@ -427,6 +434,8 @@ def settings_from_args(args: argparse.Namespace) -> Settings:
                 ) from None
     if getattr(args, "interactive", False):
         settings.interactive_folders = True
+    if getattr(args, "cumulative_dates", False):
+        settings.cumulative_dates = True
     if getattr(args, "collect_orphans", False):
         settings.collect_orphans = True
     if getattr(args, "orphan_folder", None):

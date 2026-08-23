@@ -178,6 +178,9 @@ PRESETS: Dict[str, Tuple[str, ...]] = {
     "day/camera": ("{yyyy}-{mm}-{dd}", "{camera_slug}"),
     "camera/year/month/day": ("{camera_slug}", "{yyyy}", "{mm}", "{dd}"),
     "year/quarter/month": ("{yyyy}", "{quarter}", "{mm}"),
+    # Cumulative: every level says the whole date, not just its own part.
+    "year/year-month/full-day": ("{yyyy}", "{yyyy}-{mm}", "{yyyy}-{mm}-{dd}"),
+    "year/full-day": ("{yyyy}", "{yyyy}-{mm}-{dd}"),
 }
 
 PRESET_DESCRIPTIONS: Dict[str, Tuple[str, str]] = {
@@ -193,6 +196,14 @@ PRESET_DESCRIPTIONS: Dict[str, Tuple[str, str]] = {
     "day/camera": ("Day folder, camera folders inside", "Tagesordner mit Kameraordnern"),
     "camera/year/month/day": ("Camera, then full date tree", "Kamera, danach voller Datumsbaum"),
     "year/quarter/month": ("Year, quarter, month", "Jahr, Quartal, Monat"),
+    "year/year-month/full-day": (
+        "Date tree where every level names the whole date",
+        "Datumsbaum, in dem jede Ebene das ganze Datum nennt",
+    ),
+    "year/full-day": (
+        "Year folder, full dates inside",
+        "Jahresordner mit vollständigen Datumsangaben",
+    ),
 }
 
 
@@ -378,6 +389,39 @@ TOKEN_GRANULARITY = {
 
 #: Ordering of :data:`TOKEN_GRANULARITY` values, coarsest first.
 GRANULARITY_ORDER = ("year", "month", "week", "day")
+
+
+#: What a cumulative date level joins its inherited parts with.
+CUMULATIVE_SEPARATOR = "-"
+
+
+def is_date_level(template: str) -> bool:
+    """True when this level of the structure is named after a date."""
+    return any(token in TOKEN_GRANULARITY for token in template_tokens(template))
+
+
+def make_cumulative(structure: Sequence[str]) -> Tuple[str, ...]:
+    """Rewrite date levels so each one repeats the ones above it.
+
+    ``{yyyy}/{mm}/{dd}`` becomes ``{yyyy}/{yyyy}-{mm}/{yyyy}-{mm}-{dd}``, which
+    is what most photographers mean by a date tree: every folder name is
+    complete on its own, so a folder dragged out of the tree, shown in a search
+    result, or read in a file dialog still says which day it is.
+
+    Only date levels take part. ``{camera_slug}/{yyyy}/{mm}`` becomes
+    ``{camera_slug}/{yyyy}/{yyyy}-{mm}`` -- the camera is not a date and is not
+    repeated. A level that is already cumulative gains nothing, because it
+    inherits only from the date levels *above* it.
+    """
+    inherited: List[str] = []
+    result: List[str] = []
+    for template in structure:
+        if not is_date_level(template):
+            result.append(template)
+            continue
+        result.append(CUMULATIVE_SEPARATOR.join(inherited + [template]))
+        inherited.append(template)
+    return tuple(result)
 
 
 def structure_date_granularity(structure: Sequence[str]) -> Optional[str]:

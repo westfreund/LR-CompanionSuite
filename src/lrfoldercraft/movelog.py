@@ -75,7 +75,7 @@ def render_move_log(plan: Plan, result: RunResult, settings: Settings) -> str:
         _pair("Begonnen" if german else "Started", result.started_at),
         _pair("Beendet" if german else "Finished", result.finished_at),
         _pair("Ergebnis" if german else "Outcome", _outcome(result, german)),
-        _pair("Struktur" if german else "Structure", "/".join(settings.structure)),
+        _pair("Struktur" if german else "Structure", "/".join(settings.effective_structure)),
         _pair("Platzierung" if german else "Placement", settings.placement),
     ]
     if settings.folder_rules:

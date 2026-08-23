@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r10.1.0 · Build-Datum 2026-08-23**
+**Revision r11.0.0 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -47,6 +47,9 @@ Gibt den Ordnerbaum mit den Katalog-Ordner-IDs aus. Diese IDs braucht man für
 
 Erstellt den vollständigen Plan und gibt ihn samt Vorprüfungen aus.
 **Schreibt nichts.**
+
+`-s` ist die Kurzform von `--structure` und nimmt entweder einen Vorlagennamen
+oder ein eigenes Template.
 
 ```console
 $ lrfc plan /Volumes/Fotos/2019/2019.lrcat -s day --lang de
@@ -112,6 +115,9 @@ lrfc undo ~/Library/Application\ Support/LR-FolderCraft/backups/2019-20260822-16
 ```
 
 Der Journalpfad wird am Ende jedes Laufs ausgegeben und im Log vermerkt.
+`--yes` überspringt die Rückfrage. `--catalog-backup PFAD` benennt die
+Katalogsicherung, aus der zurückgespielt wird — für den seltenen Fall, dass der
+Vermerk im Journal nicht mehr stimmt; normalerweise weiß das Journal es.
 
 ## `lrfc tui`
 
@@ -380,6 +386,7 @@ Datums-Platzhalter, sagen Ordnerdaten nichts aus und werden ignoriert.
 | `consolidate` | Fotos herausholen und unterhalb des Ankers einsortieren |
 | `sort-inside` | Ordner behalten und die Struktur *darin* aufbauen |
 | `resort` | den Ordner **an seiner Stelle** neu aufbauen, unter seinem eigenen Elternordner |
+| `refile` | in die Zielstruktur einreihen, aber den **Zusatztext behalten** — auf der tiefsten Datumsebene |
 | `relocate` | den Ordner **unverändert** an den neuen Ort tragen — gleicher Name, gleicher Inhalt, keine Sortierung |
 | `leave` | die Fotos dieses Ordners gar nicht anfassen |
 | `keep` | datierter Ordner: die Fotos, die er korrekt beschreibt, bleiben |
@@ -393,6 +400,7 @@ Datums-Platzhalter, sagen Ordnerdaten nichts aus und werden ignoriert.
 | `consolidate` | `2026-06-28/Makro Blume im Garten` — aus `raw2026` herausgezogen |
 | `sort-inside` | `raw2026/2026-06-28 Makro Blume im Garten/2026-06-28/…` — verschachtelt |
 | `resort` | `raw2026/2026-06-28/Makro Blume im Garten` — aufgeteilt, an Ort und Stelle |
+| `refile` | `2026-06-28 Makro Blume im Garten` in der Zielstruktur — neben einem schlichten `2026-06-28`, nicht darin aufgegangen |
 | `relocate` | `<neue Wurzel>/raw2026/2026-06-28 Makro Blume im Garten` — unverändert hinübergetragen |
 
 `relocate` ist die Aktion für Material, das mitkommen soll, ohne angefasst zu
@@ -406,6 +414,19 @@ zu vergraben ist nicht, was „das dorthin verschieben" heißt.
 Sie bewirkt nur etwas, wenn der Lauf den Ordner überhaupt woandershin legen
 kann, also mit gesetztem Zielordner. Beim Sortieren am selben Ort bleibt ein
 `relocate`-Ordner genau, wo er ist — `plan` weist das als „bereits am Ziel" aus.
+
+`refile` ist für Bibliotheken, deren Datumsordner Sessionnamen tragen. Der
+Ordner wird dort eingereiht, wo die Struktur ihn hinstellt, und sein Text an die
+tiefste Datumsebene angehängt — die Session behält ihren Namen im neuen Baum:
+
+```
+mobileRAW/2026-06-28 Makro Blume im Garten/   ->  2026/2026-06/2026-06-28 Makro Blume im Garten/
+mobileRAW/(lose Fotos vom 28. Juni)           ->  2026/2026-06/2026-06-28/
+```
+
+Beide bestehen **nebeneinander**. Sie zusammenzuführen würde das Einzige
+wegwerfen, was die Session unterscheidbar macht — deshalb steht `refile` neben
+`consolidate` und nicht an dessen Stelle.
 
 ### Die drei Vorgaben
 

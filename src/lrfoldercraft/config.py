@@ -26,7 +26,7 @@ from .folders import (
     parse_rules,
 )
 from .logging_setup import get_logger
-from .rules import RuleError, parse_structure, validate_structure
+from .rules import RuleError, make_cumulative, parse_structure, validate_structure
 from .version import __version__
 
 log = get_logger("config")
@@ -124,6 +124,11 @@ class Settings:
     folder_actions: Dict[int, str] = field(default_factory=dict)
     #: Ask the operator about every folder that could reasonably go either way.
     interactive_folders: bool = False
+
+    #: Repeat the coarser date parts in every date level, so ``{yyyy}/{mm}``
+    #: reads ``2019/2019-01`` rather than ``2019/01``. Every folder name is
+    #: then complete on its own.
+    cumulative_dates: bool = False
 
     #: Sweep files that are on disk but not in the catalog into one folder.
     #: Off by default: it moves files nobody asked the tool about.
@@ -235,6 +240,17 @@ class Settings:
             parse_rules(self.folder_rules)
         except FolderRuleError as error:
             raise ConfigError(str(error)) from error
+
+    @property
+    def effective_structure(self) -> Tuple[str, ...]:
+        """The structure as it will actually be rendered.
+
+        :attr:`structure` stays as the operator wrote it, so turning
+        ``cumulative_dates`` off restores exactly what they typed.
+        """
+        if not self.cumulative_dates:
+            return tuple(self.structure)
+        return make_cumulative(self.structure)
 
     @property
     def parsed_folder_rules(self) -> Tuple[FolderRule, ...]:

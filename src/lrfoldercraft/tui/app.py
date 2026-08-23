@@ -504,8 +504,8 @@ class LRFolderCraftApp(App[int]):
         stats = plan.stats
         lines = [
             "[bold]{s}[/bold]  ->  {e}".format(
-                s="/".join(plan.settings.structure),
-                e=describe_structure(plan.settings.structure, self.language),
+                s="/".join(plan.settings.effective_structure),
+                e=describe_structure(plan.settings.effective_structure, self.language),
             ),
             "move {m:,}   rename {r:,}   in place {p:,}   skipped {s:,}".format(
                 m=stats.to_move,

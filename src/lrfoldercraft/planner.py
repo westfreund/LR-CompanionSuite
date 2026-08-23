@@ -22,6 +22,7 @@ from .folders import (
     KEEP,
     LEAVE,
     MOVE_OUT,
+    REFILE,
     RELOCATE,
     RESORT,
     SORT_INSIDE,
@@ -539,7 +540,7 @@ def _structure_segments(
         language=settings.language,
     )
     return (
-        render_structure(settings.structure, context, ascii_only=settings.ascii_only),
+        render_structure(settings.effective_structure, context, ascii_only=settings.ascii_only),
         "",
     )
 
@@ -601,7 +602,7 @@ def build_folder_cases(
     """
     folders = {f.id_local: f for f in reader.folders()}
     cases: Dict[int, FolderCase] = {}
-    wanted = structure_date_granularity(settings.structure)
+    wanted = structure_date_granularity(settings.effective_structure)
 
     for photo, _segments, _reason in prepared:
         folder = folders.get(photo.folder_id)
@@ -666,6 +667,9 @@ def _consolidates(case: Optional[FolderCase], settings: Settings, photo: Photo) 
         # It moves below the target root, but keeps its own path rather than
         # joining the shared anchor.
         return False
+    if case.action == REFILE:
+        # It does join the anchor, under a name of its own.
+        return True
     if case.action == KEEP:
         when = resolve_date(photo, settings)
         matches = (
@@ -693,7 +697,7 @@ def _render_at(photo: Photo, settings: Settings, when: datetime) -> Tuple[str, .
         original_folder_label=folder_label(original),
         language=settings.language,
     )
-    return render_structure(settings.structure, context, ascii_only=settings.ascii_only)
+    return render_structure(settings.effective_structure, context, ascii_only=settings.ascii_only)
 
 
 def _keeps_the_session_together(
@@ -744,6 +748,22 @@ def _segments_for(
         return current
     if case.action == SORT_INSIDE:
         return case.segments + structure_segments
+    if case.action == REFILE:
+        # File it where the structure says, but let the folder keep its name:
+        # the descriptive text is appended to the deepest level. A plain
+        # "2026-06-28" and a "2026-06-28 Makro Blume im Garten" then sit side
+        # by side under the same month, which is the point -- merging them
+        # would throw away the only thing that distinguishes the session.
+        together = _keeps_the_session_together(photo, case, settings)
+        segments = together if together is not None else structure_segments
+        if case.label and segments:
+            named = sanitise_segment(
+                "{last} {label}".format(last=segments[-1], label=case.label),
+                ascii_only=settings.ascii_only,
+            )
+            segments = segments[:-1] + (named,)
+        return anchor + segments
+
     if case.action == RELOCATE:
         # Unchanged means unchanged: the folder keeps its name, its contents and
         # its own sub-structure, and lands under the run's target root at the
@@ -785,7 +805,7 @@ def build_plan(
     settings.validate()
     step(
         "Planning run: structure=%s placement=%s",
-        "/".join(settings.structure),
+        "/".join(settings.effective_structure),
         settings.placement,
     )
 
@@ -799,7 +819,7 @@ def build_plan(
         raise PlanError("no photos matched the selection")
     step("Selected %d file(s) from the catalog", len(photos))
 
-    needs_date = structure_requires_date(settings.structure)
+    needs_date = structure_requires_date(settings.effective_structure)
     prepared: List[Tuple[Photo, Optional[Tuple[str, ...]], str]] = []
     for photo in photos:
         if not settings.accepts_extension(photo.extension):

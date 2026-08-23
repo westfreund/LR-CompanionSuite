@@ -167,8 +167,11 @@ def render_plan(
         _kv_block(
             [
                 (t("catalog", language), plan.catalog_path),
-                (t("structure", language), "/".join(plan.settings.structure)),
-                (t("example", language), describe_structure(plan.settings.structure, language)),
+                (t("structure", language), "/".join(plan.settings.effective_structure)),
+                (
+                    t("example", language),
+                    describe_structure(plan.settings.effective_structure, language),
+                ),
                 (t("placement", language), plan.placement),
                 (t("target_root", language), plan.scopes[0].target_root_path),
                 (
