@@ -16,6 +16,27 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [16.0.1] — 2026-08-23
+
+### Fixed
+
+- **An interrupted reversal was diagnosed from the filesystem, and got it
+  wrong.** A run whose reversal had completed hours earlier was reported as
+  half done, because a later run into the same target tree had recreated the
+  very paths the earlier one left behind. Files at their old places look
+  identical whether a reversal was cut short or another run put them there, so
+  the filesystem must not be asked.
+
+  A reversal now records that it started, before a single file is touched, and
+  an interrupted one is the record saying started-but-not-finished. A run
+  marked undone is never reported again whatever the paths look like.
+
+  It mattered because the false positive raised a *blocking* pre-flight error
+  against a library that was perfectly sound. A check that refuses good work is
+  worse than no check.
+
+---
+
 ## [16.0.0] — 2026-08-23 — "Wiederaufnahme"
 
 ### Added

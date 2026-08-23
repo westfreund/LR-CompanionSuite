@@ -11,7 +11,7 @@ every UI surface (TUI header, CLI banner, log header, reports).
 
 from __future__ import annotations
 
-__version__ = "16.0.0"
+__version__ = "16.0.1"
 __build_date__ = "2026-08-23"
 __codename__ = "Wiederaufnahme"
 
