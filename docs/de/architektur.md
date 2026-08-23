@@ -1,6 +1,6 @@
 # Architektur
 
-**Revision r4.0.0 · Build-Datum 2026-08-23**
+**Revision r4.0.1 · Build-Datum 2026-08-23**
 
 ## Leitregel
 
@@ -71,7 +71,7 @@ LR-FolderCraft/
 │       ├── workers.py               Katalog / Plan / Ausführung in Threads
 │       └── i18n.py                  Oberflächentexte, EN und DE
 │
-├── tests/                           265 Tests, synthetischer Katalog als Fixture
+├── tests/                           268 Tests, synthetischer Katalog als Fixture
 ├── install/                         Installationsskripte für macOS, Linux, Windows
 └── docs/  en/  de/  images/         diese Dokumentation, in beiden Sprachen
 ```

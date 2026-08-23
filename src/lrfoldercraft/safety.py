@@ -236,6 +236,26 @@ def _check_target_writable(plan: Plan) -> Check:
     to_create = []
     for scope in plan.scopes:
         root = Path(scope.target_root_path)
+
+        # With in-place placement the target *is* the catalog's own root folder,
+        # so a missing one means the catalog is disconnected from its photos --
+        # usually a drive mounted under a different name. Reporting that as a
+        # permission problem on some distant parent directory helps nobody.
+        if plan.placement == "in-place" and not root.exists():
+            return Check(
+                "target-writable",
+                ERROR,
+                "The catalog's root folder {r} does not exist. The drive is "
+                "probably mounted under a different name, or the folder was "
+                "moved. Reconnect it in Lightroom first (right-click the "
+                "folder, Find Missing Folder), then run again.".format(r=root),
+                "Der Stammordner {r} des Katalogs existiert nicht. Vermutlich "
+                "ist das Laufwerk unter einem anderen Namen eingehaengt oder "
+                "der Ordner wurde verschoben. Bitte zuerst in Lightroom neu "
+                "verknuepfen (Rechtsklick auf den Ordner, Fehlenden Ordner "
+                "suchen) und dann erneut ausfuehren.".format(r=root),
+            )
+
         probe = _existing_ancestor(root)
         if not probe.exists():
             return Check(
@@ -384,10 +404,29 @@ def _check_missing_sources(plan: Plan) -> Optional[Check]:
     n = plan.stats.missing_source
     if not n:
         return None
+
+    # A few missing files are a fact of life in a large library. *Every* file
+    # missing is a different thing entirely: the catalog has lost track of
+    # where its photos are, and sorting it would be meaningless.
+    if plan.stats.total and n == plan.stats.total:
+        return Check(
+            "missing-sources",
+            ERROR,
+            "None of the {n} selected files exist at the paths the catalog "
+            "records. The catalog is not connected to its photos -- reconnect "
+            "the folder in Lightroom first (right-click, Find Missing "
+            "Folder).".format(n=n),
+            "Keine der {n} ausgewaehlten Dateien liegt an dem Pfad, den der "
+            "Katalog vermerkt. Der Katalog ist nicht mit seinen Fotos "
+            "verbunden -- bitte zuerst in Lightroom neu verknuepfen "
+            "(Rechtsklick, Fehlenden Ordner suchen).".format(n=n),
+        )
+
     return Check(
         "missing-sources",
         WARNING,
-        "{n} catalog entries point to files that are not on disk; they stay untouched.".format(n=n),
-        "{n} Katalogeintraege verweisen auf nicht vorhandene Dateien; sie "
-        "bleiben unangetastet.".format(n=n),
+        "{n} of {t} catalog entries point to files that are not on disk; they "
+        "stay untouched.".format(n=n, t=plan.stats.total),
+        "{n} von {t} Katalogeintraegen verweisen auf nicht vorhandene Dateien; "
+        "sie bleiben unangetastet.".format(n=n, t=plan.stats.total),
     )

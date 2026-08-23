@@ -12,6 +12,30 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
 ---
 
+## [4.0.1] — 2026-08-23
+
+### Fixed
+
+- **A catalog that has lost track of its photos is now named as such.** When
+  the drive is mounted under a different name than the catalog records — which
+  happens whenever a volume is renamed or a library is restored elsewhere — the
+  pre-flight reported "No write permission for /Volumes", because the search
+  for an existing parent directory had walked all the way up. That sends the
+  operator looking for a permission problem that is not there.
+
+  With in-place placement the target *is* the catalog's own root folder, so a
+  missing one now says exactly that, names the path, and points at Lightroom's
+  Find Missing Folder.
+
+- **Every file missing is an error, not a warning.** A few strays in a large
+  library are normal and must not block a run. All of them missing means the
+  catalog is disconnected from its photos, and sorting it would be meaningless.
+  The warning also states the total now ("3 of 9,452"), so the scale is visible
+  at a glance.
+
+  Found while preparing a test: a restored 2019 library recorded its root as
+  `/Volumes/LR_Archiv/...` while the drive was mounted as `/Volumes/1TB-2`.
+
 ## [4.0.0] — 2026-08-23 — "Prüfstand"
 
 The installer now verifies what it installed, repairs what is missing, updates
@@ -454,7 +478,7 @@ and rewriting the catalog in one reversible operation.
 - Debug mode and a per-run log file carrying a numbered `STEP` audit trail.
 
 **Project**
-- 265 tests, 87 % coverage, built on a synthetic catalog fixture so no
+- 268 tests, 87 % coverage, built on a synthetic catalog fixture so no
   Lightroom installation is needed.
 - GitLab CI: lint, tests on Python 3.9–3.13, a dedicated safety job, build.
 - Installers for macOS, Linux and Windows.

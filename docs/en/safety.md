@@ -1,6 +1,6 @@
 # Safety and recovery
 
-**Revision r4.0.0 · Build date 2026-08-23**
+**Revision r4.0.1 · Build date 2026-08-23**
 
 > This tool edits your Lightroom catalog database and moves your photographs.
 > It is built carefully and it is tested, but **keep an independent, verified
@@ -29,11 +29,11 @@ Before anything is written:
 | `catalog-writable` — the file exists and is writable | yes |
 | `catalog-side-files` — an interrupted `-journal` | warning |
 | `id-counter-type` — catalog damaged by LR-FolderCraft 1.0.0–1.0.4 | warning |
-| `target-writable` — the target location can be written | yes |
+| `target-writable` — the target exists (or can be created) and is writable | yes |
 | `free-space` — 105 % of the cross-volume data volume | yes |
 | `backup-space` — room for the catalog backup | yes |
 | `work-present` — is there anything to do at all | warning |
-| `missing-sources` — catalog entries with no file on disk | warning |
+| `missing-sources` — catalog entries with no file on disk | warning, or error when *every* file is missing |
 
 ### 2. Verified catalog backup
 

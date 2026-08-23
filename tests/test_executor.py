@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import sqlite3
 from pathlib import Path
 
 import pytest
@@ -485,3 +486,60 @@ def test_a_failure_in_the_second_root_rolls_back_the_first(builder, tmp_path, mo
     assert builder.catalog_paths() == before
     for path in before:
         assert os.path.exists(path), path
+
+
+# -- a catalog that lost track of its photos --------------------------------
+
+
+def test_a_root_folder_that_does_not_exist_is_named_as_such(builder, tmp_path):
+    """A drive mounted under a different name is the usual cause.
+
+    Saying "no write permission for /Volumes" instead sends the operator
+    looking for a permission problem that is not there.
+    """
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00")
+    conn = sqlite3.connect(str(builder.catalog_path))
+    conn.execute(
+        "UPDATE AgLibraryRootFolder SET absolutePath = ?",
+        (str(tmp_path / "not-mounted" / "Photos") + "/",),
+    )
+    conn.commit()
+    conn.close()
+
+    settings = Settings(catalog=str(builder.catalog_path), structure=("{yyyy}",))
+    with open_catalog(builder.catalog_path) as catalog:
+        plan = build_plan(CatalogReader(catalog), settings)
+    checks = preflight(plan)
+
+    assert not checks.ok
+    failed = {c.name for c in checks.errors}
+    assert "target-writable" in failed
+    target = next(c for c in checks.errors if c.name == "target-writable")
+    assert "does not exist" in target.message_en
+    assert "Find Missing Folder" in target.message_en
+    assert "Fehlenden Ordner suchen" in target.message_de
+
+
+def test_a_wholly_disconnected_catalog_is_an_error_not_a_warning(builder, tmp_path):
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00", on_disk=False)
+    builder.add_photo("B.CR2", "2019-02-14T10:00:00", on_disk=False)
+    settings = Settings(catalog=str(builder.catalog_path), structure=("{yyyy}",))
+    with open_catalog(builder.catalog_path) as catalog:
+        plan = build_plan(CatalogReader(catalog), settings)
+    check = next(c for c in preflight(plan).checks if c.name == "missing-sources")
+    assert check.level == "error"
+    assert "None of the 2" in check.message_en
+
+
+def test_a_few_missing_files_stay_a_warning(builder, tmp_path):
+    """A large library always has a few strays; that must not block a run."""
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00")
+    builder.add_photo("B.CR2", "2019-02-14T10:00:00")
+    builder.add_photo("GHOST.CR2", "2019-03-01T10:00:00", on_disk=False)
+    settings = Settings(catalog=str(builder.catalog_path), structure=("{yyyy}",))
+    with open_catalog(builder.catalog_path) as catalog:
+        plan = build_plan(CatalogReader(catalog), settings)
+    check = next(c for c in preflight(plan).checks if c.name == "missing-sources")
+    assert check.level == "warning"
+    assert "1 of 3" in check.message_en
+    assert preflight(plan).ok

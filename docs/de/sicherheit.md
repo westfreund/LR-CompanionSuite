@@ -1,6 +1,6 @@
 # Sicherheit und Wiederherstellung
 
-**Revision r4.0.0 · Build-Datum 2026-08-23**
+**Revision r4.0.1 · Build-Datum 2026-08-23**
 
 > Dieses Werkzeug bearbeitet die Lightroom-Katalogdatenbank und verschiebt Ihre
 > Fotografien. Es ist sorgfältig gebaut und getestet, aber: **Halten Sie vor
@@ -33,11 +33,11 @@ Bevor irgendetwas geschrieben wird:
 | `catalog-writable` — Datei existiert und ist beschreibbar | ja |
 | `catalog-side-files` — unterbrochenes `-journal` | Warnung |
 | `id-counter-type` — Katalog durch LR-FolderCraft 1.0.0–1.0.4 beschaedigt | Warnung |
-| `target-writable` — der Zielort ist beschreibbar | ja |
+| `target-writable` — das Ziel existiert (oder ist anlegbar) und ist beschreibbar | ja |
 | `free-space` — 105 % des Volume-übergreifenden Datenvolumens | ja |
 | `backup-space` — Platz für das Katalog-Backup | ja |
 | `work-present` — gibt es überhaupt etwas zu tun | Warnung |
-| `missing-sources` — Katalogeinträge ohne Datei auf der Platte | Warnung |
+| `missing-sources` — Katalogeinträge ohne Datei auf der Platte | Warnung, Fehler wenn *alle* fehlen |
 
 ### 2. Geprüftes Katalog-Backup
 
