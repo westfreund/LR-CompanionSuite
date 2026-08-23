@@ -36,9 +36,24 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
   Motivated by that same verification: six further tables had changed in the
   live catalog, and the only way to answer "was that us?" was to grep the
-  source for SQL statements. It was Lightroom, writing after the user opened
-  the catalog — but that should be a property the suite enforces, not an
-  argument made after the fact.
+  source for SQL statements. It was not — the user had edited a photo in
+  Lightroom to check that access worked. But that should be a property the
+  suite enforces, not an argument made after the fact.
+
+### Verified against
+
+- The reference library reorganised through the graphical interface with
+  `{camera_slug}/{yyyy}/{mm}/{dd}` and `new-tree` placement: 9,452 files into a
+  second root folder in ten seconds, every file present at an unchanged size,
+  `integrity_check` ok, `foreign_key_check` clean, 210 folder rows with no
+  orphans and no bad prefixes, all 9,452 catalog paths resolving, the id
+  counter still REAL, and the write-ahead log checkpointed away.
+
+- **And then actually used.** Editing a photo in Lightroom afterwards shows the
+  whole chain intact: the file is found at its new path, its develop history
+  from 2022 is still there, a new step ("convert to black and white") is added
+  on top, and the result is written back. A migrated library is not merely
+  readable, it is fully workable.
 
 ## [4.0.1] — 2026-08-23
 
