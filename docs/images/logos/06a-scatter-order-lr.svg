@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
+  <title>Scattered becomes ordered, LR in the first folder</title>
+  <!-- Variant of 06: the three folders keep the "ordered set" reading, and the
+       one the eye lands on first carries the monogram. -->
+  <g fill="currentColor">
+    <rect x="3" y="9" width="9" height="7" rx="1.5" transform="rotate(-13 7.5 12.5)" opacity=".7"/>
+    <rect x="5" y="25" width="9" height="7" rx="1.5" transform="rotate(9 9.5 28.5)" opacity=".7"/>
+    <rect x="2" y="40" width="9" height="7" rx="1.5" transform="rotate(-6 6.5 43.5)" opacity=".7"/>
+    <rect x="13" y="47" width="9" height="7" rx="1.5" transform="rotate(15 17.5 50.5)" opacity=".7"/>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M25 32h8"/>
+    <path d="M29 27.5 34 32l-5 4.5"/>
+  </g>
+  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M38 12a2 2 0 0 1 2-2h4l2 3h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H40a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".2"/>
+    <path d="M38 32a2 2 0 0 1 2-2h4l2 3h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H40a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".14"/>
+    <path d="M38 46a2 2 0 0 1 2-2h4l2 3h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H40a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".14"/>
+  </g>
+  <text x="51" y="24" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="10.5" font-weight="700" letter-spacing=".3">LR</text>
+</svg>

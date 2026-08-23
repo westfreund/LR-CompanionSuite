@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
+  <title>The small cut: one folder, the monogram, one arrow</title>
+  <!-- A favicon is 16 px. The full picture cannot survive that, so this is the
+       same idea reduced to what still reads: the arrow that means "sorted into",
+       one folder, the monogram. Paired with 06b for large sizes. -->
+  <g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 32h9"/>
+    <path d="M12 25l7 7-7 7"/>
+  </g>
+  <path d="M22 18a4 4 0 0 1 4-4h8l4 5h20a4 4 0 0 1 4 4v27a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4z"
+        fill="currentColor" fill-opacity=".2" stroke="currentColor" stroke-width="4"
+        stroke-linejoin="round"/>
+  <text x="42" y="43" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="20" font-weight="700" letter-spacing=".5">LR</text>
+</svg>

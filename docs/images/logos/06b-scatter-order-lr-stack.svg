@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
+  <title>Scattered becomes ordered, one folder with a stack behind it</title>
+  <!-- Variant of 06 built for small sizes: one folder large enough to hold the
+       monogram legibly, with two edges behind it still saying "a set". -->
+  <g fill="currentColor">
+    <rect x="3" y="12" width="9" height="7" rx="1.5" transform="rotate(-14 7.5 15.5)" opacity=".7"/>
+    <rect x="4" y="28" width="9" height="7" rx="1.5" transform="rotate(10 8.5 31.5)" opacity=".7"/>
+    <rect x="2" y="43" width="9" height="7" rx="1.5" transform="rotate(-5 6.5 46.5)" opacity=".7"/>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 32h8"/>
+    <path d="M22 27.5 27 32l-5 4.5"/>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity=".55">
+    <path d="M38 16h20M35.5 21h25"/>
+  </g>
+  <path d="M32 27a3 3 0 0 1 3-3h7l3 4h18a3 3 0 0 1 3 3v18a3 3 0 0 1-3 3H35a3 3 0 0 1-3-3z"
+        fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="2.5"
+        stroke-linejoin="round"/>
+  <text x="48" y="45" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="15" font-weight="700" letter-spacing=".5">LR</text>
+</svg>

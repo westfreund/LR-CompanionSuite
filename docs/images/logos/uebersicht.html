@@ -1,625 +1,537 @@
-<title>Sechs Marken zur Wahl</title>
+<title>Sechs plus LR</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
   :root {
-    --card:      #d9dadc;
-    --ground:    #eceded;
-    --panel:     #f7f7f8;
-    --ink:       #17191d;
-    --ink-soft:  #5a5f68;
-    --ink-faint: #8c9199;
-    --rule:      #c9cbcf;
-    --safelight: #b8501d;
-    --shadow:    0 1px 2px rgba(18,20,24,.10), 0 8px 22px rgba(18,20,24,.07);
-    --step--1: .8125rem;
-    --step-0:  1rem;
-    --step-1:  1.1875rem;
-    --step-2:  1.5rem;
-    --step-3:  2.25rem;
+    --card:#d9dadc; --ground:#eceded; --panel:#f7f7f8;
+    --ink:#17191d; --ink-soft:#5a5f68; --ink-faint:#8c9199;
+    --rule:#c9cbcf; --safelight:#b8501d;
+    --shadow:0 1px 2px rgba(18,20,24,.10),0 8px 22px rgba(18,20,24,.07);
+    --step--1:.8125rem; --step-0:1rem; --step-1:1.1875rem; --step-2:1.5rem; --step-3:2.25rem;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --card:      #232629;
-      --ground:    #151719;
-      --panel:     #1d2023;
-      --ink:       #e9eaec;
-      --ink-soft:  #a3a8b0;
-      --ink-faint: #71767e;
-      --rule:      #33383d;
-      --safelight: #e0783f;
-      --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 26px rgba(0,0,0,.38);
+      --card:#232629; --ground:#151719; --panel:#1d2023;
+      --ink:#e9eaec; --ink-soft:#a3a8b0; --ink-faint:#71767e;
+      --rule:#33383d; --safelight:#e0783f;
+      --shadow:0 1px 2px rgba(0,0,0,.5),0 10px 26px rgba(0,0,0,.38);
     }
   }
   :root[data-theme="dark"] {
-    --card:      #232629;
-    --ground:    #151719;
-    --panel:     #1d2023;
-    --ink:       #e9eaec;
-    --ink-soft:  #a3a8b0;
-    --ink-faint: #71767e;
-    --rule:      #33383d;
-    --safelight: #e0783f;
-    --shadow:    0 1px 2px rgba(0,0,0,.5), 0 10px 26px rgba(0,0,0,.38);
+    --card:#232629; --ground:#151719; --panel:#1d2023;
+    --ink:#e9eaec; --ink-soft:#a3a8b0; --ink-faint:#71767e;
+    --rule:#33383d; --safelight:#e0783f;
+    --shadow:0 1px 2px rgba(0,0,0,.5),0 10px 26px rgba(0,0,0,.38);
   }
-
-  *, *::before, *::after { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    background: var(--ground);
-    color: var(--ink);
-    font-family: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
-    font-size: var(--step-0);
-    line-height: 1.55;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  .wrap {
-    max-width: 68rem;
-    margin: 0 auto;
-    padding: clamp(2rem, 5vw, 4rem) clamp(1.25rem, 4vw, 2.5rem) 5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2.5rem;
-  }
-
-  /* ---- masthead ---- */
-  .masthead { display: flex; flex-direction: column; gap: .75rem; }
-  .eyebrow {
-    font-family: "JetBrains Mono", ui-monospace, monospace;
-    font-size: var(--step--1);
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--safelight);
-    margin: 0;
-  }
-  h1 {
-    font-family: Archivo, ui-sans-serif, system-ui, sans-serif;
-    font-weight: 700;
-    font-size: clamp(1.9rem, 4.5vw, var(--step-3));
-    letter-spacing: -.02em;
-    line-height: 1.08;
-    text-wrap: balance;
-    margin: 0;
-  }
-  .lede { max-width: 56ch; color: var(--ink-soft); margin: 0; }
-  .lede strong { color: var(--ink); font-weight: 600; }
-
-  /* ---- the contact sheet ---- */
-  .sheet { display: flex; flex-direction: column; gap: 1.25rem; }
-
-  .legend {
-    display: grid;
-    grid-template-columns: minmax(11rem, 1.15fr) repeat(4, minmax(6.5rem, .8fr));
-    gap: 1rem;
-    padding: 0 1.25rem;
-    font-family: "JetBrains Mono", ui-monospace, monospace;
-    font-size: .6875rem;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-  }
-  .legend span:first-child { text-transform: none; letter-spacing: 0; }
-
-  .frame {
-    display: grid;
-    grid-template-columns: minmax(11rem, 1.15fr) repeat(4, minmax(6.5rem, .8fr));
-    gap: 1rem;
-    align-items: center;
-    padding: 1.25rem;
-    background: var(--panel);
-    border: 1px solid var(--rule);
-    border-radius: 4px;
-    box-shadow: var(--shadow);
-  }
-
-  .frame-id { display: flex; flex-direction: column; gap: .15rem; }
-  .num {
-    font-family: "JetBrains Mono", ui-monospace, monospace;
-    font-size: .6875rem;
-    font-weight: 500;
-    letter-spacing: .12em;
-    color: var(--safelight);
-  }
-  .frame-id h2 {
-    font-family: Archivo, ui-sans-serif, sans-serif;
-    font-weight: 700;
-    font-size: var(--step-1);
-    letter-spacing: -.01em;
-    margin: 0;
-  }
-  .claim { margin: 0; font-size: var(--step--1); color: var(--ink-soft); font-style: italic; }
-
-  .cell { display: grid; place-items: center; border-radius: 3px; min-height: 6.5rem; }
-  /* The two swatches exist to judge the mark on each ground, so their
-     colours are fixed by purpose and do not follow the page theme. */
-  .cell-hero  { background: var(--card); color: var(--ink); }
-  .cell-light { background: #f3f3f4; color: #1d1f22; }
-  .cell-dark  { background: #1b1d20; color: #eceded; }
-  .cell-tab   { background: var(--card); }
-
-  .tab {
-    display: flex; align-items: center; gap: .4rem;
-    background: #f3f3f4; color: #33373c;
-    border-radius: 7px 7px 0 0;
-    padding: .4rem .5rem .45rem;
-    width: 9.5rem;
-    font-size: .6875rem;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-  }
-  .tab-mark { display: grid; place-items: center; color: #1d1f22; flex: 0 0 16px; }
-  .tab-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .tab-x { margin-left: auto; color: #8a8f96; }
-
-  .frame-note { grid-column: 1 / -1; padding-top: .35rem; border-top: 1px solid var(--rule);
-                 display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: baseline; }
-  .frame-note p { margin: 0; flex: 1 1 24rem; color: var(--ink-soft); font-size: var(--step--1); }
-  .frame-note em { color: var(--ink); font-style: italic; }
-  .frame-note code {
-    font-family: "JetBrains Mono", ui-monospace, monospace;
-    font-size: .6875rem; color: var(--ink-faint);
-  }
-
-  /* ---- closing ---- */
-  .closing {
-    border-top: 2px solid var(--ink);
-    padding-top: 1.25rem;
-    display: flex; flex-direction: column; gap: .5rem;
-  }
-  .closing h2 {
-    font-family: Archivo, sans-serif; font-weight: 700;
-    font-size: var(--step-2); letter-spacing: -.015em; margin: 0;
-  }
-  .closing p { margin: 0; max-width: 60ch; color: var(--ink-soft); }
-  .closing strong { color: var(--ink); font-weight: 600; }
-
-  @media (max-width: 60rem) {
-    .legend { display: none; }
-    .frame { grid-template-columns: repeat(2, 1fr); }
-    .frame-id { grid-column: 1 / -1; }
+  *,*::before,*::after { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink);
+    font-family:"Source Sans 3",ui-sans-serif,system-ui,sans-serif;
+    font-size:var(--step-0); line-height:1.55; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:68rem; margin:0 auto;
+    padding:clamp(2rem,5vw,4rem) clamp(1.25rem,4vw,2.5rem) 5rem;
+    display:flex; flex-direction:column; gap:2.5rem; }
+  .eyebrow { font-family:"JetBrains Mono",ui-monospace,monospace; font-size:var(--step--1);
+    letter-spacing:.14em; text-transform:uppercase; color:var(--safelight); margin:0; }
+  h1 { font-family:Archivo,ui-sans-serif,system-ui,sans-serif; font-weight:700;
+    font-size:clamp(1.9rem,4.5vw,var(--step-3)); letter-spacing:-.02em; line-height:1.08;
+    text-wrap:balance; margin:0; }
+  .masthead { display:flex; flex-direction:column; gap:.75rem; }
+  .lede { max-width:56ch; color:var(--ink-soft); margin:0; }
+  .lede strong { color:var(--ink); font-weight:600; }
+  .sheet { display:flex; flex-direction:column; gap:1.25rem; }
+  .band { display:flex; align-items:baseline; gap:.75rem; padding:0 .25rem; }
+  .band h2 { font-family:Archivo,sans-serif; font-weight:700; font-size:var(--step-1);
+    letter-spacing:-.01em; margin:0; }
+  .band p { margin:0; color:var(--ink-soft); font-size:var(--step--1); }
+  .legend { display:grid; grid-template-columns:minmax(11rem,1.15fr) repeat(4,minmax(6.5rem,.8fr));
+    gap:1rem; padding:0 1.25rem; font-family:"JetBrains Mono",ui-monospace,monospace;
+    font-size:.6875rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); }
+  .legend span:first-child { text-transform:none; letter-spacing:0; }
+  .frame { display:grid; grid-template-columns:minmax(11rem,1.15fr) repeat(4,minmax(6.5rem,.8fr));
+    gap:1rem; align-items:center; padding:1.25rem; background:var(--panel);
+    border:1px solid var(--rule); border-radius:4px; box-shadow:var(--shadow); }
+  .frame.muted { opacity:.62; }
+  .frame-id { display:flex; flex-direction:column; gap:.15rem; }
+  .num { font-family:"JetBrains Mono",ui-monospace,monospace; font-size:.6875rem;
+    font-weight:500; letter-spacing:.12em; color:var(--safelight); }
+  .frame-id h2 { font-family:Archivo,ui-sans-serif,sans-serif; font-weight:700;
+    font-size:var(--step-1); letter-spacing:-.01em; margin:0; }
+  .claim { margin:0; font-size:var(--step--1); color:var(--ink-soft); font-style:italic; }
+  .cell { display:grid; place-items:center; border-radius:3px; min-height:6.5rem; }
+  .cell-hero { background:var(--card); color:var(--ink); }
+  .cell-light { background:#f3f3f4; color:#1d1f22; }
+  .cell-dark { background:#1b1d20; color:#eceded; }
+  .cell-tab { background:var(--card); }
+  .tab { display:flex; align-items:center; gap:.4rem; background:#f3f3f4; color:#33373c;
+    border-radius:7px 7px 0 0; padding:.4rem .5rem .45rem; width:9.5rem; font-size:.6875rem;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.9); }
+  .tab-mark { display:grid; place-items:center; color:#1d1f22; flex:0 0 16px; }
+  .tab-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tab-x { margin-left:auto; color:#8a8f96; }
+  .frame-note { grid-column:1/-1; padding-top:.35rem; border-top:1px solid var(--rule);
+    display:flex; flex-wrap:wrap; gap:.5rem 1.25rem; align-items:baseline; }
+  .frame-note p { margin:0; flex:1 1 24rem; color:var(--ink-soft); font-size:var(--step--1); }
+  .frame-note code { font-family:"JetBrains Mono",ui-monospace,monospace; font-size:.6875rem;
+    color:var(--ink-faint); }
+  .closing { border-top:2px solid var(--ink); padding-top:1.25rem;
+    display:flex; flex-direction:column; gap:.6rem; }
+  .closing h2 { font-family:Archivo,sans-serif; font-weight:700; font-size:var(--step-2);
+    letter-spacing:-.015em; margin:0; }
+  .closing p { margin:0; max-width:62ch; color:var(--ink-soft); }
+  .closing strong { color:var(--ink); font-weight:600; }
+  @media (max-width:60rem) {
+    .legend { display:none; }
+    .frame { grid-template-columns:repeat(2,1fr); }
+    .frame-id { grid-column:1/-1; }
   }
 </style>
 
 <div class="wrap">
   <header class="masthead">
-    <p class="eyebrow">LR-FolderCraft &middot; O-26</p>
-    <h1>Sechs Marken zur Wahl</h1>
-    <p class="lede">Jeder Entwurf viermal: groß, auf hellem und auf dunklem Grund, und
-    als 16-Pixel-Favicon in einem Browser-Tab. <strong>Die letzte Spalte entscheidet</strong> —
-    dort scheitern die meisten Logos, und ein Fenstersymbol wird fast nur in dieser Größe gesehen.
-    Alle Entwürfe sind einfarbig und übernehmen die Textfarbe, lassen sich also beliebig einfärben.</p>
+    <p class="eyebrow">LR-FolderCraft &middot; O-26 &middot; zweite Runde</p>
+    <h1>Sechs plus LR</h1>
+    <p class="lede">Drei Wege, das Monogramm in Entwurf&nbsp;6 unterzubringen. Sie sagten
+    „wie bei 3“ — dort steckt der Inhalt <em>im</em> Ordner, und genau das macht
+    <strong>6a</strong>. <strong>6b</strong> und <strong>6c</strong> sind die beiden anderen
+    naheliegenden Antworten, damit Sie den Unterschied sehen statt ihn sich vorzustellen.</p>
   </header>
 
   <section class="sheet">
     <div class="legend">
-      <span>Entwurf</span>
-      <span>96 px</span>
-      <span>40 px hell</span>
-      <span>40 px dunkel</span>
-      <span>16 px Tab</span>
+      <span>Entwurf</span><span>96 px</span><span>40 px hell</span>
+      <span>40 px dunkel</span><span>16 px Tab</span>
     </div>
     
       <article class="frame">
         <header class="frame-id">
-          <span class="num">01</span>
-          <h2>Blende im Ordner</h2>
-          <p class="claim">Die Bibliothek, durch ein Objektiv gesehen.</p>
+          <span class="num">6a</span>
+          <h2>LR im ersten Ordner</h2>
+          <p class="claim">Die drei Ordner bleiben — „ein geordneter Satz“ — und der oberste, auf dem das Auge zuerst landet, trägt das Monogramm.</p>
         </header>
-
         <div class="cell cell-hero"><svg width="96" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
   
-  <!-- A folder whose contents are an aperture: the library, seen through a lens. -->
-  <path d="M6 16a3 3 0 0 1 3-3h14l4 5h28a3 3 0 0 1 3 3v30a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z"
-        fill="currentColor" opacity=".16"/>
-  <path d="M6 16a3 3 0 0 1 3-3h14l4 5h28a3 3 0 0 1 3 3v30a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z"
-        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-    <circle cx="32" cy="37" r="11"/>
-    <path d="M32 26 26.5 35.5M43.5 31 32.5 31M43.5 43 38 33.5M32 48 37.5 38.5M20.5 43 31.5 43M20.5 31 26 40.5"/>
-  </g>
-</svg></div>
-        <div class="cell cell-light"><svg width="40" height="40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
-  
-  <!-- A folder whose contents are an aperture: the library, seen through a lens. -->
-  <path d="M6 16a3 3 0 0 1 3-3h14l4 5h28a3 3 0 0 1 3 3v30a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z"
-        fill="currentColor" opacity=".16"/>
-  <path d="M6 16a3 3 0 0 1 3-3h14l4 5h28a3 3 0 0 1 3 3v30a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z"
-        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-    <circle cx="32" cy="37" r="11"/>
-    <path d="M32 26 26.5 35.5M43.5 31 32.5 31M43.5 43 38 33.5M32 48 37.5 38.5M20.5 43 31.5 43M20.5 31 26 40.5"/>
-  </g>
-</svg></div>
-        <div class="cell cell-dark"><svg width="40" height="40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
-  
-  <!-- A folder whose contents are an aperture: the library, seen through a lens. -->
-  <path d="M6 16a3 3 0 0 1 3-3h14l4 5h28a3 3 0 0 1 3 3v30a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z"
-        fill="currentColor" opacity=".16"/>
-  <path d="M6 16a3 3 0 0 1 3-3h14l4 5h28a3 3 0 0 1 3 3v30a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z"
-        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-    <circle cx="32" cy="37" r="11"/>
-    <path d="M32 26 26.5 35.5M43.5 31 32.5 31M43.5 43 38 33.5M32 48 37.5 38.5M20.5 43 31.5 43M20.5 31 26 40.5"/>
-  </g>
-</svg></div>
-        <div class="cell cell-tab">
-          <div class="tab">
-            <span class="tab-mark"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
-  
-  <!-- A folder whose contents are an aperture: the library, seen through a lens. -->
-  <path d="M6 16a3 3 0 0 1 3-3h14l4 5h28a3 3 0 0 1 3 3v30a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z"
-        fill="currentColor" opacity=".16"/>
-  <path d="M6 16a3 3 0 0 1 3-3h14l4 5h28a3 3 0 0 1 3 3v30a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z"
-        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-    <circle cx="32" cy="37" r="11"/>
-    <path d="M32 26 26.5 35.5M43.5 31 32.5 31M43.5 43 38 33.5M32 48 37.5 38.5M20.5 43 31.5 43M20.5 31 26 40.5"/>
-  </g>
-</svg></span>
-            <span class="tab-title">LR-FolderCraft</span>
-            <span class="tab-x">&times;</span>
-          </div>
-        </div>
-
-        <footer class="frame-note">
-          <p>Am deutlichsten fotografisch. Eine Blende sagt allerdings nichts über <em>Ordnung</em> — und genau die ist die Aufgabe des Werkzeugs.</p>
-          <code>01-aperture-folder.svg</code>
-        </footer>
-      </article>
-
-      <article class="frame">
-        <header class="frame-id">
-          <span class="num">02</span>
-          <h2>Der Sortiervorgang</h2>
-          <p class="claim">Ein Stapel wird zu drei Ordnern.</p>
-        </header>
-
-        <div class="cell cell-hero"><svg width="96" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
-  
-  <!-- The actual operation: one heap becomes an ordered set. -->
-  <rect x="22" y="6" width="20" height="14" rx="2.5"
-        fill="currentColor" opacity=".16"/>
-  <rect x="22" y="6" width="20" height="14" rx="2.5"
-        fill="none" stroke="currentColor" stroke-width="2.5"/>
-  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-    <path d="M32 21v6M32 27H13v5M32 27h19v5M32 27v5"/>
-  </g>
-  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
-    <path d="M4 36a2 2 0 0 1 2-2h5l2 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M23 36a2 2 0 0 1 2-2h5l2 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H25a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M42 36a2 2 0 0 1 2-2h5l2 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H44a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-  </g>
-</svg></div>
-        <div class="cell cell-light"><svg width="40" height="40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
-  
-  <!-- The actual operation: one heap becomes an ordered set. -->
-  <rect x="22" y="6" width="20" height="14" rx="2.5"
-        fill="currentColor" opacity=".16"/>
-  <rect x="22" y="6" width="20" height="14" rx="2.5"
-        fill="none" stroke="currentColor" stroke-width="2.5"/>
-  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-    <path d="M32 21v6M32 27H13v5M32 27h19v5M32 27v5"/>
-  </g>
-  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
-    <path d="M4 36a2 2 0 0 1 2-2h5l2 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M23 36a2 2 0 0 1 2-2h5l2 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H25a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M42 36a2 2 0 0 1 2-2h5l2 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H44a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-  </g>
-</svg></div>
-        <div class="cell cell-dark"><svg width="40" height="40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
-  
-  <!-- The actual operation: one heap becomes an ordered set. -->
-  <rect x="22" y="6" width="20" height="14" rx="2.5"
-        fill="currentColor" opacity=".16"/>
-  <rect x="22" y="6" width="20" height="14" rx="2.5"
-        fill="none" stroke="currentColor" stroke-width="2.5"/>
-  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-    <path d="M32 21v6M32 27H13v5M32 27h19v5M32 27v5"/>
-  </g>
-  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
-    <path d="M4 36a2 2 0 0 1 2-2h5l2 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M23 36a2 2 0 0 1 2-2h5l2 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H25a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M42 36a2 2 0 0 1 2-2h5l2 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H44a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-  </g>
-</svg></div>
-        <div class="cell cell-tab">
-          <div class="tab">
-            <span class="tab-mark"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
-  
-  <!-- The actual operation: one heap becomes an ordered set. -->
-  <rect x="22" y="6" width="20" height="14" rx="2.5"
-        fill="currentColor" opacity=".16"/>
-  <rect x="22" y="6" width="20" height="14" rx="2.5"
-        fill="none" stroke="currentColor" stroke-width="2.5"/>
-  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-    <path d="M32 21v6M32 27H13v5M32 27h19v5M32 27v5"/>
-  </g>
-  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
-    <path d="M4 36a2 2 0 0 1 2-2h5l2 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M23 36a2 2 0 0 1 2-2h5l2 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H25a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M42 36a2 2 0 0 1 2-2h5l2 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H44a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-  </g>
-</svg></span>
-            <span class="tab-title">LR-FolderCraft</span>
-            <span class="tab-x">&times;</span>
-          </div>
-        </div>
-
-        <footer class="frame-note">
-          <p>Zeigt die Tätigkeit statt des Gegenstands. Die feinen Verbindungslinien sind der Preis: bei 16&nbsp;px verschwinden sie.</p>
-          <code>02-sorting-fan.svg</code>
-        </footer>
-      </article>
-
-      <article class="frame">
-        <header class="frame-id">
-          <span class="num">03</span>
-          <h2>Kalender-Ordner</h2>
-          <p class="claim">Ordner plus Datumsraster.</p>
-        </header>
-
-        <div class="cell cell-hero"><svg width="96" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
-  
-  <!-- Grouping by date, said plainly. -->
-  <path d="M5 15a3 3 0 0 1 3-3h13l4 5h31a3 3 0 0 1 3 3v31a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"
-        fill="currentColor" opacity=".16"/>
-  <path d="M5 15a3 3 0 0 1 3-3h13l4 5h31a3 3 0 0 1 3 3v31a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"
-        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-  <path d="M5 28h54" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <!-- Variant of 06: the three folders keep the "ordered set" reading, and the
+       one the eye lands on first carries the monogram. -->
   <g fill="currentColor">
-    <rect x="13" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="24" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="35" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="46" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="13" y="44" width="7" height="6" rx="1.5"/>
-    <rect x="24" y="44" width="7" height="6" rx="1.5" opacity=".45"/>
-    <rect x="35" y="44" width="7" height="6" rx="1.5" opacity=".45"/>
+    <rect x="3" y="9" width="9" height="7" rx="1.5" transform="rotate(-13 7.5 12.5)" opacity=".7"/>
+    <rect x="5" y="25" width="9" height="7" rx="1.5" transform="rotate(9 9.5 28.5)" opacity=".7"/>
+    <rect x="2" y="40" width="9" height="7" rx="1.5" transform="rotate(-6 6.5 43.5)" opacity=".7"/>
+    <rect x="13" y="47" width="9" height="7" rx="1.5" transform="rotate(15 17.5 50.5)" opacity=".7"/>
   </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M25 32h8"/>
+    <path d="M29 27.5 34 32l-5 4.5"/>
+  </g>
+  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M38 12a2 2 0 0 1 2-2h4l2 3h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H40a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".2"/>
+    <path d="M38 32a2 2 0 0 1 2-2h4l2 3h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H40a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".14"/>
+    <path d="M38 46a2 2 0 0 1 2-2h4l2 3h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H40a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".14"/>
+  </g>
+  <text x="51" y="24" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="10.5" font-weight="700" letter-spacing=".3">LR</text>
 </svg></div>
         <div class="cell cell-light"><svg width="40" height="40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
   
-  <!-- Grouping by date, said plainly. -->
-  <path d="M5 15a3 3 0 0 1 3-3h13l4 5h31a3 3 0 0 1 3 3v31a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"
-        fill="currentColor" opacity=".16"/>
-  <path d="M5 15a3 3 0 0 1 3-3h13l4 5h31a3 3 0 0 1 3 3v31a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"
-        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-  <path d="M5 28h54" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <!-- Variant of 06: the three folders keep the "ordered set" reading, and the
+       one the eye lands on first carries the monogram. -->
   <g fill="currentColor">
-    <rect x="13" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="24" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="35" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="46" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="13" y="44" width="7" height="6" rx="1.5"/>
-    <rect x="24" y="44" width="7" height="6" rx="1.5" opacity=".45"/>
-    <rect x="35" y="44" width="7" height="6" rx="1.5" opacity=".45"/>
+    <rect x="3" y="9" width="9" height="7" rx="1.5" transform="rotate(-13 7.5 12.5)" opacity=".7"/>
+    <rect x="5" y="25" width="9" height="7" rx="1.5" transform="rotate(9 9.5 28.5)" opacity=".7"/>
+    <rect x="2" y="40" width="9" height="7" rx="1.5" transform="rotate(-6 6.5 43.5)" opacity=".7"/>
+    <rect x="13" y="47" width="9" height="7" rx="1.5" transform="rotate(15 17.5 50.5)" opacity=".7"/>
   </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M25 32h8"/>
+    <path d="M29 27.5 34 32l-5 4.5"/>
+  </g>
+  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M38 12a2 2 0 0 1 2-2h4l2 3h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H40a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".2"/>
+    <path d="M38 32a2 2 0 0 1 2-2h4l2 3h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H40a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".14"/>
+    <path d="M38 46a2 2 0 0 1 2-2h4l2 3h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H40a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".14"/>
+  </g>
+  <text x="51" y="24" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="10.5" font-weight="700" letter-spacing=".3">LR</text>
 </svg></div>
         <div class="cell cell-dark"><svg width="40" height="40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
   
-  <!-- Grouping by date, said plainly. -->
-  <path d="M5 15a3 3 0 0 1 3-3h13l4 5h31a3 3 0 0 1 3 3v31a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"
-        fill="currentColor" opacity=".16"/>
-  <path d="M5 15a3 3 0 0 1 3-3h13l4 5h31a3 3 0 0 1 3 3v31a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"
-        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-  <path d="M5 28h54" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <!-- Variant of 06: the three folders keep the "ordered set" reading, and the
+       one the eye lands on first carries the monogram. -->
   <g fill="currentColor">
-    <rect x="13" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="24" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="35" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="46" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="13" y="44" width="7" height="6" rx="1.5"/>
-    <rect x="24" y="44" width="7" height="6" rx="1.5" opacity=".45"/>
-    <rect x="35" y="44" width="7" height="6" rx="1.5" opacity=".45"/>
+    <rect x="3" y="9" width="9" height="7" rx="1.5" transform="rotate(-13 7.5 12.5)" opacity=".7"/>
+    <rect x="5" y="25" width="9" height="7" rx="1.5" transform="rotate(9 9.5 28.5)" opacity=".7"/>
+    <rect x="2" y="40" width="9" height="7" rx="1.5" transform="rotate(-6 6.5 43.5)" opacity=".7"/>
+    <rect x="13" y="47" width="9" height="7" rx="1.5" transform="rotate(15 17.5 50.5)" opacity=".7"/>
   </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M25 32h8"/>
+    <path d="M29 27.5 34 32l-5 4.5"/>
+  </g>
+  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M38 12a2 2 0 0 1 2-2h4l2 3h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H40a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".2"/>
+    <path d="M38 32a2 2 0 0 1 2-2h4l2 3h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H40a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".14"/>
+    <path d="M38 46a2 2 0 0 1 2-2h4l2 3h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H40a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".14"/>
+  </g>
+  <text x="51" y="24" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="10.5" font-weight="700" letter-spacing=".3">LR</text>
 </svg></div>
         <div class="cell cell-tab">
-          <div class="tab">
-            <span class="tab-mark"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
+          <div class="tab"><span class="tab-mark"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
   
-  <!-- Grouping by date, said plainly. -->
-  <path d="M5 15a3 3 0 0 1 3-3h13l4 5h31a3 3 0 0 1 3 3v31a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"
-        fill="currentColor" opacity=".16"/>
-  <path d="M5 15a3 3 0 0 1 3-3h13l4 5h31a3 3 0 0 1 3 3v31a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"
-        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-  <path d="M5 28h54" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <!-- Variant of 06: the three folders keep the "ordered set" reading, and the
+       one the eye lands on first carries the monogram. -->
   <g fill="currentColor">
-    <rect x="13" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="24" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="35" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="46" y="34" width="7" height="6" rx="1.5"/>
-    <rect x="13" y="44" width="7" height="6" rx="1.5"/>
-    <rect x="24" y="44" width="7" height="6" rx="1.5" opacity=".45"/>
-    <rect x="35" y="44" width="7" height="6" rx="1.5" opacity=".45"/>
+    <rect x="3" y="9" width="9" height="7" rx="1.5" transform="rotate(-13 7.5 12.5)" opacity=".7"/>
+    <rect x="5" y="25" width="9" height="7" rx="1.5" transform="rotate(9 9.5 28.5)" opacity=".7"/>
+    <rect x="2" y="40" width="9" height="7" rx="1.5" transform="rotate(-6 6.5 43.5)" opacity=".7"/>
+    <rect x="13" y="47" width="9" height="7" rx="1.5" transform="rotate(15 17.5 50.5)" opacity=".7"/>
   </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M25 32h8"/>
+    <path d="M29 27.5 34 32l-5 4.5"/>
+  </g>
+  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M38 12a2 2 0 0 1 2-2h4l2 3h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H40a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".2"/>
+    <path d="M38 32a2 2 0 0 1 2-2h4l2 3h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H40a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".14"/>
+    <path d="M38 46a2 2 0 0 1 2-2h4l2 3h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H40a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".14"/>
+  </g>
+  <text x="51" y="24" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="10.5" font-weight="700" letter-spacing=".3">LR</text>
 </svg></span>
-            <span class="tab-title">LR-FolderCraft</span>
-            <span class="tab-x">&times;</span>
-          </div>
+          <span class="tab-title">LR-FolderCraft</span><span class="tab-x">&times;</span></div>
         </div>
-
-        <footer class="frame-note">
-          <p>Nennt das mit Abstand häufigste Gruppierungskriterium. Verschweigt dafür, dass auch nach Kamera, Woche oder Objektiv sortiert werden kann.</p>
-          <code>03-calendar-folder.svg</code>
-        </footer>
+        <footer class="frame-note"><p>So, wie 3 sein Datumsraster im Ordner trägt. Das Bild bleibt vollständig erhalten. Bei 16 px sind die Buchstaben allerdings weg.</p><code>06a-scatter-order-lr.svg</code></footer>
       </article>
 
       <article class="frame">
         <header class="frame-id">
-          <span class="num">04</span>
-          <h2>Ordnerbaum</h2>
-          <p class="claim">Eine Wurzel, Ebenen darunter.</p>
+          <span class="num">6b</span>
+          <h2>Ein Ordner, Stapel dahinter</h2>
+          <p class="claim">Ein großer Ordner mit zwei Kanten dahinter sagt weiterhin „mehrere“ — lässt dem Monogramm aber echten Platz.</p>
         </header>
-
         <div class="cell cell-hero"><svg width="96" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
   
-  <!-- The structure itself: one root, levels below it. -->
-  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-    <path d="M14 12v34M14 22h10M14 34h10M14 46h10"/>
+  <!-- Variant of 06 built for small sizes: one folder large enough to hold the
+       monogram legibly, with two edges behind it still saying "a set". -->
+  <g fill="currentColor">
+    <rect x="3" y="12" width="9" height="7" rx="1.5" transform="rotate(-14 7.5 15.5)" opacity=".7"/>
+    <rect x="4" y="28" width="9" height="7" rx="1.5" transform="rotate(10 8.5 31.5)" opacity=".7"/>
+    <rect x="2" y="43" width="9" height="7" rx="1.5" transform="rotate(-5 6.5 46.5)" opacity=".7"/>
   </g>
-  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
-    <path d="M26 8a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".26"/>
-    <path d="M26 30a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M26 42a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M26 18a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 32h8"/>
+    <path d="M22 27.5 27 32l-5 4.5"/>
   </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity=".55">
+    <path d="M38 16h20M35.5 21h25"/>
+  </g>
+  <path d="M32 27a3 3 0 0 1 3-3h7l3 4h18a3 3 0 0 1 3 3v18a3 3 0 0 1-3 3H35a3 3 0 0 1-3-3z"
+        fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="2.5"
+        stroke-linejoin="round"/>
+  <text x="48" y="45" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="15" font-weight="700" letter-spacing=".5">LR</text>
 </svg></div>
         <div class="cell cell-light"><svg width="40" height="40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
   
-  <!-- The structure itself: one root, levels below it. -->
-  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-    <path d="M14 12v34M14 22h10M14 34h10M14 46h10"/>
+  <!-- Variant of 06 built for small sizes: one folder large enough to hold the
+       monogram legibly, with two edges behind it still saying "a set". -->
+  <g fill="currentColor">
+    <rect x="3" y="12" width="9" height="7" rx="1.5" transform="rotate(-14 7.5 15.5)" opacity=".7"/>
+    <rect x="4" y="28" width="9" height="7" rx="1.5" transform="rotate(10 8.5 31.5)" opacity=".7"/>
+    <rect x="2" y="43" width="9" height="7" rx="1.5" transform="rotate(-5 6.5 46.5)" opacity=".7"/>
   </g>
-  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
-    <path d="M26 8a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".26"/>
-    <path d="M26 30a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M26 42a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M26 18a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 32h8"/>
+    <path d="M22 27.5 27 32l-5 4.5"/>
   </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity=".55">
+    <path d="M38 16h20M35.5 21h25"/>
+  </g>
+  <path d="M32 27a3 3 0 0 1 3-3h7l3 4h18a3 3 0 0 1 3 3v18a3 3 0 0 1-3 3H35a3 3 0 0 1-3-3z"
+        fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="2.5"
+        stroke-linejoin="round"/>
+  <text x="48" y="45" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="15" font-weight="700" letter-spacing=".5">LR</text>
 </svg></div>
         <div class="cell cell-dark"><svg width="40" height="40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
   
-  <!-- The structure itself: one root, levels below it. -->
-  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-    <path d="M14 12v34M14 22h10M14 34h10M14 46h10"/>
+  <!-- Variant of 06 built for small sizes: one folder large enough to hold the
+       monogram legibly, with two edges behind it still saying "a set". -->
+  <g fill="currentColor">
+    <rect x="3" y="12" width="9" height="7" rx="1.5" transform="rotate(-14 7.5 15.5)" opacity=".7"/>
+    <rect x="4" y="28" width="9" height="7" rx="1.5" transform="rotate(10 8.5 31.5)" opacity=".7"/>
+    <rect x="2" y="43" width="9" height="7" rx="1.5" transform="rotate(-5 6.5 46.5)" opacity=".7"/>
   </g>
-  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
-    <path d="M26 8a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".26"/>
-    <path d="M26 30a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M26 42a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M26 18a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 32h8"/>
+    <path d="M22 27.5 27 32l-5 4.5"/>
   </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity=".55">
+    <path d="M38 16h20M35.5 21h25"/>
+  </g>
+  <path d="M32 27a3 3 0 0 1 3-3h7l3 4h18a3 3 0 0 1 3 3v18a3 3 0 0 1-3 3H35a3 3 0 0 1-3-3z"
+        fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="2.5"
+        stroke-linejoin="round"/>
+  <text x="48" y="45" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="15" font-weight="700" letter-spacing=".5">LR</text>
 </svg></div>
         <div class="cell cell-tab">
-          <div class="tab">
-            <span class="tab-mark"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
+          <div class="tab"><span class="tab-mark"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
   
-  <!-- The structure itself: one root, levels below it. -->
-  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-    <path d="M14 12v34M14 22h10M14 34h10M14 46h10"/>
+  <!-- Variant of 06 built for small sizes: one folder large enough to hold the
+       monogram legibly, with two edges behind it still saying "a set". -->
+  <g fill="currentColor">
+    <rect x="3" y="12" width="9" height="7" rx="1.5" transform="rotate(-14 7.5 15.5)" opacity=".7"/>
+    <rect x="4" y="28" width="9" height="7" rx="1.5" transform="rotate(10 8.5 31.5)" opacity=".7"/>
+    <rect x="2" y="43" width="9" height="7" rx="1.5" transform="rotate(-5 6.5 46.5)" opacity=".7"/>
   </g>
-  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
-    <path d="M26 8a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".26"/>
-    <path d="M26 30a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M26 42a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
-    <path d="M26 18a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
-          fill="currentColor" fill-opacity=".16"/>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 32h8"/>
+    <path d="M22 27.5 27 32l-5 4.5"/>
   </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity=".55">
+    <path d="M38 16h20M35.5 21h25"/>
+  </g>
+  <path d="M32 27a3 3 0 0 1 3-3h7l3 4h18a3 3 0 0 1 3 3v18a3 3 0 0 1-3 3H35a3 3 0 0 1-3-3z"
+        fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="2.5"
+        stroke-linejoin="round"/>
+  <text x="48" y="45" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="15" font-weight="700" letter-spacing=".5">LR</text>
 </svg></span>
-            <span class="tab-title">LR-FolderCraft</span>
-            <span class="tab-x">&times;</span>
-          </div>
+          <span class="tab-title">LR-FolderCraft</span><span class="tab-x">&times;</span></div>
         </div>
-
-        <footer class="frame-note">
-          <p>Trifft die Struktur am genauesten. Wirkt aber eher nach Dateimanager als nach Fotografie.</p>
-          <code>04-tree-shutter.svg</code>
-        </footer>
+        <footer class="frame-note"><p>Die kleinste Fassung, die noch alles sagt. Von den dreien die einzige, bei der das LR auch bei 40 px klar steht.</p><code>06b-scatter-order-lr-stack.svg</code></footer>
       </article>
 
       <article class="frame">
         <header class="frame-id">
-          <span class="num">05</span>
-          <h2>Monogramm LR</h2>
-          <p class="claim">Ordner-Lasche über zwei Buchstaben.</p>
+          <span class="num">6c</span>
+          <h2>Monogramm als eigene Zeile</h2>
+          <p class="claim">Das Bild von 6 unverändert, das LR darunter abgesetzt — Bildmarke und Wortmarke als Sperrsatz.</p>
         </header>
-
         <div class="cell cell-hero"><svg width="96" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
   
-  <!-- Reads at 16 px because it is two letters and one shape. -->
-  <rect x="5" y="14" width="54" height="40" rx="5"
-        fill="currentColor" opacity=".16"/>
-  <path d="M5 19a5 5 0 0 1 5-5h13l4 5" fill="none" stroke="currentColor"
-        stroke-width="2.5" stroke-linejoin="round"/>
-  <rect x="5" y="14" width="54" height="40" rx="5" fill="none"
-        stroke="currentColor" stroke-width="2.5"/>
-  <text x="32" y="43" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
-        font-size="19" font-weight="700" fill="currentColor" letter-spacing="1">LR</text>
+  <!-- Variant of 06 keeping the picture intact and adding the monogram as its
+       own line, the way a mark and a wordmark are locked up. -->
+  <g fill="currentColor">
+    <rect x="4" y="7" width="8" height="6" rx="1.4" transform="rotate(-13 8 10)" opacity=".7"/>
+    <rect x="5" y="19" width="8" height="6" rx="1.4" transform="rotate(9 9 22)" opacity=".7"/>
+    <rect x="3" y="31" width="8" height="6" rx="1.4" transform="rotate(-6 7 34)" opacity=".7"/>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 22h7"/>
+    <path d="M23.5 17.5 28 22l-4.5 4.5"/>
+  </g>
+  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M33 6a2 2 0 0 1 2-2h4l2 3h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".16"/>
+    <path d="M33 20a2 2 0 0 1 2-2h4l2 3h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".16"/>
+    <path d="M33 34a2 2 0 0 1 2-2h4l2 3h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".16"/>
+  </g>
+  <path d="M4 48h56" stroke="currentColor" stroke-width="1.5" opacity=".4"/>
+  <text x="32" y="61" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="13" font-weight="700" letter-spacing="1.5">LR</text>
 </svg></div>
         <div class="cell cell-light"><svg width="40" height="40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
   
-  <!-- Reads at 16 px because it is two letters and one shape. -->
-  <rect x="5" y="14" width="54" height="40" rx="5"
-        fill="currentColor" opacity=".16"/>
-  <path d="M5 19a5 5 0 0 1 5-5h13l4 5" fill="none" stroke="currentColor"
-        stroke-width="2.5" stroke-linejoin="round"/>
-  <rect x="5" y="14" width="54" height="40" rx="5" fill="none"
-        stroke="currentColor" stroke-width="2.5"/>
-  <text x="32" y="43" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
-        font-size="19" font-weight="700" fill="currentColor" letter-spacing="1">LR</text>
+  <!-- Variant of 06 keeping the picture intact and adding the monogram as its
+       own line, the way a mark and a wordmark are locked up. -->
+  <g fill="currentColor">
+    <rect x="4" y="7" width="8" height="6" rx="1.4" transform="rotate(-13 8 10)" opacity=".7"/>
+    <rect x="5" y="19" width="8" height="6" rx="1.4" transform="rotate(9 9 22)" opacity=".7"/>
+    <rect x="3" y="31" width="8" height="6" rx="1.4" transform="rotate(-6 7 34)" opacity=".7"/>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 22h7"/>
+    <path d="M23.5 17.5 28 22l-4.5 4.5"/>
+  </g>
+  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M33 6a2 2 0 0 1 2-2h4l2 3h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".16"/>
+    <path d="M33 20a2 2 0 0 1 2-2h4l2 3h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".16"/>
+    <path d="M33 34a2 2 0 0 1 2-2h4l2 3h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".16"/>
+  </g>
+  <path d="M4 48h56" stroke="currentColor" stroke-width="1.5" opacity=".4"/>
+  <text x="32" y="61" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="13" font-weight="700" letter-spacing="1.5">LR</text>
 </svg></div>
         <div class="cell cell-dark"><svg width="40" height="40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
   
-  <!-- Reads at 16 px because it is two letters and one shape. -->
-  <rect x="5" y="14" width="54" height="40" rx="5"
-        fill="currentColor" opacity=".16"/>
-  <path d="M5 19a5 5 0 0 1 5-5h13l4 5" fill="none" stroke="currentColor"
-        stroke-width="2.5" stroke-linejoin="round"/>
-  <rect x="5" y="14" width="54" height="40" rx="5" fill="none"
-        stroke="currentColor" stroke-width="2.5"/>
-  <text x="32" y="43" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
-        font-size="19" font-weight="700" fill="currentColor" letter-spacing="1">LR</text>
+  <!-- Variant of 06 keeping the picture intact and adding the monogram as its
+       own line, the way a mark and a wordmark are locked up. -->
+  <g fill="currentColor">
+    <rect x="4" y="7" width="8" height="6" rx="1.4" transform="rotate(-13 8 10)" opacity=".7"/>
+    <rect x="5" y="19" width="8" height="6" rx="1.4" transform="rotate(9 9 22)" opacity=".7"/>
+    <rect x="3" y="31" width="8" height="6" rx="1.4" transform="rotate(-6 7 34)" opacity=".7"/>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 22h7"/>
+    <path d="M23.5 17.5 28 22l-4.5 4.5"/>
+  </g>
+  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M33 6a2 2 0 0 1 2-2h4l2 3h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".16"/>
+    <path d="M33 20a2 2 0 0 1 2-2h4l2 3h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".16"/>
+    <path d="M33 34a2 2 0 0 1 2-2h4l2 3h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".16"/>
+  </g>
+  <path d="M4 48h56" stroke="currentColor" stroke-width="1.5" opacity=".4"/>
+  <text x="32" y="61" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="13" font-weight="700" letter-spacing="1.5">LR</text>
 </svg></div>
         <div class="cell cell-tab">
-          <div class="tab">
-            <span class="tab-mark"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
+          <div class="tab"><span class="tab-mark"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
   
-  <!-- Reads at 16 px because it is two letters and one shape. -->
-  <rect x="5" y="14" width="54" height="40" rx="5"
-        fill="currentColor" opacity=".16"/>
-  <path d="M5 19a5 5 0 0 1 5-5h13l4 5" fill="none" stroke="currentColor"
-        stroke-width="2.5" stroke-linejoin="round"/>
-  <rect x="5" y="14" width="54" height="40" rx="5" fill="none"
-        stroke="currentColor" stroke-width="2.5"/>
-  <text x="32" y="43" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
-        font-size="19" font-weight="700" fill="currentColor" letter-spacing="1">LR</text>
+  <!-- Variant of 06 keeping the picture intact and adding the monogram as its
+       own line, the way a mark and a wordmark are locked up. -->
+  <g fill="currentColor">
+    <rect x="4" y="7" width="8" height="6" rx="1.4" transform="rotate(-13 8 10)" opacity=".7"/>
+    <rect x="5" y="19" width="8" height="6" rx="1.4" transform="rotate(9 9 22)" opacity=".7"/>
+    <rect x="3" y="31" width="8" height="6" rx="1.4" transform="rotate(-6 7 34)" opacity=".7"/>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 22h7"/>
+    <path d="M23.5 17.5 28 22l-4.5 4.5"/>
+  </g>
+  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M33 6a2 2 0 0 1 2-2h4l2 3h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".16"/>
+    <path d="M33 20a2 2 0 0 1 2-2h4l2 3h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".16"/>
+    <path d="M33 34a2 2 0 0 1 2-2h4l2 3h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".16"/>
+  </g>
+  <path d="M4 48h56" stroke="currentColor" stroke-width="1.5" opacity=".4"/>
+  <text x="32" y="61" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="13" font-weight="700" letter-spacing="1.5">LR</text>
 </svg></span>
-            <span class="tab-title">LR-FolderCraft</span>
-            <span class="tab-x">&times;</span>
-          </div>
+          <span class="tab-title">LR-FolderCraft</span><span class="tab-x">&times;</span></div>
         </div>
-
-        <footer class="frame-note">
-          <p>Das einzige, das bei 16&nbsp;px zuverlässig lesbar bleibt. Dafür erklärt es nichts — es muss bekannt sein, um zu wirken.</p>
-          <code>05-monogram-lrfc.svg</code>
-        </footer>
+        <footer class="frame-note"><p>Erhält 6 am treuesten und ist als Kopfzeile im README am stärksten. Als quadratisches Symbol am schwächsten.</p><code>06c-scatter-order-lr-lockup.svg</code></footer>
       </article>
+  </section>
 
+  <section class="sheet">
+    <div class="band">
+      <h2>Was 6 zusätzlich braucht</h2>
+      <p>eine zweite Fassung fürs Kleine</p>
+    </div>
+    
       <article class="frame">
         <header class="frame-id">
-          <span class="num">06</span>
-          <h2>Vorher / Nachher</h2>
-          <p class="claim">Verstreut wird geordnet.</p>
+          <span class="num">6 klein</span>
+          <h2>Die kleine Fassung</h2>
+          <p class="claim">Ein Favicon ist 16 Pixel groß. Das vollständige Bild überlebt das nicht.</p>
         </header>
+        <div class="cell cell-hero"><svg width="96" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
+  
+  <!-- A favicon is 16 px. The full picture cannot survive that, so this is the
+       same idea reduced to what still reads: the arrow that means "sorted into",
+       one folder, the monogram. Paired with 06b for large sizes. -->
+  <g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 32h9"/>
+    <path d="M12 25l7 7-7 7"/>
+  </g>
+  <path d="M22 18a4 4 0 0 1 4-4h8l4 5h20a4 4 0 0 1 4 4v27a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4z"
+        fill="currentColor" fill-opacity=".2" stroke="currentColor" stroke-width="4"
+        stroke-linejoin="round"/>
+  <text x="42" y="43" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="20" font-weight="700" letter-spacing=".5">LR</text>
+</svg></div>
+        <div class="cell cell-light"><svg width="40" height="40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
+  
+  <!-- A favicon is 16 px. The full picture cannot survive that, so this is the
+       same idea reduced to what still reads: the arrow that means "sorted into",
+       one folder, the monogram. Paired with 06b for large sizes. -->
+  <g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 32h9"/>
+    <path d="M12 25l7 7-7 7"/>
+  </g>
+  <path d="M22 18a4 4 0 0 1 4-4h8l4 5h20a4 4 0 0 1 4 4v27a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4z"
+        fill="currentColor" fill-opacity=".2" stroke="currentColor" stroke-width="4"
+        stroke-linejoin="round"/>
+  <text x="42" y="43" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="20" font-weight="700" letter-spacing=".5">LR</text>
+</svg></div>
+        <div class="cell cell-dark"><svg width="40" height="40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
+  
+  <!-- A favicon is 16 px. The full picture cannot survive that, so this is the
+       same idea reduced to what still reads: the arrow that means "sorted into",
+       one folder, the monogram. Paired with 06b for large sizes. -->
+  <g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 32h9"/>
+    <path d="M12 25l7 7-7 7"/>
+  </g>
+  <path d="M22 18a4 4 0 0 1 4-4h8l4 5h20a4 4 0 0 1 4 4v27a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4z"
+        fill="currentColor" fill-opacity=".2" stroke="currentColor" stroke-width="4"
+        stroke-linejoin="round"/>
+  <text x="42" y="43" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="20" font-weight="700" letter-spacing=".5">LR</text>
+</svg></div>
+        <div class="cell cell-tab">
+          <div class="tab"><span class="tab-mark"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
+  
+  <!-- A favicon is 16 px. The full picture cannot survive that, so this is the
+       same idea reduced to what still reads: the arrow that means "sorted into",
+       one folder, the monogram. Paired with 06b for large sizes. -->
+  <g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 32h9"/>
+    <path d="M12 25l7 7-7 7"/>
+  </g>
+  <path d="M22 18a4 4 0 0 1 4-4h8l4 5h20a4 4 0 0 1 4 4v27a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4z"
+        fill="currentColor" fill-opacity=".2" stroke="currentColor" stroke-width="4"
+        stroke-linejoin="round"/>
+  <text x="42" y="43" text-anchor="middle" fill="currentColor"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="20" font-weight="700" letter-spacing=".5">LR</text>
+</svg></span>
+          <span class="tab-title">LR-FolderCraft</span><span class="tab-x">&times;</span></div>
+        </div>
+        <footer class="frame-note"><p>Dieselbe Aussage auf das reduziert, was bei 16 px noch trägt: der Pfeil für „einsortiert nach“, ein Ordner, das Monogramm. Gehört als Paar zur großen Fassung — so machen es alle Marken, die klein funktionieren.</p><code>06-klein.svg</code></footer>
+      </article>
+  </section>
 
+  <section class="sheet">
+    <div class="band"><h2>Zum Vergleich</h2><p>der Ausgangsentwurf</p></div>
+    
+      <article class="frame muted">
+        <header class="frame-id">
+          <span class="num">6</span>
+          <h2>Ihr Ausgangspunkt</h2>
+          <p class="claim">Verstreut wird geordnet — ohne Monogramm.</p>
+        </header>
         <div class="cell cell-hero"><svg width="96" height="96" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
   
   <!-- The promise of the tool in one picture: chaos, arrow, order. -->
@@ -684,8 +596,7 @@
   </g>
 </svg></div>
         <div class="cell cell-tab">
-          <div class="tab">
-            <span class="tab-mark"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
+          <div class="tab"><span class="tab-mark"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
   
   <!-- The promise of the tool in one picture: chaos, arrow, order. -->
   <g fill="currentColor">
@@ -706,23 +617,24 @@
           fill="currentColor" fill-opacity=".16"/>
   </g>
 </svg></span>
-            <span class="tab-title">LR-FolderCraft</span>
-            <span class="tab-x">&times;</span>
-          </div>
+          <span class="tab-title">LR-FolderCraft</span><span class="tab-x">&times;</span></div>
         </div>
-
-        <footer class="frame-note">
-          <p>Erzählt das Versprechen des Werkzeugs in einem Bild. Zugleich das detailreichste und damit anfälligste für kleine Größen.</p>
-          <code>06-before-after.svg</code>
-        </footer>
+        <footer class="frame-note"><p>Zum Vergleich stehengelassen.</p><code>06-before-after.svg</code></footer>
       </article>
   </section>
 
   <section class="closing">
-    <h2>Und jetzt?</h2>
-    <p>Sagen Sie mir die <strong>Nummer</strong> — oder zwei, wenn Sie schwanken; dann arbeite ich
-    eine Variante nach. Danach exportiere ich die Größen für Fenstersymbol, GitLab-Avatar und
-    Favicon, binde die Marke in beide READMEs und in den Über-Dialog ein und lege die Quelldateien
-    unter <code>docs/images/logos/</code> ab.</p>
+    <h2>Meine Empfehlung</h2>
+    <p><strong>6b für das Symbol, 6c für den Kopf der READMEs.</strong> 6a ist Ihrem Wunsch am
+    nächsten, aber vier Elemente und zwei Buchstaben auf 40&nbsp;px sind eines zu viel — sehen
+    Sie sich die dritte und vierte Spalte an. 6b opfert zwei Ordner und gewinnt dafür ein LR,
+    das auch klein steht.</p>
+    <p>Unabhängig davon: <strong>eine Marke, zwei Fassungen.</strong> Die große fürs README und
+    den Über-Dialog, die kleine fürs Favicon und das Fenstersymbol. Das ist keine Notlösung,
+    sondern das übliche Vorgehen — jede Marke, die bei 16&nbsp;px funktioniert, hat einen
+    eigenen Schnitt dafür.</p>
+    <p>Sagen Sie mir Ihre Wahl. Dann wandele ich die Buchstaben in Pfade um (damit die Marke
+    nicht von einer installierten Schrift abhängt), exportiere PNG in 16, 32, 64, 128, 256 und
+    512&nbsp;px und binde sie in beide READMEs, den Über-Dialog und als Fenstersymbol ein.</p>
   </section>
 </div>
