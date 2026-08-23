@@ -47,7 +47,7 @@ MONTH_NAMES: Dict[str, Tuple[str, ...]] = {
     "de": (
         "Januar",
         "Februar",
-        "Maerz",
+        "März",
         "April",
         "Mai",
         "Juni",
@@ -91,13 +91,13 @@ TOKEN_SPECS: Tuple[TokenSpec, ...] = (
     TokenSpec("yyyy", "2019", "Four digit year", "Vierstellige Jahreszahl", "date"),
     TokenSpec("yy", "19", "Two digit year", "Zweistellige Jahreszahl", "date"),
     TokenSpec("mm", "01", "Month, zero padded", "Monat, zweistellig", "date"),
-    TokenSpec("m", "1", "Month, no padding", "Monat, ohne fuehrende Null", "date"),
+    TokenSpec("m", "1", "Month, no padding", "Monat, ohne führende Null", "date"),
     TokenSpec("dd", "03", "Day, zero padded", "Tag, zweistellig", "date"),
-    TokenSpec("d", "3", "Day, no padding", "Tag, ohne fuehrende Null", "date"),
+    TokenSpec("d", "3", "Day, no padding", "Tag, ohne führende Null", "date"),
     TokenSpec("hh", "17", "Hour, 24h zero padded", "Stunde, 24h zweistellig", "date"),
     TokenSpec("mi", "42", "Minute, zero padded", "Minute, zweistellig", "date"),
     TokenSpec("month_name", "January", "Full month name", "Ausgeschriebener Monatsname", "date"),
-    TokenSpec("month_short", "Jan", "Abbreviated month name", "Abgekuerzter Monatsname", "date"),
+    TokenSpec("month_short", "Jan", "Abbreviated month name", "Abgekürzter Monatsname", "date"),
     TokenSpec("quarter", "Q1", "Calendar quarter", "Kalenderquartal", "date"),
     TokenSpec(
         "iso_week",
@@ -108,7 +108,7 @@ TOKEN_SPECS: Tuple[TokenSpec, ...] = (
     ),
     TokenSpec("iso_year", "2019", "ISO-8601 week-numbering year", "ISO-8601-Wochenjahr", "date"),
     TokenSpec("weekday", "Thursday", "Full weekday name", "Ausgeschriebener Wochentag", "date"),
-    TokenSpec("weekday_short", "Thu", "Abbreviated weekday name", "Abgekuerzter Wochentag", "date"),
+    TokenSpec("weekday_short", "Thu", "Abbreviated weekday name", "Abgekürzter Wochentag", "date"),
     TokenSpec("doy", "003", "Day of year, zero padded", "Tag des Jahres, dreistellig", "date"),
     TokenSpec(
         "camera",
@@ -144,7 +144,7 @@ TOKEN_SPECS: Tuple[TokenSpec, ...] = (
     TokenSpec(
         "format", "RAW", "Lightroom file format class", "Lightroom-Dateiformatklasse", "file"
     ),
-    TokenSpec("ext", "CR2", "File extension, upper case", "Dateiendung, gross", "file"),
+    TokenSpec("ext", "CR2", "File extension, upper case", "Dateiendung, groß", "file"),
     TokenSpec("ext_lower", "cr2", "File extension, lower case", "Dateiendung, klein", "file"),
     TokenSpec(
         "orig_folder",

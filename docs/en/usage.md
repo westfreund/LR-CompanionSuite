@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r5.0.0 · Build date 2026-08-23**
+**Revision r6.0.0 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -475,6 +475,32 @@ The log file always records the revision, build date, Python version, platform
 and full command line, so a log can be tied to an exact tool revision later.
 
 Attach the log **and** the plan JSON when reporting a problem.
+
+### What the plan could not decide alone
+
+Both `plan` and the graphical interface list, separately from the counts, every
+case the tool decided for you:
+
+```
+Needs your answer:
+  [EXCEPTION] 12 photo(s) in 1 dated folder(s) whose own date differs from the
+              folder name -- often a shoot that ran past midnight
+          --mismatch-action = leave
+          - raw2026/2026-06-27 Test 150mm Spiegelobjektiv/ (12)
+```
+
+Each entry names the option that governs it and what that option is currently
+doing, so changing your mind is one flag away.
+
+| Level | Meaning |
+| --- | --- |
+| `BLOCKS` | the run will not start: a failed pre-flight check, or a file the catalog names that the disk does not have |
+| `Warning` | the run will start, but something is not as expected |
+| `Exception` | a decision the tool made for you, which a setting can change |
+| `Note` | worth knowing, nothing to answer |
+
+In the graphical interface this is a table of its own between the settings and
+the folder table. Selecting a row shows which files it concerns.
 
 ### The move log, beside the library
 

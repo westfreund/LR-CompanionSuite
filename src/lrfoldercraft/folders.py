@@ -55,7 +55,7 @@ ACTION_LABELS = {
     ),
     CONSOLIDATE: (
         "move the photos up and merge them",
-        "Fotos herausholen und zusammenfuehren",
+        "Fotos herausholen und zusammenführen",
     ),
     LEAVE: ("leave the photos untouched", "Fotos unangetastet lassen"),
     KEEP: (
@@ -282,7 +282,7 @@ RULE_KEYWORD_HELP = {
     ),
     "dated+label": (
         "dated folders that also carry descriptive text",
-        "datierte Ordner, die zusaetzlich Text tragen",
+        "datierte Ordner, die zusätzlich Text tragen",
     ),
     "dated-only": (
         "dated folders with nothing but the date",

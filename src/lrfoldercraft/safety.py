@@ -97,7 +97,7 @@ def _check_lock(catalog: Path) -> Check:
             "Lightroom has the catalog open ({f} exists). Quit Lightroom Classic first.".format(
                 f=lock_file_for(catalog).name
             ),
-            "Lightroom hat den Katalog geoeffnet ({f} vorhanden). Bitte "
+            "Lightroom hat den Katalog geöffnet ({f} vorhanden). Bitte "
             "Lightroom Classic zuerst beenden.".format(f=lock_file_for(catalog).name),
         )
     return Check(
@@ -121,7 +121,7 @@ def _check_catalog_writable(catalog: Path) -> Check:
             "catalog-writable",
             ERROR,
             "No write permission for the catalog file.",
-            "Keine Schreibrechte fuer die Katalogdatei.",
+            "Keine Schreibrechte für die Katalogdatei.",
         )
     return Check(
         "catalog-writable",
@@ -150,8 +150,8 @@ def _check_side_files(catalog: Path) -> Check:
             "catalog in Lightroom once so it can recover. Do not delete the "
             "file.".format(n=journal[0].name),
             "{n} ist vorhanden -- eine Transaktion wurde unterbrochen. Katalog "
-            "einmal in Lightroom oeffnen und schliessen, damit er sich erholt. "
-            "Die Datei nicht loeschen.".format(n=journal[0].name),
+            "einmal in Lightroom öffnen und schließen, damit er sich erholt. "
+            "Die Datei nicht löschen.".format(n=journal[0].name),
         )
 
     wal = [p for p in sidecar_paths(catalog) if p.name.endswith("-wal")]
@@ -163,9 +163,9 @@ def _check_side_files(catalog: Path) -> Check:
             "Write-ahead log holds {n:,} byte(s) the catalog depends on. It is "
             "checkpointed into the catalog after the run. Never delete "
             "it.".format(n=pending),
-            "Das Write-Ahead-Log enthaelt {n:,} Byte, auf die der Katalog "
+            "Das Write-Ahead-Log enthält {n:,} Byte, auf die der Katalog "
             "angewiesen ist. Es wird nach dem Lauf in den Katalog "
-            "uebernommen. Niemals loeschen.".format(n=pending),
+            "übernommen. Niemals löschen.".format(n=pending),
         )
     return Check(
         "catalog-side-files",
@@ -196,7 +196,7 @@ def _check_id_counter_type(catalog: Path) -> Check:
             "id-counter-type",
             OK,
             "Could not read the id counter ({e}).".format(e=exc),
-            "ID-Zaehler nicht lesbar ({e}).".format(e=exc),
+            "ID-Zähler nicht lesbar ({e}).".format(e=exc),
         )
 
     if row is None or row[0] in ("real", "integer"):
@@ -204,7 +204,7 @@ def _check_id_counter_type(catalog: Path) -> Check:
             "id-counter-type",
             OK,
             "Id counter has Lightroom's numeric storage class.",
-            "ID-Zaehler hat Lightrooms numerische Speicherklasse.",
+            "ID-Zähler hat Lightrooms numerische Speicherklasse.",
         )
 
     repair = (
@@ -218,7 +218,7 @@ def _check_id_counter_type(catalog: Path) -> Check:
         "refuse to open this catalog. It was damaged by LR-FolderCraft 1.0.0 "
         "to 1.0.4. Repair it with: {sql}".format(t=row[0], sql=repair),
         "Adobe_entityIDCounter ist als {t} gespeichert, nicht als Zahl. "
-        "Lightroom wird diesen Katalog nicht oeffnen. Beschaedigt durch "
+        "Lightroom wird diesen Katalog nicht öffnen. Beschädigt durch "
         "LR-FolderCraft 1.0.0 bis 1.0.4. Reparatur: {sql}".format(t=row[0], sql=repair),
     )
 
@@ -250,10 +250,10 @@ def _check_target_writable(plan: Plan) -> Check:
                 "moved. Reconnect it in Lightroom first (right-click the "
                 "folder, Find Missing Folder), then run again.".format(r=root),
                 "Der Stammordner {r} des Katalogs existiert nicht. Vermutlich "
-                "ist das Laufwerk unter einem anderen Namen eingehaengt oder "
+                "ist das Laufwerk unter einem anderen Namen eingehängt oder "
                 "der Ordner wurde verschoben. Bitte zuerst in Lightroom neu "
-                "verknuepfen (Rechtsklick auf den Ordner, Fehlenden Ordner "
-                "suchen) und dann erneut ausfuehren.".format(r=root),
+                "verknüpfen (Rechtsklick auf den Ordner, Fehlenden Ordner "
+                "suchen) und dann erneut ausführen.".format(r=root),
             )
 
         probe = _existing_ancestor(root)
@@ -269,7 +269,7 @@ def _check_target_writable(plan: Plan) -> Check:
                 "target-writable",
                 ERROR,
                 "No write permission for {p}.".format(p=probe),
-                "Keine Schreibrechte fuer {p}.".format(p=probe),
+                "Keine Schreibrechte für {p}.".format(p=probe),
             )
         if probe != root:
             to_create.append((root, probe))
@@ -311,7 +311,7 @@ def _check_free_space(plan: Plan) -> Check:
             "free-space",
             OK,
             "Same-volume move -- no additional space required.",
-            "Verschieben auf demselben Volume -- kein zusaetzlicher Platz noetig.",
+            "Verschieben auf demselben Volume -- kein zusätzlicher Platz nötig.",
         )
     for target, size in sorted(needed.items()):
         free = shutil.disk_usage(target).free
@@ -323,7 +323,7 @@ def _check_free_space(plan: Plan) -> Check:
                 "Need about {n:.1f} GiB on {t}, only {f:.1f} GiB free.".format(
                     n=margin / 1024**3, t=target, f=free / 1024**3
                 ),
-                "Benoetigt werden rund {n:.1f} GiB auf {t}, frei sind nur {f:.1f} GiB.".format(
+                "Benötigt werden rund {n:.1f} GiB auf {t}, frei sind nur {f:.1f} GiB.".format(
                     n=margin / 1024**3, t=target, f=free / 1024**3
                 ),
             )
@@ -334,7 +334,7 @@ def _check_free_space(plan: Plan) -> Check:
         "Room for {n:.1f} GiB across {v} target volume(s).".format(
             n=total / 1024**3, v=len(needed)
         ),
-        "Platz fuer {n:.1f} GiB auf {v} Ziel-Volume(s).".format(n=total / 1024**3, v=len(needed)),
+        "Platz für {n:.1f} GiB auf {v} Ziel-Volume(s).".format(n=total / 1024**3, v=len(needed)),
     )
 
 
@@ -344,7 +344,7 @@ def _check_backup_space(plan: Plan, catalog: Path) -> Check:
             "backup-space",
             WARNING,
             "Catalog backup is disabled. Rolling back a failed run will be much harder.",
-            "Katalog-Backup ist deaktiviert. Ein Ruecksetzen nach Fehlern wird "
+            "Katalog-Backup ist deaktiviert. Ein Rücksetzen nach Fehlern wird "
             "dadurch erheblich schwieriger.",
         )
     backup_dir = plan.settings.resolved_backup_dir()
@@ -358,7 +358,7 @@ def _check_backup_space(plan: Plan, catalog: Path) -> Check:
             "backup-space",
             ERROR,
             "Cannot determine free space for the backup directory {p}.".format(p=backup_dir),
-            "Freier Speicher fuer das Backup-Verzeichnis {p} nicht ermittelbar.".format(
+            "Freier Speicher für das Backup-Verzeichnis {p} nicht ermittelbar.".format(
                 p=backup_dir
             ),
         )
@@ -370,7 +370,7 @@ def _check_backup_space(plan: Plan, catalog: Path) -> Check:
             "Catalog backup needs about {n:.0f} MiB in {p}, only {f:.0f} MiB free.".format(
                 n=needed / 1024**2, p=backup_dir, f=free / 1024**2
             ),
-            "Katalog-Backup benoetigt rund {n:.0f} MiB in {p}, frei sind nur {f:.0f} MiB.".format(
+            "Katalog-Backup benötigt rund {n:.0f} MiB in {p}, frei sind nur {f:.0f} MiB.".format(
                 n=needed / 1024**2, p=backup_dir, f=free / 1024**2
             ),
         )
@@ -378,7 +378,7 @@ def _check_backup_space(plan: Plan, catalog: Path) -> Check:
         "backup-space",
         OK,
         "Room for the {n:.0f} MiB catalog backup in {p}.".format(n=needed / 1024**2, p=backup_dir),
-        "Platz fuer das {n:.0f} MiB grosse Katalog-Backup in {p}.".format(
+        "Platz für das {n:.0f} MiB große Katalog-Backup in {p}.".format(
             n=needed / 1024**2, p=backup_dir
         ),
     )
@@ -390,7 +390,7 @@ def _check_work_present(plan: Plan) -> Check:
             "work-present",
             WARNING,
             "Nothing to do -- every selected file is already in its target folder.",
-            "Nichts zu tun -- alle ausgewaehlten Dateien liegen bereits am Ziel.",
+            "Nichts zu tun -- alle ausgewählten Dateien liegen bereits am Ziel.",
         )
     return Check(
         "work-present",
@@ -416,9 +416,9 @@ def _check_missing_sources(plan: Plan) -> Optional[Check]:
             "records. The catalog is not connected to its photos -- reconnect "
             "the folder in Lightroom first (right-click, Find Missing "
             "Folder).".format(n=n),
-            "Keine der {n} ausgewaehlten Dateien liegt an dem Pfad, den der "
+            "Keine der {n} ausgewählten Dateien liegt an dem Pfad, den der "
             "Katalog vermerkt. Der Katalog ist nicht mit seinen Fotos "
-            "verbunden -- bitte zuerst in Lightroom neu verknuepfen "
+            "verbunden -- bitte zuerst in Lightroom neu verknüpfen "
             "(Rechtsklick, Fehlenden Ordner suchen).".format(n=n),
         )
 
@@ -427,6 +427,6 @@ def _check_missing_sources(plan: Plan) -> Optional[Check]:
         WARNING,
         "{n} of {t} catalog entries point to files that are not on disk; they "
         "stay untouched.".format(n=n, t=plan.stats.total),
-        "{n} von {t} Katalogeintraegen verweisen auf nicht vorhandene Dateien; "
+        "{n} von {t} Katalogeinträgen verweisen auf nicht vorhandene Dateien; "
         "sie bleiben unangetastet.".format(n=n, t=plan.stats.total),
     )

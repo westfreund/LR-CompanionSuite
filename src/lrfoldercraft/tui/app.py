@@ -69,7 +69,7 @@ TEXT = {
     "backup": ("Back up catalog first", "Katalog vorher sichern"),
     "ascii": ("ASCII-only folder names", "Ordnernamen nur ASCII"),
     "plan": ("Plan (dry run)", "Planen (Trockenlauf)"),
-    "apply": ("Apply", "Ausfuehren"),
+    "apply": ("Apply", "Ausführen"),
     "quit": ("Quit", "Beenden"),
     "no_catalog": ("No catalog loaded.", "Kein Katalog geladen."),
     "no_plan": ("Plan first.", "Bitte zuerst planen."),
@@ -77,17 +77,17 @@ TEXT = {
     "files": ("Files", "Dateien"),
     "planning": ("Planning...", "Plane..."),
     "loading": ("Reading catalog...", "Lese Katalog..."),
-    "applying": ("Applying...", "Fuehre aus..."),
-    "confirm_title": ("Confirm", "Bestaetigen"),
+    "applying": ("Applying...", "Führe aus..."),
+    "confirm_title": ("Confirm", "Bestätigen"),
     "confirm_body": (
         "{n:,} file(s) will be moved and the catalog will be modified.\n"
         "A verified backup of the catalog is written first.\n\n"
         "Make sure Lightroom Classic is closed.",
-        "{n:,} Datei(en) werden verschoben und der Katalog wird veraendert.\n"
-        "Zuvor wird ein geprueftes Backup des Katalogs angelegt.\n\n"
+        "{n:,} Datei(en) werden verschoben und der Katalog wird verändert.\n"
+        "Zuvor wird ein geprüftes Backup des Katalogs angelegt.\n\n"
         "Bitte sicherstellen, dass Lightroom Classic geschlossen ist.",
     ),
-    "yes": ("Yes, apply", "Ja, ausfuehren"),
+    "yes": ("Yes, apply", "Ja, ausführen"),
     "no": ("Cancel", "Abbrechen"),
     "lang": ("Language", "Sprache"),
     "existing": ("Existing folders", "Vorgefundene Ordner"),

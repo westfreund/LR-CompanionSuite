@@ -63,10 +63,10 @@ STATUS_LABELS = {
     MOVE: ("will be moved", "wird verschoben"),
     RENAMED: ("will be moved and renamed", "wird verschoben und umbenannt"),
     STAY: ("already in place", "bereits am Ziel"),
-    SKIP_NO_DATE: ("skipped, no usable date", "uebersprungen, kein Datum"),
-    SKIP_CONFLICT: ("skipped, target name taken", "uebersprungen, Zielname belegt"),
+    SKIP_NO_DATE: ("skipped, no usable date", "übersprungen, kein Datum"),
+    SKIP_CONFLICT: ("skipped, target name taken", "übersprungen, Zielname belegt"),
     SKIP_FILTERED: ("skipped by extension filter", "durch Endungsfilter ausgeschlossen"),
-    SKIP_MISSING_SOURCE: ("skipped, file missing on disk", "uebersprungen, Datei fehlt"),
+    SKIP_MISSING_SOURCE: ("skipped, file missing on disk", "übersprungen, Datei fehlt"),
 }
 
 

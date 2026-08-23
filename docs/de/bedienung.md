@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r5.0.0 · Build-Datum 2026-08-23**
+**Revision r6.0.0 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -482,6 +482,33 @@ die vollständige Befehlszeile fest, sodass sich ein Log später eindeutig einer
 Werkzeugrevision zuordnen lässt.
 
 Bei einer Fehlermeldung bitte das Log **und** den Plan als JSON beilegen.
+
+### Was der Plan nicht allein entscheiden konnte
+
+Sowohl `plan` als auch die grafische Oberfläche führen getrennt von den Zahlen
+jeden Fall auf, den das Werkzeug für Sie entschieden hat:
+
+```
+Braucht Ihre Antwort:
+  [EXCEPTION] 12 Foto(s) in 1 datierten Ordner(n), deren eigenes Datum vom
+              Ordnernamen abweicht -- oft eine Session über Mitternacht
+          --mismatch-action = leave
+          - raw2026/2026-06-27 Test 150mm Spiegelobjektiv/ (12)
+```
+
+Jeder Eintrag nennt die steuernde Option und was sie gerade tut — eine andere
+Entscheidung ist also einen Schalter entfernt.
+
+| Stufe | Bedeutung |
+| --- | --- |
+| `BLOCKIERT` | der Lauf startet nicht: eine fehlgeschlagene Vorabprüfung, oder eine Datei, die der Katalog nennt und die Platte nicht hat |
+| `Warnung` | der Lauf startet, aber etwas ist nicht wie erwartet |
+| `Ausnahme` | eine Entscheidung, die das Werkzeug für Sie getroffen hat und die eine Einstellung ändern kann |
+| `Hinweis` | wissenswert, nichts zu beantworten |
+
+In der grafischen Oberfläche ist das eine eigene Tabelle zwischen den
+Einstellungen und der Ordnertabelle. Eine Zeile auswählen zeigt die betroffenen
+Dateien.
 
 ### Das Verschiebeprotokoll, neben der Bibliothek
 

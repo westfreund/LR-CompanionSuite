@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r5.0.0 · Build-Datum 2026-08-23**
+**Revision r6.0.0 · Build-Datum 2026-08-23**
 
 Dieses Dokument bewahrt die Anfrage, aus der LR-FolderCraft entstanden ist,
 einen generischen Prompt zur Neuerzeugung eines vergleichbaren Werkzeugs sowie

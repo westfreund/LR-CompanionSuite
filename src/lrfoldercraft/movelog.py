@@ -127,7 +127,7 @@ def _pair(label: str, value: str) -> str:
 
 def _outcome(result: RunResult, german: bool) -> str:
     if result.rolled_back:
-        return "zurueckgerollt" if german else "rolled back"
+        return "zurückgerollt" if german else "rolled back"
     if result.success:
         return "erfolgreich" if german else "success"
     return "fehlgeschlagen" if german else "failed"

@@ -6,9 +6,67 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows the project rule that **every feature extension is a major
 change** — see [docs/en/versioning.md](docs/en/versioning.md).
 
+For **why** each change was made, and what happened between the releases, see
+[docs/en/history.md](docs/en/history.md) /
+[docs/de/historie.md](docs/de/historie.md).
+
 Alle wesentlichen Änderungen an LR-FolderCraft sind hier dokumentiert. Die
 Versionierung folgt der Projektregel, dass **jede Feature-Erweiterung eine
 große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierung.md).
+
+---
+
+## [6.0.0] — 2026-08-23 — "Klartext"
+
+Saying what the plan could not decide on its own.
+
+### Added
+
+- **A findings report** (`exceptions_report.py`). A plan is not just a count of
+  files to move; it also holds the cases the tool decided for you. Reporting
+  them as a single "skipped: 43" is the same as not reporting them. Each cause
+  now gets its own entry naming the number of files, examples, and — the point —
+  **the option that governs it**, so the answer is one setting away rather than
+  a search through the documentation.
+
+  Levels: BLOCKS (a file the catalog names but the disk does not have, a failed
+  pre-flight check), Warning, Exception (no usable date, a name collision, the
+  extension filter, a stray date inside a dated folder), Note (renames, folders
+  no rule spoke about).
+
+- **The graphical interface shows them in a table** between the settings and
+  the folder table: level colour-coded, the governing option and its current
+  value in their own columns, and the affected files listed when a row is
+  selected. The counts line above it is now only counts — warnings used to be
+  crammed onto it. The command line plan report gained the same list.
+
+- **A project history** in both languages,
+  [docs/en/history.md](docs/en/history.md) /
+  [docs/de/historie.md](docs/de/historie.md), reconstructed retroactively. The
+  changelog says what changed; this says why, and what happened in between —
+  the decisions and their reasoning, the tests against real libraries, and the
+  four occasions on which the tool was wrong in a way that mattered. None of it
+  is recoverable from the code.
+
+- **`scripts/make_screenshots.py`.** The images in the READMEs had gone stale
+  within one revision because there was no way to remake them. The script
+  builds a demonstration catalog, drives both interfaces against it and writes
+  all four files.
+
+### Fixed
+
+- **Global command line flags were ignored before the subcommand.** Every
+  sub-parser redeclares `--lang`, `--debug`, `--verbose`, `--quiet`,
+  `--log-file` and `--log-dir`, and a sub-parser's default overwrites what the
+  top level already parsed. `lrfc --lang de plan X` therefore ran in English and
+  `lrfc --debug plan X` ran without debug logging — since r1.0.0. Found by
+  reading the German output of the new findings report and noticing it was
+  English. There is now a test per flag and position.
+
+- **German messages used ASCII substitutes for umlauts** — "ueber Mitternacht",
+  "zusammenfuehren", "Uebersprungen" — while the graphical interface's own text
+  used real ones, so the two disagreed on screen. All of it now uses proper
+  umlauts.
 
 ---
 

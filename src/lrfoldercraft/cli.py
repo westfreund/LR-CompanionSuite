@@ -667,7 +667,7 @@ def _stamp(prefix: str) -> str:
 
 def _confirm(plan, language: str) -> bool:
     question = (
-        "\n{n:,} Datei(en) verschieben und den Katalog aendern? [y/N] "
+        "\n{n:,} Datei(en) verschieben und den Katalog ändern? [y/N] "
         if language == "de"
         else "\nMove {n:,} file(s) and modify the catalog? [y/N] "
     ).format(n=plan.stats.touched)

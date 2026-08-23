@@ -1,6 +1,6 @@
 # LR-FolderCraft — Überblick
 
-**Revision r5.0.0 · Build-Datum 2026-08-23**
+**Revision r6.0.0 · Build-Datum 2026-08-23**
 
 LR-FolderCraft sortiert die Ordnerstruktur einer Adobe-Lightroom-Classic-
 Bibliothek neu. Es verschiebt die Bilddateien auf dem Datenträger und schreibt
@@ -55,6 +55,7 @@ dieser Wert ändert sich nie. Deshalb überlebt alles, was daran hängt:
 - [architektur.md](architektur.md) — der Aufbau des Codes
 - [entwicklung.md](entwicklung.md) — wie die Arbeit fortgesetzt wird
 - [versionierung.md](versionierung.md) — das Revisionsschema
+- [historie.md](historie.md) — warum das Projekt so verlief, wie es verlief
 - [faq.md](faq.md) — häufige Fragen
 - [offene-punkte.md](offene-punkte.md) — bekannte Grenzen und Fahrplan
 - [prompts.md](prompts.md) — ursprünglicher und generischer Prompt

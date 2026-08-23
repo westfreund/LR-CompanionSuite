@@ -193,7 +193,7 @@ def _from_folders(plan: Plan) -> List[Finding]:
                 ).format(n=len(mismatched)),
                 text_de=(
                     "Foto(s) in {n} datierten Ordner(n), deren eigenes Datum vom "
-                    "Ordnernamen abweicht -- oft eine Session ueber Mitternacht"
+                    "Ordnernamen abweicht -- oft eine Session über Mitternacht"
                 ).format(n=len(mismatched)),
                 setting="--mismatch-action",
                 current_en=settings.mismatch_action,
@@ -218,8 +218,7 @@ def _from_folders(plan: Plan) -> List[Finding]:
                 count=len(undecided),
                 text_en=("folder(s) fell through to the default because no rule spoke about them"),
                 text_de=(
-                    "Ordner sind auf die Voreinstellung gefallen, weil keine Regel "
-                    "ueber sie spricht"
+                    "Ordner sind auf die Voreinstellung gefallen, weil keine Regel über sie spricht"
                 ),
                 setting="--rule",
                 current_en="{n} rule(s) set".format(n=len(settings.folder_rules)),
