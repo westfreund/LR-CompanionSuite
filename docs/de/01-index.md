@@ -87,6 +87,7 @@ Oder dasselbe in einem Fenster:
 ```bash
 lrfc gui                        # grafische Oberfläche (braucht das Extra gui)
 lrfc tui                        # Textoberfläche im Terminal
+lrfc gui --lang de              # beide auch auf Deutsch
 ```
 
 Alles Weitere ist eine Verfeinerung dieser drei.

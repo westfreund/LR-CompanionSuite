@@ -253,9 +253,14 @@ are always handled, on every platform.
 ## The graphical interface
 
 ```bash
-lrfc gui                       # or with a catalog already chosen
-lrfc gui /Volumes/Photos/2019/2019.lrcat
+lrfc gui                                          # English
+lrfc gui --lang de                                # German
+lrfc gui --lang de /Volumes/Photos/2019/2019.lrcat  # German, catalog chosen
 ```
+
+The language can also be switched inside the window without restarting: the
+menu entry at the top always names the **other** language, so in the English
+interface it reads "Deutsch".
 
 It needs the `gui` extra: `pip install 'lr-foldercraft[gui]'`. Without it the
 command explains how to install it rather than failing with a traceback.

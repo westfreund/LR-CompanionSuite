@@ -84,6 +84,7 @@ Or do the same in a window:
 ```bash
 lrfc gui                        # graphical interface (needs the gui extra)
 lrfc tui                        # text interface in the terminal
+lrfc gui --lang de              # either of them in German
 ```
 
 Everything else is a refinement of those three.

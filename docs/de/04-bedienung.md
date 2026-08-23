@@ -248,9 +248,14 @@ jeder Plattform.
 ## Die grafische Oberfläche
 
 ```bash
-lrfc gui                       # oder gleich mit Katalog
-lrfc gui /Volumes/Fotos/2019/2019.lrcat
+lrfc gui                                        # englisch
+lrfc gui --lang de                              # deutsch
+lrfc gui --lang de /Volumes/Fotos/2019/2019.lrcat   # deutsch, Katalog gleich mit
 ```
+
+Ohne Neustart lässt sich die Sprache auch im Fenster umschalten: der
+Menüeintrag oben zeigt immer die **andere** Sprache an, in der deutschen
+Oberfläche also „English".
 
 Sie benötigt das Extra `gui`: `pip install 'lr-foldercraft[gui]'`. Fehlt es,
 erklärt der Befehl die Installation, statt mit einem Traceback abzubrechen.
