@@ -1,6 +1,6 @@
 # Open issues and roadmap
 
-**Revision r9.0.0 · Build date 2026-08-23**
+**Revision r10.0.0 · Build date 2026-08-23**
 
 An honest list of what is not done, not verified, or deliberately left out.
 Each item is a starting point for the next session.
@@ -182,10 +182,12 @@ repository. Plus a one-line description in the window itself, above the catalog
 field, so the purpose is visible without opening anything. Both languages, from
 the existing `gui/i18n.py` table.
 
-### O-26 · A logo ✔ r9.0.0 (proposals)
-Six proposals in `docs/images/logos/`, with a comparison page showing each at
-96 px, 40 px on both grounds and 16 px in a browser tab. Awaiting a choice; the
-export and integration follow. The original requirement follows.
+### O-26 · A logo ✔ r10.0.0
+Six proposals, then three variants of the chosen one; 6c was picked. The mark
+ships as two cuts in `docs/images/brand/`, the letters drawn rather than set,
+and appears in the window icon, the About box and both READMEs. The proposals
+are kept in `docs/images/logos/` for the record. The original requirement
+follows.
 
 The project has no mark of its own: not in the window, not in the READMEs, not
 as the GitLab project avatar, not as a favicon for the documentation.

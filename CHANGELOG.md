@@ -16,6 +16,46 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [10.0.0] — 2026-08-23 — "Signet"
+
+### Added
+
+- **The project has a mark** (O-26 concluded). The user chose proposal 6c:
+  scattered frames becoming an ordered set of folders, with the LR monogram set
+  below as its own line.
+
+  It ships as **two cuts**, both single-colour SVG taking `currentColor` so
+  they adopt the surrounding text colour rather than needing a light and a dark
+  copy: `logo.svg` for 32 px and above, and `logo-small.svg` for 24 px and
+  below. The small cut exists because the full mark has four elements and none
+  of them survive sixteen pixels — that is not a compromise, it is how every
+  mark that works as a favicon is made.
+
+  The letters are **drawn as strokes, not set as type**: a logo that depends on
+  a font installed on the viewer's machine is not a logo, and stroked forms
+  match the weight of the folders and the arrow besides.
+
+- **The window carries it**, as an icon holding every size from 16 to 256 px so
+  the system picks the cut drawn for the size it asks for, and in the About box
+  beside the text. Both READMEs open with it, light and dark via `<picture>`.
+
+- `scripts/make_brand.py` renders all seven sizes in both inks from the two
+  sources. PNGs are never edited: change the SVG and run the script.
+
+### Fixed
+
+- **`logo-small.svg` rendered as an empty image** and nothing said so. A double
+  hyphen inside an XML comment is illegal; the renderer reports no error and
+  simply draws nothing. Caught by looking at a magnified 16 px probe rather
+  than by trusting that a written file is a working file.
+  `tests/test_brand.py` now parses both sources, checks they are single-colour,
+  and asserts every exported PNG is the right size and not blank.
+
+- The About box built its text and displayed it in one call, so a test could
+  only reach it by driving a modal dialog. Text and display are separate now.
+
+---
+
 ## [9.0.0] — 2026-08-23 — "Aufgeraeumt"
 
 The last of the deferred backlog, and one new feature.

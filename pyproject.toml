@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lr-foldercraft"
-version = "9.0.0"
+version = "10.0.0"
 description = "Reorganise Adobe Lightroom Classic folder trees by date, camera and more, without losing the catalog connection."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -58,7 +58,7 @@ lr-foldercraft = "lrfoldercraft.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-lrfoldercraft = ["tui/*.tcss"]
+lrfoldercraft = ["tui/*.tcss", "resources/*.svg"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

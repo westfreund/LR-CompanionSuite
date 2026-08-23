@@ -780,16 +780,21 @@ def test_the_purpose_line_follows_the_language(qt_app):
     window.close()
 
 
-def test_about_is_reachable_and_says_the_revision(qt_app, monkeypatch):
-    from PySide6.QtWidgets import QMessageBox
-
-    shown = {}
-    monkeypatch.setattr(QMessageBox, "about", lambda _p, title, text: shown.update(t=text))
+def test_about_says_the_revision_and_the_promise(qt_app):
     window = MainWindow()
-    window.show_about()
-    assert REVISION in shown["t"]
-    assert "MIT" in shown["t"]
-    assert "gitlab.com" in shown["t"]
-    # the promise that matters
-    assert "folder column" in shown["t"]
+    text = window.about_html()
+    assert REVISION in text
+    assert "MIT" in text
+    assert "gitlab.com" in text
+    assert "folder column" in text  # the promise that matters
+    assert window.about_action.isEnabled()
+    window.close()
+
+
+def test_the_window_carries_the_mark(qt_app):
+    window = MainWindow()
+    icon = window.windowIcon()
+    assert not icon.isNull()
+    # Both cuts are in it, so a 16 px request gets the one drawn for 16 px.
+    assert {size.width() for size in icon.availableSizes()} >= {16, 32, 256}
     window.close()

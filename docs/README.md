@@ -31,6 +31,10 @@ und `04-bedienung.md` sind also dasselbe Dokument.
 | 13 | Open issues / Offene Punkte | [en/13-open-issues.md](en/13-open-issues.md) | [de/13-offene-punkte.md](de/13-offene-punkte.md) |
 | 14 | Prompts | [en/14-prompts.md](en/14-prompts.md) | [de/14-prompts.md](de/14-prompts.md) |
 
+`images/brand/` holds the project's mark in its two cuts, with a README of its
+own; `python scripts/make_brand.py` regenerates the PNG sizes from the SVG
+sources. `images/logos/` keeps the proposals the mark was chosen from.
+
 `images/` holds the interface screenshots referenced from the READMEs. They are
 regenerated with `python scripts/make_screenshots.py`.
 

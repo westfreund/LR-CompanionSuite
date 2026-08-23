@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img"
+     aria-label="LR-FolderCraft">
+  <title>LR-FolderCraft</title>
+  <desc>Scattered frames become an ordered set of folders, over the LR monogram.</desc>
+  <!--
+    The full mark, for anything 32 px and larger. Single colour: everything
+    takes `currentColor`, so it inherits the surrounding text colour and works
+    on a light or a dark ground without a second file.
+
+    The letters are drawn as strokes, not set as type. A logo that depends on a
+    font installed on the viewer's machine is not a logo, and the stroked forms
+    match the weight of the folders and the arrow besides.
+
+    For 16 and 24 px use logo-small.svg instead: four elements cannot survive
+    that size, and this one was never meant to.
+  -->
+  <g fill="currentColor">
+    <rect x="4" y="7" width="8" height="6" rx="1.4" transform="rotate(-13 8 10)" opacity=".7"/>
+    <rect x="5" y="19" width="8" height="6" rx="1.4" transform="rotate(9 9 22)" opacity=".7"/>
+    <rect x="3" y="31" width="8" height="6" rx="1.4" transform="rotate(-6 7 34)" opacity=".7"/>
+  </g>
+
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+     stroke-linejoin="round">
+    <path d="M20 22h7"/>
+    <path d="M23.5 17.5 28 22l-4.5 4.5"/>
+  </g>
+
+  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"
+     fill="currentColor" fill-opacity=".16">
+    <path d="M33 6a2 2 0 0 1 2-2h4l2 3h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2z"/>
+    <path d="M33 20a2 2 0 0 1 2-2h4l2 3h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2z"/>
+    <path d="M33 34a2 2 0 0 1 2-2h4l2 3h18a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2z"/>
+  </g>
+
+  <path d="M5 48h54" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".38"
+        stroke-linecap="round"/>
+
+  <!-- LR, drawn: L is stem and foot, R is stem, a semicircular bowl and a leg. -->
+  <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"
+     stroke-linejoin="round">
+    <path d="M23 50v11h6.6"/>
+    <path d="M34.6 61V50h3.6a3.2 3.2 0 0 1 0 6.4h-3.6"/>
+    <path d="m38.2 56.4 3.2 4.6"/>
+  </g>
+</svg>

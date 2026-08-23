@@ -1,6 +1,6 @@
 # Offene Punkte und Fahrplan
 
-**Revision r9.0.0 · Build-Datum 2026-08-23**
+**Revision r10.0.0 · Build-Datum 2026-08-23**
 
 Eine ehrliche Aufstellung dessen, was nicht erledigt, nicht verifiziert oder
 bewusst ausgelassen ist. Jeder Punkt ist ein Ansatzpunkt für die nächste
@@ -198,10 +198,12 @@ auf das Repository. Dazu eine einzeilige Beschreibung im Fenster selbst, über
 dem Katalogfeld, damit der Zweck sichtbar ist, ohne etwas zu öffnen.
 Zweisprachig, aus der vorhandenen Tabelle in `gui/i18n.py`.
 
-### O-26 · Ein Logo ✔ r9.0.0 (Entwürfe)
-Sechs Entwürfe in `docs/images/logos/`, mit Vergleichsseite in 96 px, 40 px auf
-beiden Gründen und 16 px im Browser-Tab. Die Wahl steht aus; Export und
-Einbindung folgen. Die ursprüngliche Anforderung folgt.
+### O-26 · Ein Logo ✔ r10.0.0
+Sechs Entwürfe, dann drei Varianten des gewählten; 6c wurde genommen. Die Marke
+liegt als zwei Schnitte in `docs/images/brand/`, die Buchstaben gezeichnet statt
+gesetzt, und erscheint im Fenstersymbol, im Über-Dialog und in beiden READMEs.
+Die Entwürfe bleiben zur Dokumentation in `docs/images/logos/`. Die
+ursprüngliche Anforderung folgt.
 
 Das Projekt hat kein eigenes Zeichen: weder im Fenster noch in den READMEs,
 noch als GitLab-Projektbild, noch als Favicon der Dokumentation.

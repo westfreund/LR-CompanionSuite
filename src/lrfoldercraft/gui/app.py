@@ -17,7 +17,16 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QColor, QFont, QGuiApplication
+from PySide6.QtGui import (
+    QAction,
+    QColor,
+    QFont,
+    QGuiApplication,
+    QIcon,
+    QImage,
+    QPainter,
+    QPixmap,
+)
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -68,6 +77,7 @@ from ..journal import JOURNAL_SUFFIX
 from ..logging_setup import get_logger, setup_logging
 from ..planner import Plan
 from ..report import human_bytes, render_result
+from ..resources import logo_for
 from ..rules import PRESETS, RuleError, describe_structure, parse_structure, token_help
 from ..safety import preconditions
 from ..version import APP_NAME, APP_URL, REVISION, __build_date__
@@ -92,6 +102,42 @@ _LEVEL_COLOURS = {
     EXCEPTION: QColor("#0057b0"),
     NOTE: QColor("#606060"),
 }
+
+
+def _logo_pixmap(size: int, colour) -> QPixmap:
+    """The mark, rendered at *size* in *colour*.
+
+    The SVG is single-colour and takes ``currentColor``, so a front end tints
+    it to whatever the surrounding theme uses rather than shipping a light and
+    a dark copy. Below 24 px the small cut is used, because the full mark
+    cannot read at that size.
+    """
+    from PySide6.QtCore import QByteArray, QRectF
+    from PySide6.QtSvg import QSvgRenderer
+
+    source = logo_for(size)
+    text = source.read_text(encoding="utf-8").replace("currentColor", colour.name())
+    image = QImage(size, size, QImage.Format_ARGB32)
+    image.fill(Qt.transparent)
+    painter = QPainter(image)
+    painter.setRenderHint(QPainter.Antialiasing, True)
+    QSvgRenderer(QByteArray(text.encode("utf-8"))).render(painter, QRectF(0, 0, size, size))
+    painter.end()
+    return QPixmap.fromImage(image)
+
+
+def window_icon() -> QIcon:
+    """Every size the window manager may ask for, in one icon.
+
+    Both cuts go in: the system picks whichever size it needs, and at 16 and
+    24 px that is the one drawn to be legible there.
+    """
+    icon = QIcon()
+    ink = QColor("#1d1f22")
+    for size in (16, 24, 32, 64, 128, 256):
+        icon.addPixmap(_logo_pixmap(size, ink))
+    return icon
+
 
 log = get_logger("gui")
 
@@ -177,6 +223,7 @@ class MainWindow(QMainWindow):
         self._threads: list = []
 
         self.setWindowTitle("{n} - {r}".format(n=APP_NAME, r=REVISION))
+        self.setWindowIcon(window_icon())
         self._build()
         self._size_to_screen()
         self._apply_state()
@@ -1296,26 +1343,33 @@ class MainWindow(QMainWindow):
 
     # -- help ---------------------------------------------------------------
 
-    def show_about(self) -> None:
-        """What the tool does, what it promises, and where it came from."""
-        QMessageBox.about(
-            self,
-            tr("about", self.language),
+    def about_html(self) -> str:
+        """What the About box says. Separate from showing it, so it is testable."""
+        return (
             "<h3>{n}</h3>"
             "<p><b>{r}</b> &middot; build {b}</p>"
             "<p>{what}</p>"
             "<p>{promise}</p>"
             "<p>{licence}<br>"
-            '<a href="{url}">{url}</a></p>'.format(
-                n=APP_NAME,
-                r=REVISION,
-                b=__build_date__,
-                what=tr("about_what", self.language),
-                promise=tr("about_promise", self.language),
-                licence=tr("about_licence", self.language),
-                url=APP_URL,
-            ),
+            '<a href="{url}">{url}</a></p>'
+        ).format(
+            n=APP_NAME,
+            r=REVISION,
+            b=__build_date__,
+            what=tr("about_what", self.language),
+            promise=tr("about_promise", self.language),
+            licence=tr("about_licence", self.language),
+            url=APP_URL,
         )
+
+    def show_about(self) -> None:
+        """What the tool does, what it promises, and where it came from."""
+        box = QMessageBox(self)
+        box.setWindowTitle(tr("about", self.language))
+        box.setIconPixmap(_logo_pixmap(96, self.palette().windowText().color()))
+        box.setTextFormat(Qt.RichText)
+        box.setText(self.about_html())
+        box.exec()
 
     def show_tokens(self) -> None:
         lines = [
