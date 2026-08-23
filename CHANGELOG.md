@@ -16,6 +16,22 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [13.0.1] — 2026-08-23
+
+### Fixed
+
+- **`leave` did not leave anything alone when sorting into a new tree.** It was
+  expressed as "the same path, below the target root", which is identical to
+  what `relocate` does as soon as the target root differs — so a folder the
+  operator had explicitly excluded was carried into the new tree anyway. It now
+  means what it says: those photos do not move, whatever the run does around
+  them.
+
+  Found by planning a real run before applying it and asking why 51,049 files
+  were queued when 340 of them sat in a folder ruled `leave`.
+
+---
+
 ## [13.0.0] — 2026-08-23 — "Laufakte"
 
 The user runs this over several libraries on several external drives, and asked

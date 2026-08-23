@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r13.0.0 · Build date 2026-08-23**
+**Revision r13.0.1 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -387,7 +387,7 @@ tokens at all, folder dates say nothing and are ignored.
 | `resort` | rebuild the folder **where it stands**, below its own parent |
 | `refile` | file it into the target structure, but **keep its descriptive text** on the deepest date level |
 | `relocate` | carry the folder to the new location **unchanged** — same name, same contents, no sorting |
-| `leave` | do not touch the photos in this folder at all |
+| `leave` | do not touch the photos in this folder at all — they stay put even when the rest of the library is sorted into a new tree |
 | `keep` | a dated folder: leave the photos it correctly describes |
 
 `resort` is the one that needs an example. Given

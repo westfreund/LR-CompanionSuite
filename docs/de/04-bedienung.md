@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r13.0.0 · Build-Datum 2026-08-23**
+**Revision r13.0.1 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -388,7 +388,7 @@ Datums-Platzhalter, sagen Ordnerdaten nichts aus und werden ignoriert.
 | `resort` | den Ordner **an seiner Stelle** neu aufbauen, unter seinem eigenen Elternordner |
 | `refile` | in die Zielstruktur einreihen, aber den **Zusatztext behalten** — auf der tiefsten Datumsebene |
 | `relocate` | den Ordner **unverändert** an den neuen Ort tragen — gleicher Name, gleicher Inhalt, keine Sortierung |
-| `leave` | die Fotos dieses Ordners gar nicht anfassen |
+| `leave` | die Fotos dieses Ordners gar nicht anfassen — sie bleiben liegen, auch wenn der Rest der Bibliothek in einen neuen Baum sortiert wird |
 | `keep` | datierter Ordner: die Fotos, die er korrekt beschreibt, bleiben |
 
 `resort` braucht ein Beispiel. Gegeben

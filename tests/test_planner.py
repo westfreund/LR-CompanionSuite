@@ -971,3 +971,46 @@ def test_refile_and_cumulative_dates_together_on_the_shape_that_asked_for_them(b
         "2026-06",
         "2026-06-28 Makro Blume",
     )
+
+
+def test_leave_means_leave_even_when_sorting_into_a_new_tree(mixed_library, tmp_path):
+    """It used to be identical to relocate as soon as the target root differed.
+
+    A folder the operator had explicitly excluded was carried into the new tree
+    anyway, because "leave" was expressed as "the same path, under the target
+    root" rather than as "do not touch this".
+    """
+    target = tmp_path / "Neu"
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}-{mm}-{dd}",),
+        placement="new-tree",
+        target_root=str(target),
+        folder_rules=("Urlaub=leave", "*=consolidate"),
+    )
+    moves = by_name(plan)
+    assert moves["U1.CR2"].status == STAY
+    assert moves["U2.CR2"].status == STAY
+    assert "Neu" not in moves["U1.CR2"].target_path
+    # everything else still moves into the new tree
+    assert moves["F1.CR2"].status == MOVE
+    assert str(target) in moves["F1.CR2"].target_path
+
+
+def test_leave_and_relocate_are_no_longer_the_same_thing(mixed_library, tmp_path):
+    target = tmp_path / "Neu"
+
+    def target_of(action):
+        plan = plan_for(
+            mixed_library,
+            structure=("{yyyy}-{mm}-{dd}",),
+            placement="new-tree",
+            target_root=str(target),
+            folder_rules=("Urlaub={a}".format(a=action), "*=consolidate"),
+        )
+        return by_name(plan)["U1.CR2"]
+
+    left, relocated = target_of("leave"), target_of("relocate")
+    assert left.status == STAY
+    assert relocated.status == MOVE
+    assert left.target_path != relocated.target_path

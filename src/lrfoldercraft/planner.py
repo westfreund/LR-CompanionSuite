@@ -979,6 +979,18 @@ def _plan_one(
 
     base.reason = date_reason
     current = tuple(_split(photo.folder_path_from_root))
+
+    # "Leave" means leave, whatever the run is doing around it. Expressing it
+    # as "the same path, under the target root" made it identical to relocate
+    # as soon as the target root differed -- so a folder the operator had
+    # explicitly excluded was carried into the new tree anyway.
+    if case is not None and case.action == LEAVE and not case.is_anchor:
+        base.status = STAY
+        base.target_path = source_path
+        base.target_segments = current
+        base.reason = "folder decision: leave"
+        return base
+
     segments = _segments_for(photo, case, settings, anchor, structure_segments, current)
     if case is not None and segments == current and not base.reason and not case.is_anchor:
         base.reason = "folder decision: {a}".format(a=case.action)
