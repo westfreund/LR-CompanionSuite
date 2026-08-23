@@ -205,6 +205,26 @@ def _from_folders(plan: Plan) -> List[Finding]:
             )
         )
 
+    unsorted = [m for m in plan.moves if m.reason.startswith("no capture date") and m.is_active]
+    if unsorted:
+        found.append(
+            Finding(
+                level=EXCEPTION,
+                category="unsorted",
+                count=len(unsorted),
+                text_en=("photo(s) with no usable capture date, filed into {f!r}").format(
+                    f=settings.unsorted_folder
+                ),
+                text_de=("Foto(s) ohne brauchbares Aufnahmedatum, abgelegt in {f!r}").format(
+                    f=settings.unsorted_folder
+                ),
+                setting="--on-missing-date",
+                current_en=settings.on_missing_date,
+                current_de=settings.on_missing_date,
+                samples=[m.source_path for m in unsorted[:SAMPLE_LIMIT]],
+            )
+        )
+
     undecided = [
         c
         for c in plan.folder_cases

@@ -114,3 +114,18 @@ def test_preflight_results_join_the_same_list(simple_catalog):
     assert any(f.category.startswith("preflight:") for f in findings) or all(
         f.level != WARNING for f in findings
     )
+
+
+def test_photos_filed_into_the_unsorted_folder_are_reported(simple_catalog):
+    """Routing a dateless photo somewhere is a decision, not a non-event."""
+    plan = plan_for(
+        simple_catalog,
+        structure=("{yyyy}-{mm}-{dd}",),
+        on_missing_date="unsorted",
+        unsorted_folder="_ohne_Datum",
+    )
+    finding = by_category(collect_findings(plan))["unsorted"]
+    assert finding.level == EXCEPTION
+    assert "_ohne_Datum" in finding.text("en")
+    assert finding.setting == "--on-missing-date"
+    assert finding.current("en") == "unsorted"

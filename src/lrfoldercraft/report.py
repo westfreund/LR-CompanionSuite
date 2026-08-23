@@ -54,7 +54,7 @@ T = {
     "warnings": ("Warnings", "Warnungen"),
     "target_folders": ("Target folders", "Zielordner"),
     "sample": ("Sample moves", "Beispielhafte Verschiebungen"),
-    "preflight": ("PRE-FLIGHT CHECKS", "VORPRUEFUNGEN"),
+    "preflight": ("PRE-FLIGHT CHECKS", "VORPRÜFUNGEN"),
     "result": ("RESULT", "ERGEBNIS"),
     "dry_run": ("Dry run -- nothing was changed", "Trockenlauf -- nichts wurde geändert"),
     "moved": ("Files moved", "Verschobene Dateien"),

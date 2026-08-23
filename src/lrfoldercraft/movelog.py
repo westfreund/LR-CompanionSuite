@@ -114,7 +114,7 @@ def render_move_log(plan: Plan, result: RunResult, settings: Settings) -> str:
         lines += ["", "HINWEISE" if german else "NOTES", ""]
         lines += ["    " + note for note in result.notes]
     if result.verification:
-        lines += ["", "PRUEFUNG" if german else "VERIFICATION", ""]
+        lines += ["", "PRÜFUNG" if german else "VERIFICATION", ""]
         lines += ["    " + line for line in result.verification]
 
     lines.append("")
