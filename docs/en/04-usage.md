@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r13.0.3 · Build date 2026-08-23**
+**Revision r13.0.4 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -630,7 +630,7 @@ Masterkatalog.Neu/
     LR-FolderCraft/
         2026-08-23_165247/
             run.json        what was done, how much, and whether it was undone
-            settings.json   every option used, in the shape of a profile
+            settings.json   everything the run was told to do, rules included
             journal.jsonl   the machine readable record undo works from
             moves.log       the same thing in prose, for a person
 ```

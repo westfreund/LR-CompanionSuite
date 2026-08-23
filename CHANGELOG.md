@@ -16,6 +16,26 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [13.0.4] — 2026-08-23
+
+### Fixed
+
+- **A run's record did not say which rules had shaped it.** `settings.json`
+  reused the exclusion list that keeps a *profile* portable, which drops the
+  rule list, the per-folder decisions and the escape hatches. Right for a
+  profile, wrong for a record whose whole job is to answer "what did I actually
+  do to this library" — a folder sat somewhere only a rule could explain, and
+  no artefact said why.
+
+  A run record now holds everything the run was told to do, `dry_run` aside.
+  The move log additionally lists per-folder decisions, which had been recorded
+  nowhere at all.
+
+  Found by reading the record of a real run and being unable to explain the
+  result from it.
+
+---
+
 ## [13.0.3] — 2026-08-23
 
 ### Fixed

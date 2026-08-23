@@ -105,20 +105,21 @@ def backup_catalog(catalog: Path, backup_dir: Path) -> Path:
     return target
 
 
-def _profile_shaped(settings: Settings) -> dict:
-    """The run's options, minus what belongs to this one library.
+def _run_settings(settings: Settings) -> dict:
+    """Everything the run was told to do, for the record.
 
-    Same shape a saved profile has, so the record of a run can be loaded
-    straight back as a way of working.
+    This is not a profile and must not be pruned like one. A profile leaves out
+    the rules, the per-folder decisions and the escape hatches because they do
+    not belong in the *next* library; a run record leaves out nothing, because
+    its whole job is to answer "what did I actually do to this library". The
+    first version of this file copied the profile's exclusions and so failed to
+    record the rule that had shaped the run -- the folder it moved was there on
+    disk and no artefact said why.
+
+    Only ``dry_run`` goes, because a dry run writes no record at all.
     """
-    from .config import NEVER_IN_A_PROFILE, PER_LIBRARY_FIELDS
-
     payload = settings.to_dict()
-    # The catalog and the target are worth keeping *here* -- this file
-    # documents one particular run -- but the escape hatches are not, for the
-    # same reason a profile leaves them out.
-    for name in (PER_LIBRARY_FIELDS | NEVER_IN_A_PROFILE) - {"catalog", "target_root"}:
-        payload.pop(name, None)
+    payload.pop("dry_run", None)
     return payload
 
 
@@ -190,7 +191,7 @@ def execute(
             target_roots=[scope.target_root_path for scope in plan.scopes],
         )
         write_record(run_directory, record)
-        write_settings(run_directory, _profile_shaped(settings))
+        write_settings(run_directory, _run_settings(settings))
         journal_path = run_directory / JOURNAL_FILE
     except OSError as error:
         # A read-only or full volume must not stop a run that is otherwise

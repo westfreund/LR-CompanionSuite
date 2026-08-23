@@ -58,17 +58,44 @@ def test_the_record_says_what_the_run_did(simple_catalog, tmp_path):
     assert record.can_be_undone
 
 
-def test_the_settings_are_kept_in_the_shape_of_a_profile(simple_catalog, tmp_path):
-    """Answering "what did I do to this library" must not need the journal."""
-    plan, settings = make_plan(simple_catalog, tmp_path, cumulative_dates=True)
+def test_the_record_holds_everything_the_run_was_told_to_do(simple_catalog, tmp_path):
+    """Answering "what did I do to this library" must not need the journal.
+
+    This is not a profile and must not be pruned like one. The first version
+    copied the profile's exclusions and so recorded neither the rules nor the
+    per-folder decisions -- a folder had visibly been moved somewhere only a
+    rule could explain, and no artefact said why.
+    """
+    plan, settings = make_plan(
+        simple_catalog,
+        tmp_path,
+        cumulative_dates=True,
+        folder_rules=("_extern=relocate", "*=consolidate"),
+        ignore_lock=True,
+    )
     result = execute(plan, settings)
 
     stored = json.loads((Path(result.run_directory) / SETTINGS_FILE).read_text(encoding="utf-8"))
     assert stored["cumulative_dates"] is True
     assert stored["catalog"] == str(simple_catalog.catalog_path)
-    # the escape hatches never travel, here as in a profile
-    for never in ("ignore_lock", "allow_unsupported_catalog", "backup_catalog"):
-        assert never not in stored
+    assert stored["folder_rules"] == ["_extern=relocate", "*=consolidate"]
+    # even the escape hatches: knowing one was used is part of the record
+    assert stored["ignore_lock"] is True
+    assert "dry_run" not in stored
+
+
+def test_a_per_folder_decision_reaches_the_move_log(simple_catalog, tmp_path):
+    folders = {}
+    with open_catalog(simple_catalog.catalog_path) as conn:
+        for folder in CatalogReader(conn).folders():
+            folders[folder.path_from_root] = folder.id_local
+    any_id = sorted(folders.values())[0]
+
+    plan, settings = make_plan(simple_catalog, tmp_path, folder_actions={any_id: "leave"})
+    result = execute(plan, settings)
+    text = Path(result.move_log_path).read_text(encoding="utf-8")
+    assert "Per-folder decisions" in text
+    assert str(any_id) in text
 
 
 def test_undoing_marks_the_run_so_it_is_not_offered_again(simple_catalog, tmp_path):

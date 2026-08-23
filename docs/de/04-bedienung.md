@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r13.0.3 · Build-Datum 2026-08-23**
+**Revision r13.0.4 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -640,7 +640,7 @@ Masterkatalog.Neu/
     LR-FolderCraft/
         2026-08-23_165247/
             run.json        was getan wurde, wie viel, und ob es zurückgenommen ist
-            settings.json   jede genutzte Option, in der Form eines Profils
+            settings.json   alles, was dem Lauf aufgetragen war, Regeln inbegriffen
             journal.jsonl   die maschinenlesbare Aufzeichnung, aus der Undo arbeitet
             moves.log       dasselbe in Prosa, für Menschen
 ```

@@ -89,6 +89,17 @@ def render_move_log(plan: Plan, result: RunResult, settings: Settings) -> str:
         lines.append(_pair("Regeln" if german else "Rules", "").rstrip())
         for position, rule in enumerate(settings.folder_rules, start=1):
             lines.append("    {n}. {r}".format(n=position, r=rule))
+    if settings.folder_actions:
+        # Decisions made about single folders shaped the run just as much as
+        # the rules did, and were previously recorded nowhere.
+        lines.append(
+            _pair(
+                "Einzelentscheidungen" if german else "Per-folder decisions",
+                "{n}".format(n=len(settings.folder_actions)),
+            )
+        )
+        for folder_id, action in sorted(settings.folder_actions.items()):
+            lines.append("    {f}: {a}".format(f=folder_id, a=action))
     for scope in plan.scopes:
         lines.append(_pair("Zielwurzel" if german else "Target root", scope.target_root_path))
     if result.backup_path:
