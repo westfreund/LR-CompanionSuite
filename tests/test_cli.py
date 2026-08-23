@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from lrfoldercraft.cli import EXIT_OK, GLOBAL_FLAG_DEFAULTS, build_parser, main
+from lrfoldercraft.cli import EXIT_ERROR, EXIT_OK, GLOBAL_FLAG_DEFAULTS, build_parser, main
 
 
 def test_info(simple_catalog, capsys):
@@ -232,3 +232,29 @@ def test_a_global_flag_survives_the_subcommand(argv, attribute, expected):
         if not hasattr(args, name):
             setattr(args, name, fallback)
     assert getattr(args, attribute) == expected
+
+
+def test_a_deliberate_refusal_is_not_reported_as_a_crash(simple_catalog, tmp_path, capsys):
+    """Undoing a run twice is refused on purpose, not unexpectedly."""
+    from lrfoldercraft.catalog import CatalogReader, open_catalog
+    from lrfoldercraft.config import Settings
+    from lrfoldercraft.executor import execute, undo
+    from lrfoldercraft.planner import build_plan
+
+    settings = Settings(
+        catalog=str(simple_catalog.catalog_path),
+        dry_run=False,
+        structure=("{yyyy}-{mm}-{dd}",),
+        backup_dir=str(tmp_path / "backups"),
+    )
+    with open_catalog(simple_catalog.catalog_path) as conn:
+        plan = build_plan(CatalogReader(conn), settings)
+    result = execute(plan, settings)
+    undo(result.journal_path)
+
+    code = main(["undo", result.journal_path, "--yes"])
+    captured = capsys.readouterr()
+    assert code == EXIT_ERROR
+    assert "already undone" in captured.err
+    assert "Unexpected error" not in captured.err
+    assert "Traceback" not in captured.err

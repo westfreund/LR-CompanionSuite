@@ -16,6 +16,17 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [13.0.3] — 2026-08-23
+
+### Fixed
+
+- **A deliberate refusal was reported as a crash.** `ExecutionError` was not in
+  the command line's list of expected failures, so refusing to undo a run twice
+  printed a traceback and called it "Unexpected error" — which is precisely
+  what it is not. Seen while reversing the master-catalog run.
+
+---
+
 ## [13.0.2] — 2026-08-23
 
 Found by driving the text interface headlessly for the first time. It had never

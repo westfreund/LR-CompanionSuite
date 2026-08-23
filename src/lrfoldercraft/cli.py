@@ -809,7 +809,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     try:
         return DISPATCH[args.command](args)
-    except (CatalogError, ConfigError, PlanError, RuleError) as exc:
+    except (CatalogError, ConfigError, PlanError, RuleError, ExecutionError) as exc:
+        # These are the refusals the tool makes on purpose -- a locked catalog,
+        # a bad structure, a run that has already been undone. Reporting them
+        # through the unhandled-error path printed a traceback and called them
+        # "unexpected", which is exactly what they are not.
         log.error("%s", exc)
         print("Error: {e}".format(e=exc), file=sys.stderr)
         return EXIT_ERROR
