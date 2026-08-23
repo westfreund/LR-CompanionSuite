@@ -101,6 +101,16 @@ def render_move_log(plan: Plan, result: RunResult, settings: Settings) -> str:
         for source, target in move.sidecars:
             lines.append("      -> {t}  ({w})".format(t=target, w=Path(source).suffix.lstrip(".")))
 
+    if plan.orphans:
+        lines += ["", "-" * 72, ""]
+        lines.append(
+            "NICHT IM KATALOG, EINGESAMMELT" if german else "NOT IN THE CATALOG, COLLECTED"
+        )
+        lines.append("")
+        for orphan in plan.orphans:
+            lines.append("    {s}".format(s=orphan.source_path))
+            lines.append("      -> {t}".format(t=orphan.target_path))
+
     lines += ["", "-" * 72, ""]
     lines.append("ZUSAMMENFASSUNG" if german else "SUMMARY")
     lines.append("")
@@ -139,6 +149,7 @@ def _summary(result: RunResult, german: bool):
         ("Umbenannt" if german else "Renamed", result.files_renamed),
         ("Beidateien" if german else "Sidecars", result.sidecars_moved),
         ("Neue Ordner" if german else "Folders created", result.folders_created),
+        ("Nicht im Katalog" if german else "Not in the catalog", result.orphans_moved),
         ("Entfernte Ordner" if german else "Folders pruned", result.folders_pruned),
         ("Datenvolumen (Bytes)" if german else "Bytes moved", result.bytes_moved),
     )

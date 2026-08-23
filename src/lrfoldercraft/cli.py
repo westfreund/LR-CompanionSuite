@@ -313,6 +313,18 @@ def _add_plan_flags(parser: argparse.ArgumentParser) -> None:
 
     behaviour = parser.add_argument_group("behaviour")
     behaviour.add_argument(
+        "--collect-orphans",
+        action="store_true",
+        help="sweep files that are on disk but not in the catalog into one "
+        "folder below each source root (nothing is deleted, and undo puts "
+        "them back)",
+    )
+    behaviour.add_argument(
+        "--orphan-folder",
+        metavar="NAME",
+        help="name of that folder (default: _not-in-catalog)",
+    )
+    behaviour.add_argument(
         "--no-move-log",
         action="store_true",
         help="do not write the human readable record of the run beside the library",
@@ -415,6 +427,10 @@ def settings_from_args(args: argparse.Namespace) -> Settings:
                 ) from None
     if getattr(args, "interactive", False):
         settings.interactive_folders = True
+    if getattr(args, "collect_orphans", False):
+        settings.collect_orphans = True
+    if getattr(args, "orphan_folder", None):
+        settings.orphan_folder = args.orphan_folder
     if getattr(args, "no_move_log", False):
         settings.move_log = False
     if getattr(args, "move_log_dir", None):

@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r8.0.1 · Build date 2026-08-23**
+**Revision r9.0.0 · Build date 2026-08-23**
 
 This document preserves the request that created LR-FolderCraft, a generic
 prompt for regenerating a comparable tool from scratch, and the context needed
@@ -286,6 +286,24 @@ pre-flight checks, execute with a progress callback. Then:
   meaning, so provide move-up and move-down. Changing a rule must clear the
   manual decisions it might have made and replan, or the display stops matching
   what would run.
+* **Offer to collect what the catalog does not know.** A library worked in for
+  years accumulates files the application cannot see, and they are why a
+  reorganised tree still has odds and ends in it. Sweeping them into one named
+  folder, keeping the path each came from, is worth having -- but define the
+  exclusions before the inclusions, and test each: a file referenced from any
+  root, a sidecar of a catalogued photo, the application's own working data,
+  the filesystem's scribbles, the collection folder itself, and any tree the
+  run is sorting into. Recognise a sidecar from the catalogued file beside it
+  rather than from the move, or a second run sweeps up what the first one
+  sorted -- a photo already in the right place makes no move. Default it off:
+  it moves files nobody asked about.
+* **State the preconditions and make the operator tick, not click.** Before the
+  first destructive run, report what was actually found -- the schema version
+  read, whether every root resolves and with how many files, when the last
+  backup was made. A dialog that recites three rules gets dismissed by reflex;
+  one that says "51,049 of 51,049 files found" is read. Put the refusal of a
+  blocking finding in the rule rather than in whether the control is clickable:
+  a disabled checkbox can still be ticked from code.
 * **Put undo in every front end, not only on the command line.** A rollback
   that exists but cannot be reached from the window the operator actually uses
   is a rollback they will not have when they need it. Reverse the file moves in

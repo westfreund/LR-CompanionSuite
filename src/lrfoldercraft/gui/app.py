@@ -22,6 +22,8 @@ from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
     QComboBox,
+    QDialog,
+    QDialogButtonBox,
     QFileDialog,
     QFormLayout,
     QGroupBox,
@@ -67,7 +69,8 @@ from ..logging_setup import get_logger, setup_logging
 from ..planner import Plan
 from ..report import human_bytes, render_result
 from ..rules import PRESETS, RuleError, describe_structure, parse_structure, token_help
-from ..version import APP_NAME, REVISION, __build_date__
+from ..safety import preconditions
+from ..version import APP_NAME, APP_URL, REVISION, __build_date__
 from .i18n import tr
 from .state import load_state, save_state
 from .workers import (
@@ -79,6 +82,9 @@ from .workers import (
     wait_for_threads,
 )
 
+#: Shown beside each precondition, so the state is readable at a glance.
+_CHECK_MARKS = {"ok": "\u2713", "warning": "!", "error": "\u2717"}
+
 #: Severity at a glance. Chosen to stay legible on a light and a dark theme.
 _LEVEL_COLOURS = {
     ERROR: QColor("#b00020"),
@@ -88,6 +94,63 @@ _LEVEL_COLOURS = {
 }
 
 log = get_logger("gui")
+
+
+class PreconditionDialog(QDialog):
+    """States what was found about the library, and asks for a deliberate yes.
+
+    Deliberately not a QMessageBox: the acknowledgement is a checkbox that must
+    be ticked before the button becomes usable, so the confirmation cannot be
+    given by reflex. A finding that blocks cannot be acknowledged at all.
+    """
+
+    def __init__(self, result, language: str, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(tr("preconditions_title", language))
+        self.setMinimumWidth(620)
+        layout = QVBoxLayout(self)
+
+        intro = QLabel(tr("preconditions_intro", language))
+        intro.setWordWrap(True)
+        layout.addWidget(intro)
+
+        for check in result.checks:
+            row = QLabel(
+                "{mark}  {message}".format(
+                    mark=_CHECK_MARKS.get(check.level, "-"), message=check.message(language)
+                )
+            )
+            row.setWordWrap(True)
+            row.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            colour = _LEVEL_COLOURS.get({"error": ERROR, "warning": WARNING}.get(check.level, NOTE))
+            if colour is not None and check.level != "ok":
+                row.setStyleSheet("color: {c};".format(c=colour.name()))
+            layout.addWidget(row)
+
+        # A blocking finding is not a matter of persuasion, so the refusal is
+        # in the rule rather than in whether the box happens to be clickable:
+        # a disabled checkbox can still be ticked from code.
+        self._blocked = not result.ok
+        self.acknowledge = QCheckBox(tr("preconditions_ack", language))
+        self.acknowledge.setEnabled(not self._blocked)
+        layout.addWidget(self.acknowledge)
+
+        if self._blocked:
+            note = QLabel(tr("preconditions_blocked", language))
+            note.setWordWrap(True)
+            note.setStyleSheet("color: {c};".format(c=_LEVEL_COLOURS[ERROR].name()))
+            layout.addWidget(note)
+
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        self.ok_button = buttons.button(QDialogButtonBox.Ok)
+        self.ok_button.setEnabled(False)
+        self.acknowledge.toggled.connect(self._acknowledgement_changed)
+        layout.addWidget(buttons)
+
+    def _acknowledgement_changed(self, checked: bool) -> None:
+        self.ok_button.setEnabled(checked and not self._blocked)
 
 
 class MainWindow(QMainWindow):
@@ -107,6 +170,8 @@ class MainWindow(QMainWindow):
         self.findings: List[Finding] = []
         #: The journal of the run made in this session, offered first for undo.
         self.last_journal: str = ""
+        #: Catalog whose preconditions were acknowledged in this session.
+        self._acknowledged: str = ""
         self.cases: List[FolderCase] = []
         self.roots: List[RootFolder] = []
         self._threads: list = []
@@ -134,6 +199,12 @@ class MainWindow(QMainWindow):
         settings = QWidget()
         settings_layout = QVBoxLayout(settings)
         settings_layout.setContentsMargins(0, 0, 0, 0)
+        self.purpose_label = QLabel()
+        self.purpose_label.setWordWrap(True)
+        purpose_font = self.purpose_label.font()
+        purpose_font.setBold(True)
+        self.purpose_label.setFont(purpose_font)
+        settings_layout.addWidget(self.purpose_label)
         settings_layout.addWidget(self._catalog_box())
         settings_layout.addWidget(self._source_box())
         settings_layout.addWidget(self._target_box())
@@ -245,6 +316,10 @@ class MainWindow(QMainWindow):
         self.language_action = QAction(tr("language", self.language), self)
         self.language_action.triggered.connect(self.toggle_language)
         menu.addAction(self.language_action)
+
+        self.about_action = QAction(tr("about", self.language), self)
+        self.about_action.triggered.connect(self.show_about)
+        menu.addAction(self.about_action)
 
         menu.addSeparator()
 
@@ -373,9 +448,16 @@ class MainWindow(QMainWindow):
         self.backup_check.setChecked(defaults.backup_catalog)
         self.ascii_check = QCheckBox()
         self.ascii_check.setChecked(defaults.ascii_only)
+        self.orphans_check = QCheckBox()
+        self.orphans_check.setChecked(defaults.collect_orphans)
+        self.orphans_check.toggled.connect(self._orphans_toggled)
+        self.orphan_edit = QLineEdit(defaults.orphan_folder)
+        self.orphan_edit.setEnabled(defaults.collect_orphans)
         right.addWidget(self.sidecars_check)
         right.addWidget(self.backup_check)
         right.addWidget(self.ascii_check)
+        right.addWidget(self.orphans_check)
+        right.addWidget(self.orphan_edit)
         right.addStretch(1)
 
         grid.addLayout(left, 1)
@@ -383,6 +465,10 @@ class MainWindow(QMainWindow):
         grid.addLayout(right, 1)
         self.options_group = box
         return box
+
+    def _orphans_toggled(self, checked: bool) -> None:
+        """The folder name only means something once the sweep is on."""
+        self.orphan_edit.setEnabled(checked)
 
     @staticmethod
     def _combo(values, default: str) -> QComboBox:
@@ -647,6 +733,9 @@ class MainWindow(QMainWindow):
         self.sidecars_check.setText(tr("sidecars", language))
         self.backup_check.setText(tr("backup", language))
         self.ascii_check.setText(tr("ascii", language))
+        self.orphans_check.setText(tr("collect_orphans", language))
+        self.orphans_check.setToolTip(tr("collect_orphans_hint", language))
+        self.orphan_edit.setToolTip(tr("orphan_folder_hint", language))
         self.folders_group.setTitle(tr("existing", language))
         self.findings_group.setTitle(tr("findings", language))
         self._retranslate_handles()
@@ -683,6 +772,8 @@ class MainWindow(QMainWindow):
         self.apply_button.setText(tr("apply", language))
         self.status_label.setText(tr("ready", language))
         self.actions_menu.setTitle(tr("menu_actions", language))
+        self.purpose_label.setText(tr("purpose", language))
+        self.about_action.setText(tr("about", language))
         self.language_action.setText(tr("language", language))
         self.undo_action.setText(tr("undo_run", language))
         self.undo_button.setText(tr("undo_button", language))
@@ -772,6 +863,8 @@ class MainWindow(QMainWindow):
         settings.move_sidecars = self.sidecars_check.isChecked()
         settings.backup_catalog = self.backup_check.isChecked()
         settings.ascii_only = self.ascii_check.isChecked()
+        settings.collect_orphans = self.orphans_check.isChecked()
+        settings.orphan_folder = self.orphan_edit.text().strip() or Settings().orphan_folder
         settings.language = self.language
         settings.folder_rules = self._rule_strings()
         settings.folder_actions = dict(self.folder_decisions)
@@ -941,12 +1034,47 @@ class MainWindow(QMainWindow):
 
     # -- applying -----------------------------------------------------------
 
+    # -- the preconditions, acknowledged once per session --------------------
+
+    def _preconditions_accepted(self) -> bool:
+        """Show what was actually found, and require a deliberate yes.
+
+        A dialog that recites three rules gets clicked away. This one reports
+        the schema version it read, whether every root folder resolves, and
+        when the last backup was made -- and has to be ticked before Apply is
+        allowed. Once per catalog per session; a blocking finding cannot be
+        ticked past at all.
+        """
+        catalog = self.catalog_edit.text().strip()
+        if not catalog or self._acknowledged == catalog:
+            return True
+
+        try:
+            result = preconditions(Path(catalog), self.collect_settings())
+        except Exception as exc:  # noqa: BLE001 - shown to the user
+            QMessageBox.warning(self, APP_NAME, str(exc))
+            return False
+
+        dialog = PreconditionDialog(result, self.language, self)
+        if dialog.exec() != QDialog.Accepted:
+            return False
+        self._acknowledged = catalog
+        for check in result.checks:
+            self.say(
+                "{lvl} {n}: {m}".format(
+                    lvl=check.level.upper(), n=check.name, m=check.message(self.language)
+                )
+            )
+        return True
+
     def do_apply(self) -> None:
         if self.plan is None:
             QMessageBox.information(self, APP_NAME, tr("plan_first", self.language))
             return
         if not self.plan.has_work:
             QMessageBox.information(self, APP_NAME, tr("nothing_to_do", self.language))
+            return
+        if not self._preconditions_accepted():
             return
         answer = QMessageBox.warning(
             self,
@@ -1081,6 +1209,8 @@ class MainWindow(QMainWindow):
             "mismatch_action": self.mismatch_combo.currentText(),
             "move_sidecars": self.sidecars_check.isChecked(),
             "ascii_only": self.ascii_check.isChecked(),
+            "collect_orphans": self.orphans_check.isChecked(),
+            "orphan_folder": self.orphan_edit.text().strip(),
             "folder_rules": [list(rule) for rule in self.rules],
             "window": [self.width(), self.height()],
             "splitter": self.splitter.sizes(),
@@ -1117,6 +1247,9 @@ class MainWindow(QMainWindow):
             self.sidecars_check.setChecked(state["move_sidecars"])
         if isinstance(state.get("ascii_only"), bool):
             self.ascii_check.setChecked(state["ascii_only"])
+        if isinstance(state.get("collect_orphans"), bool):
+            self.orphans_check.setChecked(state["collect_orphans"])
+        self._restore_text(self.orphan_edit, state.get("orphan_folder"))
         # The backup switch is never restored: see gui/state.py.
         self.backup_check.setChecked(True)
 
@@ -1162,6 +1295,27 @@ class MainWindow(QMainWindow):
         wait_for_threads(self._threads, milliseconds)
 
     # -- help ---------------------------------------------------------------
+
+    def show_about(self) -> None:
+        """What the tool does, what it promises, and where it came from."""
+        QMessageBox.about(
+            self,
+            tr("about", self.language),
+            "<h3>{n}</h3>"
+            "<p><b>{r}</b> &middot; build {b}</p>"
+            "<p>{what}</p>"
+            "<p>{promise}</p>"
+            "<p>{licence}<br>"
+            '<a href="{url}">{url}</a></p>'.format(
+                n=APP_NAME,
+                r=REVISION,
+                b=__build_date__,
+                what=tr("about_what", self.language),
+                promise=tr("about_promise", self.language),
+                licence=tr("about_licence", self.language),
+                url=APP_URL,
+            ),
+        )
 
     def show_tokens(self) -> None:
         lines = [

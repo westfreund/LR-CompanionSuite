@@ -125,6 +125,12 @@ class Settings:
     #: Ask the operator about every folder that could reasonably go either way.
     interactive_folders: bool = False
 
+    #: Sweep files that are on disk but not in the catalog into one folder.
+    #: Off by default: it moves files nobody asked the tool about.
+    collect_orphans: bool = False
+    #: Where they go, below each source root.
+    orphan_folder: str = "_not-in-catalog"
+
     #: Write a human readable record of the run beside the library. It is
     #: named after the tool, the date and the catalog, so it is found by
     #: whoever wonders months later where a photo went.
@@ -204,6 +210,10 @@ class Settings:
                 )
         if not self.unsorted_folder.strip():
             raise ConfigError("unsorted-folder name must not be empty")
+        if self.collect_orphans and not self.orphan_folder.strip():
+            raise ConfigError("orphan-folder name must not be empty")
+        if "/" in self.orphan_folder or "\\" in self.orphan_folder:
+            raise ConfigError("orphan-folder must be a single folder name, not a path")
         if self.subfolder_action not in SUBFOLDER_ACTIONS:
             raise ConfigError(
                 "subfolder-action must be one of {m}".format(m=", ".join(SUBFOLDER_ACTIONS))

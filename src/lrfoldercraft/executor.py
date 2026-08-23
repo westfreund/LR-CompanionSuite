@@ -33,6 +33,7 @@ from .config import Settings
 from .journal import Journal, build_journal_path, journal_header
 from .logging_setup import get_logger, step
 from .movelog import write_move_log
+from .orphans import collection_directories
 from .planner import Plan, PlannedMove
 from .safety import PreflightResult, preflight
 from .version import __version__
@@ -63,6 +64,8 @@ class RunResult:
     files_renamed: int = 0
     sidecars_moved: int = 0
     folders_pruned: int = 0
+    #: Files not in the catalog that were swept into the collection folder.
+    orphans_moved: int = 0
     bytes_moved: int = 0
     errors: List[str] = field(default_factory=list)
     #: Things worth saying that are not failures, e.g. a log that could not
@@ -199,6 +202,7 @@ def _run(
     total = len(active)
     moved: List[PlannedMove] = []
     moved_sidecars: List[Tuple[str, str]] = []
+    moved_orphans: List[Tuple[str, str]] = []
     created_dirs: List[Path] = []
 
     with open_catalog(
@@ -276,6 +280,28 @@ def _run(
 
             step("Moved %d file(s) and %d sidecar(s)", result.files_moved, result.sidecars_moved)
 
+            # Files the catalog knows nothing about, swept into one folder.
+            # They carry no catalog row, so they are moved after everything
+            # that does -- a failure here still rolls the whole run back,
+            # because they are journalled and tracked like any other move.
+            if plan.orphans:
+                for directory in collection_directories(plan.orphans):
+                    _ensure_directory(Path(directory), journal, created_dirs)
+                for orphan in plan.orphans:
+                    journal.write(
+                        "move-begin",
+                        file_id=0,
+                        source=orphan.source_path,
+                        target=orphan.target_path,
+                        orphan=True,
+                    )
+                    _move_file(orphan.source_path, orphan.target_path, cross_volume=False)
+                    moved_orphans.append((orphan.source_path, orphan.target_path))
+                    journal.write("move-done", file_id=0)
+                    result.orphans_moved += 1
+                    result.bytes_moved += orphan.size_bytes
+                step("Collected %d file(s) not in the catalog", result.orphans_moved)
+
             # --- 3. commit ------------------------------------------------
             if settings.prune_empty_folders:
                 pruned = writer.prune_empty_folders(plan.source_folder_ids)
@@ -293,7 +319,7 @@ def _run(
             log.error("Failure during execution: %s -- rolling back", exc)
             writer.rollback()
             journal.write("rollback-begin", reason=str(exc))
-            restored = _rollback_files(moved, moved_sidecars, journal)
+            restored = _rollback_files(moved, moved_sidecars, journal, moved_orphans)
             removed = _remove_created_directories(created_dirs)
             journal.write("rollback-end", restored=restored, directories=removed)
             result.rolled_back = True
@@ -415,9 +441,14 @@ def _rollback_files(
     moves: Sequence[PlannedMove],
     sidecars: Sequence[Tuple[str, str]],
     journal: Journal,
+    orphans: Sequence[Tuple[str, str]] = (),
 ) -> int:
     """Put every already-moved file back. Best effort, fully journalled."""
     restored = 0
+    # Newest first, so the sweep is undone before what it followed.
+    for source, target in reversed(list(orphans)):
+        if _restore(target, source, journal):
+            restored += 1
     for source, target in reversed(list(sidecars)):
         if _restore(target, source, journal):
             restored += 1

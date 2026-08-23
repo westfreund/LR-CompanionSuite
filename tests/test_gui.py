@@ -135,6 +135,8 @@ def test_applying_moves_the_files(qt_app, mixed_gui_catalog, tmp_path, monkeypat
 
     monkeypatch.setattr(QMessageBox, "warning", lambda *a, **k: QMessageBox.Yes)
     monkeypatch.setattr(QMessageBox, "information", lambda *a, **k: QMessageBox.Ok)
+    # The preconditions dialog is modal; acknowledge it without opening it.
+    monkeypatch.setattr(window, "_preconditions_accepted", lambda: True)
     window.do_apply()
     assert pump(lambda: window.plan is None and window.progress.value() == 100)
 
@@ -581,6 +583,8 @@ def test_undoing_puts_the_library_back(qt_app, mixed_gui_catalog, monkeypatch):
 
     monkeypatch.setattr(QMessageBox, "warning", lambda *a, **k: QMessageBox.Yes)
     monkeypatch.setattr(QMessageBox, "information", lambda *a, **k: QMessageBox.Ok)
+    # The preconditions dialog is modal; acknowledge it without opening it.
+    monkeypatch.setattr(window, "_preconditions_accepted", lambda: True)
     window.do_apply()
     assert pump(lambda: window.plan is None and window.progress.value() == 100)
     assert window.last_journal, "the run must record where it can be undone from"
@@ -631,4 +635,161 @@ def test_undo_cannot_be_started_while_something_is_running(qt_app):
     assert not window.undo_action.isEnabled()
     window._busy(False)
     assert window.undo_button.isEnabled()
+    window.close()
+
+
+# -- sweeping files the catalog does not know --------------------------------
+
+
+def test_the_sweep_is_off_until_it_is_asked_for(qt_app, mixed_gui_catalog):
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    assert window.orphans_check.isChecked() is False
+    assert window.orphan_edit.isEnabled() is False
+    assert window.collect_settings().collect_orphans is False
+    window.close()
+
+
+def test_switching_the_sweep_on_enables_its_folder_name(qt_app, mixed_gui_catalog):
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.orphans_check.setChecked(True)
+    assert window.orphan_edit.isEnabled()
+    settings = window.collect_settings()
+    assert settings.collect_orphans
+    assert settings.orphan_folder == Settings().orphan_folder
+    window.close()
+
+
+def test_an_empty_folder_name_falls_back_to_the_default(qt_app, mixed_gui_catalog):
+    """An empty name would be refused by validation; the window must not send one."""
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.orphans_check.setChecked(True)
+    window.orphan_edit.setText("   ")
+    assert window.collect_settings().orphan_folder == Settings().orphan_folder
+    window.close()
+
+
+def test_the_sweep_setting_is_remembered(qt_app):
+    window = MainWindow()
+    window.orphans_check.setChecked(True)
+    window.orphan_edit.setText("_ohne_Katalog")
+    window.close()
+
+    again = MainWindow()
+    assert again.orphans_check.isChecked()
+    assert again.orphan_edit.text() == "_ohne_Katalog"
+    assert again.orphan_edit.isEnabled()
+    again.close()
+
+
+# -- the preconditions, acknowledged before the first run --------------------
+
+
+def _preconditions_for(catalog):
+    from pathlib import Path as _Path
+
+    from lrfoldercraft.safety import preconditions
+
+    return preconditions(_Path(catalog), Settings(catalog=str(catalog)))
+
+
+def test_the_dialog_cannot_be_confirmed_without_ticking(qt_app, mixed_gui_catalog):
+    """A confirmation given by reflex is not a confirmation."""
+    from lrfoldercraft.gui.app import PreconditionDialog
+
+    result = _preconditions_for(mixed_gui_catalog.catalog_path)
+    dialog = PreconditionDialog(result, "en")
+    assert dialog.ok_button.isEnabled() is False
+    dialog.acknowledge.setChecked(True)
+    assert dialog.ok_button.isEnabled() is True
+
+
+def test_a_blocking_finding_cannot_be_acknowledged_away(qt_app, mixed_gui_catalog):
+    from lrfoldercraft.gui.app import PreconditionDialog
+    from lrfoldercraft.safety import ERROR, Check, PreflightResult
+
+    blocked = PreflightResult(
+        checks=[Check("folders-connected", ERROR, "root folder missing", "Wurzel fehlt")]
+    )
+    dialog = PreconditionDialog(blocked, "de")
+    assert dialog.acknowledge.isEnabled() is False
+    dialog.acknowledge.setChecked(True)  # cannot take effect
+    assert dialog.ok_button.isEnabled() is False
+
+
+def test_the_dialog_reports_what_was_actually_found(qt_app, mixed_gui_catalog):
+    """The point of it: real numbers, not three recited rules."""
+    result = _preconditions_for(mixed_gui_catalog.catalog_path)
+    names = {check.name for check in result.checks}
+    assert names == {
+        "lightroom-closed",
+        "catalog-version",
+        "folders-connected",
+        "backup-present",
+    }
+    connected = next(c for c in result.checks if c.name == "folders-connected")
+    assert connected.level == "ok"
+    assert "4" in connected.message("en")  # the fixture's four photos
+
+
+def test_apply_stops_when_the_preconditions_are_declined(qt_app, mixed_gui_catalog, monkeypatch):
+    from PySide6.QtWidgets import QMessageBox
+
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.preset_combo.setCurrentText("day")
+    window.do_plan()
+    assert pump(lambda: window.plan is not None)
+
+    before = sorted(p.name for p in mixed_gui_catalog.images_dir.rglob("*") if p.is_file())
+    monkeypatch.setattr(QMessageBox, "warning", lambda *a, **k: QMessageBox.Yes)
+    monkeypatch.setattr(window, "_preconditions_accepted", lambda: False)
+    window.do_apply()
+    window.wait_for_workers()
+
+    after = sorted(p.name for p in mixed_gui_catalog.images_dir.rglob("*") if p.is_file())
+    assert after == before, "declining the preconditions must not start the run"
+    window.close()
+
+
+def test_the_preconditions_are_asked_once_per_catalog(qt_app, mixed_gui_catalog):
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window._acknowledged = str(mixed_gui_catalog.catalog_path)
+    assert window._preconditions_accepted() is True  # no dialog, already given
+    window.close()
+
+
+# -- saying what the tool is -------------------------------------------------
+
+
+def test_the_window_states_its_purpose_without_opening_anything(qt_app):
+    window = MainWindow()
+    text = window.purpose_label.text()
+    assert "Lightroom" in text and "catalog" in text.lower()
+    window.close()
+
+
+def test_the_purpose_line_follows_the_language(qt_app):
+    window = MainWindow(language="de")
+    assert "Bibliothek" in window.purpose_label.text()
+    window.toggle_language()
+    assert "library" in window.purpose_label.text()
+    window.close()
+
+
+def test_about_is_reachable_and_says_the_revision(qt_app, monkeypatch):
+    from PySide6.QtWidgets import QMessageBox
+
+    shown = {}
+    monkeypatch.setattr(QMessageBox, "about", lambda _p, title, text: shown.update(t=text))
+    window = MainWindow()
+    window.show_about()
+    assert REVISION in shown["t"]
+    assert "MIT" in shown["t"]
+    assert "gitlab.com" in shown["t"]
+    # the promise that matters
+    assert "folder column" in shown["t"]
     window.close()

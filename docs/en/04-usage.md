@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r8.0.1 · Build date 2026-08-23**
+**Revision r9.0.0 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -508,6 +508,75 @@ Whatever you choose, `plan` lists every folder it found, what kind it is, what
 was decided and whether that came from a default, a rule, an explicit
 `--folder-action` or your own answer. The JSON export carries the same under
 `folders`.
+
+## Before the first run: the preconditions
+
+Before Apply starts anything, the window states what it actually found about
+the library and asks for a deliberate yes:
+
+```
+Before this run
+  ✓  No Lightroom lock file — the catalog is free.
+  ✓  Catalog schema 18.0.0, a version this revision was verified against.
+  ✓  All 1 root folder(s) holding files exist on disk (51,049 files).
+  ✓  A previous backup of this catalog exists, from 2026-08-23 09:08.
+
+  ☐  I have read this, Lightroom Classic is closed, and I have a backup of my own
+```
+
+The tick box has to be ticked before the button becomes usable, so the
+acknowledgement cannot be given by reflex — and a finding that **blocks** (a
+root folder that does not exist) cannot be acknowledged at all. It is asked
+once per catalog per session.
+
+Same information from the command line: `lrfc info CATALOG` reports the schema
+version and the root folders, and `lrfc plan` runs the full pre-flight.
+
+## What the tool is
+
+**Actions → About LR-FolderCraft** gives the three-sentence version: what it
+does, the promise that only the folder rows and each file's folder column are
+ever written, the revision and build date, and the licence. The purpose of the
+tool is also stated in one line at the top of the window, so it is visible
+without opening anything.
+
+## Files the catalog does not know
+
+A library worked in for years collects them: an export nobody imported, a
+Photoshop round trip, a stale `.xmp` whose raw file was deleted, a stray
+`.png`. Lightroom cannot see them, so a reorganised tree still has odds and
+ends lying about afterwards.
+
+```bash
+lrfc apply CATALOG -s day --collect-orphans
+```
+
+Each source root then gets a folder — `_not-in-catalog` by default,
+`--orphan-folder NAME` to choose — and every such file is moved into it
+**keeping the path it came from**, so nothing collides and the origin stays
+visible:
+
+```
+mobileRAW/raw2021/3Stufig HZ-1239 Kopie.png
+  -> mobileRAW/_not-in-catalog/raw2021/3Stufig HZ-1239 Kopie.png
+```
+
+Nothing is deleted, the moves are journalled like any other, and undoing the
+run puts them back.
+
+**What is never swept:**
+
+| | |
+| --- | --- |
+| Anything the catalog references | from any root, including files this run is about to move |
+| Sidecars of catalogued photos | they belong to their photo and travel with it — recognised from the photo beside them, not from the move, so a second run cannot sweep up what the first one sorted |
+| Lightroom's own files | the catalog, its side files, `*.lrdata` previews, `*.lrcat-data` |
+| The filesystem's scribbles | `.DS_Store`, `Thumbs.db`, AppleDouble `._X` companions |
+| The collection folder itself | and a target tree this run is sorting into |
+
+The sweep is **off by default**: it moves files nobody asked the tool about.
+When it is on, `plan` reports how many were found and lists examples, so it is
+never a surprise.
 
 ## Profiles
 

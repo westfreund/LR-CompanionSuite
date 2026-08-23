@@ -1,6 +1,6 @@
 # Open issues and roadmap
 
-**Revision r8.0.1 · Build date 2026-08-23**
+**Revision r9.0.0 · Build date 2026-08-23**
 
 An honest list of what is not done, not verified, or deliberately left out.
 Each item is a starting point for the next session.
@@ -101,8 +101,9 @@ It exists for inspecting a locked catalog. Nothing stops you passing it to
 Requested on 2026-08-23 and deliberately postponed until after the second test
 run, so the tests are not chasing a moving target. O-21, O-22 and O-24 were
 delivered in r5.0.0 because all three serve the master-catalog run directly.
-To pick up what is left, say "do O-23, O-25 and O-26" — each item below carries
-enough detail to start from.
+Everything on this list has now been delivered; O-26 awaits only a choice
+between the six proposals. The original requirements are kept below each item,
+because the reasoning is worth more than the tick.
 
 ### O-21 · A page about reconnecting a copied library ✔ r5.0.0
 Delivered as [03-before-you-start.md](03-before-you-start.md) /
@@ -134,7 +135,10 @@ Wanted: an explicit recommendation to open the catalog once in the installed
 Lightroom Classic — which reconnects and converts in the same pass — before
 running LR-FolderCraft. Belongs next to O-21.
 
-### O-23 · Make both interfaces state the preconditions
+### O-23 · Make both interfaces state the preconditions ✔ r9.0.0
+Delivered as `safety.preconditions()` plus a dialog that must be ticked, not
+clicked. The original requirement follows.
+
 Wanted: before the first run in a session, the TUI and the GUI should state the
 three preconditions — Lightroom closed, catalog opened once in the installed
 Lightroom, backup present — and require an explicit acknowledgement. Not a
@@ -163,7 +167,10 @@ machine-readable record for undo; this is the one a person reads. Make the
 location configurable and allow it to be turned off, because a read-only or
 full volume must not fail a run.
 
-### O-25 · A short description inside the graphical interface
+### O-25 · A short description inside the graphical interface ✔ r9.0.0
+Delivered as a purpose line at the top of the window and Actions → About. The
+original requirement follows.
+
 The window says what it is only through its title bar. Someone opening it
 without having read the documentation has no statement of what the tool does,
 what it will and will not touch, or where its safety net is.
@@ -175,7 +182,11 @@ repository. Plus a one-line description in the window itself, above the catalog
 field, so the purpose is visible without opening anything. Both languages, from
 the existing `gui/i18n.py` table.
 
-### O-26 · A logo
+### O-26 · A logo ✔ r9.0.0 (proposals)
+Six proposals in `docs/images/logos/`, with a comparison page showing each at
+96 px, 40 px on both grounds and 16 px in a browser tab. Awaiting a choice; the
+export and integration follow. The original requirement follows.
+
 The project has no mark of its own: not in the window, not in the READMEs, not
 as the GitLab project avatar, not as a favicon for the documentation.
 

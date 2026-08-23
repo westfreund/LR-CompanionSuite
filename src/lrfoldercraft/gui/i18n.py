@@ -134,6 +134,75 @@ TEXT: Dict[str, Tuple[str, str]] = {
         "'Gesteuert durch' genannte Einstellung ändern und erneut planen.",
     ),
     "findings_more": ("... and {n:,} more", "... und {n:,} weitere"),
+    "collect_orphans": (
+        "Collect files not in the catalog",
+        "Nicht im Katalog enthaltene Dateien einsammeln",
+    ),
+    "collect_orphans_hint": (
+        "Files lying in the library's folders that Lightroom does not know: "
+        "exports, round trips, stale sidecars. Nothing is deleted -- they are "
+        "moved into one folder, keeping the path they came from, and undoing "
+        "the run puts them back.",
+        "Dateien in den Ordnern der Bibliothek, die Lightroom nicht kennt: "
+        "Exporte, Zwischenstände, verwaiste Sidecars. Nichts wird gelöscht — sie "
+        "wandern in einen Ordner und behalten dabei ihren Herkunftspfad, und das "
+        "Zurücknehmen des Laufs holt sie wieder heraus.",
+    ),
+    "orphan_folder_hint": (
+        "Name of that folder, created below each source root",
+        "Name dieses Ordners, unterhalb jeder Quellwurzel angelegt",
+    ),
+    "purpose": (
+        "Reorganise a Lightroom Classic library's folders — moving the files and "
+        "rewriting the catalog together, so nothing is lost.",
+        "Die Ordner einer Lightroom-Classic-Bibliothek umsortieren — Dateien "
+        "verschieben und Katalog umschreiben in einem Zug, damit nichts verloren "
+        "geht.",
+    ),
+    "about": ("About LR-FolderCraft", "Über LR-FolderCraft"),
+    "about_what": (
+        "Groups the photos of a Lightroom Classic library into a new folder "
+        "structure — by capture date, camera, calendar week, in freely "
+        "combinable levels. The image files are moved on disk and the catalog is "
+        "rewritten in the same operation, so develop settings, virtual copies, "
+        "collections, keywords and history all survive.",
+        "Gruppiert die Fotos einer Lightroom-Classic-Bibliothek in eine neue "
+        "Ordnerstruktur — nach Aufnahmedatum, Kamera, Kalenderwoche, in frei "
+        "kombinierbaren Ebenen. Die Bilddateien werden auf der Platte verschoben "
+        "und der Katalog im selben Zug umgeschrieben, sodass "
+        "Entwicklungseinstellungen, virtuelle Kopien, Sammlungen, Stichwörter "
+        "und Historie erhalten bleiben.",
+    ),
+    "about_promise": (
+        "<b>What it touches:</b> only the folder rows and each file's folder "
+        "column. Nothing else in the catalog is ever written. A verified backup "
+        "is made first, every step is journalled, and any run can be undone.",
+        "<b>Was es anfasst:</b> nur die Ordnerzeilen und die Ordnerspalte jeder "
+        "Datei. Sonst wird im Katalog nichts geschrieben. Zuvor wird eine "
+        "geprüfte Sicherung angelegt, jeder Schritt wird journalisiert, und jeder "
+        "Lauf lässt sich rückgängig machen.",
+    ),
+    "about_licence": (
+        "Licence: MIT or GPL-3.0-or-later, at your choice.",
+        "Lizenz: MIT oder GPL-3.0-or-later, nach Ihrer Wahl.",
+    ),
+    "preconditions_title": ("Before this run", "Vor diesem Lauf"),
+    "preconditions_intro": (
+        "This is what was found about the library. Please read it -- these are "
+        "the things that decide whether the run can succeed:",
+        "Das wurde über die Bibliothek festgestellt. Bitte lesen — davon hängt "
+        "ab, ob der Lauf gelingen kann:",
+    ),
+    "preconditions_ack": (
+        "I have read this, Lightroom Classic is closed, and I have a backup of my own",
+        "Ich habe das gelesen, Lightroom Classic ist geschlossen, und ich habe "
+        "eine eigene Sicherung",
+    ),
+    "preconditions_blocked": (
+        "Something above prevents the run. Put it right first — it cannot be acknowledged away.",
+        "Etwas davon verhindert den Lauf. Bitte zuerst beheben — es lässt sich "
+        "nicht wegbestätigen.",
+    ),
     "menu_actions": ("Actions", "Aktionen"),
     "undo_run": ("Undo a run…", "Lauf rückgängig machen…"),
     "undo_button": ("Undo…", "Rückgängig…"),

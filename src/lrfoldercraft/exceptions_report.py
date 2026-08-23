@@ -225,6 +225,37 @@ def _from_folders(plan: Plan) -> List[Finding]:
             )
         )
 
+    if plan.orphans:
+        found.append(
+            Finding(
+                level=NOTE,
+                category="orphans",
+                count=len(plan.orphans),
+                text_en=(
+                    "file(s) on disk that the catalog does not know, to be collected in {f!r}"
+                ).format(f=settings.orphan_folder),
+                text_de=(
+                    "Datei(en) auf der Platte, die der Katalog nicht kennt, "
+                    "werden in {f!r} gesammelt"
+                ).format(f=settings.orphan_folder),
+                setting="--collect-orphans",
+                current_en="on",
+                current_de="ein",
+                samples=[orphan.source_path for orphan in plan.orphans[:SAMPLE_LIMIT]],
+            )
+        )
+    if plan.orphans_unreadable:
+        found.append(
+            Finding(
+                level=WARNING,
+                category="orphans-unreadable",
+                count=len(plan.orphans_unreadable),
+                text_en="path(s) could not be examined during the sweep",
+                text_de="Pfad(e) konnten beim Durchsuchen nicht gelesen werden",
+                samples=list(plan.orphans_unreadable[:SAMPLE_LIMIT]),
+            )
+        )
+
     undecided = [
         c
         for c in plan.folder_cases

@@ -32,6 +32,7 @@ from .folders import (
     usable_action,
 )
 from .logging_setup import get_logger, step
+from .orphans import Orphan, find_orphans
 from .rules import (
     TokenContext,
     render_structure,
@@ -119,6 +120,8 @@ class PlanStats:
     skipped_filtered: int = 0
     missing_source: int = 0
     sidecars: int = 0
+    orphans: int = 0
+    orphan_bytes: int = 0
     virtual_copies_carried: int = 0
     new_folders: int = 0
     bytes_to_move: int = 0
@@ -168,6 +171,11 @@ class Plan:
     new_folders: List[Tuple[int, Tuple[str, ...]]] = field(default_factory=list)
     source_folder_ids: Tuple[int, ...] = ()
     folder_cases: List[FolderCase] = field(default_factory=list)
+    #: Files found on disk that the catalog does not reference, and where they
+    #: would be collected. Empty unless ``settings.collect_orphans`` is set.
+    orphans: List[Orphan] = field(default_factory=list)
+    #: Directories the sweep could not read, with the reason.
+    orphans_unreadable: List[str] = field(default_factory=list)
     stats: PlanStats = field(default_factory=PlanStats)
     warnings: List[str] = field(default_factory=list)
     created_at: str = ""
@@ -880,6 +888,18 @@ def build_plan(
             folder_segments_seen.add((scope_index, move.target_segments))
 
     plan.new_folders = sorted(folder_segments_seen)
+
+    # Only after every move is known: a sidecar is not an orphan, and neither
+    # is a file this run is about to move.
+    known = {photo.absolute_path for photo in photos}
+    scan = find_orphans(scopes, plan.moves, known, settings)
+    plan.orphans = scan.orphans
+    plan.orphans_unreadable = scan.unreadable
+    plan.stats.orphans = len(scan.orphans)
+    plan.stats.orphan_bytes = scan.total_bytes
+    if scan.orphans:
+        step("Found %d file(s) on disk that the catalog does not know", len(scan.orphans))
+
     _fill_stats(plan)
     _add_warnings(plan)
     step(

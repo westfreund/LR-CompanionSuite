@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r8.0.1 · Build-Datum 2026-08-23**
+**Revision r9.0.0 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -517,6 +517,75 @@ Wie auch immer Sie wählen: `plan` führt jeden gefundenen Ordner auf, welcher
 Art er ist, was entschieden wurde und ob das aus einer Vorgabe, einer Regel,
 einem ausdrücklichen `--folder-action` oder Ihrer eigenen Antwort stammt. Der
 JSON-Export enthält dasselbe unter `folders`.
+
+## Vor dem ersten Lauf: die Voraussetzungen
+
+Bevor *Ausführen* irgendetwas startet, nennt das Fenster, was es über die
+Bibliothek tatsächlich vorgefunden hat, und verlangt ein bewusstes Ja:
+
+```
+Vor diesem Lauf
+  ✓  Keine Lightroom-Sperrdatei — der Katalog ist frei.
+  ✓  Katalogschema 18.0.0 — eine Version, gegen die diese Revision verifiziert wurde.
+  ✓  Alle 1 Wurzelordner mit Dateien existieren auf der Platte (51.049 Dateien).
+  ✓  Eine frühere Sicherung dieses Katalogs von 2026-08-23 09:08 ist vorhanden.
+
+  ☐  Ich habe das gelesen, Lightroom Classic ist geschlossen, und ich habe eine
+     eigene Sicherung
+```
+
+Das Kästchen muss angekreuzt sein, bevor die Schaltfläche benutzbar wird — die
+Bestätigung lässt sich also nicht aus Reflex geben. Und ein Befund, der
+**blockiert** (ein Wurzelordner, den es nicht gibt), lässt sich überhaupt nicht
+bestätigen. Gefragt wird einmal je Katalog und Sitzung.
+
+Dieselbe Auskunft auf der Kommandozeile: `lrfc info KATALOG` nennt Schemaversion
+und Wurzelordner, `lrfc plan` fährt die vollständige Vorabprüfung.
+
+## Was das Werkzeug ist
+
+**Aktionen → Über LR-FolderCraft** gibt die Kurzfassung in drei Sätzen: was es
+tut, das Versprechen, dass nur die Ordnerzeilen und die Ordnerspalte jeder Datei
+geschrieben werden, Revision und Build-Datum, und die Lizenz. Der Zweck steht
+außerdem als eine Zeile ganz oben im Fenster, sichtbar ohne einen Klick.
+
+## Dateien, die der Katalog nicht kennt
+
+Eine über Jahre bearbeitete Bibliothek sammelt sie an: ein nie importierter
+Export, ein Photoshop-Zwischenstand, ein verwaistes `.xmp`, dessen RAW gelöscht
+wurde, ein versprengtes `.png`. Lightroom sieht sie nicht, und deshalb liegt
+nach dem Umsortieren immer noch Kleinkram herum.
+
+```bash
+lrfc apply KATALOG -s day --collect-orphans
+```
+
+Jede Quellwurzel bekommt dann einen Ordner — voreingestellt
+`_not-in-catalog`, wählbar mit `--orphan-folder NAME` — und jede solche Datei
+wandert hinein, **unter Beibehaltung ihres Herkunftspfads**, sodass nichts
+kollidiert und die Herkunft sichtbar bleibt:
+
+```
+mobileRAW/raw2021/3Stufig HZ-1239 Kopie.png
+  -> mobileRAW/_not-in-catalog/raw2021/3Stufig HZ-1239 Kopie.png
+```
+
+Nichts wird gelöscht, die Verschiebungen werden wie alle anderen journalisiert,
+und das Zurücknehmen des Laufs holt sie wieder heraus.
+
+**Was nie eingesammelt wird:**
+
+| | |
+| --- | --- |
+| Alles, worauf der Katalog verweist | aus jeder Wurzel, auch Dateien, die dieser Lauf gerade bewegt |
+| Sidecars katalogisierter Fotos | sie gehören zu ihrem Foto und reisen mit — erkannt am Foto daneben, nicht an der Bewegung, damit ein zweiter Lauf nicht einsammelt, was der erste sortiert hat |
+| Lightrooms eigene Dateien | der Katalog, seine Nebendateien, `*.lrdata`-Vorschauen, `*.lrcat-data` |
+| Das Gekritzel des Dateisystems | `.DS_Store`, `Thumbs.db`, AppleDouble-Begleiter `._X` |
+| Der Sammelordner selbst | und ein Zielbaum, in den dieser Lauf gerade sortiert |
+
+Das Einsammeln ist **standardmäßig aus**: Es bewegt Dateien, nach denen niemand
+das Werkzeug gefragt hat. Ist es an, meldet `plan` die gefundene Zahl mit
+Beispielen — eine Überraschung soll es nie sein.
 
 ## Profile
 

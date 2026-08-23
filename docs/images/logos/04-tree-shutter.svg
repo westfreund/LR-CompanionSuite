@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
+  <title>A folder tree drawn as branching</title>
+  <!-- The structure itself: one root, levels below it. -->
+  <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+    <path d="M14 12v34M14 22h10M14 34h10M14 46h10"/>
+  </g>
+  <g stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M26 8a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".26"/>
+    <path d="M26 30a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".16"/>
+    <path d="M26 42a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".16"/>
+    <path d="M26 18a2 2 0 0 1 2-2h6l2 3h20a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2z"
+          fill="currentColor" fill-opacity=".16"/>
+  </g>
+</svg>

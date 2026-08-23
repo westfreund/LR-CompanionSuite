@@ -12,12 +12,17 @@ import os
 import shutil
 import sqlite3
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from .catalog.db import is_locked, lock_file_for, sidecar_paths
 from .logging_setup import get_logger, step
 from .planner import Plan
+from .version import VERIFIED_CATALOG_VERSIONS
+
+if TYPE_CHECKING:  # pragma: no cover - typing only
+    from .config import Settings
 
 log = get_logger("safety")
 
@@ -429,4 +434,153 @@ def _check_missing_sources(plan: Plan) -> Optional[Check]:
         "stay untouched.".format(n=n, t=plan.stats.total),
         "{n} von {t} Katalogeinträgen verweisen auf nicht vorhandene Dateien; "
         "sie bleiben unangetastet.".format(n=n, t=plan.stats.total),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Preconditions: what an operator must confirm before the first run
+# ---------------------------------------------------------------------------
+
+
+def preconditions(catalog: Path, settings: Settings) -> PreflightResult:
+    """The state of the three things that have to be true before any run.
+
+    Separate from :func:`preflight` on purpose: these are questions about the
+    library and about what the operator has done, and they can be answered
+    before a plan exists -- so an interface can put them up front rather than
+    after the work is already described.
+
+    Each check reports **what was actually found**. A dialog that merely
+    recites three rules gets clicked away; one that says "schema 18.0.0,
+    verified" and "51,049 of 51,049 files found" is worth reading.
+    """
+    catalog = Path(catalog)
+    return PreflightResult(
+        checks=[
+            _check_lock(catalog),
+            _precondition_schema(catalog),
+            _precondition_paths_resolve(catalog),
+            _precondition_backup(catalog, settings),
+        ]
+    )
+
+
+def _roots_with_counts(catalog: Path):
+    """Every root folder with how many files the catalog files under it."""
+    from .catalog.db import open_catalog
+
+    with open_catalog(catalog, allow_unsupported=True, ignore_lock=True) as connection:
+        version = connection.schema_version()
+        rows = connection.query(
+            "SELECT rf.absolutePath AS path, COUNT(f.id_local) AS files "
+            "FROM AgLibraryRootFolder rf "
+            "LEFT JOIN AgLibraryFolder fo ON fo.rootFolder = rf.id_local "
+            "LEFT JOIN AgLibraryFile f ON f.folder = fo.id_local "
+            "GROUP BY rf.id_local, rf.absolutePath"
+        )
+    return version, [(row["path"], row["files"]) for row in rows]
+
+
+def _precondition_schema(catalog: Path) -> Check:
+    """Has this catalog been opened by the installed Lightroom Classic?"""
+    try:
+        version, _roots = _roots_with_counts(catalog)
+    except Exception as error:  # noqa: BLE001 - reported, never raised on
+        return Check(
+            "catalog-version",
+            WARNING,
+            "Could not read the catalog version: {e}".format(e=error),
+            "Katalogversion nicht lesbar: {e}".format(e=error),
+        )
+    if version in VERIFIED_CATALOG_VERSIONS:
+        return Check(
+            "catalog-version",
+            OK,
+            "Catalog schema {v}, a version this revision was verified against.".format(v=version),
+            "Katalogschema {v} -- eine Version, gegen die diese Revision verifiziert wurde.".format(
+                v=version
+            ),
+        )
+    return Check(
+        "catalog-version",
+        WARNING,
+        "Catalog schema {v} has not been verified with this revision. Open the "
+        "catalog once in your installed Lightroom Classic first, so it is "
+        "converted before it is reorganised.".format(v=version),
+        "Katalogschema {v} wurde mit dieser Revision nicht verifiziert. Bitte "
+        "den Katalog zuerst einmal im installierten Lightroom Classic öffnen, "
+        "damit er vor dem Umsortieren konvertiert wird.".format(v=version),
+    )
+
+
+def _precondition_paths_resolve(catalog: Path) -> Check:
+    """Is every root folder connected, or is the library looking elsewhere?"""
+    try:
+        _version, roots = _roots_with_counts(catalog)
+    except Exception as error:  # noqa: BLE001 - reported, never raised on
+        return Check(
+            "folders-connected",
+            WARNING,
+            "Could not examine the root folders: {e}".format(e=error),
+            "Wurzelordner nicht prüfbar: {e}".format(e=error),
+        )
+
+    holding = [(path, count) for path, count in roots if count]
+    broken = [path for path, _count in holding if not Path(path).is_dir()]
+    if broken:
+        names = ", ".join(broken[:3])
+        return Check(
+            "folders-connected",
+            ERROR,
+            "{n} root folder(s) do not exist at the path the catalog records: {p}. "
+            "Reconnect them in Lightroom (right-click the folder, Find Missing "
+            "Folder) before running.".format(n=len(broken), p=names),
+            "{n} Wurzelordner liegen nicht an dem Pfad, den der Katalog nennt: {p}. "
+            "Bitte in Lightroom neu verknüpfen (Rechtsklick auf den Ordner, "
+            "Fehlenden Ordner suchen), bevor der Lauf startet.".format(n=len(broken), p=names),
+        )
+    total = sum(count for _path, count in holding)
+    return Check(
+        "folders-connected",
+        OK,
+        "All {n} root folder(s) holding files exist on disk ({f:,} files).".format(
+            n=len(holding), f=total
+        ),
+        "Alle {n} Wurzelordner mit Dateien existieren auf der Platte ({f:,} Dateien).".format(
+            n=len(holding), f=total
+        ),
+    )
+
+
+def _precondition_backup(catalog: Path, settings: Settings) -> Check:
+    """Is there a copy of this catalog that is not the one about to be changed?"""
+    directory = settings.resolved_backup_dir()
+    stem = catalog.stem
+    try:
+        copies = sorted(
+            (p for p in directory.glob("{s}-*.lrcat".format(s=stem)) if p.is_file()),
+            key=lambda p: p.stat().st_mtime,
+        )
+    except OSError:
+        copies = []
+    if copies:
+        newest = copies[-1]
+        when = datetime.fromtimestamp(newest.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
+        return Check(
+            "backup-present",
+            OK,
+            "A previous backup of this catalog exists, from {w}. This run makes "
+            "its own before touching anything.".format(w=when),
+            "Eine frühere Sicherung dieses Katalogs von {w} ist vorhanden. Dieser "
+            "Lauf legt vor jeder Änderung eine eigene an.".format(w=when),
+        )
+    return Check(
+        "backup-present",
+        WARNING,
+        "No earlier backup of this catalog in {d}. The run makes one before "
+        "touching anything, but a copy of the photos on a different drive is "
+        "yours to make.".format(d=directory),
+        "Keine frühere Sicherung dieses Katalogs in {d}. Der Lauf legt vor jeder "
+        "Änderung eine an, aber eine Kopie der Bilddaten auf einem anderen "
+        "Laufwerk müssen Sie selbst anlegen.".format(d=directory),
     )

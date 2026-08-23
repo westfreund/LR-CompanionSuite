@@ -16,6 +16,64 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [9.0.0] — 2026-08-23 — "Aufgeraeumt"
+
+The last of the deferred backlog, and one new feature.
+
+### Added
+
+- **Files the catalog does not know can be collected** (`--collect-orphans`).
+  A library worked in for years accumulates them: an export nobody imported, a
+  Photoshop round trip, a stale `.xmp` whose raw file was deleted. They are
+  invisible to Lightroom and they are why a reorganised tree still has odds and
+  ends lying about. Each source root gets a folder — `_not-in-catalog` by
+  default — and each such file is moved into it keeping the path it came from,
+  so nothing collides and the origin stays visible. Nothing is deleted, the
+  moves are journalled, and undo puts them back. Off by default, and reported
+  in the findings list when on. Requested by the user.
+
+  Never swept: anything the catalog references from any root, sidecars of
+  catalogued photos, Lightroom's own files (`*.lrdata`, `*.lrcat-data`, the
+  catalog and its side files), `.DS_Store` and AppleDouble companions, the
+  collection folder itself, and a target tree the run is sorting into.
+
+- **The preconditions are stated and must be acknowledged** (O-23). Before
+  Apply starts, the window reports what it actually found — the schema version
+  it read, whether every root folder resolves and with how many files, when the
+  last backup was made — and requires a tick box, not a click. A finding that
+  blocks cannot be acknowledged at all, and the guard is in the rule rather
+  than in whether the box is clickable, because a disabled checkbox can still
+  be ticked from code. Asked once per catalog per session.
+  `safety.preconditions()` answers the same questions without a plan, so any
+  front end can put them up front.
+
+- **The window says what the tool is** (O-25): a purpose line above the catalog
+  field, visible without opening anything, and **Actions → About** with what it
+  does, the promise that only the folder rows and each file's folder column are
+  ever written, the revision, the build date and the licence.
+
+- **Six logo proposals** (O-26) in `docs/images/logos/`, single-colour SVG that
+  takes the surrounding text colour, with a comparison page showing each at
+  96 px, at 40 px on a light and a dark ground, and at 16 px inside a browser
+  tab — the size at which most marks fail and the one a window icon is almost
+  always seen at. Awaiting a choice.
+
+### Fixed
+
+- **A rule pattern found `_extern` only at the top of a tree** — see r8.0.0;
+  the sweep's first nested test found it again from the other side.
+
+- **The sweep would have collected the sidecars of already-sorted photos.** A
+  photo that is already in the right place makes no move, so recognising
+  sidecars from the moves would have left them unaccounted for on a second run.
+  They are now recognised from the catalogued photo they sit beside.
+
+- **The sweep called itself off when sorting in place.** The target root is
+  then the source root, and protecting the target tree from being swept ended
+  the walk before it began.
+
+---
+
 ## [8.0.1] — 2026-08-23
 
 ### Fixed

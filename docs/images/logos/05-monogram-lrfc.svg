@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
+  <title>Monogram: a folder tab over LR</title>
+  <!-- Reads at 16 px because it is two letters and one shape. -->
+  <rect x="5" y="14" width="54" height="40" rx="5"
+        fill="currentColor" opacity=".16"/>
+  <path d="M5 19a5 5 0 0 1 5-5h13l4 5" fill="none" stroke="currentColor"
+        stroke-width="2.5" stroke-linejoin="round"/>
+  <rect x="5" y="14" width="54" height="40" rx="5" fill="none"
+        stroke="currentColor" stroke-width="2.5"/>
+  <text x="32" y="43" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-size="19" font-weight="700" fill="currentColor" letter-spacing="1">LR</text>
+</svg>

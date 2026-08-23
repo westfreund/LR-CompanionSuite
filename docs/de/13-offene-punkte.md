@@ -1,6 +1,6 @@
 # Offene Punkte und Fahrplan
 
-**Revision r8.0.1 · Build-Datum 2026-08-23**
+**Revision r9.0.0 · Build-Datum 2026-08-23**
 
 Eine ehrliche Aufstellung dessen, was nicht erledigt, nicht verifiziert oder
 bewusst ausgelassen ist. Jeder Punkt ist ein Ansatzpunkt für die nächste
@@ -113,8 +113,9 @@ es an `apply` zu übergeben. Man könnte es auf lesende Befehle beschränken.
 Am 23.08.2026 gewünscht und bewusst bis nach dem zweiten Testlauf verschoben,
 damit die Tests kein bewegliches Ziel haben. O-21, O-22 und O-24 wurden in
 r5.0.0 vorgezogen, weil alle drei dem Masterkatalog-Lauf unmittelbar dienen.
-Für den Rest genügt „mach O-23, O-25 und O-26" — jeder Punkt unten enthält
-genug, um damit zu beginnen.
+Alles auf dieser Liste ist inzwischen geliefert; bei O-26 steht nur noch die
+Wahl zwischen den sechs Entwürfen aus. Die ursprünglichen Anforderungen bleiben
+unter jedem Punkt stehen, weil die Begründung mehr wert ist als der Haken.
 
 ### O-21 · Eine Seite zum Neuverknüpfen einer kopierten Bibliothek ✔ r5.0.0
 Geliefert als [03-vorbereitung.md](03-vorbereitung.md) /
@@ -148,7 +149,10 @@ Gewünscht: die ausdrückliche Empfehlung, den Katalog einmal im installierten
 Lightroom Classic zu öffnen — das verknüpft und konvertiert in einem Zug —,
 bevor LR-FolderCraft läuft. Gehört neben O-21.
 
-### O-23 · Beide Oberflächen sollen die Voraussetzungen nennen
+### O-23 · Beide Oberflächen sollen die Voraussetzungen nennen ✔ r9.0.0
+Geliefert als `safety.preconditions()` samt Dialog, der angekreuzt und nicht
+weggeklickt werden muss. Die ursprüngliche Anforderung folgt.
+
 Gewünscht: Vor dem ersten Lauf einer Sitzung sollen TUI und GUI die drei
 Voraussetzungen nennen — Lightroom geschlossen, Katalog einmal im installierten
 Lightroom geöffnet, Sicherung vorhanden — und eine ausdrückliche Bestätigung
@@ -179,7 +183,10 @@ es ist — die maschinenlesbare Grundlage für das Rückgängigmachen; dies hier
 das, was ein Mensch liest. Ort konfigurierbar und abschaltbar machen, denn ein
 schreibgeschütztes oder volles Volume darf keinen Lauf scheitern lassen.
 
-### O-25 · Eine Kurzbeschreibung in der grafischen Oberfläche
+### O-25 · Eine Kurzbeschreibung in der grafischen Oberfläche ✔ r9.0.0
+Geliefert als Zweckzeile oben im Fenster und Aktionen → Über. Die ursprüngliche
+Anforderung folgt.
+
 Das Fenster sagt nur über seine Titelzeile, was es ist. Wer es öffnet, ohne die
 Dokumentation gelesen zu haben, findet keine Aussage darüber, was das Werkzeug
 tut, was es anfasst und was nicht, und wo sein Sicherheitsnetz liegt.
@@ -191,7 +198,11 @@ auf das Repository. Dazu eine einzeilige Beschreibung im Fenster selbst, über
 dem Katalogfeld, damit der Zweck sichtbar ist, ohne etwas zu öffnen.
 Zweisprachig, aus der vorhandenen Tabelle in `gui/i18n.py`.
 
-### O-26 · Ein Logo
+### O-26 · Ein Logo ✔ r9.0.0 (Entwürfe)
+Sechs Entwürfe in `docs/images/logos/`, mit Vergleichsseite in 96 px, 40 px auf
+beiden Gründen und 16 px im Browser-Tab. Die Wahl steht aus; Export und
+Einbindung folgen. Die ursprüngliche Anforderung folgt.
+
 Das Projekt hat kein eigenes Zeichen: weder im Fenster noch in den READMEs,
 noch als GitLab-Projektbild, noch als Favicon der Dokumentation.
 

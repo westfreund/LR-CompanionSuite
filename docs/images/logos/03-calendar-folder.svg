@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="LR-FolderCraft">
+  <title>A folder that is a calendar</title>
+  <!-- Grouping by date, said plainly. -->
+  <path d="M5 15a3 3 0 0 1 3-3h13l4 5h31a3 3 0 0 1 3 3v31a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"
+        fill="currentColor" opacity=".16"/>
+  <path d="M5 15a3 3 0 0 1 3-3h13l4 5h31a3 3 0 0 1 3 3v31a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"
+        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M5 28h54" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <g fill="currentColor">
+    <rect x="13" y="34" width="7" height="6" rx="1.5"/>
+    <rect x="24" y="34" width="7" height="6" rx="1.5"/>
+    <rect x="35" y="34" width="7" height="6" rx="1.5"/>
+    <rect x="46" y="34" width="7" height="6" rx="1.5"/>
+    <rect x="13" y="44" width="7" height="6" rx="1.5"/>
+    <rect x="24" y="44" width="7" height="6" rx="1.5" opacity=".45"/>
+    <rect x="35" y="44" width="7" height="6" rx="1.5" opacity=".45"/>
+  </g>
+</svg>
