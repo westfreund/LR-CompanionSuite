@@ -64,6 +64,10 @@ class RunRecord:
     bytes_moved: int = 0
     backup_path: Optional[str] = None
     success: bool = False
+    #: Set when a reversal begins. A reversal cut short leaves this set and
+    #: :attr:`undone_at` empty, which is the only reliable way to tell -- two
+    #: runs into the same target tree make the paths on disk say nothing.
+    undo_started_at: Optional[str] = None
     #: Set once the run has been reversed, so it is never reversed twice.
     undone_at: Optional[str] = None
     undo_restored: int = 0
@@ -73,6 +77,10 @@ class RunRecord:
     @property
     def can_be_undone(self) -> bool:
         return self.success and self.undone_at is None
+
+    @property
+    def reversal_was_cut_short(self) -> bool:
+        return bool(self.undo_started_at) and not self.undone_at
 
     def describe(self, language: str = "en") -> str:
         when = self.started_at.replace("T", " ")[:16] or self.stamp
@@ -177,6 +185,15 @@ def find_record_for_journal(journal: Path) -> Optional[RunRecord]:
     if directory.name == RUNS_DIRECTORY or not (directory / RUN_FILE).exists():
         return None
     return read_record(directory)
+
+
+def mark_undo_started(record: RunRecord) -> Optional[Path]:
+    """Note that a reversal has begun, before a single file is touched."""
+    record.undo_started_at = datetime.now().isoformat(timespec="seconds")
+    directory = directory_of(record)
+    if not directory.is_dir():
+        return None
+    return write_record(directory, record)
 
 
 def mark_undone(record: RunRecord, restored: int, errors: List[str]) -> Optional[Path]:

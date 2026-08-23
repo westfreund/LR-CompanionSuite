@@ -39,6 +39,7 @@ from .runs import (
     JOURNAL_FILE,
     RunRecord,
     find_record_for_journal,
+    mark_undo_started,
     mark_undone,
     new_run_directory,
     write_record,
@@ -655,6 +656,12 @@ def undo(
             backup = backup or record.get("target")
             catalog = record.get("source")
     result.catalog = catalog or ""
+
+    if run_record is not None:
+        try:
+            mark_undo_started(run_record)
+        except OSError as error:  # pragma: no cover - reported, not fatal
+            log.warning("Could not note the start of the reversal: %s", error)
 
     restored = 0
     for record in reversed(list(completed_moves(records))):

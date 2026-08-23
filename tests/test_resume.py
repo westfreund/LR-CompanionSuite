@@ -154,22 +154,24 @@ def test_putting_files_back_twice_is_harmless(simple_catalog, tmp_path, monkeypa
     assert files_under(simple_catalog) == before
 
 
-def test_an_interrupted_reversal_is_told_apart_from_an_interrupted_run(simple_catalog, tmp_path):
-    """Undo restores the catalog last, so a half-done reversal looks different."""
+def test_moved_back_files_alone_do_not_mean_an_interrupted_reversal(simple_catalog, tmp_path):
+    """The filesystem cannot tell the difference, so it is not asked to.
+
+    Files sitting at their old paths look the same whether a reversal was cut
+    short or another run put them there. Only the run's record knows.
+    """
     plan, settings = make_plan(simple_catalog, tmp_path)
     result = execute(plan, settings)
 
-    # Move a couple of files back by hand, as an interrupted undo would leave them.
-    records = [m for m in plan.moves if m.is_active][:2]
-    for move in records:
+    for move in [m for m in plan.moves if m.is_active][:2]:
         Path(move.source_path).parent.mkdir(parents=True, exist_ok=True)
         os.replace(move.target_path, move.source_path)
 
-    found = inspect(result.journal_path)
-    assert found.state == NEEDS_UNDO
-    assert found.already_back == 2
-    undo(result.journal_path)
-    assert inspect(result.journal_path).state == COMPLETE
+    from lrfoldercraft.runs import read_record
+
+    record = read_record(Path(result.run_directory))
+    assert not record.reversal_was_cut_short
+    assert inspect(result.journal_path, record).state == COMPLETE
 
 
 def test_a_run_that_committed_but_did_not_finish_needs_no_moving(
@@ -219,3 +221,54 @@ def test_a_committed_run_is_never_reverted_by_mistake(simple_catalog, tmp_path, 
         revert_files(found)
         remove_created_directories(found)
     assert files_under(simple_catalog) == after, "nothing may move"
+
+
+def test_a_finished_reversal_is_not_reported_as_interrupted(simple_catalog, tmp_path):
+    """Two runs into the same target tree made a finished reversal look half done.
+
+    The later run recreates the very paths the earlier one left behind, so the
+    filesystem says nothing. It produced a blocking pre-flight error against a
+    library that was perfectly sound, which is worse than no check at all.
+    """
+    plan, settings = make_plan(simple_catalog, tmp_path)
+    first = execute(plan, settings)
+    undo(first.journal_path)
+
+    # A second run puts files back at the same targets the first one used.
+    plan2, settings2 = make_plan(simple_catalog, tmp_path)
+    execute(plan2, settings2)
+
+    reported = [f.journal_path for f in find_interruptions(Path(simple_catalog.catalog_path))]
+    assert first.journal_path not in reported
+
+
+def test_an_interrupted_reversal_is_recorded_not_guessed(simple_catalog, tmp_path, monkeypatch):
+    import lrfoldercraft.executor as executor
+
+    plan, settings = make_plan(simple_catalog, tmp_path)
+    result = execute(plan, settings)
+
+    real = executor.os.replace
+    state = {"n": 0}
+
+    def dying(source, target):
+        if state["n"] >= 2:
+            raise KeyboardInterrupt("died mid-reversal")
+        state["n"] += 1
+        return real(source, target)
+
+    monkeypatch.setattr(executor.os, "replace", dying)
+    with pytest.raises(KeyboardInterrupt):
+        undo(result.journal_path)
+    monkeypatch.undo()
+
+    from lrfoldercraft.runs import read_record
+
+    record = read_record(Path(result.run_directory))
+    assert record.undo_started_at and not record.undone_at
+    assert record.reversal_was_cut_short
+    assert inspect(result.journal_path, record).state == NEEDS_UNDO
+
+    # and finishing it is simply running undo again
+    undo(result.journal_path)
+    assert read_record(Path(result.run_directory)).undone_at

@@ -116,29 +116,34 @@ class Interruption:
         return texts[self.state].format(n=len(self.to_revert))
 
 
-def inspect(journal_path: str | Path) -> Interruption:
-    """Read *journal_path* and work out what state its run is in."""
+def inspect(journal_path: str | Path, record=None) -> Interruption:
+    """Read *journal_path* and work out what state its run is in.
+
+    Pass the run's :class:`~lrfoldercraft.runs.RunRecord` when there is one:
+    whether a reversal was cut short is recorded there and cannot be told from
+    the filesystem.
+    """
     records = read_journal(journal_path)
     events = [r.get("event") for r in records]
     found = Interruption(state=COMPLETE, journal_path=str(journal_path))
 
-    for record in records:
-        if record.get("event") == "run-start":
-            found.catalog = record.get("catalog", "") or found.catalog
-        elif record.get("event") == "backup":
-            found.backup_path = record.get("target")
-            found.catalog = found.catalog or record.get("source", "")
-        elif record.get("event") == "mkdir" and record.get("path"):
-            found.created.append(record["path"])
+    for entry in records:
+        if entry.get("event") == "run-start":
+            found.catalog = entry.get("catalog", "") or found.catalog
+        elif entry.get("event") == "backup":
+            found.backup_path = entry.get("target")
+            found.catalog = found.catalog or entry.get("source", "")
+        elif entry.get("event") == "mkdir" and entry.get("path"):
+            found.created.append(entry["path"])
 
     committed = "catalog-commit" in events
     ended = "run-end" in events
 
     # What is where, right now.
-    for record in records:
-        if record.get("event") != "move-begin":
+    for entry in records:
+        if entry.get("event") != "move-begin":
             continue
-        source, target = record.get("source"), record.get("target")
+        source, target = entry.get("source"), entry.get("target")
         if not source or not target:
             continue
         if os.path.exists(target) and not os.path.exists(source):
@@ -153,9 +158,18 @@ def inspect(journal_path: str | Path) -> Interruption:
     elif not ended:
         found.state = NEEDS_RECORD
     else:
-        # A completed run. If files have started going back, a reversal was cut
-        # short -- undo restores the catalog last, so it never got that far.
-        found.state = NEEDS_UNDO if found.already_back and found.at_target else COMPLETE
+        found.state = COMPLETE
+
+    # An interrupted reversal cannot be read off the paths: two runs into the
+    # same target tree make a finished reversal look like a half-done one,
+    # because the later run has recreated the very paths the earlier one left.
+    # That produced a blocking pre-flight error against a library that was
+    # perfectly sound. Only the run's own record can say.
+    if record is not None:
+        if record.undone_at:
+            found.state = COMPLETE
+        elif record.reversal_was_cut_short:
+            found.state = NEEDS_UNDO
 
     log.info(
         "Journal %s: state=%s, %d to move back, %d already back",
@@ -176,7 +190,7 @@ def find_interruptions(catalog: Path) -> List[Interruption]:
         journal = journal_of(record)
         if not journal.exists():
             continue
-        found = inspect(journal)
+        found = inspect(journal, record)
         if found.needs_work:
             out.append(found)
     return out
