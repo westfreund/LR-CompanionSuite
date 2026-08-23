@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r14.0.1 · Build date 2026-08-23**
+**Revision r15.0.0 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -129,17 +129,42 @@ longer right — normally the journal knows.
 
 ## `lrfc tui`
 
-The interactive interface. Pick a catalog, choose a structure and watch the
-live preview, plan, review the target folders in a table, then apply behind a
-confirmation dialog.
+The interactive interface for a terminal — the one that works over SSH, on a
+machine with no screen, in a session that survives a dropped connection.
+
+It offers the same options as the window and the same safety net: the
+preconditions are shown and must be acknowledged before anything is written,
+past runs are listable, and a run can be reversed from here.
 
 | Key | Action |
 | --- | --- |
 | `Ctrl+L` | load the catalog |
 | `Ctrl+P` | plan |
 | `Ctrl+R` | apply |
+| `Ctrl+Z` | the run history, and undo from it |
 | `F1` | switch between English and German |
 | `Ctrl+Q` | quit |
+| `Esc` | close a dialog, declining it |
+
+Folder rules are typed as one comma separated line, in order, first match
+wins:
+
+```
+_extern=leave, _fineart=relocate, dated+label=refile, *=sort-inside
+```
+
+A table would look nicer, but order is the only thing that matters here and a
+line of text carries it plainly.
+
+Profiles work as they do in the window: type a name, *Save* stores the options,
+*Load* applies them without touching this library's catalog, target or rules.
+
+**Parity is enforced by a test.** `tests/test_parity.py` asserts that every
+option one interface can set, the other can set too, and that any interface
+which writes offers the preconditions, the history and undo. The text interface
+once grew a full apply path while lacking all three, which made it the surface
+with the greatest effect and the smallest safety net — nobody decided that, it
+accumulated one revision at a time.
 
 ## `lrfc presets` / `lrfc tokens` / `lrfc profiles`
 

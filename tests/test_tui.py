@@ -83,10 +83,11 @@ def test_apply_requires_confirmation(simple_catalog):
                 break
         app.action_apply()
         await pilot.pause(0.2)
-        assert type(app.screen).__name__ == "ConfirmScreen"
+        # The preconditions come first, and declining them stops the run.
+        assert type(app.screen).__name__ == "PreconditionScreen"
         app.screen.dismiss(False)
         await pilot.pause(0.2)
-        # nothing was written
+        assert type(app.screen).__name__ != "ConfirmScreen"
         assert (simple_catalog.images_dir / "A0001.CR2").exists()
         return True
 
@@ -222,6 +223,11 @@ def test_escape_declines_the_confirmation(simple_catalog):
                     break
             await pilot.press("ctrl+r")
             await asyncio.sleep(0.3)
+            # Acknowledge the preconditions so the confirmation is reached.
+            app.screen.query_one("#ack").value = True
+            await asyncio.sleep(0.2)
+            app.screen.dismiss(True)
+            await asyncio.sleep(0.4)
             seen["modal"] = type(app.screen_stack[-1]).__name__
             await pilot.press("escape")
             await asyncio.sleep(0.3)
@@ -230,3 +236,90 @@ def test_escape_declines_the_confirmation(simple_catalog):
     asyncio.run(drive())
     assert seen["modal"] == "ConfirmScreen"
     assert seen["after"] != "ConfirmScreen", "escape must dismiss the dialog"
+
+
+# -- the safety net, now present here too ------------------------------------
+
+
+def test_the_preconditions_gate_the_apply(simple_catalog):
+    """Without this the text interface could write with less protection
+    than the window, which is how it shipped for twelve revisions."""
+    seen = {}
+
+    async def steps(app, pilot):
+        app.action_plan()
+        for _ in range(200):
+            await pilot.pause(0.05)
+            if app.plan is not None:
+                break
+        app.action_apply()
+        await pilot.pause(0.3)
+        seen["first"] = type(app.screen).__name__
+        seen["blocked"] = app.screen.query_one("#pre-yes").disabled
+        app.screen.query_one("#ack").value = True
+        await pilot.pause(0.2)
+        seen["after_tick"] = app.screen.query_one("#pre-yes").disabled
+        app.screen.dismiss(False)
+        await pilot.pause(0.2)
+        return True
+
+    assert asyncio.run(_drive(LRFolderCraftApp(catalog=str(simple_catalog.catalog_path)), steps))
+    assert seen["first"] == "PreconditionScreen"
+    assert seen["blocked"] is True, "the button must start unusable"
+    assert seen["after_tick"] is False, "ticking must enable it"
+
+
+def test_the_history_screen_lists_recorded_runs(simple_catalog, tmp_path):
+    from lrfoldercraft.catalog import CatalogReader, open_catalog
+    from lrfoldercraft.config import Settings
+    from lrfoldercraft.executor import execute
+    from lrfoldercraft.planner import build_plan
+
+    settings = Settings(
+        catalog=str(simple_catalog.catalog_path),
+        dry_run=False,
+        structure=("{yyyy}-{mm}-{dd}",),
+        backup_dir=str(tmp_path / "backups"),
+    )
+    with open_catalog(simple_catalog.catalog_path) as conn:
+        plan = build_plan(CatalogReader(conn), settings)
+    execute(plan, settings)
+
+    seen = {}
+
+    async def steps(app, pilot):
+        app.action_history()
+        await pilot.pause(0.3)
+        seen["screen"] = type(app.screen).__name__
+        seen["rows"] = app.screen.query_one("#runs").row_count
+        app.screen.dismiss(None)
+        await pilot.pause(0.2)
+        return True
+
+    assert asyncio.run(_drive(LRFolderCraftApp(catalog=str(simple_catalog.catalog_path)), steps))
+    assert seen["screen"] == "HistoryScreen"
+    assert seen["rows"] == 1
+
+
+def test_the_new_options_reach_the_settings(simple_catalog):
+    from textual.widgets import Checkbox, Input
+
+    seen = {}
+
+    async def steps(app, pilot):
+        app.query_one("#cumulative", Checkbox).value = True
+        app.query_one("#orphans", Checkbox).value = True
+        app.query_one("#orphan-folder", Input).value = "_ohne_Katalog"
+        app.query_one("#exclude-ext", Input).value = "tif, jpg"
+        app.query_one("#rules", Input).value = "_extern=leave, *=consolidate"
+        await pilot.pause(0.1)
+        seen["settings"] = app._collect_settings()
+        return True
+
+    assert asyncio.run(_drive(LRFolderCraftApp(catalog=str(simple_catalog.catalog_path)), steps))
+    s = seen["settings"]
+    assert s.cumulative_dates is True
+    assert s.collect_orphans is True
+    assert s.orphan_folder == "_ohne_Katalog"
+    assert s.exclude_extensions == ("tif", "jpg")
+    assert s.folder_rules == ("_extern=leave", "*=consolidate")

@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r14.0.1 · Build-Datum 2026-08-23**
+**Revision r15.0.0 · Build-Datum 2026-08-23**
 
 Dieses Dokument bewahrt die Anfrage, aus der LR-FolderCraft entstanden ist,
 einen generischen Prompt zur Neuerzeugung eines vergleichbaren Werkzeugs sowie
@@ -369,6 +369,16 @@ pre-flight checks, execute with a progress callback. Then:
   one that says "51,049 of 51,049 files found" is read. Put the refusal of a
   blocking finding in the rule rather than in whether the control is clickable:
   a disabled checkbox can still be ticked from code.
+* **Enforce parity between front ends with a test, from the first day.** Three
+  interfaces over one core is a fine design and a slow trap: every feature
+  lands in whichever one is being worked on, and the others fall behind one
+  revision at a time until nobody notices that the terminal interface can move
+  fifty thousand files but cannot undo them, and shows no preconditions before
+  it does. Nobody decides that. Read the source of each front end, collect the
+  settings it assigns, and fail the build when they differ -- and separately
+  require that any interface which *writes* offers the preconditions, the
+  history and the undo. The check costs half an hour and is the only thing that
+  keeps the promise honest.
 * **Put undo in every front end, not only on the command line.** A rollback
   that exists but cannot be reached from the window the operator actually uses
   is a rollback they will not have when they need it. Reverse the file moves in

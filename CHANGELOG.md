@@ -16,6 +16,39 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [15.0.0] — 2026-08-23 — "Gleichstand"
+
+The text interface is a peer again. It had fallen behind by seven settings and
+six whole capabilities — not through neglect, but one revision at a time, each
+feature landing in the window and nowhere else.
+
+### Added
+
+- **`tests/test_parity.py`, written first and failing on purpose.** It reads
+  the source of both front ends, collects the settings each one assigns, and
+  fails when they differ. Separately it requires that any interface which
+  *writes* offers the preconditions, the history and the undo. Twelve failures
+  on its first run; the rest of this release is making them pass.
+
+- **The safety net in the text interface.** The preconditions are shown before
+  anything is written and must be acknowledged with a tick rather than a click,
+  with a blocking finding refusing the acknowledgement in the rule and not
+  merely by disabling a box. `Ctrl+Z` lists the runs recorded beside the
+  catalog and reverses one. `Esc` closes a dialog by declining it.
+
+  Until now this interface could move fifty thousand files with less protection
+  than either of the others.
+
+- **The seven missing settings**: cumulative dates, orphan collection and its
+  folder name, the extension filters, the root folder to work on, and the rule
+  list — typed as one comma separated line, in order, first match wins.
+
+- **Profiles and the findings list**, so the text interface reports what the
+  plan could not decide alone, each with the option that governs it, exactly as
+  the window does.
+
+---
+
 ## [14.0.1] — 2026-08-23
 
 ### Fixed

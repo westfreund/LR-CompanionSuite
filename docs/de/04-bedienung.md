@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r14.0.1 · Build-Datum 2026-08-23**
+**Revision r15.0.0 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -121,17 +121,46 @@ Vermerk im Journal nicht mehr stimmt; normalerweise weiß das Journal es.
 
 ## `lrfc tui`
 
-Die interaktive Oberfläche: Katalog wählen, Struktur festlegen und die
-Live-Vorschau beobachten, planen, die Zielordner in einer Tabelle prüfen und
-hinter einem Bestätigungsdialog ausführen.
+Die interaktive Oberfläche fürs Terminal — die, die über SSH funktioniert, an
+einem Rechner ohne Bildschirm, in einer Sitzung, die einen Verbindungsabbruch
+übersteht.
+
+Sie bietet dieselben Optionen wie das Fenster und dasselbe Sicherheitsnetz: Die
+Voraussetzungen werden gezeigt und müssen bestätigt werden, bevor etwas
+geschrieben wird, vergangene Läufe sind auflistbar, und ein Lauf lässt sich von
+hier zurücknehmen.
 
 | Taste | Aktion |
 | --- | --- |
 | `Strg+L` | Katalog laden |
 | `Strg+P` | planen |
 | `Strg+R` | ausführen |
+| `Strg+Z` | Verlauf der Läufe, und Zurücknehmen daraus |
 | `F1` | zwischen Englisch und Deutsch wechseln |
 | `Strg+Q` | beenden |
+| `Esc` | Dialog schließen und damit ablehnen |
+
+Ordnerregeln werden als eine kommagetrennte Zeile eingegeben, der Reihe nach,
+erste passende gewinnt:
+
+```
+_extern=leave, _fineart=relocate, dated+label=refile, *=sort-inside
+```
+
+Eine Tabelle sähe hübscher aus, aber hier zählt allein die Reihenfolge, und eine
+Textzeile trägt die unmissverständlich.
+
+Profile arbeiten wie im Fenster: Namen eingeben, *Speichern* legt die Optionen
+ab, *Laden* wendet sie an, ohne Katalog, Ziel oder Regeln dieser Bibliothek
+anzurühren.
+
+**Die Gleichwertigkeit sichert ein Test.** `tests/test_parity.py` fordert, dass
+jede Option, die eine Oberfläche setzen kann, auch die andere setzen kann — und
+dass jede schreibende Oberfläche Voraussetzungen, Verlauf und Rückgängigmachen
+anbietet. Die Textoberfläche hatte einmal einen vollständigen Ausführungspfad
+und keines der drei; damit war sie die Oberfläche mit der größten Wirkung und
+dem kleinsten Sicherheitsnetz. Entschieden hat das niemand, es wuchs Revision
+für Revision.
 
 ## `lrfc presets` / `lrfc tokens` / `lrfc profiles`
 
