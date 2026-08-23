@@ -16,6 +16,23 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [16.1.0] — 2026-08-23
+
+### Changed
+
+- **The history now records every revision.** It had drifted to covering
+  eighteen of thirty-nine, its prose stopping at r6.1.0 while the changelog
+  went on: releasing touches the changelog, and nothing touched the history.
+  Reconstructed from the commits, the changelog and the session record — a
+  one-line entry per revision in both languages, plus the narrative for r7 to
+  r16 and a table of all sixteen runs against real libraries.
+
+- **A test now keeps it current**: the history must name every revision the
+  changelog records as released, and the changelog must name every tag. That is
+  the actual fix; the reconstruction alone would drift again.
+
+---
+
 ## [16.0.1] — 2026-08-23
 
 ### Fixed

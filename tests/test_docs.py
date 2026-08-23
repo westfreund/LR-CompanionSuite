@@ -84,3 +84,40 @@ def test_every_document_carries_the_current_revision(language):
         if "r{v}".format(v=__version__) not in p.read_text(encoding="utf-8")
     ]
     assert not stale, stale
+
+
+# -- the history must not fall behind again ----------------------------------
+
+
+def released_revisions() -> list:
+    """Every version the changelog records as released."""
+    changelog = (DOCS.parent / "CHANGELOG.md").read_text(encoding="utf-8")
+    return sorted(set(re.findall(r"^## \[(\d+\.\d+\.\d+)\]", changelog, re.M)))
+
+
+@pytest.mark.parametrize("language", LANGUAGES)
+def test_the_history_names_every_released_revision(language):
+    """It had drifted to covering eighteen of thirty-nine before anyone looked.
+
+    The changelog says what changed and was kept current because releasing
+    touches it; the history says why and was not, because nothing forced it.
+    This is what forces it.
+    """
+    name = "12-history.md" if language == "en" else "12-historie.md"
+    text = (DOCS / language / name).read_text(encoding="utf-8")
+    missing = [v for v in released_revisions() if "r{v}".format(v=v) not in text]
+    assert not missing, missing
+
+
+def test_the_changelog_names_every_tagged_revision():
+    """A release without a changelog entry is a release nobody can read about."""
+    import subprocess
+
+    tags = subprocess.run(
+        ["git", "tag"], capture_output=True, text=True, cwd=str(DOCS.parent)
+    ).stdout.split()
+    if not tags:  # pragma: no cover - a source checkout without tags
+        pytest.skip("no tags in this checkout")
+    released = set(released_revisions())
+    missing = [t for t in tags if t.lstrip("v") not in released]
+    assert not missing, missing

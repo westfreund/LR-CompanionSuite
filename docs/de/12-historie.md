@@ -1,6 +1,6 @@
 # Projekthistorie
 
-**Revision r16.0.1 · Build-Datum 2026-08-23**
+**Revision r16.1.0 · Build-Datum 2026-08-23**
 
 Der [CHANGELOG](../../CHANGELOG.md) sagt, was sich in jeder Revision geändert
 hat. Dieses Dokument sagt **warum**, und was dazwischen geschah: die getroffenen
@@ -39,6 +39,63 @@ git log -p -- src/lrfoldercraft/planner.py    # das ganze Leben einer Datei
 Der CHANGELOG listet Releases neueste zuerst. Dieses Dokument liest sich
 **vorwärts**, ältestes zuerst, weil es als Erzählung gedacht ist und nicht zum
 Nachschlagen.
+
+---
+
+---
+
+## Jede Revision, der Reihe nach
+
+Neununddreißig Revisionen an einem Tag, vom Kern bis zur Wiederaufnahme. Die
+Zeiten sind die der Auslieferung; ein Name steht dort, wo eine Revision einen
+trägt — nach der Projektregel ist jede Feature-Erweiterung eine Hauptversion,
+und nur die bekommen einen.
+
+Wer wissen will, *was* sich geändert hat, findet es hier in einer Zeile; wer
+wissen will, *warum*, liest die Abschnitte darunter und den
+[CHANGELOG](../../CHANGELOG.md).
+
+| Revision | Zeit | Name | Worum es ging |
+| --- | --- | --- | --- |
+| **r1.0.0** | 16:28 | Daybreak | Der Kern: Katalogleser und -schreiber, Planer, Ausführung, Journal, Vorabprüfungen, CLI. Die Schreibfläche wird auf fünf Anweisungen gegen vier Tabellen festgelegt. |
+| **r1.0.1** | 18:06 |  | AppleDouble-Begleiter `._X` werden mitverschoben. Diese Änderung verursachte den Abbruch beim ersten Echtlauf. |
+| **r1.0.2** | 18:23 |  | Der exFAT-Rückfall war toter Code: `sqlite3.connect()` arbeitet verzögert, der Fehler kam erst bei der ersten Abfrage. Behoben mit einer Prüfabfrage. |
+| **r1.0.3** | 18:30 |  | Nachgemessen, was der Kernel auf exFAT tut: Er verschiebt `._X` selbst. Unter macOS bleibt der Begleiter jetzt liegen, sonst wird er mitgeführt. |
+| **r1.0.4** | 19:42 |  | Die Vorabprüfung nannte `.lrcat-wal` eine veraltete Nebendatei. Falsch und gefährlich: Ein nicht leeres WAL enthält festgeschriebene Transaktionen. |
+| **r1.0.5** | 20:05 |  | Die Ursache, an der Lightroom den Katalog verweigerte: Der ID-Zähler wurde als TEXT statt REAL geschrieben. Speicherklasse wird jetzt gelesen, erhalten und nachgeprüft. |
+| **r1.0.6** | 20:41 |  | Erkennung von Katalogen, die r1.0.0 bis r1.0.4 bereits beschädigt hatten. |
+| **r2.0.0** | 22:19 | Wegweiser | Gewachsene Bibliotheken: Ordnerklassifikation datiert gegen thematisch, Granularitätsregel, und der Entscheidungs-Callback, den die Oberflächen liefern. Der Planer fragt nie selbst. |
+| **r2.0.1** | 22:43 |  | Eine Zielwurzel, die es noch nicht gibt, wird angelegt — genau darum geht es bei „neuer Baum“. |
+| **r3.0.0** | 23:19 | Weitwinkel | Grafische Oberfläche (PySide6/Qt) und Läufe über mehrere Wurzelordner. Über Volumes hinweg: kopieren, per SHA-256 prüfen, löschen. |
+| **r3.0.1** | 00:08 |  | `lrfc` lag nach der Installation nicht im PATH. Das Skript bearbeitet nun die Startdatei der Shell. |
+| **r3.0.2** | 07:02 |  | Das Fenster war höher als ein kleiner Bildschirm. Einstellungen scrollen, die Aktionszeile ist verankert. |
+| **r4.0.0** | 07:29 | Pruefstand | Das Installationsskript prüft jede Komponente durch Importieren und bewirbt nur, was funktioniert. Zuvor hatte es `lrfc gui` ohne PySide6 angeboten. |
+| **r4.0.1** | 07:40 |  | Ein Katalog mit nicht mehr existierendem Wurzelordner wurde als Rechteproblem gemeldet. Jetzt wird der nicht verbundene Pfad benannt. |
+| **r4.0.2** | 08:08 |  | Ein wiederholter `new-tree`-Lauf war keine Nulloperation und rollte sich selbst zurück. Die Prüfung „schon am Ziel“ vergleicht jetzt nur noch Pfade. |
+| **r5.0.0** | 09:26 | Regelwerk | Ordnerregeln, der Platzhalter `{folder_label}` und die Aktion `resort`. 39 Ordner werden zu fünf Zeilen. Die Simulation deckte auf, dass `resort` eine Session über Mitternacht zerriss. |
+| **r6.0.0** | 10:22 | Klartext | Ausnahmen-Bericht: jede Ursache mit Dateizahl, Beispielen und der Option, die sie steuert. Dazu die Projekthistorie und reproduzierbare Screenshots. Gefunden: `--lang de` vor dem Unterbefehl wirkte nicht. |
+| **r6.1.0** | 10:41 |  | Dokumente nach Gewichtung nummeriert, in beiden Sprachen mit denselben Nummern. Die Historie nennt seither ihre eigene Herkunft. |
+| **r7.0.0** | 10:56 | Gedaechtnis | Das Fenster merkt sich seine Einstellungen. Nicht gemerkt werden Einzelentscheidungen (Katalog-IDs) und der Sicherungsschalter. Behoben: Der Zielordner war nicht erreichbar, weil Feld und Knopf gesperrt aussahen. |
+| **r7.1.0** | 11:06 |  | Die Teiler zwischen den Bereichen waren fast unsichtbar. Dazu ein Fehler: Der Protokollbereich bekam keine eigene Größe, seit die Ausnahmen-Tabelle dazukam. |
+| **r8.0.0** | 11:29 | Rueckfahrkarte | Die Aktion `relocate` trägt einen Ordner unverändert hinüber, und das Rückgängigmachen kommt in die GUI. Behoben: Ein Regelmuster traf nur Ordner direkt unter der Wurzel. |
+| **r8.0.1** | 11:50 |  | Die Menüeinträge waren unter macOS unsichtbar: Qt unterstützt dort keine Aktionen direkt an der Menüleiste. Rückgängig steht jetzt zusätzlich als Schaltfläche. |
+| **r9.0.0** | 13:12 | Aufgeraeumt | Katalogfremde Dateien einsammeln, Voraussetzungen bestätigen lassen, Kurzbeschreibung und Über-Dialog, sechs Logo-Entwürfe. Zwei Ausnahmen des Einsammelns fand erst der Test. |
+| **r10.0.0** | 13:50 | Signet | Die Marke, in zwei Schnitten und mit gezeichneten Buchstaben. Dabei: `logo-small.svg` zeichnete nichts, weil ein doppelter Bindestrich im XML-Kommentar stand. |
+| **r10.1.0** | 16:17 |  | Die Marke war unsichtbar: macOS zeigt keine Symbole in Fenstertitelleisten. Sie steht jetzt im Fenster. |
+| **r11.0.0** | 16:33 | Vollstaendig | Kumulative Datumsebenen und die Aktion `refile`. Dazu ein Test, der jede Aktion, jeden Platzhalter und jeden Schalter in beiden Sprachbäumen einfordert — er fand sofort drei undokumentierte Schalter. |
+| **r12.0.0** | 17:10 | Arbeitsweise | Ein Schalter für die häufigste Ordnerentscheidung, und Profile, die nur noch die Arbeitsweise tragen: kein Katalog, kein Ziel, keine Regeln, keine Notausgänge. |
+| **r13.0.0** | 17:20 | Laufakte | Eine Ordnerakte je Lauf, neben dem Katalog. Verlauf, und ein Lauf lässt sich nur einmal zurücknehmen. Behoben: Zwei Läufe in derselben Sekunde teilten sich den Ordner. |
+| **r13.0.1** | 17:33 |  | `leave` ließ unter `new-tree` nichts liegen — es war identisch mit `relocate`, sobald die Zielwurzel abwich. |
+| **r13.0.2** | 18:31 |  | Drei der vier Tastenkürzel der TUI feuerten nie; Textual belegt `ctrl+p` mit Vorrang. Escape schloss den Bestätigungsdialog nicht. |
+| **r13.0.3** | 18:42 |  | Eine bewusste Verweigerung wurde als Absturz gemeldet, mit Rückverfolgung und der Aufschrift „Unexpected error“. |
+| **r13.0.4** | 19:03 |  | Die Laufakte nannte die Regeln nicht, die den Lauf geformt hatten — sie übernahm die Ausschlussliste der Profile. Für eine Aufzeichnung ist das falsch. |
+| **r14.0.0** | 19:07 | Umschrift | ASCII-Namen schreiben Umlaute aus statt sie wegzuwerfen. `Straße` war zu `Strae` geworden. Der vorhandene Test hatte das falsche Ergebnis als Sollzustand festgeschrieben. |
+| **r14.0.1** | 20:33 |  | Die Umschrift lief ins Leere: macOS liefert Dateinamen zerlegt, die Zeichentabelle traf nie. Betraf ebenso den Vergleich von Regelmustern. |
+| **r15.0.0** | 21:26 | Gleichstand | Die Textoberfläche wird gleichwertig: sieben fehlende Einstellungen, Voraussetzungen, Verlauf, Rückgängig, Profile. Ein Gleichstands-Test verhindert das erneute Auseinanderlaufen. |
+| **r15.0.1** | 21:46 |  | `refile` wiederholte einen Zusatztext, den die Struktur bereits gesetzt hatte: `2026-06-18 Voelki Voelki`. |
+| **r15.0.2** | 22:00 |  | Ein überholter Plan konnte der ausgeführte werden. Der erste Behebungsversuch war schlimmer: Ein Lambda um den Slot machte die Verbindung direkt statt eingereiht, und Widgets entstanden im Arbeitsthread. |
+| **r16.0.0** | 22:17 | Wiederaufnahme | Ein abgebrochener Lauf lässt sich abschließen. Die Richtung ergibt sich aus der Abbruchstelle, nicht aus einer Vermutung. Ein neuer Lauf wird verweigert, solange einer offen ist. |
+| **r16.0.1** | 22:37 |  | Eine abgeschlossene Rücknahme wurde als abgebrochen gemeldet, weil ein späterer Lauf dieselben Pfade angelegt hatte. Der Fehlalarm blockierte gesunde Bibliotheken. |
 
 ---
 
@@ -318,21 +375,85 @@ führt.
 
 ---
 
-## Was die echten Tests gezeigt haben
+## 23.08.2026, Nachmittag bis Nacht — was das Benutzen zutage fördert
 
-| Datum | Bibliothek | Fotos | Ergebnis |
-| --- | --- | --- | --- |
-| 22.08.2026 | `2019.lrcat` | 9.489 | Abbruch bei Datei 850 — AppleDouble-Kollision |
-| 22.08.2026 | `2019.lrcat` | 9.489 | Gelaufen, geprüft, **Lightroom verweigerte den Katalog** — Zähler als TEXT geschrieben |
-| 22.08.2026 | `2019.lrcat` | 9.489 | Gelaufen, geprüft, **Lightroom öffnete ihn**, Bilder selektierbar |
-| 23.08.2026 | `2019.lrcat` | 9.489 | `Kamera/Jahr/Monat/Tag` über die GUI, **geöffnet, danach Foto bearbeitet** |
-| offen | `Masterkatalog.Neu.lrcat` | 51.049 | Nur simuliert; muss vorher verknüpft werden |
+Von r7 bis r16 kam kaum eine Revision aus einer Planung. Fast jede entstand,
+weil der Auftraggeber das Werkzeug benutzte und etwas nicht stimmte.
 
-Drei der vier Mängel, die zählten, wurden durch Läufe gegen eine echte
-Bibliothek gefunden, keiner durch die Testsuite. Die Aufgabe der Suite ist es,
-sie behoben zu halten.
+**Was die Oberfläche nicht hergab.** Der Zielordner war nicht erreichbar, weil
+Feld und Schaltfläche gesperrt *aussahen* (r7.0.0). Die Teiler zwischen den
+Bereichen waren praktisch unsichtbar (r7.1.0). Die Menüeinträge fehlten unter
+macOS ganz, weil Qt dort keine Aktionen direkt an der Menüleiste unterstützt
+— damit war das eben erst eingebaute Rückgängigmachen unerreichbar (r8.0.1).
+Und die frisch gewählte Marke war nirgends zu sehen, weil macOS keine Symbole
+in Fenstertitelleisten zeigt (r10.1.0). Vier Mal dasselbe Muster: gebaut,
+vorhanden, unbenutzbar.
+
+**Was erst echte Daten zeigten.** Ein Regelmuster traf nur Ordner direkt unter
+der Wurzel (r8.0.0). `leave` ließ unter `new-tree` nichts liegen, weil es
+identisch mit `relocate` war (r13.0.1). Die Laufakte nannte die Regeln nicht,
+die den Lauf geformt hatten — das Ergebnis war aus der Aufzeichnung nicht
+erklärbar (r13.0.4). Aus `Straße` wurde `Strae`, das ß verschwand ersatzlos
+(r14.0.0). Und die Behebung dafür lief ins Leere, weil macOS Dateinamen zerlegt
+liefert und die Zeichentabelle nie traf (r14.0.1).
+
+**Zwei Tests, die das Falsche festhielten.** Der ASCII-Test behauptete
+`"Grun Strae"` als Sollzustand — er hat den Fehler nicht gefunden, sondern
+festgeschrieben. Und der Test zur Umschrift war mit einem Quelltext-Literal
+geschrieben, das die zerlegte Form gar nicht erzeugen kann.
+
+**Und Behebungen, die schlimmer waren als der Fehler.** Um einen überholten
+Plan abzuweisen, reichte ich eine Kennung per Lambda um den Slot — damit verlor
+die Verbindung ihren QObject-Empfänger, Qt machte sie direkt statt eingereiht,
+und Widgets entstanden im Arbeitsthread. Die Ordnerentscheidungen funktionierten
+danach stumm nicht mehr (r15.0.2). Und der erste Erkenner für abgebrochene Läufe
+las den Zustand aus Pfaden; ein späterer Lauf ins selbe Ziel machte daraus einen
+Fehlalarm, der gesunde Bibliotheken blockierte (r16.0.1).
+
+**Wächter statt Vorsätze.** Dreimal war die Antwort nicht eine Behebung, sondern
+eine Prüfung, die den Rückfall unmöglich macht: dass jede Aktion, jeder
+Platzhalter und jeder Schalter in beiden Sprachbäumen steht (r11.0.0); dass
+beide Oberflächen dieselben Einstellungen setzen können und jede schreibende
+Oberfläche Voraussetzungen, Verlauf und Rückgängig anbietet (r15.0.0); und dass
+diese Historie jede ausgelieferte Revision nennt.
+
+**Zuletzt der Abbruch.** Beim automatisierten Steuern der Oberfläche beendete
+ich selbst einen Prozess mitten in einer Rücknahme: 27.660 Dateien zurück,
+23.050 noch am neuen Ort. Reparabel, weil der Katalog zuletzt zurückgespielt
+wird — aber nichts im Werkzeug sagte es oder half. Daraus wurde r16.0.0.
+
 
 ---
+
+## Was die echten Tests gezeigt haben
+
+Alle Läufe gegen `Masterkatalog.Neu.lrcat`, 51.049 Fotos, 2,36 TB, sofern nicht
+anders vermerkt.
+
+| Datum | Bibliothek | Was gefahren wurde | Ergebnis |
+| --- | --- | --- | --- |
+| 22.08. | `2019.lrcat`, 9.489 | erster Echtlauf | Abbruch bei Datei 850 — AppleDouble-Kollision |
+| 22.08. | `2019.lrcat` | Wiederholung | gelaufen und geprüft, **Lightroom verweigerte den Katalog** |
+| 22.08. | `2019.lrcat` | nach r1.0.5 | gelaufen, **Lightroom öffnete**, Bilder selektierbar |
+| 23.08. | `2019.lrcat` | `Kamera/Jahr/Monat/Tag` über die GUI | geöffnet, danach Foto bearbeitet |
+| 23.08. 11:40 | Masterkatalog | `{yyyy}/{mm}/{dd}`, CLI | 51.049 verschoben, Lightroom öffnete, zurückgenommen |
+| 23.08. 16:52 | Masterkatalog | kumulative Datumsebenen | geprüft, zurückgenommen |
+| 23.08. 17:34 | Masterkatalog | alle vier Ordneraktionen zugleich, Waisen | geprüft, zurückgenommen |
+| 23.08. 18:50 | Masterkatalog | GUI mit Einzelentscheidungen | geprüft, zurückgenommen |
+| 23.08. 20:25 | Masterkatalog | GUI, ASCII-Namen | zeigte, dass die Umschrift nicht griff |
+| 23.08. 21:05 | Masterkatalog | GUI nach r14.0.1 | `Voelki` korrekt, zurückgenommen |
+| 23.08. 21:35 | Masterkatalog | **TUI**, schreibend | 50.709 verschoben, über `Strg+Z` zurückgenommen |
+| 23.08. 21:40 | Masterkatalog | **CLI**, `{folder_label}` + `refile` | deckte die Verdopplung auf |
+| 23.08. 22:24 | Masterkatalog | **GUI** nach r15.0.2 | geprüft, zurückgenommen |
+| 23.08. 22:31 | Masterkatalog | CLI, **nach 35 s abgeschossen** | 13.605 bewegt, `resume` stellte alles zurück |
+| 23.08. 22:41 | Masterkatalog | **TUI** nach r16.0.1 | geprüft, über `Strg+Z` zurückgenommen |
+| 23.08. 22:46 | Masterkatalog | TUI, **nach 45 s abgeschossen** | über `Strg+E` aus der TUI wiederaufgenommen |
+
+Jeder Zyklus endete bitidentisch am Ausgangszustand: zehn Katalogtabellen, alle
+Pfade und alle 51.063 Dateien auf der Platte.
+
+**Die meisten Fehler, die zählten, fanden echte Läufe, nicht die Testsuite.**
+Deren Aufgabe ist es, sie behoben zu halten — inzwischen mit 555 Tests.
 
 ## Siehe auch
 

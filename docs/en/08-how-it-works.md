@@ -1,6 +1,6 @@
 # How it works
 
-**Revision r16.0.1 · Build date 2026-08-23**
+**Revision r16.1.0 · Build date 2026-08-23**
 
 ## Why the catalog has to be edited directly
 

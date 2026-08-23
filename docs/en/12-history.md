@@ -1,6 +1,6 @@
 # Project history
 
-**Revision r16.0.1 · Build date 2026-08-23**
+**Revision r16.1.0 · Build date 2026-08-23**
 
 The [CHANGELOG](../../CHANGELOG.md) says what changed in each revision. This
 document says **why**, and what happened in between: the decisions taken, the
@@ -36,6 +36,62 @@ git log -p -- src/lrfoldercraft/planner.py    # one file's whole life
 
 The CHANGELOG lists releases newest first. This document reads **forwards**,
 oldest first, because it is meant to be read as a story rather than looked up.
+
+---
+
+---
+
+## Every revision, in order
+
+Thirty-nine revisions in a day, from the core to resumption. The times are when
+each was released; a name appears where a revision carries one, since the
+project rule makes every feature extension a major version and only those get
+named.
+
+For *what* changed, one line each is here; for *why*, read the sections below
+and the [CHANGELOG](../../CHANGELOG.md).
+
+| Revision | Time | Name | What it was about |
+| --- | --- | --- | --- |
+| **r1.0.0** | 16:28 | Daybreak | The core: catalog reader and writer, planner, executor, journal, pre-flight checks, CLI. The write surface is fixed at five statements against four tables. |
+| **r1.0.1** | 18:06 |  | AppleDouble companions `._X` are moved along. This change caused the first live run to abort. |
+| **r1.0.2** | 18:23 |  | The exFAT fallback was dead code: `sqlite3.connect()` is lazy, so the failure came only at the first query. Fixed with a probe query. |
+| **r1.0.3** | 18:30 |  | Measured what the kernel does on exFAT: it moves `._X` itself. On macOS the companion is now left alone; elsewhere it travels along. |
+| **r1.0.4** | 19:42 |  | Pre-flight called `.lrcat-wal` a stale side file. Wrong and dangerous: a non-empty write-ahead log holds committed transactions. |
+| **r1.0.5** | 20:05 |  | The cause of Lightroom refusing the catalog: the id counter was written as TEXT instead of REAL. The storage class is now read, preserved and verified. |
+| **r1.0.6** | 20:41 |  | Detection of catalogs already damaged by r1.0.0 to r1.0.4. |
+| **r2.0.0** | 22:19 | Wegweiser | Grown libraries: folder classification, dated versus topic, a granularity rule, and the decision callback front ends supply. The planner never prompts. |
+| **r2.0.1** | 22:43 |  | A target root that does not exist yet is created, which is the whole point of a new tree. |
+| **r3.0.0** | 23:19 | Weitwinkel | The graphical interface (PySide6/Qt) and runs spanning several root folders. Across volumes: copy, verify by SHA-256, delete. |
+| **r3.0.1** | 00:08 |  | `lrfc` was not on PATH after installing. The installer now edits the shell startup file. |
+| **r3.0.2** | 07:02 |  | The window was taller than a small screen. Settings scroll and the action row is pinned. |
+| **r4.0.0** | 07:29 | Pruefstand | The installer verifies each component by importing it and advertises only what works. It had been offering `lrfc gui` without PySide6. |
+| **r4.0.1** | 07:40 |  | A catalog whose root folder no longer exists was reported as a permissions problem. The disconnected path is now named. |
+| **r4.0.2** | 08:08 |  | A repeated new-tree run was not a no-op and rolled itself back. The already-in-place check now compares paths only. |
+| **r5.0.0** | 09:26 | Regelwerk | Folder rules, the `{folder_label}` token and the `resort` action. Thirty-nine folders become five lines. Simulation revealed that `resort` tore a session that ran past midnight. |
+| **r6.0.0** | 10:22 | Klartext | The findings report: each cause with its file count, examples and the option that governs it. Plus the project history and reproducible screenshots. Found: `--lang de` before the subcommand had no effect. |
+| **r6.1.0** | 10:41 |  | Documents numbered by weight, the same numbers in both languages. The history now states its own provenance. |
+| **r7.0.0** | 10:56 | Gedaechtnis | The window remembers its settings. Not remembered: per-folder decisions (catalog ids) and the backup switch. Fixed: the target folder was unreachable because field and button looked disabled. |
+| **r7.1.0** | 11:06 |  | The dividers between sections were nearly invisible. Also fixed: the log section had no size of its own since the findings table arrived. |
+| **r8.0.0** | 11:29 | Rueckfahrkarte | The `relocate` action carries a folder across unchanged, and undo reaches the window. Fixed: a rule pattern matched only folders directly below the root. |
+| **r8.0.1** | 11:50 |  | The menu entries were invisible on macOS: Qt does not support actions directly on the menu bar there. Undo is now also a button. |
+| **r9.0.0** | 13:12 | Aufgeraeumt | Collect files not in the catalog, acknowledge the preconditions, a purpose line and About box, six logo proposals. Two of the sweep's exclusions were found only by testing. |
+| **r10.0.0** | 13:50 | Signet | The mark, in two cuts with drawn letters. On the way: `logo-small.svg` drew nothing, because of a double hyphen inside an XML comment. |
+| **r10.1.0** | 16:17 |  | The mark was invisible: macOS shows no icon in a window title bar. It is now inside the window. |
+| **r11.0.0** | 16:33 | Vollstaendig | Cumulative date levels and the `refile` action. Plus a test requiring every action, token and flag in both language trees; it found three undocumented flags at once. |
+| **r12.0.0** | 17:10 | Arbeitsweise | A switch for the commonest folder decision, and profiles that carry the way of working only: no catalog, no target, no rules, no escape hatches. |
+| **r13.0.0** | 17:20 | Laufakte | One record folder per run, beside the catalog. A history, and a run can be undone only once. Fixed: two runs in the same second shared a folder. |
+| **r13.0.1** | 17:33 |  | `leave` left nothing alone under new-tree: it was identical to `relocate` as soon as the target root differed. |
+| **r13.0.2** | 18:31 |  | Three of the four TUI shortcuts never fired; Textual claims `ctrl+p` with priority. Escape did not close the confirmation dialog. |
+| **r13.0.3** | 18:42 |  | A deliberate refusal was reported as a crash, with a traceback and the words 'Unexpected error'. |
+| **r13.0.4** | 19:03 |  | The run record did not name the rules that shaped the run: it reused the profile's exclusion list, which is wrong for a record. |
+| **r14.0.0** | 19:07 | Umschrift | ASCII names spell out umlauts instead of discarding them. `Straße` had become `Strae`. The existing test had enshrined the wrong output as correct. |
+| **r14.0.1** | 20:33 |  | The romanisation did nothing: macOS hands back decomposed filenames, so the character map never matched. The same blindness affected rule patterns. |
+| **r15.0.0** | 21:26 | Gleichstand | The text interface becomes a peer: seven missing settings, preconditions, history, undo, profiles. A parity test prevents the drift recurring. |
+| **r15.0.1** | 21:46 |  | `refile` repeated a label the structure had already placed: `2026-06-18 Voelki Voelki`. |
+| **r15.0.2** | 22:00 |  | A superseded plan could become the one that ran. The first attempt at fixing it was worse: a lambda around the slot made the connection direct rather than queued, and widgets were built on the worker thread. |
+| **r16.0.0** | 22:17 | Wiederaufnahme | A run cut short can be finished. The direction follows from where it stopped, not from a guess. A new run is refused while one is unfinished. |
+| **r16.0.1** | 22:37 |  | A completed reversal was reported as interrupted, because a later run had recreated the same paths. The false positive blocked sound libraries. |
 
 ---
 
@@ -292,21 +348,83 @@ it, because the master catalog happens to keep `_extern` at the top.
 
 ---
 
-## What the real tests have shown
+## 2026-08-23, afternoon to night — what using it turns up
 
-| Date | Library | Photos | Result |
-| --- | --- | --- | --- |
-| 2026-08-22 | `2019.lrcat` | 9,489 | Aborted at file 850 — AppleDouble collision |
-| 2026-08-22 | `2019.lrcat` | 9,489 | Ran, verified, **Lightroom refused the catalog** — id counter written as TEXT |
-| 2026-08-22 | `2019.lrcat` | 9,489 | Ran, verified, **Lightroom opened it**, photos selectable |
-| 2026-08-23 | `2019.lrcat` | 9,489 | `camera/year/month/day` via the GUI, **opened, photo edited afterwards** |
-| pending | `Masterkatalog.Neu.lrcat` | 51,049 | Simulated only; needs reconnecting first |
+From r7 to r16 barely a revision came out of a plan. Nearly every one existed
+because the user was using the tool and something was wrong.
 
-Three of the four defects that mattered were found by running against a real
-library, and none of them by the test suite. The suite's job is to keep them
-fixed.
+**What the interface would not give up.** The target folder could not be
+reached, because field and button *looked* disabled (r7.0.0). The dividers
+between sections were all but invisible (r7.1.0). The menu entries were missing
+entirely on macOS, where Qt does not support actions directly on the menu bar
+— which made the undo just built unreachable (r8.0.1). And the newly chosen
+mark was nowhere to be seen, because macOS shows no icon in a window title bar
+(r10.1.0). Four times the same shape: built, present, unusable.
+
+**What only real data showed.** A rule pattern matched only folders directly
+below the root (r8.0.0). `leave` left nothing alone under new-tree, being
+identical to `relocate` (r13.0.1). The run record did not name the rules that
+had shaped the run, so the result could not be explained from it (r13.0.4).
+`Straße` became `Strae`, the sharp s vanishing outright (r14.0.0). And the fix
+for that did nothing, because macOS hands back decomposed filenames and the
+character map never matched (r14.0.1).
+
+**Two tests that enshrined the wrong answer.** The ASCII test asserted
+`"Grun Strae"` as correct: it had not caught the defect, it had recorded it.
+And the test for the romanisation used a source literal, which cannot produce
+the decomposed form at all.
+
+**And fixes worse than the fault.** To discard a superseded plan I passed a
+ticket through a lambda around the slot, which removed the QObject receiver, so
+Qt made the connection direct rather than queued and widgets were built on the
+worker thread. The folder decisions silently stopped working (r15.0.2). And the
+first detector for interrupted runs read the state from paths; a later run into
+the same target turned that into a false positive that blocked sound libraries
+(r16.0.1).
+
+**Guards rather than good intentions.** Three times the answer was not a fix
+but a check that makes the regression impossible: that every action, token and
+flag appears in both language trees (r11.0.0); that both interfaces can set the
+same settings and every writing interface offers preconditions, history and
+undo (r15.0.0); and that this history names every released revision.
+
+**Finally, the interruption.** Driving the window from a script I killed a
+process partway through a reversal: 27,660 files back, 23,050 still at their
+new paths. Recoverable, because the catalog is restored last — but nothing in
+the tool said so or helped. That became r16.0.0.
+
 
 ---
+
+## What the real tests have shown
+
+All runs against `Masterkatalog.Neu.lrcat`, 51,049 photos, 2.36 TB, unless
+noted otherwise.
+
+| Date | Library | What was run | Result |
+| --- | --- | --- | --- |
+| 22 Aug | `2019.lrcat`, 9,489 | first live run | aborted at file 850 — AppleDouble collision |
+| 22 Aug | `2019.lrcat` | repeated | ran and verified, **Lightroom refused the catalog** |
+| 22 Aug | `2019.lrcat` | after r1.0.5 | ran, **Lightroom opened it**, photos selectable |
+| 23 Aug | `2019.lrcat` | `camera/year/month/day` via the window | opened, a photo edited afterwards |
+| 23 Aug 11:40 | master catalog | `{yyyy}/{mm}/{dd}`, command line | 51,049 moved, Lightroom opened, undone |
+| 23 Aug 16:52 | master catalog | cumulative date levels | verified, undone |
+| 23 Aug 17:34 | master catalog | all four folder actions at once, orphans | verified, undone |
+| 23 Aug 18:50 | master catalog | window, with per-folder decisions | verified, undone |
+| 23 Aug 20:25 | master catalog | window, ASCII names | showed the romanisation was not firing |
+| 23 Aug 21:05 | master catalog | window after r14.0.1 | `Voelki` correct, undone |
+| 23 Aug 21:35 | master catalog | **text interface**, writing | 50,709 moved, undone via `Ctrl+Z` |
+| 23 Aug 21:40 | master catalog | **command line**, `{folder_label}` + `refile` | exposed the doubled label |
+| 23 Aug 22:24 | master catalog | **window** after r15.0.2 | verified, undone |
+| 23 Aug 22:31 | master catalog | command line, **killed after 35 s** | 13,605 moved, `resume` put them all back |
+| 23 Aug 22:41 | master catalog | **text interface** after r16.0.1 | verified, undone via `Ctrl+Z` |
+| 23 Aug 22:46 | master catalog | text interface, **killed after 45 s** | resumed from within it via `Ctrl+E` |
+
+Every cycle ended byte-identical to where it started: ten catalog tables, every
+path, and all 51,063 files on disk.
+
+**Most of the defects that mattered were found by real runs, not by the test
+suite.** Its job is to keep them fixed — 555 tests by now.
 
 ## See also
 

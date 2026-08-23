@@ -1,6 +1,6 @@
 # Architektur
 
-**Revision r16.0.1 · Build-Datum 2026-08-23**
+**Revision r16.1.0 · Build-Datum 2026-08-23**
 
 ## Leitregel
 
