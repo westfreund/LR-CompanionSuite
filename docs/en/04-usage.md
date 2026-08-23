@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r7.0.0 · Build date 2026-08-23**
+**Revision r7.1.0 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -289,12 +289,45 @@ One window, top to bottom:
 | **Target** | below the current folder, or into a new folder chosen with the system dialog — its *New Folder* button creates one, and a path that does not exist yet is created during the run |
 | **Folder structure** | a preset, or your own template, with a live preview that updates as you type, and a Placeholders button listing all 25 |
 | **Options** | name conflicts, photos without a date, and the three decisions about existing folders, plus sidecars, catalog backup and ASCII names |
-| **Folders found** | one row per folder with its kind, photo count and a dropdown for its decision — changing one re-plans immediately |
+| **Needs your answer** | one row per cause with the file count, the option that governs it and that option's current value — selecting a row lists the files it concerns |
+| **Folders found** | the rule list, and below it one row per folder with its kind, photo count, the rule that decided it and a dropdown — changing one re-plans immediately |
 | **Buttons** | Plan changes nothing; Apply asks for confirmation first |
 | **Progress** | a bar and a counter during the run, and the full result afterwards |
 | **Log** | what happened, including every warning from the pre-flight checks |
 
 The menu bar switches between English and German at any time.
+
+### The sections can be pulled open — important
+
+Between the four large sections — **settings**, **Needs your answer**,
+**Folders found** and **Log** — sits a **divider**. It is easy to miss: a thin
+horizontal line at the **bottom edge of a section**, formerly just a few grey
+dots.
+
+```
+┌─ Settings ──────────────────────────────┐
+│  Catalog, Source, Target, Structure …   │   ← scrolls within itself
+└─────────────────────────────────────────┘
+ ────────────────────────────────────────      ← divider: drag here
+┌─ Needs your answer ─────────────────────┐
+```
+
+The pointer turns into a double arrow over a divider, and a tooltip says what
+it does. With it:
+
+- **Dragging** gives the section above more or less room.
+- **Dragging it fully shut** hides a section. It is not gone — the divider
+  stays, and pulling it back open brings the section out again. If you have no
+  use for the log, that is room won for the folder table.
+- The sizes you set are **remembered** and restored at the next start.
+
+The **settings** section additionally has a **scrollbar of its own**: on a
+small screen Target, Folder structure and Options start below the visible edge
+and are reached by scrolling *inside* the section — or by dragging the divider
+below it downwards.
+
+So if a table looks cut off or a setting seems to be missing: the section is
+too small, not empty.
 
 The window fits small screens: it opens no larger than the space the screen
 offers, the settings scroll when they do not fit, and the buttons and the

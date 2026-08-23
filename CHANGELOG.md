@@ -16,6 +16,36 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [7.1.0] — 2026-08-23
+
+### Fixed
+
+- **The log section had no size of its own.** `_balance_splitter` set three
+  sizes for what became four sections when the findings table was added in
+  r6.0.0; Qt calls a short list undefined. There is now one share per section
+  and an assertion that says so, so adding a fifth cannot repeat it.
+
+- **The dividers between the sections were nearly invisible.** Qt draws a
+  splitter handle as a few faint dots, so a section that would not show
+  everything looked broken rather than merely small — the user found the
+  sections "hard to find". The handles are now wider with a rule through them,
+  highlight under the pointer, carry a resize cursor and a tooltip saying what
+  dragging does.
+
+### Changed
+
+- **Both usage documents explain the dividers**, with a diagram of where they
+  sit, what dragging one fully shut does, and the fact that the settings
+  section scrolls within itself — plus the sentence that matters when something
+  looks wrong: the section is too small, not empty. The FAQ gained the two
+  questions in the words someone would actually search for. Requested by the
+  user.
+
+- The window-layout tables in both languages now list the findings section and
+  the rule list, which had been added without being described.
+
+---
+
 ## [7.0.0] — 2026-08-23 — "Gedaechtnis"
 
 ### Added

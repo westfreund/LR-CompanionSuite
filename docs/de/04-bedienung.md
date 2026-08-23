@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r7.0.0 · Build-Datum 2026-08-23**
+**Revision r7.1.0 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -284,13 +284,48 @@ Ein Fenster, von oben nach unten:
 | **Ziel** | unterhalb des aktuellen Ordners, oder in einen neuen Ordner über den Systemdialog — dessen Schaltfläche *Neuer Ordner* legt einen an, und ein noch nicht vorhandener Pfad wird beim Lauf erzeugt |
 | **Ordnerstruktur** | eine Vorlage oder ein eigenes Template, mit Live-Vorschau beim Tippen und einer Schaltfläche, die alle 25 Platzhalter auflistet |
 | **Optionen** | Namenskonflikte, Fotos ohne Datum und die drei Entscheidungen zu vorhandenen Ordnern, dazu Sidecars, Katalog-Backup und ASCII-Namen |
-| **Vorgefundene Ordner** | eine Zeile je Ordner mit Art, Fotozahl und Auswahlfeld für die Entscheidung — eine Änderung plant sofort neu |
+| **Braucht Ihre Antwort** | je Ursache eine Zeile mit Dateizahl, steuernder Option und deren aktuellem Wert — eine Zeile auswählen zeigt die betroffenen Dateien |
+| **Vorgefundene Ordner** | die Regelliste und darunter eine Zeile je Ordner mit Art, Fotozahl, entscheidender Regel und Auswahlfeld — eine Änderung plant sofort neu |
 | **Schaltflächen** | Planen ändert nichts; Ausführen fragt vorher nach |
 | **Fortschritt** | Balken und Zähler während des Laufs, danach das vollständige Ergebnis |
 | **Protokoll** | was geschehen ist, samt aller Warnungen aus den Vorprüfungen |
 
 Über die Menüleiste lässt sich jederzeit zwischen Deutsch und Englisch
 wechseln.
+
+### Die Bereiche lassen sich aufziehen — Wichtig
+
+Zwischen den vier großen Bereichen — **Einstellungen**, **Braucht Ihre
+Antwort**, **Vorgefundene Ordner** und **Protokoll** — liegt jeweils ein
+**Teiler**. Er ist leicht zu übersehen: eine dünne waagerechte Linie am
+**unteren Rand eines Bereichs**, früher nur ein paar graue Punkte.
+
+```
+┌─ Einstellungen ─────────────────────────┐
+│  Katalog, Quelle, Ziel, Struktur …      │   ← scrollt in sich
+└─────────────────────────────────────────┘
+ ────────────────────────────────────────      ← Teiler: hier ziehen
+┌─ Braucht Ihre Antwort ──────────────────┐
+```
+
+Der Mauszeiger wird über einem Teiler zum Doppelpfeil, und ein Tooltip sagt,
+was er tut. Damit:
+
+- **Ziehen** gibt dem Bereich darüber mehr oder weniger Platz.
+- **Ganz zuziehen** blendet einen Bereich aus. Er ist nicht weg — der Teiler
+  bleibt liegen, und Aufziehen holt ihn zurück. Wer das Protokoll nicht
+  braucht, gewinnt so Platz für die Ordnertabelle.
+- Die eingestellten Größen werden **gemerkt** und beim nächsten Start
+  wiederhergestellt.
+
+Der Bereich **Einstellungen** hat zusätzlich eine **eigene Bildlaufleiste**:
+Auf einem kleinen Bildschirm sind Ziel, Ordnerstruktur und Optionen zunächst
+unterhalb des sichtbaren Randes und werden durch Scrollen *innerhalb* des
+Bereichs erreicht — oder eben dadurch, dass man den Teiler darunter nach unten
+zieht.
+
+Wenn also eine Tabelle abgeschnitten wirkt oder eine Einstellung zu fehlen
+scheint: Der Bereich ist zu klein, nicht leer.
 
 Das Fenster passt auf kleine Bildschirme: Es öffnet nie größer als der
 verfügbare Platz, die Einstellungen scrollen, wenn sie nicht hineinpassen, und

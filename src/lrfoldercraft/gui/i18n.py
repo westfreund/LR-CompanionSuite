@@ -134,6 +134,12 @@ TEXT: Dict[str, Tuple[str, str]] = {
         "'Gesteuert durch' genannte Einstellung ändern und erneut planen.",
     ),
     "findings_more": ("... and {n:,} more", "... und {n:,} weitere"),
+    "splitter_hint": (
+        "Drag to give this section more or less room -- drag it fully shut to "
+        "hide the section, and back open to bring it out again",
+        "Ziehen, um diesem Bereich mehr oder weniger Platz zu geben -- ganz "
+        "zuziehen blendet den Bereich aus, wieder aufziehen holt ihn zurück",
+    ),
 }
 
 

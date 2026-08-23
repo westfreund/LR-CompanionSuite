@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r7.0.0 · Build-Datum 2026-08-23**
+**Revision r7.1.0 · Build-Datum 2026-08-23**
 
 ## Sicherheit und Daten
 
@@ -109,6 +109,26 @@ und den Synchronisationsstand danach prüfen.
 Jeder Lauf arbeitet auf einem Stammordner. Umfasst die Auswahl mehrere, weist
 der Planer darauf hin und bittet um Eingrenzung mit `--root-folder`. Also einen
 Lauf je Stammordner.
+
+### In der GUI ist eine Tabelle abgeschnitten oder eine Einstellung fehlt
+
+Der Bereich ist zu klein, nicht leer. Zwischen den vier großen Bereichen —
+Einstellungen, „Braucht Ihre Antwort", „Vorgefundene Ordner" und Protokoll —
+liegt am **unteren Rand** jeweils ein **Teiler**, eine dünne waagerechte Linie.
+Ziehen gibt dem Bereich darüber mehr Platz; ganz zuziehen blendet ihn aus, und
+Aufziehen holt ihn zurück. Der Mauszeiger wird dort zum Doppelpfeil.
+
+Der Bereich Einstellungen scrollt zusätzlich in sich selbst — auf einem kleinen
+Bildschirm liegen Ziel, Ordnerstruktur und Optionen zunächst unterhalb des
+sichtbaren Randes. Die eingestellten Größen werden für den nächsten Start
+gemerkt. Siehe [04-bedienung.md](04-bedienung.md).
+
+### Ich kann in der GUI keinen Zielordner angeben
+
+Bis r6.1.0 war das Feld gesperrt, solange oben nicht „In einen neuen Ordner"
+gewählt war — ein graues Feld neben einer grauen Schaltfläche, ohne Hinweis,
+welcher Knopf gemeint ist. Ab r7.0.0 sind beide immer bedienbar, und einen
+Ordner zu benennen wählt den Modus gleich mit.
 
 ### Kann ich Fotos auf ein ganz anderes Laufwerk verschieben?
 

@@ -509,3 +509,32 @@ def test_an_unreadable_state_file_is_shrugged_off(qt_app):
     window = MainWindow()  # must not raise
     assert window.language == "en"
     window.close()
+
+
+# -- the dividers between the sections ---------------------------------------
+
+
+def test_every_splitter_section_gets_a_size(qt_app):
+    """Qt calls a short size list undefined, and the log section was the loser."""
+    window = MainWindow()
+    assert len(window.SPLITTER_SHARES) == window.splitter.count()
+    window._balance_splitter(900)
+    assert len(window.splitter.sizes()) == window.splitter.count()
+    assert all(size > 0 for size in window.splitter.sizes())
+    window.close()
+
+
+def test_the_dividers_say_what_they_are(qt_app):
+    window = MainWindow()
+    handles = [window.splitter.handle(i) for i in range(1, window.splitter.count())]
+    assert handles and all(h is not None for h in handles)
+    assert all(h.toolTip() for h in handles)
+    window.close()
+
+
+def test_the_divider_tooltip_follows_the_language(qt_app):
+    window = MainWindow(language="de")
+    assert "Ziehen" in window.splitter.handle(1).toolTip()
+    window.toggle_language()
+    assert "Drag" in window.splitter.handle(1).toolTip()
+    window.close()

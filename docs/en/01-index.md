@@ -1,6 +1,6 @@
 # LR-FolderCraft — Overview
 
-**Revision r7.0.0 · Build date 2026-08-23**
+**Revision r7.1.0 · Build date 2026-08-23**
 
 LR-FolderCraft reorganises the folder tree of an Adobe Lightroom Classic
 library. It moves the image files on disk and rewrites the catalog in the same

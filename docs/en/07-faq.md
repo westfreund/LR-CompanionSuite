@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r7.0.0 · Build date 2026-08-23**
+**Revision r7.1.0 · Build date 2026-08-23**
 
 ## Safety and data
 
@@ -102,6 +102,25 @@ tested against one. Take a backup and check the sync status afterwards.
 
 Each run works on one root folder. If your selection spans several, the planner
 says so and asks you to restrict it with `--root-folder`. Run once per root.
+
+### A table in the GUI looks cut off, or a setting is missing
+
+The section is too small, not empty. Between the four large sections —
+settings, "Needs your answer", "Folders found" and the log — sits a **divider**
+at the **bottom edge** of each, a thin horizontal line. Dragging gives the
+section above more room; dragging it fully shut hides it, and pulling it back
+open brings it out again. The pointer turns into a double arrow there.
+
+The settings section also scrolls within itself — on a small screen Target,
+Folder structure and Options start below the visible edge. The sizes you set
+are remembered for the next start. See [04-usage.md](04-usage.md).
+
+### I cannot give a target folder in the GUI
+
+Up to r6.1.0 the field was disabled until "into a new folder" was selected
+above it — a greyed-out field beside a greyed-out button, with no hint which
+control to press. From r7.0.0 both are always usable, and naming a folder
+selects that mode with it.
 
 ### Can I move photos to a completely different drive?
 

@@ -160,6 +160,7 @@ class MainWindow(QMainWindow):
         self.splitter.setStretchFactor(1, 2)
         self.splitter.setStretchFactor(2, 2)
         self.splitter.setStretchFactor(3, 1)
+        self._make_handles_visible()
         outer.addWidget(self.splitter, 1)
 
         outer.addWidget(self._actions_box())
@@ -168,6 +169,34 @@ class MainWindow(QMainWindow):
             "{n} {r} - build {d}".format(n=APP_NAME, r=REVISION, d=__build_date__)
         )
         self._build_menu()
+
+    def _make_handles_visible(self) -> None:
+        """Make the dividers between the sections look like something to grab.
+
+        Qt draws a splitter handle as a few faint dots, which is easy to miss
+        entirely -- a section that will not show everything then looks broken
+        rather than merely small. A wider handle with a rule through it, a
+        resize cursor and a tooltip say what it is.
+        """
+        self.splitter.setHandleWidth(11)
+        self.splitter.setStyleSheet(
+            "QSplitter::handle:vertical {"
+            "  margin: 3px 0px;"
+            "  border-top: 1px solid palette(mid);"
+            "  border-bottom: 1px solid palette(mid);"
+            "}"
+            "QSplitter::handle:vertical:hover { background: palette(highlight); }"
+        )
+        for index in range(1, self.splitter.count()):
+            handle = self.splitter.handle(index)
+            if handle is not None:
+                handle.setCursor(Qt.SplitVCursor)
+
+    def _retranslate_handles(self) -> None:
+        for index in range(1, self.splitter.count()):
+            handle = self.splitter.handle(index)
+            if handle is not None:
+                handle.setToolTip(tr("splitter_hint", self.language))
 
     def _size_to_screen(self) -> None:
         """Open at a comfortable size, but never larger than the screen.
@@ -187,12 +216,16 @@ class MainWindow(QMainWindow):
         self.resize(width, height)
         self._balance_splitter(height)
 
+    #: Share of the window each splitter section gets on a fresh start, and the
+    #: height below which it stops being worth showing. The list must have one
+    #: entry per widget in the splitter: Qt calls a short list undefined.
+    SPLITTER_SHARES = ((0.48, 200), (0.14, 70), (0.26, 120), (0.12, 60))
+
     def _balance_splitter(self, height: int) -> None:
-        """Give the settings most of the room, but keep the other two usable."""
-        settings = max(200, int(height * 0.55))
-        folders = max(140, int(height * 0.30))
-        log = max(60, height - settings - folders)
-        self.splitter.setSizes([settings, folders, log])
+        """Give the settings most of the room, but keep the others usable."""
+        sizes = [max(floor, int(height * share)) for share, floor in self.SPLITTER_SHARES]
+        assert len(sizes) == self.splitter.count(), "one size per splitter section"
+        self.splitter.setSizes(sizes)
 
     def _build_menu(self) -> None:
         language_action = QAction(tr("language", self.language), self)
@@ -592,6 +625,7 @@ class MainWindow(QMainWindow):
         self.ascii_check.setText(tr("ascii", language))
         self.folders_group.setTitle(tr("existing", language))
         self.findings_group.setTitle(tr("findings", language))
+        self._retranslate_handles()
         self.findings_table.setHorizontalHeaderLabels(
             [
                 "",
