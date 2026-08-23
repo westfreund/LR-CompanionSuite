@@ -304,6 +304,8 @@ class MainWindow(QMainWindow):
         #: The ordered rule list, as (pattern, action) pairs. Order is meaning.
         self.rules: List[Tuple[str, str]] = []
         self.findings: List[Finding] = []
+        #: Counts planning requests, so a superseded result can be discarded.
+        self._plan_ticket = 0
         #: The journal of the run made in this session, offered first for undo.
         self.last_journal: str = ""
         #: Catalog whose preconditions were acknowledged in this session.
@@ -1258,12 +1260,27 @@ class MainWindow(QMainWindow):
         self.plan = None
         self.apply_button.setEnabled(False)
         self._busy(True, tr("planning", self.language))
-        worker = PlanWorker(settings, self.folder_decisions)
+        # Changing a setting re-plans, and on a large catalog a plan takes long
+        # enough for two to overlap. Without a ticket the slower, older one
+        # lands last and becomes the plan that Apply would run -- a plan that
+        # does not match what is on screen. Only the newest request counts.
+        self._plan_ticket += 1
+        ticket = self._plan_ticket
+        # Connect the bound method, never a lambda: a lambda has no QObject
+        # receiver, so Qt makes the connection direct rather than queued and
+        # the slot runs on the worker thread -- where creating the widgets of
+        # the folder table is illegal and silently produces dead ones.
+        worker = PlanWorker(settings, self.folder_decisions, ticket)
         worker.finished.connect(self._plan_ready)
         worker.failed.connect(self._worker_failed)
         run_in_thread(worker, self._threads)
 
-    def _plan_ready(self, plan: Plan, checks) -> None:
+    def _plan_ready(self, plan: Plan, checks, ticket: int) -> None:
+        # No default: a sentinel that means "accept anyway" is exactly how a
+        # superseded result slips through.
+        if ticket != self._plan_ticket:
+            log.info("Discarding a superseded plan (ticket %d)", ticket)
+            return
         self.plan = plan
         self._show_plan(plan, checks)
         self._busy(False, tr("done", self.language))

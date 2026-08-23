@@ -969,3 +969,56 @@ def test_a_profile_never_carries_a_safety_override(qt_app, tmp_path):
     assert back.ignore_lock is False
     assert back.backup_catalog is True
     assert back.allow_unsupported_catalog is False
+
+
+def test_a_superseded_plan_never_becomes_the_one_that_would_run(qt_app, mixed_gui_catalog):
+    """Two plans can overlap on a large catalog; the older must not win.
+
+    Without this the slower, earlier plan lands last and Apply runs something
+    that does not match the settings on screen.
+    """
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.preset_combo.setCurrentText("day")
+    window.do_plan()
+    assert pump(lambda: window.plan is not None)
+    current = window.plan
+
+    # A result arriving from an earlier request must be ignored.
+    stale_ticket = window._plan_ticket - 1
+    window._plan_ready("not a plan", None, stale_ticket)
+    assert window.plan is current
+
+    # while the newest one is accepted
+    window._plan_ready(current, None, window._plan_ticket)
+    assert window.plan is current
+    window.close()
+
+
+def test_plan_results_are_handled_on_the_main_thread(qt_app, mixed_gui_catalog):
+    """Connect a bound method, never a lambda.
+
+    A lambda has no QObject receiver, so Qt makes the connection direct instead
+    of queued and the slot runs on the worker thread -- where building the
+    folder table's combo boxes is illegal. Qt says so on stderr and then hands
+    back widgets whose signals never fire again, which looks like the interface
+    ignoring the operator.
+
+    The override has to be a real method of a QObject subclass: assigning a
+    plain function to the instance recreates the very bug being tested for.
+    """
+    import threading
+
+    seen = {}
+
+    class Watched(MainWindow):
+        def _plan_ready(self, plan, checks, ticket):
+            seen["thread"] = threading.current_thread()
+            super()._plan_ready(plan, checks, ticket)
+
+    window = Watched(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.do_plan()
+    assert pump(lambda: window.plan is not None)
+    assert seen["thread"] is threading.main_thread()
+    window.close()

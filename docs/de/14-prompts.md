@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r15.0.1 · Build-Datum 2026-08-23**
+**Revision r15.0.2 · Build-Datum 2026-08-23**
 
 Dieses Dokument bewahrt die Anfrage, aus der LR-FolderCraft entstanden ist,
 einen generischen Prompt zur Neuerzeugung eines vergleichbaren Werkzeugs sowie
@@ -369,6 +369,18 @@ pre-flight checks, execute with a progress callback. Then:
   one that says "51,049 of 51,049 files found" is read. Put the refusal of a
   blocking finding in the rule rather than in whether the control is clickable:
   a disabled checkbox can still be ticked from code.
+* **Give every planning request a ticket and discard superseded results.**
+  Re-planning on every changed setting is right; letting the slower earlier
+  plan land last is not, because the plan the operator then applies is not the
+  one on screen.
+* **In Qt, connect a bound method of a QObject, never a lambda.** A lambda has
+  no QObject receiver, so the connection becomes direct rather than queued and
+  the slot runs on the worker thread. Creating widgets there is illegal: Qt
+  warns on stderr and then hands back widgets whose signals never fire again,
+  which presents as the interface ignoring the operator. Pass whatever the slot
+  needs through the signal instead. A test for this must override with a real
+  method on a subclass -- assigning a plain function to the instance recreates
+  the bug it is testing for.
 * **Enforce parity between front ends with a test, from the first day.** Three
   interfaces over one core is a fine design and a slow trap: every feature
   lands in whichever one is being worked on, and the others fall behind one

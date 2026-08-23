@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r15.0.1 · Build date 2026-08-23**
+**Revision r15.0.2 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*

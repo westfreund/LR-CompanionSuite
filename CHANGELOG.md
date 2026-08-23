@@ -16,6 +16,33 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [15.0.2] — 2026-08-23
+
+### Fixed
+
+- **A superseded plan could become the one that Apply ran.** Changing a setting
+  re-plans, and on a large catalog two plans overlap; the slower, earlier one
+  landed last and replaced the newer. What Apply would then have executed was
+  not what the window showed. Each request now carries a ticket and only the
+  newest result is accepted.
+
+  Found while driving a full cycle through the window: the run used a profile's
+  settings rather than the rules set afterwards, and the run record proved it.
+
+- **The first attempt at that fix introduced a worse bug**, which is worth
+  recording. Passing the ticket through a lambda around the slot removed the
+  QObject receiver from the connection, so Qt made it *direct* rather than
+  queued and ran the handler on the worker thread — where building the folder
+  table's combo boxes is illegal. Qt warns on stderr and then hands back
+  widgets whose signals never fire, so the folder decisions silently stopped
+  working. The ticket now travels in the signal and the bound method is
+  connected, with a test that asserts results arrive on the main thread.
+
+  The test for it had to use a real subclass: assigning a plain function to the
+  instance recreates exactly the bug being tested for.
+
+---
+
 ## [15.0.1] — 2026-08-23
 
 ### Fixed

@@ -46,17 +46,29 @@ class CatalogWorker(QObject):
 class PlanWorker(QObject):
     """Builds a plan and runs the pre-flight checks."""
 
-    finished = Signal(object, object)  # Plan, PreflightResult
+    #: Plan, PreflightResult, and the ticket the window issued for this
+    #: request. The ticket travels in the signal rather than in a lambda
+    #: around the slot: a lambda has no QObject receiver, so Qt makes the
+    #: connection direct instead of queued and the slot then runs on this
+    #: worker thread -- where building widgets is illegal and quietly leaves
+    #: broken ones behind.
+    finished = Signal(object, object, int)
     failed = Signal(str)
     #: Emitted for every folder the operator could reasonably decide about. The
     #: interface answers by writing into ``decisions`` before planning again;
     #: the worker itself never blocks waiting for a human.
     found_folder = Signal(object)
 
-    def __init__(self, settings: Settings, decisions: Optional[Dict[int, str]] = None):
+    def __init__(
+        self,
+        settings: Settings,
+        decisions: Optional[Dict[int, str]] = None,
+        ticket: int = 0,
+    ):
         super().__init__()
         self.settings = settings
         self.decisions = decisions or {}
+        self.ticket = ticket
 
     def run(self) -> None:
         try:
@@ -73,7 +85,7 @@ class PlanWorker(QObject):
             ) as conn:
                 plan = build_plan(CatalogReader(conn), self.settings, decide=decide)
             checks = preflight(plan)
-            self.finished.emit(plan, checks)
+            self.finished.emit(plan, checks, self.ticket)
         except Exception as exc:  # noqa: BLE001
             self.failed.emit("{e}\n\n{t}".format(e=exc, t=traceback.format_exc()))
 
