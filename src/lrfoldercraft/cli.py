@@ -161,16 +161,59 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+#: What each global flag means when it is given nowhere. They cannot be normal
+#: argparse defaults: every sub-parser declares the same flags, and a sub-parser
+#: default overwrites what the top level already parsed -- so `lrfc --lang de
+#: plan X` silently lost its language, and `lrfc --debug plan X` its debug mode.
+#: With SUPPRESS the attribute is set only where the flag actually appears.
+GLOBAL_FLAG_DEFAULTS = {
+    "debug": False,
+    "verbose": False,
+    "quiet": False,
+    "lang": None,
+    "log_file": None,
+    "log_dir": None,
+}
+
+
 def _add_global_flags(parser: argparse.ArgumentParser) -> None:
     group = parser.add_argument_group("general")
-    group.add_argument("--debug", action="store_true", help="verbose logging with source locations")
     group.add_argument(
-        "--verbose", action="store_true", help="show progress messages on the console"
+        "--debug",
+        action="store_true",
+        default=argparse.SUPPRESS,
+        help="verbose logging with source locations",
     )
-    group.add_argument("--quiet", action="store_true", help="console output only for errors")
-    group.add_argument("--lang", choices=("en", "de"), default=None, help="output language")
-    group.add_argument("--log-file", metavar="PATH", help="explicit log file path")
-    group.add_argument("--log-dir", metavar="DIR", help="directory for the auto-named log file")
+    group.add_argument(
+        "--verbose",
+        action="store_true",
+        default=argparse.SUPPRESS,
+        help="show progress messages on the console",
+    )
+    group.add_argument(
+        "--quiet",
+        action="store_true",
+        default=argparse.SUPPRESS,
+        help="console output only for errors",
+    )
+    group.add_argument(
+        "--lang",
+        choices=("en", "de"),
+        default=argparse.SUPPRESS,
+        help="output language",
+    )
+    group.add_argument(
+        "--log-file",
+        metavar="PATH",
+        default=argparse.SUPPRESS,
+        help="explicit log file path",
+    )
+    group.add_argument(
+        "--log-dir",
+        metavar="DIR",
+        default=argparse.SUPPRESS,
+        help="directory for the auto-named log file",
+    )
 
 
 def _add_catalog_flags(parser: argparse.ArgumentParser) -> None:
@@ -680,6 +723,11 @@ DISPATCH = {
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    # Fill in the flags nobody passed; see GLOBAL_FLAG_DEFAULTS for why they
+    # cannot simply be argparse defaults.
+    for name, fallback in GLOBAL_FLAG_DEFAULTS.items():
+        if not hasattr(args, name):
+            setattr(args, name, fallback)
     if not args.command:
         parser.print_help()
         return EXIT_USAGE

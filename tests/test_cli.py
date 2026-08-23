@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 
-from lrfoldercraft.cli import EXIT_OK, main
+import pytest
+
+from lrfoldercraft.cli import EXIT_OK, GLOBAL_FLAG_DEFAULTS, build_parser, main
 
 
 def test_info(simple_catalog, capsys):
@@ -205,3 +207,28 @@ def test_interactive_asks_and_honours_the_answer(builder, capsys, monkeypatch):
     assert "leave" in {f["action"] for f in payload["folders"]}
     assert "operator" in {f["action_source"] for f in payload["folders"]}
     assert by_path["raw2019/"]["is_anchor"] is True
+
+
+# -- global flags before the subcommand --------------------------------------
+
+
+@pytest.mark.parametrize(
+    "argv,attribute,expected",
+    [
+        (["--lang", "de", "plan", "X"], "lang", "de"),
+        (["plan", "X", "--lang", "de"], "lang", "de"),
+        (["--debug", "plan", "X"], "debug", True),
+        (["plan", "X", "--debug"], "debug", True),
+        (["--verbose", "apply", "X"], "verbose", True),
+        (["--log-dir", "/tmp/x", "plan", "X"], "log_dir", "/tmp/x"),
+        (["plan", "X"], "lang", None),
+        (["plan", "X"], "debug", False),
+    ],
+)
+def test_a_global_flag_survives_the_subcommand(argv, attribute, expected):
+    """Each sub-parser redeclares these; its default must not clobber the top level."""
+    args = build_parser().parse_args(argv)
+    for name, fallback in GLOBAL_FLAG_DEFAULTS.items():
+        if not hasattr(args, name):
+            setattr(args, name, fallback)
+    assert getattr(args, attribute) == expected

@@ -316,3 +316,57 @@ def test_adding_and_removing_a_rule_keeps_the_table_in_step(qt_app, mixed_gui_ca
     window._remove_rule()
     assert pump(lambda: window.plan is not None)
     assert window.rule_table.rowCount() == len(window.rules) == 0
+
+
+# -- what the plan could not decide alone ------------------------------------
+
+
+@pytest.fixture
+def catalog_with_a_stray_date(builder):
+    """A dated folder holding one photo shot on a different day."""
+    builder.add_photo("D1.CR2", "2019-03-10T11:00:00", folder="raw2019/2019-03-10 Fasching/")
+    builder.add_photo("X1.CR2", "2019-07-07T11:00:00", folder="raw2019/2019-03-10 Fasching/")
+    return builder
+
+
+def test_the_findings_table_names_the_setting_to_change(qt_app, catalog_with_a_stray_date):
+    """The point of the panel: an exception and its remedy in the same row."""
+    window = MainWindow(catalog=str(catalog_with_a_stray_date.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.preset_combo.setCurrentText("day")
+    window.do_plan()
+    assert pump(lambda: window.plan is not None)
+
+    rows = {
+        window.findings_table.item(r, 2).text(): r for r in range(window.findings_table.rowCount())
+    }
+    assert rows, "a grown library always has something worth reporting"
+    mismatch = [r for text, r in rows.items() if "folder name" in text]
+    assert mismatch, rows
+    assert window.findings_table.item(mismatch[0], 3).text() == "--mismatch-action"
+    assert window.findings_table.item(mismatch[0], 4).text() == "move-out"
+
+
+def test_selecting_a_finding_shows_which_files_it_concerns(qt_app, mixed_gui_catalog):
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.preset_combo.setCurrentText("day")
+    window.do_plan()
+    assert pump(lambda: window.plan is not None)
+
+    for row in range(window.findings_table.rowCount()):
+        if window.findings[row].samples:
+            window.findings_table.selectRow(row)
+            assert window.findings[row].samples[0] in window.findings_detail.text()
+            return
+    pytest.fail("no finding carried examples")
+
+
+def test_the_summary_line_no_longer_carries_the_detail(qt_app, mixed_gui_catalog):
+    """Warnings used to be crammed into the counts line; they have their own place now."""
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.preset_combo.setCurrentText("day")
+    window.do_plan()
+    assert pump(lambda: window.plan is not None)
+    assert "\n" not in window.summary_label.text()

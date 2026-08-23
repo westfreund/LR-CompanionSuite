@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Sequence, Tuple
 
 from .catalog.model import CatalogInfo
+from .exceptions_report import collect_findings, render_findings
 from .executor import RunResult
 from .folders import label as action_label
 from .folders import summarise
@@ -62,6 +63,7 @@ T = {
     "pruned": ("Empty folders removed", "Entfernte leere Ordner"),
     "backup": ("Catalog backup", "Katalog-Backup"),
     "journal": ("Journal", "Journal"),
+    "findings": ("Needs your answer", "Braucht Ihre Antwort"),
     "move_log": ("Move log", "Verschiebeprotokoll"),
     "verification": ("Verification", "Pruefung"),
     "passed": ("passed", "bestanden"),
@@ -220,10 +222,12 @@ def render_plan(
                 "  {c:>8,}  {l}".format(c=count, l=label_de if language == "de" else label_en)
             )
 
-    if plan.warnings:
-        lines += ["", t("warnings", language) + ":"]
-        for warning in plan.warnings:
-            lines.append("  ! " + warning)
+    # Each cause with its own count and the option that governs it. Reporting
+    # these as one "skipped: 43" is the same as not reporting them.
+    findings = collect_findings(plan)
+    if findings:
+        lines += ["", t("findings", language) + ":"]
+        lines += ["  " + line for line in render_findings(findings, language)]
 
     folders = plan.folder_summary()
     if folders:

@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QFont, QGuiApplication
+from PySide6.QtGui import QAction, QColor, QFont, QGuiApplication
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -45,6 +45,14 @@ from PySide6.QtWidgets import (
 
 from ..catalog.model import CatalogInfo, RootFolder
 from ..config import CONFLICT_MODES, MISSING_DATE_MODES, Settings
+from ..exceptions_report import (
+    ERROR,
+    EXCEPTION,
+    NOTE,
+    WARNING,
+    Finding,
+    collect_findings,
+)
 from ..folders import (
     ALL_ACTIONS,
     CONSOLIDATE,
@@ -68,6 +76,14 @@ from .workers import (
     wait_for_threads,
 )
 
+#: Severity at a glance. Chosen to stay legible on a light and a dark theme.
+_LEVEL_COLOURS = {
+    ERROR: QColor("#b00020"),
+    WARNING: QColor("#b06000"),
+    EXCEPTION: QColor("#0057b0"),
+    NOTE: QColor("#606060"),
+}
+
 log = get_logger("gui")
 
 
@@ -81,6 +97,7 @@ class MainWindow(QMainWindow):
         self.folder_decisions: Dict[int, str] = {}
         #: The ordered rule list, as (pattern, action) pairs. Order is meaning.
         self.rules: List[Tuple[str, str]] = []
+        self.findings: List[Finding] = []
         self.cases: List[FolderCase] = []
         self.roots: List[RootFolder] = []
         self._threads: list = []
@@ -128,11 +145,13 @@ class MainWindow(QMainWindow):
         # give the space to whichever part they are working with.
         self.splitter = QSplitter(Qt.Vertical)
         self.splitter.addWidget(self.settings_scroll)
+        self.splitter.addWidget(self._findings_box())
         self.splitter.addWidget(self._folders_box())
         self.splitter.addWidget(self.log_view)
         self.splitter.setStretchFactor(0, 3)
         self.splitter.setStretchFactor(1, 2)
-        self.splitter.setStretchFactor(2, 1)
+        self.splitter.setStretchFactor(2, 2)
+        self.splitter.setStretchFactor(3, 1)
         outer.addWidget(self.splitter, 1)
 
         outer.addWidget(self._actions_box())
@@ -318,6 +337,71 @@ class MainWindow(QMainWindow):
             combo.setCurrentIndex(list(values).index(default))
         return combo
 
+    def _findings_box(self) -> QGroupBox:
+        """What the plan could not decide alone, and the setting that decides it.
+
+        Reporting these as a single "skipped: 43" is the same as not reporting
+        them, so each cause gets its own row, its own count and the name of the
+        option that governs it.
+        """
+        box = QGroupBox()
+        layout = QVBoxLayout(box)
+        self.findings_table = QTableWidget(0, 5)
+        self.findings_table.verticalHeader().setVisible(False)
+        self.findings_table.setSelectionBehavior(QTableWidget.SelectRows)
+        header = self.findings_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        self.findings_table.setMinimumHeight(90)
+        self.findings_table.itemSelectionChanged.connect(self._show_finding_samples)
+        layout.addWidget(self.findings_table, 1)
+        self.findings_detail = QLabel()
+        self.findings_detail.setWordWrap(True)
+        self.findings_detail.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        layout.addWidget(self.findings_detail)
+        self.findings_group = box
+        return box
+
+    def _fill_findings(self, plan: Plan, checks) -> None:
+        self.findings = collect_findings(plan, checks)
+        table = self.findings_table
+        table.setRowCount(len(self.findings))
+        for row, finding in enumerate(self.findings):
+            level = QTableWidgetItem(tr("level_" + finding.level, self.language))
+            level.setForeground(_LEVEL_COLOURS.get(finding.level, QColor("gray")))
+            font = level.font()
+            font.setBold(finding.level in (ERROR, WARNING))
+            level.setFont(font)
+            table.setItem(row, 0, level)
+            table.setItem(
+                row, 1, QTableWidgetItem("{n:,}".format(n=finding.count) if finding.count else "")
+            )
+            table.setItem(row, 2, QTableWidgetItem(finding.text(self.language)))
+            table.setItem(row, 3, QTableWidgetItem(finding.setting or ""))
+            table.setItem(row, 4, QTableWidgetItem(finding.current(self.language)))
+        self.findings_detail.setText(
+            tr("findings_none", self.language)
+            if not self.findings
+            else tr("findings_hint", self.language)
+        )
+
+    def _show_finding_samples(self) -> None:
+        row = self.findings_table.currentRow()
+        if not (0 <= row < len(self.findings)):
+            return
+        finding = self.findings[row]
+        if not finding.samples:
+            self.findings_detail.setText(finding.text(self.language))
+            return
+        more = finding.count - len(finding.samples)
+        text = "\n".join("    " + sample for sample in finding.samples)
+        if more > 0:
+            text += "\n    " + tr("findings_more", self.language).format(n=more)
+        self.findings_detail.setText(finding.text(self.language) + "\n" + text)
+
     def _folders_box(self) -> QGroupBox:
         box = QGroupBox()
         layout = QVBoxLayout(box)
@@ -497,6 +581,18 @@ class MainWindow(QMainWindow):
         self.backup_check.setText(tr("backup", language))
         self.ascii_check.setText(tr("ascii", language))
         self.folders_group.setTitle(tr("existing", language))
+        self.findings_group.setTitle(tr("findings", language))
+        self.findings_table.setHorizontalHeaderLabels(
+            [
+                "",
+                tr("col_count", language),
+                tr("col_what", language),
+                tr("col_setting", language),
+                tr("col_current", language),
+            ]
+        )
+        if not self.findings:
+            self.findings_detail.setText(tr("findings_none", language))
         self.folder_table.setHorizontalHeaderLabels(
             [
                 tr("col_folder", language),
@@ -696,23 +792,18 @@ class MainWindow(QMainWindow):
             ),
             "{l}: {b}".format(l=tr("volume", self.language), b=human_bytes(stats.bytes_to_move)),
         ]
-        text = "   ".join(parts)
-        if plan.warnings:
-            text += "\n" + "\n".join("! " + w for w in plan.warnings)
-        if checks is not None:
-            for check in checks.checks:
-                if check.level != "ok":
-                    text += "\n{lvl}: {m}".format(
-                        lvl=check.level.upper(), m=check.message(self.language)
+        self.summary_label.setText("   ".join(parts))
+        # The detail belongs in the findings table, not squeezed into one line.
+        self._fill_findings(plan, checks)
+        for finding in self.findings:
+            if finding.level in (ERROR, WARNING):
+                self.say(
+                    "{lvl} {c}: {m}".format(
+                        lvl=finding.level.upper(),
+                        c=finding.category,
+                        m=finding.text(self.language),
                     )
-                    self.say(
-                        "{lvl} {n}: {m}".format(
-                            lvl=check.level.upper(),
-                            n=check.name,
-                            m=check.message(self.language),
-                        )
-                    )
-        self.summary_label.setText(text)
+                )
         self._fill_folder_table(plan)
 
     def _fill_folder_table(self, plan: Plan) -> None:

@@ -113,6 +113,27 @@ TEXT: Dict[str, Tuple[str, str]] = {
     "rule_remove": ("Remove", "Entfernen"),
     "rule_up": ("Move up -- earlier rules win", "Nach oben -- frühere Regeln gewinnen"),
     "rule_down": ("Move down", "Nach unten"),
+    # what the plan could not decide alone
+    "findings": ("Needs your answer", "Braucht Ihre Antwort"),
+    "level_error": ("BLOCKS", "BLOCKIERT"),
+    "level_warning": ("Warning", "Warnung"),
+    "level_exception": ("Exception", "Ausnahme"),
+    "level_note": ("Note", "Hinweis"),
+    "col_count": ("Files", "Dateien"),
+    "col_what": ("What was found", "Was gefunden wurde"),
+    "col_setting": ("Governed by", "Gesteuert durch"),
+    "col_current": ("Currently", "Derzeit"),
+    "findings_none": (
+        "Nothing needs an answer -- the plan is unambiguous.",
+        "Nichts zu beantworten -- der Plan ist eindeutig.",
+    ),
+    "findings_hint": (
+        "Select a row to see which files it concerns. Change the setting named in "
+        "'Governed by' and plan again.",
+        "Eine Zeile auswählen, um die betroffenen Dateien zu sehen. Die unter "
+        "'Gesteuert durch' genannte Einstellung ändern und erneut planen.",
+    ),
+    "findings_more": ("... and {n:,} more", "... und {n:,} weitere"),
 }
 
 
