@@ -1,6 +1,6 @@
 # Before you start
 
-**Revision r13.0.4 · Build date 2026-08-23**
+**Revision r14.0.0 · Build date 2026-08-23**
 
 Two things about your library have to be true before LR-FolderCraft touches
 anything. Neither is difficult, both are easy to overlook, and both were found

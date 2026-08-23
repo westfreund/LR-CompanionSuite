@@ -1,6 +1,6 @@
 # Ordnerstrukturen und Platzhalter
 
-**Revision r13.0.4 · Build-Datum 2026-08-23**
+**Revision r14.0.0 · Build-Datum 2026-08-23**
 
 Eine **Struktur** ist eine geordnete Liste von **Ebenen**. Jede Ebene wird zu
 einem Verzeichnis, und jede Ebene ist ein **Template** aus festem Text und
@@ -183,6 +183,27 @@ lrfc apply KATALOG -s '{yyyy}/{quarter}/{mm}'
 Immer zuerst `plan` laufen lassen und die Zielordnerliste lesen.
 
 
+
+### ASCII-Namen
+
+`--ascii` (das Feld *ASCII-Namen* im Fenster) beschränkt Ordnernamen auf reines
+ASCII — für ein Laufwerk oder ein Sicherungsziel, das nichts anderes trägt.
+
+Buchstaben, die ein Akzent nicht abbilden kann, werden **ausgeschrieben** statt
+weggeworfen:
+
+| | |
+| --- | --- |
+| `Völki` | `Voelki` |
+| `Tabaksmühle` | `Tabaksmuehle` |
+| `Straße` | `Strasse` |
+| `MÜNCHEN` | `MUENCHEN` — ein durchgehend großgeschriebenes Wort bleibt es |
+| `Ærø` | `Aeroe` |
+| `Café`, `Señor` | `Cafe`, `Senor` — hier *ist* das Weglassen die Umschrift |
+
+Abgedeckt: ä ö ü ß æ ø œ å þ ð đ ł ı und die Großbuchstaben dazu. Alles andere
+behält seinen Grundbuchstaben, was für französische, spanische, polnische
+Akzente und die übrigen richtig ist.
 
 ## Datumsebenen, die das ganze Datum nennen
 

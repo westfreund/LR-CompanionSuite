@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r13.0.4 · Build date 2026-08-23**
+**Revision r14.0.0 · Build date 2026-08-23**
 
 This document preserves the request that created LR-FolderCraft, a generic
 prompt for regenerating a comparable tool from scratch, and the context needed
@@ -286,6 +286,18 @@ pre-flight checks, execute with a progress callback. Then:
   meaning, so provide move-up and move-down. Changing a rule must clear the
   manual decisions it might have made and replan, or the display stops matching
   what would run.
+* **An ASCII option must romanise, not discard.** Normalising to NFKD and
+  dropping what will not encode is the obvious implementation and it is wrong
+  for German: it turns Voelki into Volki and Strasse into Strae, words that
+  read as different words or as nothing at all. Spell out the letters an accent
+  cannot carry -- ä ö ü ß æ ø œ and the rest -- before folding, and take the
+  case from the neighbouring letter so an all-caps word stays all caps. Where
+  dropping the mark genuinely is the romanisation, as in French or Spanish,
+  NFKD is still right.
+* **A run record is not a profile.** Prune a profile so it can be applied to
+  the next library; prune a run record and it stops answering the only question
+  it exists for. Record the rules, the per-folder decisions and even the escape
+  hatches that were used -- everything the run was told to do.
 * **Write each run's record beside the thing it changed.** Journals from
   several libraries sitting together in one configuration directory, under
   names that differ by a timestamp, is how the wrong library gets rolled back

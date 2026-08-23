@@ -231,6 +231,49 @@ class RuleError(ValueError):
     """Raised for malformed templates."""
 
 
+#: Letters whose romanisation is not simply "drop the accent". Dropping it
+#: turns Voelki into Volki and Tabaksmuehle into Tabaksmuhle, which read as
+#: different words -- so these are spelled out before the accents are folded.
+#: Everything else (é, ñ, å as a plain a, and so on) is handled correctly by
+#: dropping the mark, which is what NFKD does.
+TRANSLITERATIONS = {
+    "ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss",
+    "æ": "ae", "ø": "oe", "œ": "oe",
+    "å": "aa", "þ": "th", "ð": "d", "đ": "d", "ł": "l", "ı": "i",
+}
+
+
+def fold_to_ascii(text: str) -> str:
+    """Romanise *text* into ASCII, spelling out what an accent cannot carry.
+
+    An upper-case letter takes an upper-case spelling when the letter beside it
+    is also upper case, so MUENCHEN comes out of MÜNCHEN rather than MUeNCHEN,
+    while München still gives Muenchen.
+    """
+    out = []
+    for index, character in enumerate(text):
+        lowered = character.lower()
+        spelling = TRANSLITERATIONS.get(lowered)
+        if spelling is None:
+            out.append(character)
+            continue
+        if character.islower():
+            out.append(spelling)
+            continue
+        neighbour = _neighbouring_letter(text, index)
+        out.append(spelling.upper() if neighbour and neighbour.isupper() else spelling.capitalize())
+    folded = "".join(out)
+    return unicodedata.normalize("NFKD", folded).encode("ascii", "ignore").decode("ascii")
+
+
+def _neighbouring_letter(text: str, index: int) -> str:
+    """The letter after *index*, or the one before it when there is none."""
+    for offset in (index + 1, index - 1):
+        if 0 <= offset < len(text) and text[offset].isalpha():
+            return text[offset]
+    return ""
+
+
 def sanitise_segment(text: str, replacement: str = "-", ascii_only: bool = False) -> str:
     """Turn arbitrary text into a portable directory name.
 
@@ -240,7 +283,7 @@ def sanitise_segment(text: str, replacement: str = "-", ascii_only: bool = False
     """
     value = text
     if ascii_only:
-        value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
+        value = fold_to_ascii(value)
     value = ILLEGAL_CHARS.sub(replacement, value)
     value = re.sub(r"\s+", " ", value).strip()
     value = value.rstrip(". ")
@@ -255,7 +298,7 @@ def sanitise_segment(text: str, replacement: str = "-", ascii_only: bool = False
 
 def slugify(text: str) -> str:
     """Lower-case, hyphen separated, ASCII only version of *text*."""
-    value = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii").lower()
+    value = fold_to_ascii(text).lower()
     value = re.sub(r"[^a-z0-9]+", "-", value).strip("-")
     return value or "unknown"
 

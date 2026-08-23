@@ -1,6 +1,6 @@
 # Folder structures and tokens
 
-**Revision r13.0.4 · Build date 2026-08-23**
+**Revision r14.0.0 · Build date 2026-08-23**
 
 A **structure** is an ordered list of **levels**. Each level becomes one
 directory, and each level is a **template** made of literal text and
@@ -179,6 +179,26 @@ lrfc apply CATALOG -s '{yyyy}/{quarter}/{mm}'
 Always run `plan` first and read the target folder list.
 
 
+
+### ASCII names
+
+`--ascii` (the *ASCII names* box in the window) restricts folder names to plain
+ASCII, for a drive or a backup target that cannot carry anything else.
+
+Letters an accent cannot carry are **spelled out** rather than dropped:
+
+| | |
+| --- | --- |
+| `Völki` | `Voelki` |
+| `Tabaksmühle` | `Tabaksmuehle` |
+| `Straße` | `Strasse` |
+| `MÜNCHEN` | `MUENCHEN` — an all-caps word stays all caps |
+| `Ærø` | `Aeroe` |
+| `Café`, `Señor` | `Cafe`, `Senor` — here dropping the mark *is* the romanisation |
+
+Covered: ä ö ü ß æ ø œ å þ ð đ ł ı and their capitals. Everything else keeps
+its base letter, which is correct for French, Spanish, Polish accents and the
+rest.
 
 ## Date levels that name the whole date
 

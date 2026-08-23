@@ -16,6 +16,27 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [14.0.0] — 2026-08-23 — "Umschrift"
+
+### Added
+
+- **The ASCII option now romanises instead of discarding.** `Völki` became
+  `Volki` and `Tabaksmühle` became `Tabaksmuhle` — words that read as different
+  words — and `Straße` became `Strae`, the sharp s vanishing outright, which is
+  not a romanisation of anything. Letters an accent cannot carry are now
+  spelled out: ä ö ü ß æ ø œ å þ ð đ ł ı and their capitals.
+
+  Case follows the neighbouring letter, so `MÜNCHEN` gives `MUENCHEN` while
+  `München` gives `Muenchen`. Where dropping the mark *is* the romanisation —
+  `Café`, `Señor` — nothing changed. Slugs use the same folding, so
+  `{camera_slug}` and friends agree with folder names.
+
+  Noticed in the user's own run: three folders named after a place had come out
+  as `Volki`. The existing test asserted the old output, so it had been
+  encoding the defect rather than catching it.
+
+---
+
 ## [13.0.4] — 2026-08-23
 
 ### Fixed

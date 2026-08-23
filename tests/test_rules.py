@@ -11,6 +11,7 @@ from lrfoldercraft.rules import (
     RuleError,
     TokenContext,
     describe_structure,
+    fold_to_ascii,
     parse_structure,
     render_level,
     render_structure,
@@ -116,7 +117,9 @@ def test_sanitise_length_limit():
 
 
 def test_ascii_folding():
-    assert sanitise_segment("Grün Straße", ascii_only=True) == "Grun Strae"
+    # This used to assert "Grun Strae": the umlaut was dropped and the sharp s
+    # vanished outright, which is not a romanisation of anything.
+    assert sanitise_segment("Grün Straße", ascii_only=True) == "Gruen Strasse"
     assert sanitise_segment("Grün Straße") == "Grün Straße"
 
 
@@ -163,3 +166,49 @@ def test_template_tokens():
 
 def test_render_structure_returns_one_segment_per_level():
     assert render_structure(("{yyyy}", "{mm}", "{dd}"), ctx()) == ("2019", "01", "03")
+
+
+# -- romanising names for the ASCII option -----------------------------------
+
+
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        # German, where dropping the mark makes a different word
+        ("Völki", "Voelki"),
+        ("Tabaksmühle", "Tabaksmuehle"),
+        ("Straße", "Strasse"),
+        ("Größe", "Groesse"),
+        ("Bärbel Müller-Weiß", "Baerbel Mueller-Weiss"),
+        # case follows the neighbour, so an all-caps word stays all caps
+        ("MÜNCHEN", "MUENCHEN"),
+        ("München", "Muenchen"),
+        ("Öl", "Oel"),
+        ("ÖL", "OEL"),
+        # Nordic and French
+        ("Ærø", "Aeroe"),
+        ("Œuvre", "Oeuvre"),
+        # dropping the accent is right here, and still happens
+        ("Café", "Cafe"),
+        ("Señor", "Senor"),
+        ("Ostern in Tirol", "Ostern in Tirol"),
+    ],
+)
+def test_ascii_folding_spells_out_what_an_accent_cannot_carry(text, expected):
+    assert fold_to_ascii(text) == expected
+
+
+def test_the_ascii_option_uses_it(tmp_path):
+    assert sanitise_segment("2026-06-18 Völki", ascii_only=True) == "2026-06-18 Voelki"
+    # and leaves the name alone when the option is off
+    assert sanitise_segment("2026-06-18 Völki") == "2026-06-18 Völki"
+
+
+def test_slugs_are_romanised_the_same_way():
+    assert slugify("Bärbel Müller-Weiß") == "baerbel-mueller-weiss"
+
+
+def test_folding_is_stable_when_run_twice():
+    """A second run must not turn Voelki into something else again."""
+    once = fold_to_ascii("Völki Straße MÜNCHEN")
+    assert fold_to_ascii(once) == once
