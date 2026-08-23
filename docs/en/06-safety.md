@@ -1,6 +1,6 @@
 # Safety and recovery
 
-**Revision r6.0.0 · Build date 2026-08-23**
+**Revision r6.1.0 · Build date 2026-08-23**
 
 > This tool edits your Lightroom catalog database and moves your photographs.
 > It is built carefully and it is tested, but **keep an independent, verified
@@ -62,7 +62,7 @@ leaves the database file byte-identical.
 ### 4. Journalled file moves
 
 Each move is recorded, flushed and `fsync`ed *before* it is attempted. See
-[how-it-works.md](how-it-works.md#the-journal).
+[08-how-it-works.md](08-how-it-works.md#the-journal).
 
 ### 5. Automatic rollback
 

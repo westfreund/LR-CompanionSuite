@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r6.0.0 · Build date 2026-08-23**
+**Revision r6.1.0 · Build date 2026-08-23**
 
 ## Safety and data
 
@@ -38,7 +38,7 @@ backup the run wrote. The journal path is printed at the end of every run.
 The catalog is committed *last*, so an interruption almost always leaves the
 database untouched while some files have moved. The journal tells you exactly
 how far it got, and `lrfc undo` puts the files back. See
-[safety.md](safety.md#the-run-was-interrupted-power-cut-forced-quit).
+[06-safety.md](06-safety.md#the-run-was-interrupted-power-cut-forced-quit).
 
 ### Can it overwrite one of my photos?
 
@@ -116,7 +116,7 @@ registered as an additional root folder in the catalog.
 Because ISO 8601 says so: a week belongs to the year containing its Thursday,
 so 30 December 2019 is week 1 of 2020. Always pair `{iso_week}` with
 `{iso_year}`, never with `{yyyy}`. See
-[structures.md](structures.md#iso-calendar-weeks).
+[05-structures.md](05-structures.md#iso-calendar-weeks).
 
 ### Can I get German month names?
 
@@ -212,7 +212,7 @@ Or check and repair the whole installation:
 
 ### Where are logs, profiles and backups?
 
-See [installation.md](installation.md#where-things-are-stored). Override with
+See [02-installation.md](02-installation.md#where-things-are-stored). Override with
 `LRFC_CONFIG_DIR`, `LRFC_LOG_DIR`, `LRFC_BACKUP_DIR`, `LRFC_REPORT_DIR`.
 
 ### What are `.lrcat-wal` and `.lrcat-shm`? Should I delete them?

@@ -1,6 +1,6 @@
 # Offene Punkte und Fahrplan
 
-**Revision r6.0.0 · Build-Datum 2026-08-23**
+**Revision r6.1.0 · Build-Datum 2026-08-23**
 
 Eine ehrliche Aufstellung dessen, was nicht erledigt, nicht verifiziert oder
 bewusst ausgelassen ist. Jeder Punkt ist ein Ansatzpunkt für die nächste
@@ -117,8 +117,8 @@ Für den Rest genügt „mach O-23, O-25 und O-26" — jeder Punkt unten enthäl
 genug, um damit zu beginnen.
 
 ### O-21 · Eine Seite zum Neuverknüpfen einer kopierten Bibliothek ✔ r5.0.0
-Geliefert als [vorbereitung.md](vorbereitung.md) /
-[before-you-start.md](../en/before-you-start.md), aus beiden Übersichten
+Geliefert als [03-vorbereitung.md](03-vorbereitung.md) /
+[before-you-start.md](../en/03-before-you-start.md), aus beiden Übersichten
 verlinkt. Die ursprüngliche Anforderung folgt.
 
 Ein Katalog merkt sich den **absoluten** Pfad seiner Stammordner. Kopiert man

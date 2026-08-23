@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r6.0.0 · Build-Datum 2026-08-23**
+**Revision r6.1.0 · Build-Datum 2026-08-23**
 
 ## Sicherheit und Daten
 
@@ -40,7 +40,7 @@ Laufs ausgegeben.
 Der Katalog wird *zuletzt* bestätigt. Eine Unterbrechung lässt die Datenbank
 also fast immer unberührt, während einige Dateien schon verschoben sind. Das
 Journal zeigt genau, wie weit es kam, und `lrfc undo` legt die Dateien zurück.
-Siehe [sicherheit.md](sicherheit.md#der-lauf-wurde-unterbrochen-stromausfall-erzwungenes-beenden).
+Siehe [06-sicherheit.md](06-sicherheit.md#der-lauf-wurde-unterbrochen-stromausfall-erzwungenes-beenden).
 
 ### Kann es eines meiner Fotos überschreiben?
 
@@ -123,7 +123,7 @@ entfernt; das Ziel wird als zusätzlicher Stammordner im Katalog registriert.
 Weil ISO 8601 es so vorsieht: Eine Woche gehört zu dem Jahr, in dem ihr
 Donnerstag liegt, der 30. Dezember 2019 ist also Woche 1 von 2020.
 `{iso_week}` deshalb immer mit `{iso_year}` kombinieren, nie mit `{yyyy}`.
-Siehe [strukturen.md](strukturen.md#iso-kalenderwochen).
+Siehe [05-strukturen.md](05-strukturen.md#iso-kalenderwochen).
 
 ### Bekomme ich deutsche Monatsnamen?
 
@@ -222,7 +222,7 @@ Oder die gesamte Installation prüfen und reparieren:
 
 ### Wo liegen Logdateien, Profile und Backups?
 
-Siehe [installation.md](installation.md#wo-was-abgelegt-wird). Überschreibbar
+Siehe [02-installation.md](02-installation.md#wo-was-abgelegt-wird). Überschreibbar
 mit `LRFC_CONFIG_DIR`, `LRFC_LOG_DIR`, `LRFC_BACKUP_DIR`, `LRFC_REPORT_DIR`.
 
 ### Was sind `.lrcat-wal` und `.lrcat-shm`? Soll ich die löschen?

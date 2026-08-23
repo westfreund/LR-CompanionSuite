@@ -1,6 +1,6 @@
 # Project history
 
-**Revision r6.0.0 · Build date 2026-08-23**
+**Revision r6.1.0 · Build date 2026-08-23**
 
 The [CHANGELOG](../../CHANGELOG.md) says what changed in each revision. This
 document says **why**, and what happened in between: the decisions taken, the
@@ -11,9 +11,31 @@ It is written for whoever picks the project up later — including a future
 version of its own authors — because the reasoning behind a fix is worth more
 than the fix, and none of it is recoverable from the code.
 
-Reconstructed retroactively on 2026-08-23 from the commit history, the
-changelog and the test records. Entries from that date onward are written as
-the work happens.
+## How this document came about, and what it can be trusted for
+
+It was written **retroactively on 2026-08-23**, not kept as the work went along.
+Entries from that date onward are written as the work happens.
+
+That distinction matters, so here is exactly what it rests on:
+
+| Part | Source | Reliable? |
+| --- | --- | --- |
+| Dates, order, what changed when | Commit history and tags | Yes — machine recorded |
+| What each revision contains | [CHANGELOG.md](../../CHANGELOG.md) | Yes — written at the time |
+| Test results and their numbers | Run output, quoted in the commits | Yes |
+| Reasoning, alternatives, what was learned | Reconstructed from the record | The account is faithful, but it is a narrative written afterwards |
+
+So it is a companion to the change history, not a replacement for it. **To trace
+an individual change**, use the tools that record it exactly:
+
+```bash
+git log --oneline --reverse          # every step, in order
+git show v5.0.0                      # what one revision was
+git log -p -- src/lrfoldercraft/planner.py    # one file's whole life
+```
+
+The CHANGELOG lists releases newest first. This document reads **forwards**,
+oldest first, because it is meant to be read as a story rather than looked up.
 
 ---
 
@@ -223,6 +245,30 @@ subcommand was silently ignored too, since r1.0.0.
 
 ---
 
+## 2026-08-23, afternoon — plain words
+
+Two questions from the user, each of which found a gap.
+
+**"Does the interface show which exceptions were found, so preferences can be
+set on them?"** — Only inadequately. Warnings sat on the same line as the
+counts, and the exceptions were *one* number, "skipped". That is as good as no
+report at all. **r6.0.0** gives each cause its own entry with the file count,
+examples and the option that governs it — a table of its own in the graphical
+interface, a section of its own on the command line.
+
+**"We have no history file."** — True. This document is the answer.
+
+Checking the new output turned up two old faults: `lrfc --lang de plan X` ran in
+English, because every sub-parser redeclares the global flags and their defaults
+overwrite what the top level already parsed (since r1.0.0, and `--debug` with
+it). And German messages used ASCII substitutes for umlauts while the graphical
+interface's own text used real ones — the two stood side by side on screen.
+
+**r6.1.0** numbered the documents by weight, at the user's request, with the
+same numbers in both languages.
+
+---
+
 ## What the real tests have shown
 
 | Date | Library | Photos | Result |
@@ -242,6 +288,6 @@ fixed.
 ## See also
 
 - [CHANGELOG.md](../../CHANGELOG.md) — what changed, per revision
-- [open-issues.md](open-issues.md) — what is known to be missing
-- [prompts.md](prompts.md) — the original brief and the regeneration prompt
-- [development.md](development.md) — how to continue the work
+- [13-open-issues.md](13-open-issues.md) — what is known to be missing
+- [14-prompts.md](14-prompts.md) — the original brief and the regeneration prompt
+- [10-development.md](10-development.md) — how to continue the work

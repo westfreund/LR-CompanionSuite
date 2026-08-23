@@ -1,6 +1,6 @@
 """Single source of truth for revision information.
 
-Versioning policy (see docs/en/versioning.md):
+Versioning policy (see docs/en/11-versioning.md):
   MAJOR  -- every feature extension is a major change (project rule).
   MINOR  -- behaviour-preserving improvements, docs, refactors.
   PATCH  -- bug fixes only.
@@ -11,7 +11,7 @@ every UI surface (TUI header, CLI banner, log header, reports).
 
 from __future__ import annotations
 
-__version__ = "6.0.0"
+__version__ = "6.1.0"
 __build_date__ = "2026-08-23"
 __codename__ = "Klartext"
 

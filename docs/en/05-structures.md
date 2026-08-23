@@ -1,6 +1,6 @@
 # Folder structures and tokens
 
-**Revision r6.0.0 · Build date 2026-08-23**
+**Revision r6.1.0 · Build date 2026-08-23**
 
 A **structure** is an ordered list of **levels**. Each level becomes one
 directory, and each level is a **template** made of literal text and
@@ -46,7 +46,7 @@ shorthand — anything a preset does you can also write out yourself.
 ### Date and time
 
 Values come from the photo's capture time (see
-[usage.md](usage.md#photos-without-a-capture-date) for how that is resolved).
+[04-usage.md](04-usage.md#photos-without-a-capture-date) for how that is resolved).
 
 | Token | Example | Meaning |
 | --- | --- | --- |

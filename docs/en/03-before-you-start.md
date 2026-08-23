@@ -1,6 +1,6 @@
 # Before you start
 
-**Revision r6.0.0 · Build date 2026-08-23**
+**Revision r6.1.0 · Build date 2026-08-23**
 
 Two things about your library have to be true before LR-FolderCraft touches
 anything. Neither is difficult, both are easy to overlook, and both were found
@@ -112,7 +112,7 @@ The list is here so the failures are not a surprise.
 
 ## See also
 
-- [usage.md](usage.md) — the commands and options
-- [safety.md](safety.md) — what the backup covers and how to undo a run
-- [faq.md](faq.md) — including what to do if Lightroom refuses to open a
+- [04-usage.md](04-usage.md) — the commands and options
+- [06-safety.md](06-safety.md) — what the backup covers and how to undo a run
+- [07-faq.md](07-faq.md) — including what to do if Lightroom refuses to open a
   catalog afterwards

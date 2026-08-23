@@ -1,6 +1,6 @@
 # Sicherheit und Wiederherstellung
 
-**Revision r6.0.0 · Build-Datum 2026-08-23**
+**Revision r6.1.0 · Build-Datum 2026-08-23**
 
 > Dieses Werkzeug bearbeitet die Lightroom-Katalogdatenbank und verschiebt Ihre
 > Fotografien. Es ist sorgfältig gebaut und getestet, aber: **Halten Sie vor
@@ -67,7 +67,7 @@ nichts und lässt die Datenbankdatei bitgleich zurück.
 ### 4. Journalisierte Verschiebungen
 
 Jede Bewegung wird protokolliert, geflusht und per `fsync` gesichert, *bevor*
-sie versucht wird. Siehe [funktionsweise.md](funktionsweise.md#das-journal).
+sie versucht wird. Siehe [08-funktionsweise.md](08-funktionsweise.md#das-journal).
 
 ### 5. Automatischer Rollback
 

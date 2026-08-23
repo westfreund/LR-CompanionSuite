@@ -1,6 +1,6 @@
 # Open issues and roadmap
 
-**Revision r6.0.0 · Build date 2026-08-23**
+**Revision r6.1.0 · Build date 2026-08-23**
 
 An honest list of what is not done, not verified, or deliberately left out.
 Each item is a starting point for the next session.
@@ -105,8 +105,8 @@ To pick up what is left, say "do O-23, O-25 and O-26" — each item below carrie
 enough detail to start from.
 
 ### O-21 · A page about reconnecting a copied library ✔ r5.0.0
-Delivered as [before-you-start.md](before-you-start.md) /
-[vorbereitung.md](../de/vorbereitung.md), linked from both indexes. The
+Delivered as [03-before-you-start.md](03-before-you-start.md) /
+[vorbereitung.md](../de/03-vorbereitung.md), linked from both indexes. The
 original requirement follows.
 
 A catalog records the **absolute** path of its root folders. Copy a library to

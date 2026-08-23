@@ -1,16 +1,16 @@
 # Prompts
 
-**Revision r6.0.0 · Build-Datum 2026-08-23**
+**Revision r6.1.0 · Build date 2026-08-23**
 
-Dieses Dokument bewahrt die Anfrage, aus der LR-FolderCraft entstanden ist,
-einen generischen Prompt zur Neuerzeugung eines vergleichbaren Werkzeugs sowie
-den Kontext, der zum Fortsetzen der Entwicklung nötig ist.
+This document preserves the request that created LR-FolderCraft, a generic
+prompt for regenerating a comparable tool from scratch, and the context needed
+to resume development.
 
 ---
 
-## 1. Der ursprüngliche Prompt (wörtlich)
+## 1. The original prompt (verbatim, German)
 
-Aufgezeichnet exakt so, wie er am 22.08.2026 gestellt wurde.
+Recorded exactly as given on 2026-08-22.
 
 ```text
 LR-FolderCraft
@@ -90,27 +90,22 @@ Lightroom-Bibliothek.
 /Volumes/1TB-2/Lightroom/2019/2019.lrcat
 ```
 
-### Gestellte Rückfragen und die gegebenen Antworten
+### Clarifying questions asked, and the answers given
 
-| Frage | Antwort |
+| Question | Answer |
 | --- | --- |
-| Wo sollen die neuen Tagesordner angelegt werden? | **Frei konfigurierbar, beides möglich** — umgesetzt als `in-place` (Standard) und `new-tree`. |
-| Welches TUI-Framework? | **Textual** — Widgets, Mausunterstützung, ein Weg zu einem Web-/GUI-Frontend. |
-| Welche Python-Mindestversion? | **3.9+**, damit macOS' eigenes `/usr/bin/python3` ohne Installation genügt. |
-| Wie weit beim Beispielkatalog gehen? | **Nur Analyse und Trockenlauf.** Der scharfe Lauf bleibt beim Anwender. |
+| Where should the new day folders be created? | **Freely configurable, both possible** — implemented as `in-place` (default) and `new-tree`. |
+| Which TUI framework? | **Textual** — widgets, mouse support, a path to a web/GUI front end. |
+| Minimum Python version? | **3.9+**, so macOS's own `/usr/bin/python3` works with no installation. |
+| How far to go with the sample catalog? | **Analysis and dry-run only.** The live run stays with the user. |
 
 ---
 
-## 2. Generischer Prompt zur Neuerzeugung
+## 2. Generic prompt for regenerating the tool
 
-Damit lässt sich ein vergleichbares Werkzeug von Grund auf neu bauen, in einer
-anderen Sprache oder mit einem anderen Technologiestapel. Er enthält die
-Anforderungen und — wichtiger — die mühsam erarbeiteten Erkenntnisse, damit
-dieselben Entdeckungen nicht noch einmal gemacht werden müssen.
-
-Der Prompt ist bewusst auf Englisch gehalten, weil er sich an ein
-Entwicklungswerkzeug richtet und die technischen Begriffe (Tabellen- und
-Spaltennamen des Lightroom-Katalogs) ohnehin englisch sind.
+Use this to have a comparable tool built from scratch, in another language or
+with another stack. It captures the requirements and, importantly, the hard-won
+findings — so the same discoveries do not have to be made again.
 
 ````text
 Build a cross-platform command line tool with a text user interface that
@@ -344,53 +339,51 @@ user's library without explicit consent. Commit and push at every milestone.
 
 ---
 
-## 3. Entwicklung fortsetzen
+## 3. Resuming development
 
-Der zum Weiterarbeiten nötige Kontext steht in
-[entwicklung.md](entwicklung.md) — aktueller Stand, was *nicht* erledigt ist,
-Teststrategie, wo welche Änderung hingehört und die vorbereitete
-GUI-Schnittstelle. [offene-punkte.md](offene-punkte.md) enthält den
-priorisierten Rückstand, die bereits getroffenen Entscheidungen und die noch
-offenen Fragen.
+The context needed to continue is kept in
+[10-development.md](10-development.md) — current state, what is *not* done, the test
+strategy, where to make which change, and the prepared GUI seam.
+[13-open-issues.md](13-open-issues.md) holds the prioritised backlog, the decisions
+already taken and the questions still open.
 
-### Die Kurzfassung
+### The short version
 
 ```bash
 git clone https://gitlab.com/andy-freund/LR-FolderCraft.git
 cd LR-FolderCraft && python3 -m venv .venv && source .venv/bin/activate
-python -m pip install -e '.[dev]' && pytest        # 270 Tests sollten grün sein
+python -m pip install -e '.[dev]' && pytest        # expect 270 passing
 ```
 
-Danach in dieser Reihenfolge lesen:
+Then read, in this order:
 
-1. `docs/de/entwicklung.md` — wo die Dinge stehen
-2. `docs/de/offene-punkte.md` — was als Nächstes ansteht (beginnend bei O-1)
-3. `docs/de/funktionsweise.md` — die Katalog-Interna
-4. `src/lrfoldercraft/planner.py` — das Herzstück des Werkzeugs
-5. `src/lrfoldercraft/folders.py` — wie vorhandene Ordner eingeordnet werden
-6. `src/lrfoldercraft/gui/app.py` — das Qt-Frontend, falls die Oberfläche dran ist
+1. `docs/en/10-development.md` — where things stand
+2. `docs/en/13-open-issues.md` — what to do next (start at O-1)
+3. `docs/en/08-how-it-works.md` — the catalog internals
+4. `src/lrfoldercraft/planner.py` — the heart of the tool
+5. `src/lrfoldercraft/folders.py` — how existing folders are classified
+6. `src/lrfoldercraft/gui/app.py` — the Qt front end, if you touch the interface
 
-### Prompt zum Fortsetzen mit einem KI-Assistenten
+### Prompt for resuming with an AI assistant
 
 ```text
-Setze die Arbeit an LR-FolderCraft fort, einem Python-Werkzeug, das
-Ordnerstrukturen von Adobe Lightroom Classic neu sortiert, indem es den
-SQLite-Katalog (.lrcat) umschreibt und dabei die Dateien verschiebt. Das
-Repository liegt unter https://gitlab.com/andy-freund/LR-FolderCraft.
+Continue work on LR-FolderCraft, a Python tool that reorganises Adobe Lightroom
+Classic folder trees by rewriting the .lrcat SQLite catalog while moving the
+files. The repository is at https://gitlab.com/andy-freund/LR-FolderCraft.
 
-Lies zuerst: docs/de/entwicklung.md (aktueller Stand und was NICHT erledigt
-ist), docs/de/offene-punkte.md (der Rückstand, Punkte ab O-1 nummeriert) und
-docs/de/funktionsweise.md (Katalog-Interna und Ausführungsreihenfolge).
+Read these first: docs/en/10-development.md (current state and what is NOT done),
+docs/en/13-open-issues.md (the backlog, with items numbered O-1 onwards) and
+docs/en/08-how-it-works.md (the catalog internals and the execution order).
 
-Konventionen: Python-3.9-Basis mit `from __future__ import annotations`; kein
-Kernmodul darf aus cli oder tui importieren; jede Zustandsänderung läuft über
-logging_setup.step(); jede Feature-Erweiterung erhöht die Hauptversion; die
-gesamte Dokumentation existiert auf Englisch und Deutsch und beide Fassungen
-sind gemeinsam zu pflegen; zu jedem Meilenstein committen und pushen.
+Conventions: Python 3.9 baseline with `from __future__ import annotations`;
+no core module may import from cli or tui; every state change goes through
+logging_setup.step(); every feature extension is a MAJOR version bump; all
+documentation exists in English and German and both must be updated together;
+commit and push at every milestone.
 
-Bevor du den Executor änderst, stelle sicher, dass
+Before changing the executor, make sure
 tests/test_executor.py::test_rollback_restores_everything_when_a_move_fails
-weiterhin grün ist — es ist der wichtigste Test der Suite.
+still passes — it is the most important test in the suite.
 
-<hier beschreiben, was zu tun ist>
+<state what you want done>
 ```

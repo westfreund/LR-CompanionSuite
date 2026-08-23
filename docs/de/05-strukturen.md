@@ -1,6 +1,6 @@
 # Ordnerstrukturen und Platzhalter
 
-**Revision r6.0.0 · Build-Datum 2026-08-23**
+**Revision r6.1.0 · Build-Datum 2026-08-23**
 
 Eine **Struktur** ist eine geordnete Liste von **Ebenen**. Jede Ebene wird zu
 einem Verzeichnis, und jede Ebene ist ein **Template** aus festem Text und
@@ -48,7 +48,7 @@ selbst schreiben.
 ### Datum und Uhrzeit
 
 Die Werte stammen aus der Aufnahmezeit des Fotos (wie sie ermittelt wird, steht
-in [bedienung.md](bedienung.md#fotos-ohne-aufnahmedatum)).
+in [04-bedienung.md](04-bedienung.md#fotos-ohne-aufnahmedatum)).
 
 | Platzhalter | Beispiel | Bedeutung |
 | --- | --- | --- |

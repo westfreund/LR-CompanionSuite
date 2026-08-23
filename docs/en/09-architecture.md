@@ -1,6 +1,6 @@
 # Architecture
 
-**Revision r6.0.0 · Build date 2026-08-23**
+**Revision r6.1.0 · Build date 2026-08-23**
 
 ## Guiding rule
 
@@ -137,7 +137,7 @@ planner so a front end can show them live while the user is still choosing.
 ### `executor.py`
 
 The only module that changes anything. Owns the ordering described in
-[how-it-works.md](how-it-works.md#the-execution-order), the rollback, the
+[08-how-it-works.md](08-how-it-works.md#the-execution-order), the rollback, the
 cross-volume verified copy and `undo`.
 
 ### `report.py`
@@ -178,7 +178,7 @@ CatalogInfo
 3. If it needs new catalog data, extend `Photo` and the query in `reader.py`.
 4. Optionally add a preset to `PRESETS` and `PRESET_DESCRIPTIONS`.
 5. Add a case to `tests/test_rules.py::test_tokens_render`.
-6. Bump the **major** version — see [versioning.md](versioning.md).
+6. Bump the **major** version — see [11-versioning.md](11-versioning.md).
 
 Nothing else needs to change: the CLI, the TUI, the docs tables and the help
 output are all generated from `TOKEN_SPECS`.

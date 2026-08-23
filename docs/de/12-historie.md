@@ -1,6 +1,6 @@
 # Projekthistorie
 
-**Revision r6.0.0 · Build-Datum 2026-08-23**
+**Revision r6.1.0 · Build-Datum 2026-08-23**
 
 Der [CHANGELOG](../../CHANGELOG.md) sagt, was sich in jeder Revision geändert
 hat. Dieses Dokument sagt **warum**, und was dazwischen geschah: die getroffenen
@@ -8,13 +8,37 @@ Entscheidungen, die Tests an echten Bibliotheken und die vier Gelegenheiten, bei
 denen das Werkzeug auf eine Weise falsch lag, die zählte.
 
 Es ist für den geschrieben, der das Projekt später aufnimmt — einschließlich
-einer künftigen Fassung seiner eigenen Autoren — denn die Begründung eines
+einer künftigen Fassung seiner eigenen Autoren — denn die Begründung einer
 Fehlerbehebung ist mehr wert als die Behebung selbst, und nichts davon lässt
 sich aus dem Code zurückgewinnen.
 
-Am 23.08.2026 rückwirkend aus Commit-Historie, Changelog und den
-Testaufzeichnungen rekonstruiert. Einträge ab diesem Datum entstehen begleitend
-zur Arbeit.
+## Wie dieses Dokument entstand, und wofür es taugt
+
+Es wurde **am 23.08.2026 rückwirkend** geschrieben, nicht begleitend geführt.
+Einträge ab diesem Datum entstehen begleitend zur Arbeit.
+
+Dieser Unterschied zählt, deshalb genau, worauf es fußt:
+
+| Teil | Quelle | Belastbar? |
+| --- | --- | --- |
+| Daten, Reihenfolge, was wann geändert wurde | Commit-Historie und Tags | Ja — maschinell festgehalten |
+| Was jede Revision enthält | [CHANGELOG.md](../../CHANGELOG.md) | Ja — seinerzeit geschrieben |
+| Testergebnisse und ihre Zahlen | Lauf-Ausgaben, in den Commits zitiert | Ja |
+| Begründungen, Alternativen, Gelerntes | Aus dem Bestand rekonstruiert | Die Darstellung ist wahrheitsgetreu, aber im Nachhinein verfasst |
+
+Es ist also eine Ergänzung zur Änderungshistorie, kein Ersatz. **Um eine
+einzelne Änderung nachzuverfolgen**, nehmen Sie die Werkzeuge, die sie exakt
+festhalten:
+
+```bash
+git log --oneline --reverse          # jeder Schritt, der Reihe nach
+git show v5.0.0                      # was eine Revision war
+git log -p -- src/lrfoldercraft/planner.py    # das ganze Leben einer Datei
+```
+
+Der CHANGELOG listet Releases neueste zuerst. Dieses Dokument liest sich
+**vorwärts**, ältestes zuerst, weil es als Erzählung gedacht ist und nicht zum
+Nachschlagen.
 
 ---
 
@@ -242,6 +266,33 @@ wurde stillschweigend ignoriert — seit r1.0.0.
 
 ---
 
+## 23.08.2026, nachmittags — Klartext
+
+Zwei Fragen des Auftraggebers, die je eine Lücke trafen.
+
+**„Wird nach dem Plandurchlauf ausgewiesen, welche Ausnahmen gefunden wurden,
+damit man darauf seine Präferenzen hinterlegen kann?"** — Nur unzureichend.
+Warnungen standen in derselben Zeile wie die Zahlen, und die Ausnahmen waren
+*eine* Zahl „Übersprungen". Das ist so gut wie keine Auskunft. **r6.0.0** gibt
+jeder Ursache einen eigenen Eintrag mit Dateizahl, Beispielen und der Option,
+die sie steuert — in der GUI eine eigene Tabelle, in der CLI eine eigene
+Rubrik.
+
+**„Wir haben keine Historie-Datei."** — Stimmte. Dieses Dokument ist die
+Antwort darauf.
+
+Beim Prüfen der neuen Ausgabe fielen zwei Altlasten auf: `lrfc --lang de plan X`
+lief auf Englisch, weil jeder Unterbefehl die globalen Schalter neu deklariert
+und deren Vorgaben überschreiben, was die oberste Ebene bereits geparst hatte
+(seit r1.0.0, `--debug` ebenso). Und die deutschen Meldungen benutzten „ue/oe/ae"
+statt Umlauten, während die GUI-Texte echte verwendeten — auf dem Bildschirm
+standen beide nebeneinander.
+
+**r6.1.0** nummerierte die Dokumente nach Gewichtung, auf Wunsch des
+Auftraggebers, in beiden Sprachen mit denselben Nummern.
+
+---
+
 ## Was die echten Tests gezeigt haben
 
 | Datum | Bibliothek | Fotos | Ergebnis |
@@ -261,6 +312,6 @@ sie behoben zu halten.
 ## Siehe auch
 
 - [CHANGELOG.md](../../CHANGELOG.md) — was sich je Revision geändert hat
-- [offene-punkte.md](offene-punkte.md) — was bekanntermaßen fehlt
-- [prompts.md](prompts.md) — der ursprüngliche Auftrag und der generische Prompt
-- [entwicklung.md](entwicklung.md) — wie die Arbeit fortgesetzt wird
+- [13-offene-punkte.md](13-offene-punkte.md) — was bekanntermaßen fehlt
+- [14-prompts.md](14-prompts.md) — der ursprüngliche Auftrag und der generische Prompt
+- [10-entwicklung.md](10-entwicklung.md) — wie die Arbeit fortgesetzt wird

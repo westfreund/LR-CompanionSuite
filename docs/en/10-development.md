@@ -1,6 +1,6 @@
 # Development and continuation
 
-**Revision r6.0.0 · Build date 2026-08-23**
+**Revision r6.1.0 · Build date 2026-08-23**
 
 This document exists so that work can be picked up later — by you, by someone
 else, or by an AI assistant — without reconstructing context from the code.
@@ -168,7 +168,7 @@ refactor: / test: / chore:    bump MINOR at most
 release: rX.Y.Z — <summary>
 ```
 
-Release steps are in [versioning.md](versioning.md).
+Release steps are in [11-versioning.md](11-versioning.md).
 
 ## The three front ends
 
@@ -194,4 +194,4 @@ Run the Qt tests headless with `QT_QPA_PLATFORM=offscreen pytest tests/test_gui.
 
 ## Roadmap
 
-See [open-issues.md](open-issues.md) for the prioritised list.
+See [13-open-issues.md](13-open-issues.md) for the prioritised list.

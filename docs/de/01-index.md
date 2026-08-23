@@ -1,6 +1,6 @@
 # LR-FolderCraft — Überblick
 
-**Revision r6.0.0 · Build-Datum 2026-08-23**
+**Revision r6.1.0 · Build-Datum 2026-08-23**
 
 LR-FolderCraft sortiert die Ordnerstruktur einer Adobe-Lightroom-Classic-
 Bibliothek neu. Es verschiebt die Bilddateien auf dem Datenträger und schreibt
@@ -23,7 +23,7 @@ Lightroom Classic bietet keinen programmierbaren Weg dafür:
 Bleibt nur, die Katalogdatenbank direkt zu ändern, während Lightroom
 geschlossen ist. Genau das tut LR-FolderCraft — eng begrenzt, transaktional und
 umkehrbar. Welche Zeilen genau angefasst werden, steht in
-[funktionsweise.md](funktionsweise.md).
+[08-funktionsweise.md](08-funktionsweise.md).
 
 ## Was erhalten bleibt
 
@@ -45,24 +45,34 @@ dieser Wert ändert sich nie. Deshalb überlebt alles, was daran hängt:
 
 ## Dokumente
 
-- [installation.md](installation.md) — Installation unter macOS, Windows, Linux
-- [vorbereitung.md](vorbereitung.md) — **zuerst lesen**: Ordner verknüpfen und
-  Katalog konvertieren
-- [bedienung.md](bedienung.md) — alle Befehle, alle Optionen, Beispiele
-- [strukturen.md](strukturen.md) — Vorlagen und die vollständige Platzhalterliste
-- [funktionsweise.md](funktionsweise.md) — die Katalog-Interna
-- [sicherheit.md](sicherheit.md) — Backups, Rollback, Undo, Wiederherstellung
-- [architektur.md](architektur.md) — der Aufbau des Codes
-- [entwicklung.md](entwicklung.md) — wie die Arbeit fortgesetzt wird
-- [versionierung.md](versionierung.md) — das Revisionsschema
-- [historie.md](historie.md) — warum das Projekt so verlief, wie es verlief
-- [faq.md](faq.md) — häufige Fragen
-- [offene-punkte.md](offene-punkte.md) — bekannte Grenzen und Fahrplan
-- [prompts.md](prompts.md) — ursprünglicher und generischer Prompt
+Nach Gewichtung nummeriert: je kleiner die Zahl, desto eher wird sie gebraucht.
+
+**Das Werkzeug benutzen**
+
+- [02-installation.md](02-installation.md) — Installation unter macOS, Windows, Linux
+- [03-vorbereitung.md](03-vorbereitung.md) — **zuerst lesen**: Ordner verknüpfen
+  und Katalog konvertieren
+- [04-bedienung.md](04-bedienung.md) — alle Befehle, alle Optionen, Beispiele
+- [05-strukturen.md](05-strukturen.md) — Vorlagen und die vollständige Platzhalterliste
+- [06-sicherheit.md](06-sicherheit.md) — Sicherung, Rückabwicklung, Wiederherstellung
+- [07-faq.md](07-faq.md) — häufige Fragen
+
+**Es verstehen**
+
+- [08-funktionsweise.md](08-funktionsweise.md) — die Katalog-Interna
+- [09-architektur.md](09-architektur.md) — der Aufbau des Codes
+
+**Die Arbeit fortsetzen**
+
+- [10-entwicklung.md](10-entwicklung.md) — wie das Projekt aufgenommen wird
+- [11-versionierung.md](11-versionierung.md) — das Revisionsschema
+- [12-historie.md](12-historie.md) — warum das Projekt so verlief, wie es verlief
+- [13-offene-punkte.md](13-offene-punkte.md) — bekannte Grenzen und Fahrplan
+- [14-prompts.md](14-prompts.md) — ursprünglicher und generischer Prompt
 
 ## Die drei Befehle, die man braucht
 
-Zuvor zwei Voraussetzungen — siehe [vorbereitung.md](vorbereitung.md): jeder
+Zuvor zwei Voraussetzungen — siehe [03-vorbereitung.md](03-vorbereitung.md): jeder
 Ordner in Lightroom verknüpft, und der Katalog einmal mit dem aktuellen
 Lightroom Classic geöffnet.
 

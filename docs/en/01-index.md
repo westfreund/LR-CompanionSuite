@@ -1,6 +1,6 @@
 # LR-FolderCraft — Overview
 
-**Revision r6.0.0 · Build date 2026-08-23**
+**Revision r6.1.0 · Build date 2026-08-23**
 
 LR-FolderCraft reorganises the folder tree of an Adobe Lightroom Classic
 library. It moves the image files on disk and rewrites the catalog in the same
@@ -19,7 +19,7 @@ Lightroom Classic offers no programmable way to do this:
 
 The only remaining route is to change the catalog database directly while
 Lightroom is closed. That is what LR-FolderCraft does — narrowly, transactionally
-and reversibly. See [how-it-works.md](how-it-works.md) for exactly which rows
+and reversibly. See [08-how-it-works.md](08-how-it-works.md) for exactly which rows
 are touched.
 
 ## What is preserved
@@ -42,24 +42,34 @@ that value never changes, everything hanging off it survives:
 
 ## Documents
 
-- [installation.md](installation.md) — install on macOS, Windows and Linux
-- [before-you-start.md](before-you-start.md) — **read this first**: reconnecting
-  folders and converting the catalog
-- [usage.md](usage.md) — every command, every option, worked examples
-- [structures.md](structures.md) — presets and the full token reference
-- [how-it-works.md](how-it-works.md) — the catalog internals
-- [safety.md](safety.md) — backups, rollback, undo, recovery
-- [architecture.md](architecture.md) — the code layout
-- [development.md](development.md) — how to continue the work
-- [versioning.md](versioning.md) — the revision scheme
-- [history.md](history.md) — why the project went the way it did
-- [faq.md](faq.md) — frequently asked questions
-- [open-issues.md](open-issues.md) — known limits and the roadmap
-- [prompts.md](prompts.md) — original and generic regeneration prompt
+Numbered by weight: the lower the number, the sooner you are likely to need it.
+
+**Using the tool**
+
+- [02-installation.md](02-installation.md) — install on macOS, Windows and Linux
+- [03-before-you-start.md](03-before-you-start.md) — **read this first**:
+  reconnecting folders and converting the catalog
+- [04-usage.md](04-usage.md) — every command, every option, worked examples
+- [05-structures.md](05-structures.md) — presets and the full token reference
+- [06-safety.md](06-safety.md) — backups, rollback, undo, recovery
+- [07-faq.md](07-faq.md) — frequently asked questions
+
+**Understanding it**
+
+- [08-how-it-works.md](08-how-it-works.md) — the catalog internals
+- [09-architecture.md](09-architecture.md) — the code layout
+
+**Continuing the work**
+
+- [10-development.md](10-development.md) — how to pick the project up
+- [11-versioning.md](11-versioning.md) — the revision scheme
+- [12-history.md](12-history.md) — why the project went the way it did
+- [13-open-issues.md](13-open-issues.md) — known limits and the roadmap
+- [14-prompts.md](14-prompts.md) — original and generic regeneration prompt
 
 ## The three commands you need
 
-Two preconditions first — see [before-you-start.md](before-you-start.md): every
+Two preconditions first — see [03-before-you-start.md](03-before-you-start.md): every
 folder connected in Lightroom, and the catalog opened once with your current
 Lightroom Classic.
 

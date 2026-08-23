@@ -1,6 +1,6 @@
 # Vorbereitung
 
-**Revision r6.0.0 · Build-Datum 2026-08-23**
+**Revision r6.1.0 · Build-Datum 2026-08-23**
 
 Zwei Dinge müssen für Ihre Bibliothek zutreffen, bevor LR-FolderCraft etwas
 anfasst. Keines davon ist schwierig, beide werden leicht übersehen, und beide
@@ -117,8 +117,8 @@ ist.
 
 ## Siehe auch
 
-- [bedienung.md](bedienung.md) — die Befehle und Optionen
-- [sicherheit.md](sicherheit.md) — was die Sicherung abdeckt und wie ein Lauf
+- [04-bedienung.md](04-bedienung.md) — die Befehle und Optionen
+- [06-sicherheit.md](06-sicherheit.md) — was die Sicherung abdeckt und wie ein Lauf
   rückgängig gemacht wird
-- [faq.md](faq.md) — unter anderem, was zu tun ist, wenn Lightroom einen
+- [07-faq.md](07-faq.md) — unter anderem, was zu tun ist, wenn Lightroom einen
   Katalog danach nicht öffnen will

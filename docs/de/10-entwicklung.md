@@ -1,6 +1,6 @@
 # Entwicklung und Fortsetzung
 
-**Revision r6.0.0 · Build-Datum 2026-08-23**
+**Revision r6.1.0 · Build-Datum 2026-08-23**
 
 Dieses Dokument existiert, damit die Arbeit später fortgesetzt werden kann —
 von Ihnen, von jemand anderem oder von einem KI-Assistenten — ohne den Kontext
@@ -178,7 +178,7 @@ refactor: / test: / chore:     höchstens MINOR erhöhen
 release: rX.Y.Z — <Zusammenfassung>
 ```
 
-Die Release-Schritte stehen in [versionierung.md](versionierung.md).
+Die Release-Schritte stehen in [11-versionierung.md](11-versionierung.md).
 
 ## Die drei Frontends
 
@@ -205,4 +205,4 @@ Die Qt-Tests laufen ohne Bildschirm mit
 
 ## Fahrplan
 
-Die priorisierte Liste steht in [offene-punkte.md](offene-punkte.md).
+Die priorisierte Liste steht in [13-offene-punkte.md](13-offene-punkte.md).

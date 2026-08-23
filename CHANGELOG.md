@@ -4,15 +4,44 @@ All notable changes to LR-FolderCraft are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows the project rule that **every feature extension is a major
-change** — see [docs/en/versioning.md](docs/en/versioning.md).
+change** — see [docs/en/11-versioning.md](docs/en/11-versioning.md).
 
 For **why** each change was made, and what happened between the releases, see
-[docs/en/history.md](docs/en/history.md) /
-[docs/de/historie.md](docs/de/historie.md).
+[docs/en/12-history.md](docs/en/12-history.md) /
+[docs/de/12-historie.md](docs/de/12-historie.md).
 
 Alle wesentlichen Änderungen an LR-FolderCraft sind hier dokumentiert. Die
 Versionierung folgt der Projektregel, dass **jede Feature-Erweiterung eine
-große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierung.md).
+große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versionierung.md).
+
+---
+
+## [6.1.0] — 2026-08-23
+
+### Changed
+
+- **The documents are numbered by weight**, at the user's request: the lower the
+  number, the sooner a reader is likely to need it. Both languages carry the
+  same numbers, so `04-usage.md` and `04-bedienung.md` are the same document.
+  Renamed with `git mv`, so each file's history follows it. All 174 internal
+  links were rewritten and verified.
+
+- **The history document now states its own provenance.** It was written
+  retroactively, and says so in a table separating what is machine-recorded
+  (dates, order, revision contents, test output) from what is a narrative
+  written afterwards (reasoning, alternatives, lessons) — with the `git`
+  commands to trace an individual change exactly.
+
+### Fixed
+
+- Two upper-case German headings still using ASCII substitutes for umlauts,
+  missed by the r6.0.0 pass because it matched lower case.
+
+- Photos with no usable capture date were filed into the unsorted folder without
+  a word about it. Routing a dateless photo somewhere is a decision the tool
+  made for the operator, so it now appears in the findings list with the option
+  that governs it, like every other one. Two such photos exist in the master
+  catalog.
 
 ---
 
@@ -41,8 +70,8 @@ Saying what the plan could not decide on its own.
   crammed onto it. The command line plan report gained the same list.
 
 - **A project history** in both languages,
-  [docs/en/history.md](docs/en/history.md) /
-  [docs/de/historie.md](docs/de/historie.md), reconstructed retroactively. The
+  [docs/en/12-history.md](docs/en/12-history.md) /
+  [docs/de/12-historie.md](docs/de/12-historie.md), reconstructed retroactively. The
   changelog says what changed; this says why, and what happened in between —
   the decisions and their reasoning, the tests against real libraries, and the
   four occasions on which the tool was wrong in a way that mattered. None of it
@@ -118,8 +147,8 @@ the vocabulary the tool had.
   `--no-move-log` and `--move-log-dir` control it.
 
 - **A preparation page** in both languages (O-21, O-22):
-  [before-you-start.md](docs/en/before-you-start.md) /
-  [vorbereitung.md](docs/de/vorbereitung.md) — reconnecting a library whose
+  [before-you-start.md](docs/en/03-before-you-start.md) /
+  [vorbereitung.md](docs/de/03-vorbereitung.md) — reconnecting a library whose
   drive was renamed or restored, and converting the catalog to the installed
   Lightroom Classic first. Linked from both indexes.
 
@@ -700,6 +729,6 @@ because the same traps await anyone working on this kind of tool:
 
 ### Known limits
 
-See [docs/en/open-issues.md](docs/en/open-issues.md).
+See [docs/en/13-open-issues.md](docs/en/13-open-issues.md).
 
 [1.0.0]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v1.0.0

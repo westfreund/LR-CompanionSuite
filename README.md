@@ -2,7 +2,7 @@
 
 **Reorganise Adobe Lightroom Classic folder trees — without losing the catalog connection.**
 
-[![Revision](https://img.shields.io/badge/revision-r6.0.0-blue)](CHANGELOG.md)
+[![Revision](https://img.shields.io/badge/revision-r6.1.0-blue)](CHANGELOG.md)
 [![Build date](https://img.shields.io/badge/build-2026--08--23-lightgrey)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20GPL--3.0--or--later-green)](LICENSE)
@@ -92,7 +92,7 @@ Run `lrfc presets` for the full list, `lrfc tokens` for every placeholder.
 `2019-04-15 Ostern in Tirol` are recognised and, by default, dated folders keep
 their name and their photos. `--interactive` asks you about each folder;
 `--subfolder-action`, `--dated-folder-action` and `--folder-action ID=ACTION`
-set it without being asked. See [usage.md](docs/en/usage.md).
+set it without being asked. See [usage.md](docs/en/04-usage.md).
 
 Any combination works — separate levels with `/`:
 
@@ -127,7 +127,7 @@ leave you with a half-sorted library:
 Existing files are never overwritten. A name collision is resolved by renaming
 (and the catalog is updated to match), or you can choose `--conflict skip`.
 
-**Always keep an independent backup anyway.** See [docs/en/safety.md](docs/en/safety.md).
+**Always keep an independent backup anyway.** See [docs/en/06-safety.md](docs/en/06-safety.md).
 
 ## Requirements
 
@@ -144,18 +144,18 @@ The command line needs nothing but the standard library. `lrfc tui` adds
 
 | | English | Deutsch |
 | --- | --- | --- |
-| Overview | [docs/en/index.md](docs/en/index.md) | [docs/de/index.md](docs/de/index.md) |
-| Installation | [installation.md](docs/en/installation.md) | [installation.md](docs/de/installation.md) |
-| Usage | [usage.md](docs/en/usage.md) | [bedienung.md](docs/de/bedienung.md) |
-| Structures & tokens | [structures.md](docs/en/structures.md) | [strukturen.md](docs/de/strukturen.md) |
-| How it works | [how-it-works.md](docs/en/how-it-works.md) | [funktionsweise.md](docs/de/funktionsweise.md) |
-| Safety & recovery | [safety.md](docs/en/safety.md) | [sicherheit.md](docs/de/sicherheit.md) |
-| Architecture | [architecture.md](docs/en/architecture.md) | [architektur.md](docs/de/architektur.md) |
-| Development | [development.md](docs/en/development.md) | [entwicklung.md](docs/de/entwicklung.md) |
-| Versioning | [versioning.md](docs/en/versioning.md) | [versionierung.md](docs/de/versionierung.md) |
-| FAQ | [faq.md](docs/en/faq.md) | [faq.md](docs/de/faq.md) |
-| Open issues | [open-issues.md](docs/en/open-issues.md) | [offene-punkte.md](docs/de/offene-punkte.md) |
-| Prompts | [prompts.md](docs/en/prompts.md) | [prompts.md](docs/de/prompts.md) |
+| Overview | [docs/en/01-index.md](docs/en/01-index.md) | [docs/de/01-index.md](docs/de/01-index.md) |
+| Installation | [installation.md](docs/en/02-installation.md) | [installation.md](docs/de/02-installation.md) |
+| Usage | [usage.md](docs/en/04-usage.md) | [bedienung.md](docs/de/04-bedienung.md) |
+| Structures & tokens | [structures.md](docs/en/05-structures.md) | [strukturen.md](docs/de/05-strukturen.md) |
+| How it works | [how-it-works.md](docs/en/08-how-it-works.md) | [funktionsweise.md](docs/de/08-funktionsweise.md) |
+| Safety & recovery | [safety.md](docs/en/06-safety.md) | [sicherheit.md](docs/de/06-sicherheit.md) |
+| Architecture | [architecture.md](docs/en/09-architecture.md) | [architektur.md](docs/de/09-architektur.md) |
+| Development | [development.md](docs/en/10-development.md) | [entwicklung.md](docs/de/10-entwicklung.md) |
+| Versioning | [versioning.md](docs/en/11-versioning.md) | [versionierung.md](docs/de/11-versionierung.md) |
+| FAQ | [faq.md](docs/en/07-faq.md) | [faq.md](docs/de/07-faq.md) |
+| Open issues | [open-issues.md](docs/en/13-open-issues.md) | [offene-punkte.md](docs/de/13-offene-punkte.md) |
+| Prompts | [prompts.md](docs/en/14-prompts.md) | [prompts.md](docs/de/14-prompts.md) |
 
 ## License
 

@@ -1,6 +1,6 @@
 # Architektur
 
-**Revision r6.0.0 · Build-Datum 2026-08-23**
+**Revision r6.1.0 · Build-Datum 2026-08-23**
 
 ## Leitregel
 
@@ -143,7 +143,7 @@ getrennt, damit ein Frontend sie schon während der Auswahl anzeigen kann.
 ### `executor.py`
 
 Das einzige Modul, das etwas verändert. Verantwortlich für die in
-[funktionsweise.md](funktionsweise.md#die-ausführungsreihenfolge) beschriebene
+[08-funktionsweise.md](08-funktionsweise.md#die-ausführungsreihenfolge) beschriebene
 Reihenfolge, den Rollback, die verifizierte Volume-übergreifende Kopie und
 `undo`.
 
@@ -187,7 +187,7 @@ CatalogInfo
    erweitern.
 4. Optional eine Vorlage in `PRESETS` und `PRESET_DESCRIPTIONS` ergänzen.
 5. Einen Fall in `tests/test_rules.py::test_tokens_render` ergänzen.
-6. Die **Hauptversion** erhöhen — siehe [versionierung.md](versionierung.md).
+6. Die **Hauptversion** erhöhen — siehe [11-versionierung.md](11-versionierung.md).
 
 Mehr ist nicht nötig: CLI, TUI, die Tabellen in der Dokumentation und die
 Hilfeausgabe werden alle aus `TOKEN_SPECS` erzeugt.
