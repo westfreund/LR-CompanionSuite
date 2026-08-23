@@ -1,6 +1,6 @@
 # Installation
 
-**Revision r3.0.2 · Build-Datum 2026-08-23**
+**Revision r4.0.0 · Build-Datum 2026-08-23**
 
 LR-FolderCraft ist ein Python-Paket. Die Installationsskripte legen eine
 isolierte virtuelle Umgebung an, sodass am System-Python nichts verändert wird.
@@ -48,12 +48,50 @@ Optionen:
 | --- | --- |
 | `--no-tui` | nur Kommandozeile, ohne Textual |
 | `--with-gui` | zusätzlich PySide6 für `lrfc gui` (rund 100 MB) |
+| `--no-gui` | nicht nach der grafischen Oberfläche fragen |
+| `--check` | Installation prüfen und Fehlendes nachinstallieren |
+| `--recreate` | Umgebung von Grund auf neu bauen |
 | `--prefix VERZ` | anderes Installationsverzeichnis |
 | `--bin VERZ` | anderes Starterverzeichnis |
 | `--no-path` | die Shell-Startdatei nicht anfassen |
 | `--uninstall` | Umgebung, Starter und PATH-Zeile entfernen |
 
 Mit `--no-path` gibt das Skript die Zeile nur aus, statt sie selbst zu setzen.
+
+### Was das Installationsskript prüft
+
+Es installiert nicht nur, es verifiziert — und nennt nur Oberflächen, die
+tatsächlich funktionieren:
+
+1. sucht ein Python ≥ 3.9 und stellt sicher, dass `venv` und `sqlite3` da sind,
+2. verwendet eine vorhandene Umgebung weiter oder legt eine an (`--recreate`
+   erzwingt einen Neuaufbau),
+3. installiert LR-FolderCraft und **aktualisiert** dabei alles bereits
+   Vorhandene, das veraltet ist,
+4. installiert jede gewünschte Oberfläche und **importiert sie anschließend**,
+   um zu belegen, dass sie läuft,
+5. merkt sich, welche Oberflächen zu dieser Installation gehören, damit eine
+   spätere Reparatur „nie gewollt" von „kaputt" unterscheiden kann,
+6. nimmt den Starter in den PATH auf,
+7. listet die wirklich verfügbaren Oberflächen auf und gibt für fehlende den
+   genauen Befehl zum Nachrüsten aus.
+
+Scheitert ein Bestandteil, nennt das Skript welcher, warum, und was von Hand zu
+tun ist — statt Erfolg zu melden und Sie es bei `lrfc gui` herausfinden zu
+lassen.
+
+### Eine Installation reparieren
+
+```bash
+./install/install-macos.sh --check
+```
+
+Prüft die Umgebung und installiert nach, was fehlt, ohne Funktionierendes
+anzufassen. Es meldet auch, wenn von einem Bestandteil eine neuere Fassung
+vorliegt; ohne `--check` erneut ausführen, um sie zu übernehmen.
+
+Das Skript erneut auszuführen ist immer unbedenklich: Es verwendet die
+Umgebung weiter, hebt Veraltetes an und dupliziert nichts.
 
 ### Kein Python vorhanden?
 
@@ -79,7 +117,9 @@ nach `%LOCALAPPDATA%\Programs\bin` und ergänzt dieses Verzeichnis im
 **Benutzer**-PATH (nicht im System-PATH). **Danach ein neues Terminalfenster
 öffnen**, damit die PATH-Änderung wirkt.
 
-Optionen: `-NoTui`, `-Prefix VERZ`, `-BinDir VERZ`, `-Uninstall`.
+Optionen: `-NoTui`, `-WithGui`, `-NoGui`, `-Check`, `-Recreate`, `-Prefix VERZ`,
+`-BinDir VERZ`, `-Uninstall`. Es prüft und repariert genauso wie das
+macOS-Skript.
 
 ### Kein Python vorhanden?
 

@@ -19,6 +19,15 @@
 .PARAMETER WithGui
     Also install PySide6 so that `lrfc gui` works. About 100 MB.
 
+.PARAMETER NoGui
+    Never ask about the graphical interface.
+
+.PARAMETER Check
+    Verify an existing installation and repair whatever is missing.
+
+.PARAMETER Recreate
+    Build the virtual environment from scratch instead of reusing it.
+
 .PARAMETER Uninstall
     Remove a previous installation.
 
@@ -35,6 +44,9 @@ param(
     [string]$BinDir = "$env:LOCALAPPDATA\Programs\bin",
     [switch]$NoTui,
     [switch]$WithGui,
+    [switch]$NoGui,
+    [switch]$Recreate,
+    [switch]$Check,
     [switch]$Uninstall
 )
 
@@ -46,6 +58,74 @@ $MinMinor = 9
 function Write-Info { param($Message) Write-Host "==> $Message" -ForegroundColor Cyan }
 function Write-Warn { param($Message) Write-Host "[!] $Message" -ForegroundColor Yellow }
 function Write-Fail { param($Message) Write-Host "[x] $Message" -ForegroundColor Red; exit 1 }
+
+# Each optional interface is one importable module and one pip requirement.
+# Everything below drives off this table, so a component can never be installed
+# without being verified, or advertised without being installed.
+$Components = @{
+    tui = @{ Module = 'textual';           Requirement = 'textual>=0.47';            Dist = 'textual';            Command = 'lrfc tui' }
+    gui = @{ Module = 'PySide6.QtWidgets'; Requirement = 'PySide6-Essentials>=6.5';  Dist = 'PySide6-Essentials'; Command = 'lrfc gui' }
+}
+
+# File remembering which optional components this installation wants. Without
+# it a repair run cannot tell "the GUI was never asked for" from "the GUI was
+# installed and is now broken" -- both simply fail to import.
+function Get-ComponentsFile { return (Join-Path $Prefix 'components') }
+
+function Save-Components {
+    param($Names)
+    Set-Content -Path (Get-ComponentsFile) -Value ($Names -join "`n") -Encoding ASCII
+}
+
+function Get-SavedComponents {
+    $file = Get-ComponentsFile
+    if (Test-Path $file) {
+        return @(Get-Content $file | Where-Object { $_.Trim() })
+    }
+    return $null
+}
+
+function Test-Component {
+    param($Name)
+    & $script:VenvPy -c "import $($Components[$Name].Module)" 2>$null
+    return $LASTEXITCODE -eq 0
+}
+
+function Get-ComponentVersion {
+    param($Name)
+    $dist = $Components[$Name].Dist
+    $out = & $script:VenvPy -c "
+try:
+    from importlib.metadata import version; print(version('$dist'))
+except Exception:
+    pass" 2>$null
+    return ($out | Out-String).Trim()
+}
+
+# Install or update a component, then confirm it imports. A present but
+# out-of-date module counts as work to do: half the reason to re-run an
+# installer is to refresh what has aged.
+function Install-Component {
+    param($Name)
+    $before = Get-ComponentVersion $Name
+    if ((Test-Component $Name) -and $Check) {
+        Write-Info "$Name`: working (version $(if ($before) { $before } else { '?' }))"
+        return $true
+    }
+    if ($before) { Write-Info "$Name`: updating $($Components[$Name].Requirement) (have $before)" }
+    else         { Write-Info "$Name`: installing $($Components[$Name].Requirement)" }
+    & $script:VenvPy -m pip install --quiet --upgrade $Components[$Name].Requirement
+    if ($LASTEXITCODE -ne 0) { Write-Warn "$Name`: installation failed"; return $false }
+    if (-not (Test-Component $Name)) {
+        Write-Warn "$Name`: installed but $($Components[$Name].Module) still does not import"
+        return $false
+    }
+    $after = Get-ComponentVersion $Name
+    if ($before -and $before -ne $after) { Write-Info "$Name`: updated $before -> $after" }
+    elseif ($before)                     { Write-Info "$Name`: already up to date ($after)" }
+    else                                 { Write-Info "$Name`: installed and verified ($after)" }
+    return $true
+}
 
 $ScriptDir  = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProjectDir = Split-Path -Parent $ScriptDir
@@ -116,34 +196,79 @@ if ($LASTEXITCODE -ne 0) {
 
 # -- 2. create the virtual environment ----------------------------------------
 
-Write-Info "Creating the virtual environment in $Prefix"
 New-Item -ItemType Directory -Force -Path $Prefix | Out-Null
 $VenvDir = Join-Path $Prefix 'venv'
-if (Test-Path $VenvDir) {
-    Write-Warn 'An existing installation was found and will be replaced.'
-    Remove-Item -Recurse -Force $VenvDir
-}
-$venvArgs = @($PyArgs) + @('-m', 'venv', $VenvDir)
-& $PyExe @venvArgs
-if ($LASTEXITCODE -ne 0) { Write-Fail 'Could not create the virtual environment.' }
-
 $VenvPy  = Join-Path $VenvDir 'Scripts\python.exe'
 $VenvExe = Join-Path $VenvDir 'Scripts\lrfc.exe'
+$script:VenvPy = $VenvPy
 
-Write-Info 'Updating pip'
-& $VenvPy -m pip install --quiet --upgrade pip setuptools wheel
+if ((Test-Path $VenvDir) -and $Recreate) {
+    Write-Warn 'Rebuilding the existing environment from scratch.'
+    Remove-Item -Recurse -Force $VenvDir
+}
+if (Test-Path $VenvPy) {
+    # Reusing the environment is what makes "add the graphical interface later"
+    # a short job instead of a full reinstall.
+    Write-Info "Reusing the environment in $VenvDir"
+} else {
+    Write-Info "Creating the virtual environment in $Prefix"
+    $venvArgs = @($PyArgs) + @('-m', 'venv', $VenvDir)
+    & $PyExe @venvArgs
+    if ($LASTEXITCODE -ne 0) { Write-Fail 'Could not create the virtual environment.' }
+}
+
+if (-not $Check) {
+    Write-Info 'Updating pip'
+    & $VenvPy -m pip install --quiet --upgrade pip setuptools wheel
+}
 
 # -- 3. install ----------------------------------------------------------------
 
-$extras = ''
-if     (-not $NoTui -and $WithGui) { $extras = '[tui,gui]'; Write-Info "Installing $AppName with the text and graphical interfaces" }
-elseif ($WithGui)                  { $extras = '[gui]';     Write-Info "Installing $AppName with the graphical interface" }
-elseif (-not $NoTui)               { $extras = '[tui]';     Write-Info "Installing $AppName with the TUI" }
-else                               { Write-Info "Installing $AppName (command line only)" }
-if ($WithGui) { Write-Info 'PySide6 is about 100 MB -- this takes a moment' }
-$target = "$ProjectDir" + $extras
-& $VenvPy -m pip install --quiet $target
-if ($LASTEXITCODE -ne 0) { Write-Fail 'Installation failed.' }
+$wantTui = -not $NoTui
+$wantGui = $WithGui
+
+if ($Check) {
+    Write-Info 'Checking the existing installation'
+    if (-not (Test-Path $VenvPy)) { Write-Fail "No installation found in $Prefix -- run without -Check first" }
+    # Repair exactly the set this installation was set up with. Asking which
+    # modules import right now would treat a broken component as an absent one.
+    $saved = Get-SavedComponents
+    if ($null -ne $saved) {
+        $wantTui = $saved -contains 'tui'
+        if (-not $WithGui -and -not $NoGui) { $wantGui = $saved -contains 'gui' }
+    } else {
+        Write-Warn 'No record of what was installed; checking what is present.'
+        $wantTui = $wantTui -and (Test-Component 'tui')
+        if (-not $WithGui -and -not $NoGui) { $wantGui = Test-Component 'gui' }
+    }
+} else {
+    # Discovering -WithGui from a help text is not a plan, so ask when nobody
+    # said either way and there is someone to ask.
+    if (-not $WithGui -and -not $NoGui) {
+        if ([Environment]::UserInteractive -and -not [Console]::IsInputRedirected) {
+            Write-Host ''
+            Write-Host 'Also install the graphical interface (lrfc gui)?'
+            $answer = Read-Host 'It needs PySide6, about 100 MB to download. [y/N]'
+            $wantGui = $answer -match '^[yYjJ]'
+        }
+    }
+    Write-Info "Installing $AppName"
+    if ($wantGui) { Write-Info 'PySide6 is about 100 MB -- this takes a moment' }
+    # --upgrade so that re-running the installer also refreshes anything that
+    # has gone out of date, which is half of what people re-run it for.
+    & $VenvPy -m pip install --quiet --upgrade $ProjectDir
+    if ($LASTEXITCODE -ne 0) { Write-Fail 'Installation failed.' }
+}
+
+$failed = @()
+if ($wantTui -and -not (Install-Component 'tui')) { $failed += 'tui' }
+if ($wantGui -and -not (Install-Component 'gui')) { $failed += 'gui' }
+if (-not $Check) {
+    $chosen = @()
+    if ($wantTui) { $chosen += 'tui' }
+    if ($wantGui) { $chosen += 'gui' }
+    Save-Components $chosen
+}
 
 # -- 4. launcher -----------------------------------------------------------------
 
@@ -181,15 +306,27 @@ Write-Info "$AppName is installed."
 Write-Host "    Command      : $BinDir\lrfc.cmd"
 Write-Host "    Environment  : $VenvDir"
 Write-Host "    Logs         : $env:LOCALAPPDATA\LR-FolderCraft\logs"
+$working = @('cli') + @('tui','gui' | Where-Object { Test-Component $_ })
+Write-Host "    Interfaces   : $($working -join ' ')"
+
+foreach ($name in $failed) {
+    Write-Warn "$($Components[$name].Command) is not available: $($Components[$name].Module) could not be installed."
+    Write-Host "    Try it by hand:  $VenvPy -m pip install `"$($Components[$name].Requirement)`""
+}
+
 Write-Host ''
-Write-Host @'
-Next steps:
-
-    lrfc info D:\Photos\Catalog.lrcat          inspect a catalog, read only
-    lrfc presets                               see the ready made structures
-    lrfc plan D:\Photos\Catalog.lrcat -s day   see what would happen
-    lrfc tui                                   interactive text interface
-    lrfc gui                                   graphical interface (needs -WithGui)
-
-Quit Lightroom Classic before running 'lrfc apply'.
-'@
+Write-Host 'Next steps:'
+Write-Host ''
+Write-Host '    lrfc info D:\Photos\Catalog.lrcat          inspect a catalog, read only'
+Write-Host '    lrfc presets                               see the ready made structures'
+Write-Host '    lrfc plan D:\Photos\Catalog.lrcat -s day   see what would happen'
+if (Test-Component 'tui') { Write-Host '    lrfc tui                                   interactive text interface' }
+if (Test-Component 'gui') {
+    Write-Host '    lrfc gui                                   graphical interface'
+} else {
+    Write-Host ''
+    Write-Host 'The graphical interface is not installed. To add it:'
+    Write-Host "    powershell -ExecutionPolicy Bypass -File $($MyInvocation.MyCommand.Path) -WithGui"
+}
+Write-Host ''
+Write-Host "Quit Lightroom Classic before running 'lrfc apply'."

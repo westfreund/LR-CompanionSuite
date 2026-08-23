@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r3.0.2 · Build-Datum 2026-08-23**
+**Revision r4.0.0 · Build-Datum 2026-08-23**
 
 ## Sicherheit und Daten
 
@@ -197,6 +197,27 @@ PATH. Diese Zeile in `~/.zshrc` eintragen und ein neues Fenster öffnen:
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
+```
+
+### `lrfc gui` meldet, PySide6 fehle
+
+Die grafische Oberfläche ist ein optionales Extra von rund 100 MB, das
+Installationsskript nimmt sie deshalb nur auf Wunsch mit. Seit r4.0.0 fragt es
+danach, wenn es in einem Terminal läuft; davor musste man `--with-gui` kennen,
+und die Liste der nächsten Schritte bewarb `lrfc gui` unabhängig davon, ob es
+installiert war.
+
+Zu einer bestehenden Installation hinzufügen — die Umgebung wird
+weiterverwendet, das dauert Sekunden:
+
+```bash
+./install/install-macos.sh --with-gui
+```
+
+Oder die gesamte Installation prüfen und reparieren:
+
+```bash
+./install/install-macos.sh --check
 ```
 
 ### Wo liegen Logdateien, Profile und Backups?

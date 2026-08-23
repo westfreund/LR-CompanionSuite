@@ -10,7 +10,10 @@
 #   ./install/install-macos.sh                 # install into ~/.local/share
 #   ./install/install-macos.sh --no-tui        # skip the Textual dependency
 #   ./install/install-macos.sh --with-gui      # add the Qt graphical interface
+#   ./install/install-macos.sh --no-gui        # never ask about the Qt interface
 #   ./install/install-macos.sh --no-path       # do not touch the shell startup file
+#   ./install/install-macos.sh --check         # verify an installation and repair it
+#   ./install/install-macos.sh --recreate      # build the environment from scratch
 #   ./install/install-macos.sh --prefix DIR    # choose the install location
 #   ./install/install-macos.sh --bin DIR       # choose the launcher location
 #   ./install/install-macos.sh --uninstall
@@ -26,12 +29,142 @@ MIN_PY_MINOR=9
 PREFIX="${LRFC_PREFIX:-$HOME/.local/share/lr-foldercraft}"
 BIN_DIR="${LRFC_BIN:-$HOME/.local/bin}"
 WITH_TUI=1
-WITH_GUI=0
+WITH_GUI=-1          # -1 = ask when interactive, 0 = no, 1 = yes
 UNINSTALL=0
 EDIT_PATH=1
+RECREATE=0
+CHECK_ONLY=0
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+
+# -- components ----------------------------------------------------------------
+#
+# Each optional interface is one importable module and one pip requirement.
+# Everything below drives off this table, so a component can never be installed
+# without being verified, or advertised without being installed.
+
+component_module() {
+    case "$1" in
+        tui) printf 'textual' ;;
+        gui) printf 'PySide6.QtWidgets' ;;
+    esac
+}
+
+component_requirement() {
+    case "$1" in
+        tui) printf 'textual>=0.47' ;;
+        gui) printf 'PySide6-Essentials>=6.5' ;;
+    esac
+}
+
+component_command() {
+    case "$1" in
+        tui) printf 'lrfc tui' ;;
+        gui) printf 'lrfc gui' ;;
+    esac
+}
+
+#: True when the component's module actually imports in the installed venv.
+component_works() {
+    "$VENV_PY" -c "import $(component_module "$1")" >/dev/null 2>&1
+}
+
+#: Version of a component's distribution, or empty when it is absent.
+component_version() {
+    "$VENV_PY" - "$1" <<'PY' 2>/dev/null
+import sys
+try:
+    from importlib.metadata import version
+except ImportError:  # pragma: no cover - Python < 3.8
+    sys.exit(0)
+name = {"tui": "textual", "gui": "PySide6-Essentials"}.get(sys.argv[1])
+try:
+    print(version(name))
+except Exception:
+    pass
+PY
+}
+
+#: Install or update a component, then confirm it imports. Reporting a
+#: successful installation of something that cannot be imported is worse than
+#: reporting nothing at all.
+#:
+#: A present but out-of-date module counts as work to do: half the reason to
+#: re-run an installer is to refresh what has aged. Only --check leaves a
+#: working component alone, and even then it says when a newer one exists.
+install_component() {
+    local name="$1" before after
+    before="$(component_version "$name")"
+
+    if component_works "$name" && [ "$CHECK_ONLY" -eq 1 ]; then
+        info "$name: working (version ${before:-?})"
+        if "$VENV_PY" -m pip list --outdated 2>/dev/null \
+             | grep -qi "^$(component_module "$name" | cut -d. -f1) "; then
+            warn "$name: a newer version is available -- re-run without --check to update"
+        fi
+        return 0
+    fi
+
+    if [ -n "$before" ]; then
+        info "$name: updating $(component_requirement "$name") (have $before)"
+    else
+        info "$name: installing $(component_requirement "$name")"
+    fi
+    if ! "$VENV_PY" -m pip install --quiet --upgrade "$(component_requirement "$name")"; then
+        warn "$name: installation failed"
+        return 1
+    fi
+    if ! component_works "$name"; then
+        warn "$name: installed but $(component_module "$name") still does not import"
+        return 1
+    fi
+    after="$(component_version "$name")"
+    if [ -n "$before" ] && [ "$before" != "$after" ]; then
+        info "$name: updated $before -> $after"
+    elif [ -n "$before" ]; then
+        info "$name: already up to date ($after)"
+    else
+        info "$name: installed and verified ($after)"
+    fi
+    return 0
+}
+
+#: File remembering which optional components this installation wants. Without
+#: it a repair run cannot tell "the GUI was never asked for" from "the GUI was
+#: installed and is now broken" -- both simply fail to import.
+components_file() { printf '%s/components' "$PREFIX"; }
+
+record_components() {
+    : > "$(components_file)"
+    [ "$WITH_TUI" -eq 1 ] && printf 'tui\n' >> "$(components_file)"
+    [ "$WITH_GUI" -eq 1 ] && printf 'gui\n' >> "$(components_file)"
+    return 0
+}
+
+wanted_previously() {
+    [ -f "$(components_file)" ] && grep -qx "$1" "$(components_file)"
+}
+
+#: Ask about the graphical interface when nobody said either way and there is
+#: someone to ask. Discovering --with-gui from a help text is not a plan.
+resolve_gui_choice() {
+    [ "$WITH_GUI" -ge 0 ] && return 0
+    if [ ! -t 0 ]; then
+        WITH_GUI=0
+        return 0
+    fi
+    printf '\n'
+    printf 'Also install the graphical interface (lrfc gui)?\n'
+    printf 'It needs PySide6, about 100 MB to download. [y/N] '
+    local answer
+    read -r answer || answer=""
+    case "$answer" in
+        [yYjJ]*) WITH_GUI=1 ;;
+        *)       WITH_GUI=0 ;;
+    esac
+}
 
 
 # -- PATH ----------------------------------------------------------------------
@@ -96,7 +229,10 @@ while [ $# -gt 0 ]; do
     case "$1" in
         --no-tui)    WITH_TUI=0; shift ;;
         --with-gui)  WITH_GUI=1; shift ;;
+        --no-gui)    WITH_GUI=0; shift ;;
         --no-path)   EDIT_PATH=0; shift ;;
+        --recreate)  RECREATE=1; shift ;;
+        --check)     CHECK_ONLY=1; shift ;;
         --prefix)    PREFIX="${2:?--prefix needs a directory}"; shift 2 ;;
         --bin)       BIN_DIR="${2:?--bin needs a directory}"; shift 2 ;;
         --uninstall) UNINSTALL=1; shift ;;
@@ -155,34 +291,62 @@ info "Using $("$PYTHON" -c 'import sys; print(sys.executable)') ($("$PYTHON" -V 
 
 # -- 2. create the virtual environment -----------------------------------------
 
-info "Creating the virtual environment in $PREFIX"
 mkdir -p "$PREFIX"
-if [ -d "$PREFIX/venv" ]; then
-    warn "An existing installation was found and will be replaced."
-    rm -rf "$PREFIX/venv"
-fi
-"$PYTHON" -m venv "$PREFIX/venv"
 VENV_PY="$PREFIX/venv/bin/python"
 
-info "Updating pip"
-"$VENV_PY" -m pip install --quiet --upgrade pip setuptools wheel
+if [ -d "$PREFIX/venv" ] && [ "$RECREATE" -eq 1 ]; then
+    warn "Rebuilding the existing environment from scratch."
+    rm -rf "$PREFIX/venv"
+fi
+
+if [ -x "$VENV_PY" ]; then
+    # Reusing the environment is what makes "add the graphical interface later"
+    # a ten second job instead of a full reinstall.
+    info "Reusing the environment in $PREFIX/venv"
+else
+    info "Creating the virtual environment in $PREFIX"
+    "$PYTHON" -m venv "$PREFIX/venv"
+fi
+
+if [ "$CHECK_ONLY" -eq 0 ]; then
+    info "Updating pip"
+    "$VENV_PY" -m pip install --quiet --upgrade pip setuptools wheel
+fi
 
 # -- 3. install ------------------------------------------------------------------
 
-EXTRAS=""
-if [ "$WITH_TUI" -eq 1 ] && [ "$WITH_GUI" -eq 1 ]; then
-    EXTRAS="[tui,gui]"; info "Installing $APP_NAME with the text and graphical interfaces"
-elif [ "$WITH_GUI" -eq 1 ]; then
-    EXTRAS="[gui]";     info "Installing $APP_NAME with the graphical interface"
-elif [ "$WITH_TUI" -eq 1 ]; then
-    EXTRAS="[tui]";     info "Installing $APP_NAME with the TUI"
+if [ "$CHECK_ONLY" -eq 1 ]; then
+    info "Checking the existing installation"
+    if [ ! -x "$VENV_PY" ]; then
+        die "no installation found in $PREFIX -- run without --check first"
+    fi
+    # Repair exactly the set this installation was set up with. Asking which
+    # modules import right now would treat a broken component as an absent one.
+    if [ -f "$(components_file)" ]; then
+        wanted_previously tui && WITH_TUI=1 || WITH_TUI=0
+        [ "$WITH_GUI" -lt 0 ] && { wanted_previously gui && WITH_GUI=1 || WITH_GUI=0; }
+    else
+        warn "No record of what was installed; checking what is present."
+        component_works tui || WITH_TUI=0
+        [ "$WITH_GUI" -lt 0 ] && { component_works gui && WITH_GUI=1 || WITH_GUI=0; }
+    fi
 else
-    info "Installing $APP_NAME (command line only)"
+    resolve_gui_choice
+    info "Installing $APP_NAME"
+    if [ "$WITH_GUI" -eq 1 ]; then
+        info "PySide6 is about 100 MB -- this takes a moment"
+    fi
+    # --upgrade so that re-running the installer also refreshes anything that
+    # has gone out of date, which is half of what people re-run it for.
+    "$VENV_PY" -m pip install --quiet --upgrade "$PROJECT_DIR"
 fi
-if [ "$WITH_GUI" -eq 1 ]; then
-    info "PySide6 is about 100 MB -- this takes a moment"
-fi
-"$VENV_PY" -m pip install --quiet "$PROJECT_DIR$EXTRAS"
+
+# Every wanted component is installed and then verified; nothing is reported as
+# ready that cannot actually be imported.
+FAILED=""
+[ "$WITH_TUI" -eq 1 ] && { install_component tui || FAILED="$FAILED tui"; }
+[ "$WITH_GUI" -eq 1 ] && { install_component gui || FAILED="$FAILED gui"; }
+[ "$CHECK_ONLY" -eq 0 ] && record_components
 
 # -- 4. launcher -------------------------------------------------------------------
 
@@ -196,7 +360,7 @@ LAUNCHER
 chmod +x "$BIN_DIR/lrfc"
 ln -sf "$BIN_DIR/lrfc" "$BIN_DIR/lr-foldercraft"
 
-# -- 5. verify -----------------------------------------------------------------------
+# -- 5. verify and report ------------------------------------------------------
 
 info "Verifying the installation"
 "$PREFIX/venv/bin/lrfc" --version || die "the installed command did not start"
@@ -206,16 +370,43 @@ info "$APP_NAME is installed."
 printf '    Command      : %s\n' "$BIN_DIR/lrfc"
 printf '    Environment  : %s\n' "$PREFIX/venv"
 printf '    Logs         : %s\n' "$HOME/Library/Logs/LR-FolderCraft"
+printf '    Interfaces   :'
+for name in tui gui; do
+    if component_works "$name"; then printf ' %s' "$name"; fi
+done
+printf ' cli\n'
+
+if [ -n "$FAILED" ]; then
+    echo
+    for name in $FAILED; do
+        warn "$(component_command "$name") is not available: $(component_module "$name") could not be installed."
+        printf '    Try it by hand:  %s -m pip install "%s"\n' \
+            "$VENV_PY" "$(component_requirement "$name")"
+    done
+fi
+
 echo
 ensure_on_path
+
 cat <<'NEXT'
+
 Next steps:
 
     lrfc info /path/to/your.lrcat          # inspect a catalog, read only
     lrfc presets                           # see the ready made structures
     lrfc plan /path/to/your.lrcat -s day   # see what would happen
-    lrfc tui                               # interactive text interface
-    lrfc gui                               # graphical interface (needs --with-gui)
+NEXT
+if component_works tui; then
+    printf '    lrfc tui                               # interactive text interface\n'
+fi
+if component_works gui; then
+    printf '    lrfc gui                               # graphical interface\n'
+else
+    printf '\n'
+    printf 'The graphical interface is not installed. To add it:\n'
+    printf '    %s --with-gui\n' "$0"
+fi
+cat <<'NEXT'
 
 Quit Lightroom Classic before running 'lrfc apply'.
 NEXT

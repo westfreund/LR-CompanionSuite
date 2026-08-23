@@ -1,6 +1,6 @@
 # Entwicklung und Fortsetzung
 
-**Revision r3.0.2 · Build-Datum 2026-08-23**
+**Revision r4.0.0 · Build-Datum 2026-08-23**
 
 Dieses Dokument existiert, damit die Arbeit später fortgesetzt werden kann —
 von Ihnen, von jemand anderem oder von einem KI-Assistenten — ohne den Kontext

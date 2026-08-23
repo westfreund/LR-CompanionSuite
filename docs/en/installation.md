@@ -1,6 +1,6 @@
 # Installation
 
-**Revision r3.0.2 · Build date 2026-08-23**
+**Revision r4.0.0 · Build date 2026-08-23**
 
 LR-FolderCraft is a Python package. The installers create an isolated virtual
 environment so nothing is added to your system Python.
@@ -47,12 +47,48 @@ Options:
 | --- | --- |
 | `--no-tui` | command line only, no Textual dependency |
 | `--with-gui` | also install PySide6 for `lrfc gui` (about 100 MB) |
+| `--no-gui` | never ask about the graphical interface |
+| `--check` | verify an installation and repair what is missing |
+| `--recreate` | build the environment from scratch |
 | `--prefix DIR` | install somewhere else |
 | `--bin DIR` | put the launcher somewhere else |
 | `--no-path` | do not touch the shell startup file |
 | `--uninstall` | remove the environment, the launchers and the PATH line |
 
 With `--no-path` the installer only prints the line for you to add yourself.
+
+### What the installer checks
+
+It does not just install; it verifies, and it only tells you about interfaces
+that actually work:
+
+1. finds a Python ≥ 3.9 and confirms `venv` and `sqlite3` are there,
+2. reuses an existing environment, or creates one (`--recreate` forces a fresh
+   build),
+3. installs LR-FolderCraft, **upgrading** anything already present that has
+   gone out of date,
+4. installs each wanted interface and then **imports it** to prove it works,
+5. records which interfaces this installation wants, so a later repair knows
+   the difference between "never asked for" and "broken",
+6. puts the launcher on your PATH,
+7. lists the interfaces that are genuinely available, and for anything missing
+   prints the exact command to add it.
+
+If a component fails, the installer says which one, why, and what to run by
+hand — instead of reporting success and letting you find out at `lrfc gui`.
+
+### Repairing an installation
+
+```bash
+./install/install-macos.sh --check
+```
+
+Verifies the environment and reinstalls whatever is missing, without touching
+anything that works. It also says when a newer version of a component is
+available; re-run without `--check` to take it.
+
+Re-running the installer normally is always safe: it reuses the environment,
+updates what has aged, and does not duplicate anything.
 
 ### No Python?
 
@@ -78,7 +114,9 @@ into `%LOCALAPPDATA%\Programs\bin` and adds that directory to your **user**
 PATH (not the system PATH). **Open a new terminal window afterwards** so the
 PATH change takes effect.
 
-Options: `-NoTui`, `-Prefix DIR`, `-BinDir DIR`, `-Uninstall`.
+Options: `-NoTui`, `-WithGui`, `-NoGui`, `-Check`, `-Recreate`, `-Prefix DIR`,
+`-BinDir DIR`, `-Uninstall`. It checks and repairs the same way the macOS
+script does.
 
 ### No Python?
 

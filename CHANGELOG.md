@@ -12,6 +12,49 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
 ---
 
+## [4.0.0] — 2026-08-23 — "Prüfstand"
+
+The installer now verifies what it installed, repairs what is missing, updates
+what has aged, and only advertises interfaces that actually work.
+
+### Added
+
+- **Verification.** Each optional interface is one importable module and one
+  pip requirement, and the installer imports it after installing. Nothing is
+  reported as ready that cannot be imported.
+
+- **`--check` / `-Check`** verifies an existing installation and reinstalls
+  whatever is missing, without touching what works. It also reports when a
+  newer version of a component is available.
+
+- **The installation remembers its components.** A `components` file in the
+  install prefix records which interfaces were asked for, so a repair can tell
+  "never asked for" from "installed and broken" — the two are indistinguishable
+  by import alone.
+
+- **Updating.** Re-running the installer upgrades anything already present that
+  has gone out of date, instead of leaving an old version in place.
+
+- **The environment is reused** rather than deleted and rebuilt, which makes
+  adding the graphical interface later a matter of seconds. `--recreate` /
+  `-Recreate` forces a clean build.
+
+- **It asks about the graphical interface** when run in a terminal and nobody
+  said either way. `--with-gui` / `--no-gui` (and `-WithGui` / `-NoGui`) skip
+  the question for scripted installs; a non-interactive run never prompts.
+
+### Fixed
+
+- **The installer advertised `lrfc gui` even when it had not installed it.**
+  Reported from use: a run without `--with-gui` finished with `lrfc gui` in its
+  list of next steps, and the command then said PySide6 was missing. The final
+  report now lists only the interfaces that were installed and verified, and
+  prints the exact command to add anything that is not there.
+
+- A component that fails to install is named explicitly, with the reason and
+  the command to try by hand, rather than being passed over in a run that
+  reports success.
+
 ## [3.0.2] — 2026-08-23
 
 ### Fixed
