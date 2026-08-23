@@ -864,10 +864,11 @@ def _plan_one(
     target_dir = _join(target_root_path, segments)
     target_path = "{d}/{f}".format(d=target_dir, f=photo.filename)
 
-    same_place = (
-        settings.placement == "in-place" and tuple(_split(photo.folder_path_from_root)) == segments
-    )
-    if same_place and os.path.normpath(target_path) == os.path.normpath(source_path):
+    # Whether a photo already sits where it belongs is a question about paths,
+    # not about the placement mode. Tying it to in-place made a repeated
+    # new-tree run plan every file as a move onto itself, which then tripped
+    # the "never overwrite an existing file" guard and rolled the run back.
+    if os.path.normpath(target_path) == os.path.normpath(source_path):
         base.status = STAY
         base.target_path = source_path
         base.reason = "already in the target folder"

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import os
 import sqlite3
 from pathlib import Path
@@ -543,3 +544,46 @@ def test_a_few_missing_files_stay_a_warning(builder, tmp_path):
     assert check.level == "warning"
     assert "1 of 3" in check.message_en
     assert preflight(plan).ok
+
+
+def test_only_four_tables_are_ever_written(builder, tmp_path):
+    """The promise that edits survive rests on touching nothing else.
+
+    Motivated by a real run: afterwards six further tables differed, and the
+    only way to answer "was that us?" was to grep the source. This makes it a
+    property the suite enforces instead of an argument.
+    """
+    import shutil
+
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00", folder="raw2019/")
+    builder.add_photo("B.CR2", "2019-02-14T10:00:00", folder="raw2019/", virtual_copies=1)
+    before_path = tmp_path / "before.lrcat"
+    shutil.copy2(str(builder.catalog_path), str(before_path))
+
+    plan, settings = make_plan(builder, tmp_path, structure=("{yyyy}", "{mm}", "{dd}"))
+    execute(plan, settings)
+
+    def table_digests(path):
+        conn = sqlite3.connect("file:{p}?mode=ro".format(p=path), uri=True)
+        out = {}
+        for (table,) in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+        ):
+            cols = [c[1] for c in conn.execute('PRAGMA table_info("{t}")'.format(t=table))]
+            order = ", ".join('"{c}"'.format(c=c) for c in cols)
+            digest = hashlib.sha256()
+            for row in conn.execute('SELECT * FROM "{t}" ORDER BY {o}'.format(t=table, o=order)):
+                digest.update(repr(tuple(row)).encode())
+            out[table] = digest.hexdigest()
+        conn.close()
+        return out
+
+    before, after = table_digests(before_path), table_digests(builder.catalog_path)
+    changed = {t for t in set(before) & set(after) if before[t] != after[t]}
+    allowed = {
+        "AgLibraryFolder",  # new folder rows
+        "AgLibraryFile",  # the folder column, and names on a rename
+        "AgLibraryRootFolder",  # only with new-tree placement
+        "Adobe_variablesTable",  # the id counter
+    }
+    assert changed <= allowed, "unexpected tables written: {u}".format(u=sorted(changed - allowed))

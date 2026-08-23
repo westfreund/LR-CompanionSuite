@@ -1,6 +1,6 @@
 # Architecture
 
-**Revision r4.0.1 · Build date 2026-08-23**
+**Revision r4.0.2 · Build date 2026-08-23**
 
 ## Guiding rule
 
@@ -69,7 +69,7 @@ LR-FolderCraft/
 │       ├── workers.py               catalog / plan / apply on worker threads
 │       └── i18n.py                  interface strings, EN and DE
 │
-├── tests/                           268 tests, synthetic catalog fixture
+├── tests/                           270 tests, synthetic catalog fixture
 ├── install/                         installers for macOS, Linux, Windows
 └── docs/  en/  de/  images/         this documentation, in both languages
 ```

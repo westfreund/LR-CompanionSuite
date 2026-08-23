@@ -634,3 +634,29 @@ def test_new_tree_merges_every_root_into_one(two_roots, tmp_path):
     plan = plan_for(builder, structure=("{yyyy}",), placement="new-tree", target_root=str(target))
     assert len(plan.scopes) == 1
     assert all(m.target_path.startswith(str(target)) for m in plan.active_moves)
+
+
+def test_a_repeated_new_tree_run_is_a_no_op(builder, tmp_path):
+    """Photos already in the new tree must be recognised, not moved onto themselves."""
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00", folder="raw2019/")
+    builder.add_photo("B.CR2", "2019-02-14T10:00:00", folder="raw2019/")
+    target = tmp_path / "Sortiert"
+
+    from lrfoldercraft.executor import execute
+
+    settings = Settings(
+        catalog=str(builder.catalog_path),
+        structure=("{camera_slug}", "{yyyy}", "{mm}", "{dd}"),
+        placement="new-tree",
+        target_root=str(target),
+        dry_run=False,
+        backup_dir=str(tmp_path / "b"),
+    )
+    with open_catalog(builder.catalog_path) as conn:
+        plan = build_plan(CatalogReader(conn), settings)
+    execute(plan, settings)
+
+    with open_catalog(builder.catalog_path) as conn:
+        again = build_plan(CatalogReader(conn), settings)
+    assert not again.has_work, [(m.source_path, m.target_path) for m in again.active_moves]
+    assert again.stats.already_in_place == 2

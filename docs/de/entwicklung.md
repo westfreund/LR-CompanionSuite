@@ -1,6 +1,6 @@
 # Entwicklung und Fortsetzung
 
-**Revision r4.0.1 · Build-Datum 2026-08-23**
+**Revision r4.0.2 · Build-Datum 2026-08-23**
 
 Dieses Dokument existiert, damit die Arbeit später fortgesetzt werden kann —
 von Ihnen, von jemand anderem oder von einem KI-Assistenten — ohne den Kontext
@@ -21,7 +21,7 @@ exFAT).
 | CLI | vollständig: 9 Befehle |
 | TUI | vollständig: Laden, Planen, Ausführen, Live-Vorschau, EN/DE |
 | GUI | vollständig: Qt, alle Einstellungen, Ordnerentscheidungen, Fortschritt |
-| Tests | 268 Tests, 87 % Abdeckung |
+| Tests | 270 Tests, 87 % Abdeckung |
 | CI | GitLab, Python 3.9–3.13 |
 | Dokumentation | vollständig, EN und DE |
 | Installationsskripte | macOS, Linux, Windows |

@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r4.0.1 · Build date 2026-08-23**
+**Revision r4.0.2 · Build date 2026-08-23**
 
 This document preserves the request that created LR-FolderCraft, a generic
 prompt for regenerating a comparable tool from scratch, and the context needed
@@ -312,7 +312,7 @@ already taken and the questions still open.
 ```bash
 git clone https://gitlab.com/andy-freund/LR-FolderCraft.git
 cd LR-FolderCraft && python3 -m venv .venv && source .venv/bin/activate
-python -m pip install -e '.[dev]' && pytest        # expect 268 passing
+python -m pip install -e '.[dev]' && pytest        # expect 270 passing
 ```
 
 Then read, in this order:

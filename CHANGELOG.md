@@ -12,6 +12,34 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
 ---
 
+## [4.0.2] — 2026-08-23
+
+### Fixed
+
+- **A repeated `new-tree` run was not a no-op.** Whether a photo already sits
+  where it belongs was decided by comparing paths *and* requiring in-place
+  placement. Running the same `new-tree` migration twice therefore planned
+  every file as a move onto itself, which then tripped the "never overwrite an
+  existing file" guard and rolled the whole run back. The check is now purely
+  about the paths, as it should always have been.
+
+  Found by verifying a real run: after 9,452 files had been sorted into a new
+  tree, planning the identical run again still offered to move all of them.
+
+### Added
+
+- **A guard that only four tables may ever be written.** The promise that
+  develop settings, virtual copies, collections and keywords survive rests on
+  the tool touching nothing but `AgLibraryFolder`, `AgLibraryFile`,
+  `AgLibraryRootFolder` and `Adobe_variablesTable`. A test now hashes every
+  table before and after a run and fails if anything else differs.
+
+  Motivated by that same verification: six further tables had changed in the
+  live catalog, and the only way to answer "was that us?" was to grep the
+  source for SQL statements. It was Lightroom, writing after the user opened
+  the catalog — but that should be a property the suite enforces, not an
+  argument made after the fact.
+
 ## [4.0.1] — 2026-08-23
 
 ### Fixed
@@ -478,7 +506,7 @@ and rewriting the catalog in one reversible operation.
 - Debug mode and a per-run log file carrying a numbered `STEP` audit trail.
 
 **Project**
-- 268 tests, 87 % coverage, built on a synthetic catalog fixture so no
+- 270 tests, 87 % coverage, built on a synthetic catalog fixture so no
   Lightroom installation is needed.
 - GitLab CI: lint, tests on Python 3.9–3.13, a dedicated safety job, build.
 - Installers for macOS, Linux and Windows.
