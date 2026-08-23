@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QFont
+from PySide6.QtGui import QAction, QFont, QGuiApplication
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -35,6 +35,7 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QPushButton,
     QRadioButton,
+    QScrollArea,
     QSplitter,
     QTableWidget,
     QTableWidgetItem,
@@ -81,8 +82,8 @@ class MainWindow(QMainWindow):
         self._threads: list = []
 
         self.setWindowTitle("{n} - {r}".format(n=APP_NAME, r=REVISION))
-        self.resize(1024, 860)
         self._build()
+        self._size_to_screen()
         self._retranslate()
         if catalog:
             self.catalog_edit.setText(catalog)
@@ -94,33 +95,73 @@ class MainWindow(QMainWindow):
         central = QWidget()
         outer = QVBoxLayout(central)
 
-        splitter = QSplitter(Qt.Vertical)
-        top = QWidget()
-        layout = QVBoxLayout(top)
-        layout.addWidget(self._catalog_box())
-        layout.addWidget(self._source_box())
-        layout.addWidget(self._target_box())
-        layout.addWidget(self._structure_box())
-        layout.addWidget(self._options_box())
-        splitter.addWidget(top)
-        splitter.addWidget(self._folders_box())
-        splitter.setStretchFactor(0, 0)
-        splitter.setStretchFactor(1, 1)
-        splitter.setSizes([560, 300])
-        outer.addWidget(splitter, 1)
+        # The settings are the tall part, so they live in a scroll area: on a
+        # small screen the window must still fit, and the buttons and progress
+        # bar must never be what scrolls out of sight.
+        settings = QWidget()
+        settings_layout = QVBoxLayout(settings)
+        settings_layout.setContentsMargins(0, 0, 0, 0)
+        settings_layout.addWidget(self._catalog_box())
+        settings_layout.addWidget(self._source_box())
+        settings_layout.addWidget(self._target_box())
+        settings_layout.addWidget(self._structure_box())
+        settings_layout.addWidget(self._options_box())
+        settings_layout.addStretch(0)
 
-        outer.addWidget(self._actions_box())
+        self.settings_scroll = QScrollArea()
+        self.settings_scroll.setWidget(settings)
+        self.settings_scroll.setWidgetResizable(True)
+        self.settings_scroll.setFrameShape(QScrollArea.NoFrame)
+        self.settings_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.settings_scroll.setMinimumHeight(140)
+
         self.log_view = QPlainTextEdit()
         self.log_view.setReadOnly(True)
-        self.log_view.setMaximumHeight(140)
         self.log_view.setFont(QFont("Menlo", 11))
-        outer.addWidget(self.log_view)
+        self.log_view.setMinimumHeight(60)
 
+        # One splitter for everything above the action row, so the operator can
+        # give the space to whichever part they are working with.
+        self.splitter = QSplitter(Qt.Vertical)
+        self.splitter.addWidget(self.settings_scroll)
+        self.splitter.addWidget(self._folders_box())
+        self.splitter.addWidget(self.log_view)
+        self.splitter.setStretchFactor(0, 3)
+        self.splitter.setStretchFactor(1, 2)
+        self.splitter.setStretchFactor(2, 1)
+        outer.addWidget(self.splitter, 1)
+
+        outer.addWidget(self._actions_box())
         self.setCentralWidget(central)
         self.statusBar().showMessage(
             "{n} {r} - build {d}".format(n=APP_NAME, r=REVISION, d=__build_date__)
         )
         self._build_menu()
+
+    def _size_to_screen(self) -> None:
+        """Open at a comfortable size, but never larger than the screen.
+
+        A fixed 1024x860 is taller than the usable area of a 13-inch laptop once
+        the menu bar and the dock are taken off, which put the buttons below the
+        bottom edge with no way to reach them.
+        """
+        self.setMinimumSize(720, 420)
+        screen = QGuiApplication.primaryScreen()
+        if screen is None:  # pragma: no cover - always present in practice
+            self.resize(1024, 800)
+            return
+        available = screen.availableGeometry()
+        width = min(1024, max(720, available.width() - 80))
+        height = min(940, max(420, available.height() - 80))
+        self.resize(width, height)
+        self._balance_splitter(height)
+
+    def _balance_splitter(self, height: int) -> None:
+        """Give the settings most of the room, but keep the other two usable."""
+        settings = max(200, int(height * 0.55))
+        folders = max(140, int(height * 0.30))
+        log = max(60, height - settings - folders)
+        self.splitter.setSizes([settings, folders, log])
 
     def _build_menu(self) -> None:
         language_action = QAction(tr("language", self.language), self)
@@ -286,7 +327,7 @@ class MainWindow(QMainWindow):
         header.setSectionResizeMode(0, QHeaderView.Stretch)
         for column in (1, 2, 3):
             header.setSectionResizeMode(column, QHeaderView.ResizeToContents)
-        self.folder_table.setMinimumHeight(220)
+        self.folder_table.setMinimumHeight(110)
         layout.addWidget(self.folder_table, 1)
         self.folders_group = box
         return box

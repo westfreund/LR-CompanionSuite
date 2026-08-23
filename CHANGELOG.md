@@ -12,6 +12,26 @@ große Änderung** ist — siehe [docs/de/versionierung.md](docs/de/versionierun
 
 ---
 
+## [3.0.2] — 2026-08-23
+
+### Fixed
+
+- **The window did not fit a small screen.** It opened at a fixed 1024x860,
+  which is taller than the usable area of a 13-inch laptop once the menu bar
+  and the dock are taken off, leaving the Plan and Apply buttons below the
+  bottom edge with no way to reach them.
+
+  The settings now live in a scroll area, and the action row with the progress
+  bar sits outside it so it can never be the thing that scrolls away. The
+  window opens at the smaller of a comfortable size and the space the screen
+  actually offers, and its minimum is 720x420. Settings, folder table and log
+  share one splitter, so the space can be given to whichever part is in use.
+
+  Five regression tests: the window never opens larger than the screen, the
+  minimum fits a small laptop, the action row stays inside the window at five
+  heights down to 420, the settings scroll when they do not fit, and shrinking
+  below the minimum is refused.
+
 ## [3.0.1] — 2026-08-23
 
 ### Fixed
@@ -391,7 +411,7 @@ and rewriting the catalog in one reversible operation.
 - Debug mode and a per-run log file carrying a numbered `STEP` audit trail.
 
 **Project**
-- 256 tests, 87 % coverage, built on a synthetic catalog fixture so no
+- 265 tests, 87 % coverage, built on a synthetic catalog fixture so no
   Lightroom installation is needed.
 - GitLab CI: lint, tests on Python 3.9–3.13, a dedicated safety job, build.
 - Installers for macOS, Linux and Windows.

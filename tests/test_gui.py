@@ -188,3 +188,66 @@ def test_language_can_be_switched(qt_app):
 )
 def test_extension_parsing(text, expected):
     assert _split_extensions(text) == expected
+
+
+# -- fitting on a small screen ----------------------------------------------
+
+
+def _bottom_of(window, widget) -> int:
+    """Y coordinate of a widget's lower edge, in window coordinates."""
+    return widget.mapTo(window, widget.rect().bottomLeft()).y()
+
+
+def test_the_window_never_opens_larger_than_the_screen(qt_app):
+    from PySide6.QtGui import QGuiApplication
+
+    window = MainWindow()
+    available = QGuiApplication.primaryScreen().availableGeometry()
+    assert window.width() <= available.width()
+    assert window.height() <= available.height()
+
+
+def test_the_minimum_size_fits_a_small_laptop(qt_app):
+    """A fixed 1024x860 put the buttons below the bottom edge of a 13-inch."""
+    window = MainWindow()
+    assert window.minimumWidth() <= 800
+    assert window.minimumHeight() <= 500
+
+
+@pytest.mark.parametrize("height", [900, 700, 560, 480, 420])
+def test_the_action_row_stays_visible_at_every_height(qt_app, height):
+    window = MainWindow()
+    window.show()
+    window.resize(900, height)
+    for _ in range(20):
+        QCoreApplication.processEvents()
+    for widget in (window.plan_button, window.apply_button, window.progress):
+        assert _bottom_of(window, widget) <= window.height(), (
+            "{w} is below the bottom edge at height {h}".format(
+                w=widget.objectName() or type(widget).__name__, h=height
+            )
+        )
+    window.close()
+
+
+def test_the_settings_area_scrolls_when_it_does_not_fit(qt_app):
+    window = MainWindow()
+    window.show()
+    window.resize(900, 420)
+    for _ in range(20):
+        QCoreApplication.processEvents()
+    scrollbar = window.settings_scroll.verticalScrollBar()
+    assert scrollbar.maximum() > 0, "the settings cannot be reached by scrolling"
+    window.close()
+
+
+def test_shrinking_below_the_minimum_is_refused(qt_app):
+    window = MainWindow()
+    window.show()
+    window.resize(1, 1)
+    for _ in range(20):
+        QCoreApplication.processEvents()
+    assert window.width() >= window.minimumWidth()
+    assert window.height() >= window.minimumHeight()
+    assert _bottom_of(window, window.plan_button) <= window.height()
+    window.close()

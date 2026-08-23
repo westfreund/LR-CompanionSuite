@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r3.0.1 · Build date 2026-08-23**
+**Revision r3.0.2 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -275,6 +275,11 @@ One window, top to bottom:
 | **Log** | what happened, including every warning from the pre-flight checks |
 
 The menu bar switches between English and German at any time.
+
+The window fits small screens: it opens no larger than the space the screen
+offers, the settings scroll when they do not fit, and the buttons and the
+progress bar stay put outside the scrolling area. Settings, folder table and
+log share a splitter, so you can give the room to whichever you are using.
 
 The option defaults are taken from the same `Settings` object the command line
 uses, so the interface cannot quietly disagree with the documentation. There is

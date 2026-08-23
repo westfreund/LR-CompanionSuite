@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r3.0.1 · Build-Datum 2026-08-23**
+**Revision r3.0.2 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -271,6 +271,12 @@ Ein Fenster, von oben nach unten:
 
 Über die Menüleiste lässt sich jederzeit zwischen Deutsch und Englisch
 wechseln.
+
+Das Fenster passt auf kleine Bildschirme: Es öffnet nie größer als der
+verfügbare Platz, die Einstellungen scrollen, wenn sie nicht hineinpassen, und
+Schaltflächen sowie Fortschrittsbalken bleiben außerhalb des Scrollbereichs
+stehen. Einstellungen, Ordnertabelle und Protokoll teilen sich einen Teiler,
+Sie können den Platz also dem Teil geben, mit dem Sie gerade arbeiten.
 
 Die Vorgabewerte der Optionen stammen aus demselben `Settings`-Objekt, das auch
 die Kommandozeile verwendet — die Oberfläche kann der Dokumentation also nicht
