@@ -16,6 +16,31 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [17.0.0] — 2026-08-23 — "Beisammen"
+
+### Changed
+
+- **The collection folder for files not in the catalog now sits in the target
+  tree.** It used to stay behind in the source tree, so a run into a new folder
+  left its results in two places and it was not clear afterwards which one held
+  the outcome — the very confusion the sweep exists to remove. Reported by the
+  user.
+
+  Sorting in place is unaffected: the two roots are the same directory.
+
+### Fixed
+
+- **A collection folder on another drive would have failed.** Moving an orphan
+  was hard-coded as a rename, which raises `EXDEV` across a device boundary —
+  harmless while the folder stayed beside the source, fatal the moment it
+  follows the target. Orphans now carry the scope's cross-volume flag and are
+  copied and verified like any other file that crosses.
+
+- **The free-space check ignored them.** With the collection in the target tree
+  those bytes land on the target volume too, and are now counted.
+
+---
+
 ## [16.1.0] — 2026-08-23
 
 ### Changed

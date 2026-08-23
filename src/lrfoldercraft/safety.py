@@ -349,6 +349,13 @@ def _check_free_space(plan: Plan) -> Check:
             continue
         target = str(_existing_ancestor(Path(plan.scopes[move.scope].target_root_path)))
         needed[target] = needed.get(target, 0) + move.size_bytes
+    for orphan in plan.orphans:
+        # The collection folder sits in the target tree, so a target on another
+        # drive means these are copied too.
+        if not orphan.cross_volume:
+            continue
+        target = str(_existing_ancestor(Path(orphan.target_path).parent))
+        needed[target] = needed.get(target, 0) + orphan.size_bytes
     if not needed:
         return Check(
             "free-space",

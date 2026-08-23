@@ -362,7 +362,7 @@ def _run(
                         target=orphan.target_path,
                         orphan=True,
                     )
-                    _move_file(orphan.source_path, orphan.target_path, cross_volume=False)
+                    _move_file(orphan.source_path, orphan.target_path, orphan.cross_volume)
                     moved_orphans.append((orphan.source_path, orphan.target_path))
                     journal.write("move-done", file_id=0)
                     result.orphans_moved += 1

@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r16.1.0 · Build-Datum 2026-08-23**
+**Revision r17.0.0 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -615,14 +615,15 @@ nach dem Umsortieren immer noch Kleinkram herum.
 lrfc apply KATALOG -s day --collect-orphans
 ```
 
-Jede Quellwurzel bekommt dann einen Ordner — voreingestellt
-`_not-in-catalog`, wählbar mit `--orphan-folder NAME` — und jede solche Datei
-wandert hinein, **unter Beibehaltung ihres Herkunftspfads**, sodass nichts
-kollidiert und die Herkunft sichtbar bleibt:
+Der Sammelordner liegt **im Zielbaum**, bei allem anderen, was der Lauf
+erzeugt hat — voreingestellt `_not-in-catalog`, wählbar mit
+`--orphan-folder NAME`. Jede solche Datei wandert hinein, **unter Beibehaltung
+ihres Herkunftspfads**, sodass nichts kollidiert und die Herkunft sichtbar
+bleibt:
 
 ```
 mobileRAW/raw2021/3Stufig HZ-1239 Kopie.png
-  -> mobileRAW/_not-in-catalog/raw2021/3Stufig HZ-1239 Kopie.png
+  -> RAW/_not-in-catalog/raw2021/3Stufig HZ-1239 Kopie.png
 ```
 
 Nichts wird gelöscht, die Verschiebungen werden wie alle anderen journalisiert,
@@ -637,6 +638,10 @@ und das Zurücknehmen des Laufs holt sie wieder heraus.
 | Lightrooms eigene Dateien | der Katalog, seine Nebendateien, `*.lrdata`-Vorschauen, `*.lrcat-data` |
 | Das Gekritzel des Dateisystems | `.DS_Store`, `Thumbs.db`, AppleDouble-Begleiter `._X` |
 | Der Sammelordner selbst | und ein Zielbaum, in den dieser Lauf gerade sortiert |
+
+Liegt das Ziel auf einem anderen Laufwerk, wird daraus wie bei jeder anderen
+Verschiebung über Volumes hinweg ein Kopieren, und die Platzprüfung zählt sie
+mit.
 
 Das Einsammeln ist **standardmäßig aus**: Es bewegt Dateien, nach denen niemand
 das Werkzeug gefragt hat. Ist es an, meldet `plan` die gefundene Zahl mit

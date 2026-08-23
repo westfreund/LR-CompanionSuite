@@ -1,6 +1,6 @@
 # Projekthistorie
 
-**Revision r16.1.0 · Build-Datum 2026-08-23**
+**Revision r17.0.0 · Build-Datum 2026-08-23**
 
 Der [CHANGELOG](../../CHANGELOG.md) sagt, was sich in jeder Revision geändert
 hat. Dieses Dokument sagt **warum**, und was dazwischen geschah: die getroffenen
@@ -96,6 +96,8 @@ wissen will, *warum*, liest die Abschnitte darunter und den
 | **r15.0.2** | 22:00 |  | Ein überholter Plan konnte der ausgeführte werden. Der erste Behebungsversuch war schlimmer: Ein Lambda um den Slot machte die Verbindung direkt statt eingereiht, und Widgets entstanden im Arbeitsthread. |
 | **r16.0.0** | 22:17 | Wiederaufnahme | Ein abgebrochener Lauf lässt sich abschließen. Die Richtung ergibt sich aus der Abbruchstelle, nicht aus einer Vermutung. Ein neuer Lauf wird verweigert, solange einer offen ist. |
 | **r16.0.1** | 22:37 |  | Eine abgeschlossene Rücknahme wurde als abgebrochen gemeldet, weil ein späterer Lauf dieselben Pfade angelegt hatte. Der Fehlalarm blockierte gesunde Bibliotheken. |
+| **r16.1.0** | 22:52 |  | Die Historie nennt jede ausgelieferte Revision, und ein Test hält sie dazu an. Zuvor deckte sie 18 von 39 ab. |
+| **r17.0.0** | 23:—  | Beisammen | Der Sammelordner für katalogfremde Dateien liegt im Zielbaum statt in der Quelle: sonst lag das Ergebnis eines Laufs an zwei Orten. Dabei behoben: Über Laufwerksgrenzen wäre das Verschieben gescheitert. |
 
 ---
 

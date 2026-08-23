@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r16.1.0 · Build date 2026-08-23**
+**Revision r17.0.0 · Build date 2026-08-23**
 
 This document preserves the request that created LR-FolderCraft, a generic
 prompt for regenerating a comparable tool from scratch, and the context needed

@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r16.1.0 · Build date 2026-08-23**
+**Revision r17.0.0 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -601,14 +601,14 @@ ends lying about afterwards.
 lrfc apply CATALOG -s day --collect-orphans
 ```
 
-Each source root then gets a folder — `_not-in-catalog` by default,
-`--orphan-folder NAME` to choose — and every such file is moved into it
-**keeping the path it came from**, so nothing collides and the origin stays
-visible:
+The collection folder sits **in the target tree**, beside everything else
+the run produced — `_not-in-catalog` by default, `--orphan-folder NAME` to
+choose. Every such file is moved into it **keeping the path it came from**, so
+nothing collides and the origin stays visible:
 
 ```
 mobileRAW/raw2021/3Stufig HZ-1239 Kopie.png
-  -> mobileRAW/_not-in-catalog/raw2021/3Stufig HZ-1239 Kopie.png
+  -> RAW/_not-in-catalog/raw2021/3Stufig HZ-1239 Kopie.png
 ```
 
 Nothing is deleted, the moves are journalled like any other, and undoing the
@@ -623,6 +623,9 @@ run puts them back.
 | Lightroom's own files | the catalog, its side files, `*.lrdata` previews, `*.lrcat-data` |
 | The filesystem's scribbles | `.DS_Store`, `Thumbs.db`, AppleDouble `._X` companions |
 | The collection folder itself | and a target tree this run is sorting into |
+
+A target on another drive makes these copies rather than renames, like any
+other cross-volume move, and the free-space check counts them.
 
 The sweep is **off by default**: it moves files nobody asked the tool about.
 When it is on, `plan` reports how many were found and lists examples, so it is

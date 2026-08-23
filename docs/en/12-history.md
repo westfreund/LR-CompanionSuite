@@ -1,6 +1,6 @@
 # Project history
 
-**Revision r16.1.0 · Build date 2026-08-23**
+**Revision r17.0.0 · Build date 2026-08-23**
 
 The [CHANGELOG](../../CHANGELOG.md) says what changed in each revision. This
 document says **why**, and what happened in between: the decisions taken, the
@@ -92,6 +92,8 @@ and the [CHANGELOG](../../CHANGELOG.md).
 | **r15.0.2** | 22:00 |  | A superseded plan could become the one that ran. The first attempt at fixing it was worse: a lambda around the slot made the connection direct rather than queued, and widgets were built on the worker thread. |
 | **r16.0.0** | 22:17 | Wiederaufnahme | A run cut short can be finished. The direction follows from where it stopped, not from a guess. A new run is refused while one is unfinished. |
 | **r16.0.1** | 22:37 |  | A completed reversal was reported as interrupted, because a later run had recreated the same paths. The false positive blocked sound libraries. |
+| **r16.1.0** | 22:52 |  | The history names every released revision, and a test holds it to that. It had been covering 18 of 39. |
+| **r17.0.0** | 23:—  | Beisammen | The collection folder for files not in the catalog moves into the target tree rather than staying in the source: a run's result had been split across two places. Fixed on the way: across a drive boundary the move would have failed. |
 
 ---
 

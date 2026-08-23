@@ -157,3 +157,122 @@ def test_the_sweep_is_reported_so_it_is_never_a_surprise(library_with_strays):
     assert finding.count == 3
     assert finding.setting == "--collect-orphans"
     assert finding.samples
+
+
+# -- the collection belongs with the rest of the result ----------------------
+
+
+def test_the_collection_lands_in_the_target_tree(library_with_strays, tmp_path):
+    """Leaving it behind split the result across two folders.
+
+    Afterwards it was not clear which one held the outcome of the run, which is
+    exactly the confusion the sweep exists to remove.
+    """
+    target = tmp_path / "Neu"
+    plan, _s = plan_for(
+        library_with_strays,
+        structure=("{yyyy}-{mm}-{dd}",),
+        placement="new-tree",
+        target_root=str(target),
+        collect_orphans=True,
+    )
+    assert plan.orphans
+    for orphan in plan.orphans:
+        assert orphan.target_path.startswith(str(target / "_not-in-catalog"))
+    # and the path each file came from is still visible inside it
+    by_name = {Path(o.source_path).name: o for o in plan.orphans}
+    assert by_name["Panorama.dng"].target_path.endswith(
+        str(Path("_not-in-catalog") / "raw2019" / "Urlaub" / "Panorama.dng")
+    )
+
+
+def test_sorting_in_place_puts_it_where_it_always_was(library_with_strays):
+    """The two roots are the same directory, so nothing changes."""
+    plan, _s = plan_for(library_with_strays, structure=("{yyyy}-{mm}-{dd}",), collect_orphans=True)
+    root = library_with_strays.images_dir
+    for orphan in plan.orphans:
+        assert orphan.target_path.startswith(str(root / "_not-in-catalog"))
+
+
+def test_a_second_run_into_the_same_target_does_not_sweep_the_collection(
+    library_with_strays, tmp_path
+):
+    """The collection now sits inside the tree the sweep must not walk into."""
+    target = tmp_path / "Neu"
+    plan, settings = plan_for(
+        library_with_strays,
+        structure=("{yyyy}-{mm}-{dd}",),
+        placement="new-tree",
+        target_root=str(target),
+        collect_orphans=True,
+        dry_run=False,
+        backup_dir=str(tmp_path / "backups"),
+    )
+    result = execute(plan, settings)
+    assert result.orphans_moved == 3
+
+    again, _s = plan_for(
+        library_with_strays,
+        structure=("{yyyy}-{mm}-{dd}",),
+        placement="new-tree",
+        target_root=str(target),
+        collect_orphans=True,
+    )
+    assert again.orphans == []
+
+
+def test_the_move_is_marked_as_crossing_a_volume_when_it_does(
+    library_with_strays, tmp_path, monkeypatch
+):
+    """A target on another drive makes it a copy, not a rename.
+
+    Handing os.replace a cross-device path raises EXDEV, so the flag has to
+    reach the mover rather than being assumed False.
+    """
+    import lrfoldercraft.planner as planner
+
+    # Pretend the target sits on another device, which is what makes the move
+    # a copy rather than a rename.
+    real = planner._device_of
+    target_root = str(tmp_path / "Anderes")
+    monkeypatch.setattr(
+        planner,
+        "_device_of",
+        lambda path: -1 if str(path).startswith(target_root) else real(path),
+    )
+    plan, _s = plan_for(
+        library_with_strays,
+        structure=("{yyyy}-{mm}-{dd}",),
+        placement="new-tree",
+        target_root=str(tmp_path / "Anderes"),
+        collect_orphans=True,
+    )
+    assert plan.orphans
+    assert all(o.cross_volume for o in plan.orphans)
+
+
+def test_undo_brings_them_back_from_the_target_tree(library_with_strays, tmp_path):
+    before = sorted(
+        str(p.relative_to(library_with_strays.images_dir))
+        for p in library_with_strays.images_dir.rglob("*")
+        if p.is_file()
+    )
+    plan, settings = plan_for(
+        library_with_strays,
+        structure=("{yyyy}-{mm}-{dd}",),
+        placement="new-tree",
+        target_root=str(tmp_path / "Neu"),
+        collect_orphans=True,
+        dry_run=False,
+        backup_dir=str(tmp_path / "backups"),
+    )
+    result = execute(plan, settings)
+    assert result.orphans_moved == 3
+    undo(result.journal_path)
+
+    after = sorted(
+        str(p.relative_to(library_with_strays.images_dir))
+        for p in library_with_strays.images_dir.rglob("*")
+        if p.is_file()
+    )
+    assert after == before

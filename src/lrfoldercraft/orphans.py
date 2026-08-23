@@ -71,6 +71,9 @@ class Orphan:
     size_bytes: int = 0
     #: Path below the source root, kept so the collection folder shows origin.
     relative_path: str = ""
+    #: True when the collection folder is on another drive than the file is,
+    #: which makes the move a copy-verify-delete rather than a rename.
+    cross_volume: bool = False
 
 
 @dataclass
@@ -131,7 +134,11 @@ def find_orphans(
     folder_name = settings.orphan_folder.strip() or "_not-in-catalog"
     for scope in scopes:
         root = Path(scope.root_folder.absolute_path)
-        collection = root / folder_name
+        # The collection belongs with everything else the run produced. Leaving
+        # it behind in the source tree splits the result across two places, so
+        # that afterwards it is not clear which folder holds the outcome. With
+        # in-place sorting the two are the same directory and nothing changes.
+        collection = Path(scope.target_root_path) / folder_name
         # A run may be sorting into a tree below the source root; its files are
         # the very ones being placed and must not be swept up behind it. When
         # sorting in place the two are the same directory, and protecting it
@@ -140,7 +147,15 @@ def find_orphans(
         target = _key(scope.target_root_path)
         if target != _key(str(root)):
             protected.add(target)
-        _walk_root(root, collection, protected, spoken_for, sidecar_extensions, scan)
+        _walk_root(
+            root,
+            collection,
+            protected,
+            spoken_for,
+            sidecar_extensions,
+            scan,
+            scope.cross_volume,
+        )
 
     log.info(
         "Orphan sweep: %d file(s) examined, %d not in the catalog",
@@ -175,6 +190,7 @@ def _walk_root(
     spoken_for: Set[str],
     sidecar_extensions: Set[str],
     scan: OrphanScan,
+    cross_volume: bool = False,
 ) -> None:
     for dirpath, dirnames, filenames in os.walk(str(root)):
         if _key(dirpath) in protected:
@@ -207,6 +223,7 @@ def _walk_root(
                     target_path=str(collection / relative),
                     size_bytes=size,
                     relative_path=relative,
+                    cross_volume=cross_volume,
                 )
             )
 
