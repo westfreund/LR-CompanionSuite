@@ -8,6 +8,11 @@ never restored:
 * **Per-folder decisions.** They are keyed by catalog folder id. Restoring them
   against a different catalog would apply an answer given about one folder to
   whatever unrelated folder happens to share that number.
+* **The rule list.** Rules name folders that exist in one particular library.
+  Carrying them silently into the next one puts decisions in front of an
+  operator that were never made about the folders now on screen. A way of
+  working that *should* travel belongs in a profile, which is saved and loaded
+  deliberately.
 * **The catalog backup switch.** Turning the safety net off should be a decision
   taken for the run at hand, not one inherited from a run three weeks ago.
 

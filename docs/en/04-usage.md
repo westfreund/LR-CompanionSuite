@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r11.0.0 · Build date 2026-08-23**
+**Revision r12.0.0 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -600,19 +600,58 @@ The sweep is **off by default**: it moves files nobody asked the tool about.
 When it is on, `plan` reports how many were found and lists examples, so it is
 never a surprise.
 
+### Taking existing day folders along
+
+A library whose dated folders carry session names does not want a rule per
+folder. The checkbox **"Take existing day folders into the new structure,
+keeping their text"**, above the rule list, gives every dated folder the
+`refile` action at once:
+
+```bash
+lrfc plan CATALOG -s year/month/day --cumulative-dates --dated-folder-action refile
+```
+
+`2026-06-28 Makro Blume im Garten` then keeps its title inside the new tree and
+sits beside the plain `2026-06-28` holding that day's other photos. The
+checkbox and the *dated folder* box in the options are the same setting, so
+they always agree.
+
+Rules still win where they are set — the checkbox is the default underneath
+them, not a competitor.
+
 ## Profiles
 
-Save a configuration once, reuse it:
+
+Save a way of working once and apply it across libraries:
 
 ```bash
 lrfc plan CATALOG -s '{camera_slug}/{yyyy}-{mm}-{dd}' --save-profile by-camera
-lrfc apply OTHER_CATALOG --profile by-camera
+lrfc apply ANOTHER_CATALOG --profile by-camera
 lrfc profiles
 ```
 
-A profile stores *how* to sort, never `dry_run` — so loading one can never
-start a live run by accident. `--config FILE.json` loads settings from an
-explicit file instead.
+In the window there is a **Profile** row at the top, with a name field and
+*Load* and *Save*.
+
+### What a profile holds — and what it does not
+
+A profile holds the **options**: structure, cumulative dates, the three folder
+defaults, conflict handling, extension filters, sidecars, ASCII names, the
+sweep for files not in the catalog and its folder name, the move log, date
+sources, language.
+
+Deliberately **not** included:
+
+| | Why not |
+| --- | --- |
+| Catalog, target folder, root folder | They belong to a library, not to a way of working |
+| The rule list | Rules name folders that exist in one particular library |
+| Per-folder decisions | They are catalog folder ids; in the next library they would hit unrelated folders |
+| `--ignore-lock`, `--allow-unsupported-catalog`, "no backup" | Escape hatches for one awkward run. Carrying them unnoticed into the next library months later is exactly what a profile must not do |
+
+That is what lets one profile serve several collections. A profile also never
+stores `dry_run`, so loading one can never start a live run by accident.
+`--config FILE.json` loads settings from a particular file.
 
 ## Logging and debugging
 

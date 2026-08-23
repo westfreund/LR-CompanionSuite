@@ -16,6 +16,45 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [12.0.0] — 2026-08-23 — "Arbeitsweise"
+
+For using one way of working across several libraries, which is what the user
+asked for.
+
+### Added
+
+- **A switch for the folder decision most libraries need.** Above the rule
+  list: *"Take existing day folders into the new structure, keeping their
+  text"*. Every dated folder gets `refile` at once, so a library with dozens of
+  named sessions needs no rule at all. It drives the *dated folder* box in the
+  options rather than duplicating it, so the two can never disagree, and rules
+  still win where they are set.
+
+- **Profiles in the graphical interface**: a name field with *Load* and *Save*
+  at the top of the window.
+
+### Changed
+
+- **A profile now carries the way of working and nothing of one library.** It
+  used to store the catalog, the target folder, the rule list and the
+  per-folder decisions, which made it useless for the job profiles exist for.
+  Left out now: catalog, target root, root and anchor folder, folder ids, the
+  rule list, and the per-folder decisions — the last being catalog row ids that
+  would hit unrelated folders in the next library.
+
+  Also left out: `ignore_lock`, `allow_unsupported_catalog` and
+  `backup_catalog`. Escape hatches for one awkward run; carrying "ignore the
+  lock" or "skip the backup" unnoticed into a different library months later is
+  a trap, not a convenience. Loading a profile always leaves the safety net on.
+
+- **The window no longer remembers the rule list**, at the user's request.
+  Rules name folders that exist in one particular library, so carrying them
+  silently into the next one puts decisions in front of the operator that were
+  never made about the folders now on screen. A way of working that *should*
+  travel belongs in a profile, which is saved and loaded deliberately.
+
+---
+
 ## [11.0.0] — 2026-08-23 — "Vollstaendig"
 
 Two requests from the user, and the documentation checked by machine rather

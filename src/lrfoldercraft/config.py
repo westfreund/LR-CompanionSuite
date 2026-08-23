@@ -62,6 +62,28 @@ def config_dir() -> Path:
     return base / "lr-foldercraft"
 
 
+#: Settings that describe one particular library rather than a way of working.
+#: A profile leaves them out so it can be applied to the next library unchanged.
+PER_LIBRARY_FIELDS = frozenset(
+    {
+        "catalog",
+        "target_root",
+        "root_folder_id",
+        "anchor_folder_id",
+        "folder_ids",
+        "folder_actions",
+        "folder_rules",
+    }
+)
+
+#: Escape hatches for one awkward run. Carrying "ignore the lock" or "skip the
+#: backup" into the next library, months later and unnoticed, is exactly the
+#: kind of thing a profile must not do.
+NEVER_IN_A_PROFILE = frozenset(
+    {"ignore_lock", "allow_unsupported_catalog", "backup_catalog", "dry_run"}
+)
+
+
 def profiles_dir() -> Path:
     return config_dir() / "profiles"
 
@@ -275,7 +297,15 @@ class Settings:
         return cls(**{k: v for k, v in data.items() if k in known})
 
     def save_profile(self, name: str, directory: Optional[Path] = None) -> Path:
-        """Persist these settings as a named profile and return its path."""
+        """Persist these settings as a named profile and return its path.
+
+        A profile carries the **options** and nothing that belongs to one
+        library: not the catalog, not the target folder, not the rule list, and
+        certainly not the per-folder decisions, which are catalog row ids and
+        would apply one library's answer to whatever folder happens to share a
+        number in the next. That is what makes a profile worth having when the
+        same way of sorting is wanted across several collections.
+        """
         target_dir = Path(directory) if directory else profiles_dir()
         target_dir.mkdir(parents=True, exist_ok=True)
         path = target_dir / "{n}.json".format(n=_safe_profile_name(name))
@@ -283,6 +313,8 @@ class Settings:
         payload["profile_name"] = name
         # A profile describes *how* to sort, not one specific run.
         payload.pop("dry_run", None)
+        for field_name in PER_LIBRARY_FIELDS | NEVER_IN_A_PROFILE:
+            payload.pop(field_name, None)
         path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
         log.info("Saved profile %r to %s", name, path)
         return path

@@ -95,6 +95,40 @@ TEXT: Dict[str, Tuple[str, str]] = {
     "virtual_copies": ("Virtual copies carried", "Mitgeführte virtuelle Kopien"),
     "language": ("Deutsch", "English"),
     # the ordered rule list
+    "profile": ("Profile", "Profil"),
+    "profile_load": ("Load", "Laden"),
+    "profile_save": ("Save", "Speichern"),
+    "profile_hint": (
+        "A profile holds the options and nothing belonging to one library: no "
+        "catalog, no target folder, no rules, no per-folder decisions. That is "
+        "what lets the same profile serve several collections.",
+        "Ein Profil enthält die Optionen und nichts, was zu einer einzelnen "
+        "Bibliothek gehört: keinen Katalog, keinen Zielordner, keine Regeln, "
+        "keine Einzelentscheidungen. Genau deshalb lässt sich dasselbe Profil "
+        "für mehrere Sammlungen verwenden.",
+    ),
+    "profile_needs_a_name": (
+        "Type a name for the profile first.",
+        "Bitte zuerst einen Namen für das Profil eingeben.",
+    ),
+    "profile_saved": ("Profile {n} saved to {p}", "Profil {n} gespeichert unter {p}"),
+    "profile_loaded": ("Profile {n} loaded", "Profil {n} geladen"),
+    "refile_dated": (
+        "Take existing day folders into the new structure, keeping their text",
+        "Vorhandene Tagesordner in die neue Struktur übernehmen, Zusatztext behalten",
+    ),
+    "refile_dated_hint": (
+        "Every folder already named after a day -- with or without a description "
+        "-- is filed into the target structure under that name, so "
+        "'2026-06-28 Makro Blume im Garten' keeps its title and sits beside the "
+        "plain day folder. One click instead of a rule per folder. It sets the "
+        "'dated folder' box in the options below.",
+        "Jeder Ordner, der bereits nach einem Tag benannt ist — mit oder ohne "
+        "Beschreibung — wird unter diesem Namen in die Zielstruktur eingereiht. "
+        "'2026-06-28 Makro Blume im Garten' behält also seinen Titel und steht "
+        "neben dem schlichten Tagesordner. Ein Klick statt einer Regel je Ordner. "
+        "Setzt das Feld „Datierter Ordner“ in den Optionen darunter.",
+    ),
     "rules_hint": (
         "Rules, in order -- the first one that matches decides a folder. A pattern is "
         "a folder path (covering everything below it) or one of: *, dated, "

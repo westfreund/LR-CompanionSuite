@@ -450,7 +450,6 @@ def test_the_settings_come_back(qt_app, mixed_gui_catalog, tmp_path):
     window.subfolder_combo.setCurrentText("sort-inside")
     window.exclude_edit.setText("tif")
     window.sidecars_check.setChecked(False)
-    window.rules = [("_extern", "leave"), ("dated+label", "resort")]
     window.close()
 
     again = MainWindow()
@@ -462,7 +461,19 @@ def test_the_settings_come_back(qt_app, mixed_gui_catalog, tmp_path):
     assert again.subfolder_combo.currentText() == "sort-inside"
     assert again.exclude_edit.text() == "tif"
     assert again.sidecars_check.isChecked() is False
-    assert again.rules == [("_extern", "leave"), ("dated+label", "resort")]
+    again.close()
+
+
+def test_the_rule_list_is_not_carried_into_the_next_library(qt_app, mixed_gui_catalog):
+    """Rules name folders of one library; the next one has different folders."""
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.rules = [("_extern", "leave")]
+    assert "folder_rules" not in window.collect_state()
+    window.close()
+
+    again = MainWindow()
+    assert again.rules == []
     again.close()
 
 
@@ -864,3 +875,97 @@ def test_the_option_reaches_the_settings_and_is_remembered(qt_app, mixed_gui_cat
     again = MainWindow()
     assert again.cumulative_check.isChecked()
     again.close()
+
+
+# -- one way of working, several libraries -----------------------------------
+
+
+def test_the_shortcut_sets_the_dated_folder_default(qt_app, mixed_gui_catalog):
+    """One click instead of a rule the operator has to know how to write."""
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    assert window.dated_refile_check.isChecked() is False
+
+    window.dated_refile_check.setChecked(True)
+    assert window.dated_combo.currentText() == "refile"
+    assert window.collect_settings().dated_folder_action == "refile"
+    window.close()
+
+
+def test_the_shortcut_and_the_box_below_stay_in_step(qt_app, mixed_gui_catalog):
+    """Two controls, one setting -- they must never disagree."""
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.dated_combo.setCurrentText("refile")
+    assert window.dated_refile_check.isChecked()
+    window.dated_combo.setCurrentText("keep")
+    assert window.dated_refile_check.isChecked() is False
+    window.close()
+
+
+def test_a_profile_carries_the_options_and_no_library(qt_app, mixed_gui_catalog, tmp_path):
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.preset_combo.setCurrentText("year/month/day")
+    window.cumulative_check.setChecked(True)
+    window.dated_refile_check.setChecked(True)
+    window.mismatch_combo.setCurrentText("leave")
+    window.exclude_edit.setText("tif")
+    window.rules = [("_extern", "leave")]
+    window.target_edit.setText(str(tmp_path / "Neu"))
+    window._target_named(str(tmp_path / "Neu"))
+
+    window.profile_combo.setCurrentText("Meine Arbeitsweise")
+    window.save_profile()
+    window.close()
+
+    stored = Settings.load_profile("Meine Arbeitsweise")
+    assert stored.cumulative_dates is True
+    assert stored.dated_folder_action == "refile"
+    assert stored.mismatch_action == "leave"
+    assert stored.exclude_extensions == ("tif",)
+    # nothing belonging to that one library
+    assert stored.catalog == ""
+    assert stored.target_root is None
+    assert stored.folder_rules == ()
+    assert stored.folder_actions == {}
+
+
+def test_loading_a_profile_leaves_this_library_alone(qt_app, mixed_gui_catalog, tmp_path):
+    """The options change; the catalog, the target and the rules do not."""
+    Settings(
+        structure=("{yyyy}", "{mm}", "{dd}"),
+        cumulative_dates=True,
+        dated_folder_action="refile",
+        conflict="skip",
+    ).save_profile("Standard")
+
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    target = str(tmp_path / "Ziel")
+    window.target_edit.setText(target)
+    window._target_named(target)
+    window.rules = [("Urlaub", "leave")]
+
+    window.profile_combo.setCurrentText("Standard")
+    window.load_profile()
+    assert pump(lambda: window.plan is not None)
+
+    assert window.cumulative_check.isChecked()
+    assert window.dated_combo.currentText() == "refile"
+    assert window.conflict_combo.currentText() == "skip"
+    assert window.catalog_edit.text() == str(mixed_gui_catalog.catalog_path)
+    assert window.target_edit.text() == target
+    assert window.rules == [("Urlaub", "leave")]
+    window.close()
+
+
+def test_a_profile_never_carries_a_safety_override(qt_app, tmp_path):
+    """ "Ignore the lock" must not travel to the next library unnoticed."""
+    Settings(
+        catalog="x.lrcat", ignore_lock=True, backup_catalog=False, allow_unsupported_catalog=True
+    ).save_profile("Riskant")
+    back = Settings.load_profile("Riskant")
+    assert back.ignore_lock is False
+    assert back.backup_catalog is True
+    assert back.allow_unsupported_catalog is False

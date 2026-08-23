@@ -1,6 +1,6 @@
 # Versionierung
 
-**Revision r11.0.0 · Build-Datum 2026-08-23**
+**Revision r12.0.0 · Build-Datum 2026-08-23**
 
 ## Das Schema
 
@@ -20,10 +20,10 @@ Die Revision sagt dann eindeutig, ob eine bestimmte Fähigkeit vorhanden ist.
 `src/lrfoldercraft/version.py` ist die einzige Quelle:
 
 ```python
-__version__    = "11.0.0"
+__version__    = "12.0.0"
 __build_date__ = "2026-08-23"
 __codename__   = "Pruefstand"
-REVISION       = "r11.0.0 (2026-08-23)"
+REVISION       = "r12.0.0 (2026-08-23)"
 ```
 
 Nirgends sonst steht eine Version fest verdrahtet. Alles leitet sich daraus ab:
@@ -41,19 +41,19 @@ anzeigt. Das tut es an fünf Stellen:
 
 ```console
 $ lrfc --version
-LR-FolderCraft r11.0.0 (2026-08-23) - Vollstaendig
+LR-FolderCraft r12.0.0 (2026-08-23) - Arbeitsweise
 ```
 
 ```
-LR-FolderCraft r11.0.0 (2026-08-23) - Vollstaendig      <- jeder Berichtskopf
+LR-FolderCraft r12.0.0 (2026-08-23) - Arbeitsweise      <- jeder Berichtskopf
 ```
 
 ```
-LR-FolderCraft — r11.0.0 (2026-08-23) - build 2026-08-23    <- TUI-Kopf
+LR-FolderCraft — r12.0.0 (2026-08-23) - build 2026-08-23    <- TUI-Kopf
 ```
 
 ```
-2026-08-22 16:26:31 | INFO | Revision r11.0.0 (2026-08-23) | version 5.0.0 | build date 2026-08-23
+2026-08-22 16:26:31 | INFO | Revision r12.0.0 (2026-08-23) | version 5.0.0 | build date 2026-08-23
 ```
 
 ```json
@@ -74,7 +74,7 @@ LR-FolderCraft — r11.0.0 (2026-08-23) - build 2026-08-23    <- TUI-Kopf
 7. Als `release: rX.Y.Z — <Zusammenfassung>` committen und taggen:
 
 ```bash
-git tag -a v11.0.0 -m "LR-FolderCraft r11.0.0"
+git tag -a v12.0.0 -m "LR-FolderCraft r12.0.0"
 git push origin main --tags
 ```
 

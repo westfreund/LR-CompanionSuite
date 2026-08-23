@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r11.0.0 · Build-Datum 2026-08-23**
+**Revision r12.0.0 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -610,9 +610,29 @@ Das Einsammeln ist **standardmäßig aus**: Es bewegt Dateien, nach denen nieman
 das Werkzeug gefragt hat. Ist es an, meldet `plan` die gefundene Zahl mit
 Beispielen — eine Überraschung soll es nie sein.
 
+### Vorhandene Tagesordner übernehmen
+
+Eine Bibliothek, deren Datumsordner Sessionnamen tragen, will keine Regel je
+Ordner. Das Ankreuzfeld **„Vorhandene Tagesordner in die neue Struktur
+übernehmen, Zusatztext behalten"** über der Regelliste gibt jedem datierten
+Ordner auf einen Schlag die Aktion `refile`:
+
+```bash
+lrfc plan KATALOG -s year/month/day --cumulative-dates --dated-folder-action refile
+```
+
+`2026-06-28 Makro Blume im Garten` behält damit seinen Titel im neuen Baum und
+steht neben dem schlichten `2026-06-28` mit den übrigen Fotos des Tages. Das
+Ankreuzfeld und das Feld *Datierter Ordner* in den Optionen sind dieselbe
+Einstellung und stimmen deshalb immer überein.
+
+Regeln stechen weiterhin, wo sie gesetzt sind — das Ankreuzfeld ist die
+Voreinstellung darunter, kein Gegenspieler.
+
 ## Profile
 
-Eine Konfiguration einmal speichern und wiederverwenden:
+
+Eine Arbeitsweise einmal speichern und über Bibliotheken hinweg anwenden:
 
 ```bash
 lrfc plan KATALOG -s '{camera_slug}/{yyyy}-{mm}-{dd}' --save-profile nach-kamera
@@ -620,9 +640,29 @@ lrfc apply ANDERER_KATALOG --profile nach-kamera
 lrfc profiles
 ```
 
-Ein Profil speichert, *wie* sortiert wird, niemals `dry_run` — das Laden eines
-Profils kann also nie versehentlich einen scharfen Lauf starten. `--config
-DATEI.json` lädt Einstellungen aus einer bestimmten Datei.
+Im Fenster steht dafür ganz oben eine Zeile **Profil** mit Namensfeld sowie
+*Laden* und *Speichern*.
+
+### Was ein Profil enthält — und was nicht
+
+Ein Profil hält die **Optionen**: Struktur, kumulative Datumsangaben, die drei
+Ordnervorgaben, Konfliktbehandlung, Endungsfilter, Sidecars, ASCII-Namen, das
+Einsammeln katalogfremder Dateien und dessen Ordnername, Verschiebeprotokoll,
+Datumsquellen, Sprache.
+
+Bewusst **nicht** enthalten:
+
+| | Warum nicht |
+| --- | --- |
+| Katalog, Zielordner, Stammordner | Sie gehören zu einer Bibliothek, nicht zu einer Arbeitsweise |
+| Die Regelliste | Regeln benennen Ordner, die es genau in einer Bibliothek gibt |
+| Entscheidungen zu einzelnen Ordnern | Es sind Katalog-Ordner-IDs; in der nächsten Bibliothek träfen sie fremde Ordner |
+| `--ignore-lock`, `--allow-unsupported-catalog`, „keine Sicherung" | Notausgänge für einen einzelnen Lauf. Sie Monate später unbemerkt in die nächste Bibliothek zu tragen, ist genau das, was ein Profil nicht tun darf |
+
+Genau deshalb lässt sich dasselbe Profil auf mehrere Sammlungen anwenden. Ein
+Profil speichert außerdem niemals `dry_run` — das Laden kann also nie
+versehentlich einen scharfen Lauf starten. `--config DATEI.json` lädt
+Einstellungen aus einer bestimmten Datei.
 
 ## Protokollierung und Fehlersuche
 

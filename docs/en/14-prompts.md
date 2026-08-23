@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r11.0.0 · Build date 2026-08-23**
+**Revision r12.0.0 · Build date 2026-08-23**
 
 This document preserves the request that created LR-FolderCraft, a generic
 prompt for regenerating a comparable tool from scratch, and the context needed
@@ -286,6 +286,18 @@ pre-flight checks, execute with a progress callback. Then:
   meaning, so provide move-up and move-down. Changing a rule must clear the
   manual decisions it might have made and replan, or the display stops matching
   what would run.
+* **A saved profile must carry the way of working and nothing of one library.**
+  Leave out the catalog, the target folder, the root folder, the rule list and
+  the per-folder decisions -- and leave out the escape hatches too, the "ignore
+  the lock" and "skip the backup" flags, because a profile that carries those
+  into a different library months later is a trap rather than a convenience.
+  What remains is portable, which is the only reason to have profiles at all.
+  The same reasoning governs whatever the interface remembers by itself.
+* **Give the one folder decision most libraries need its own control.** Asking
+  an operator to write a rule to say "keep my existing day folders" is asking
+  them to learn a syntax for the common case. Put it up front as a switch that
+  sets the dated-folder default, and bind it to that setting rather than
+  duplicating it, so the two can never disagree.
 * **Offer cumulative date levels.** `{yyyy}/{mm}/{dd}` giving `2019/01/03` is
   only half of what people want: a folder named `01` says nothing once it is
   out of its tree, in a search result or a file dialog. An option that rewrites

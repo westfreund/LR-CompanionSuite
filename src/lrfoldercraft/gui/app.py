@@ -55,7 +55,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..catalog.model import CatalogInfo, RootFolder
-from ..config import CONFLICT_MODES, MISSING_DATE_MODES, Settings
+from ..config import CONFLICT_MODES, MISSING_DATE_MODES, ConfigError, Settings, list_profiles
 from ..exceptions_report import (
     ERROR,
     EXCEPTION,
@@ -68,7 +68,9 @@ from ..folders import (
     ALL_ACTIONS,
     CONSOLIDATE,
     DATED_FOLDER_ACTIONS,
+    KEEP,
     MISMATCH_ACTIONS,
+    REFILE,
     SUBFOLDER_ACTIONS,
     FolderCase,
 )
@@ -254,6 +256,7 @@ class MainWindow(QMainWindow):
         settings_layout = QVBoxLayout(settings)
         settings_layout.setContentsMargins(0, 0, 0, 0)
         settings_layout.addWidget(self._masthead())
+        settings_layout.addWidget(self._profile_box())
         settings_layout.addWidget(self._catalog_box())
         settings_layout.addWidget(self._source_box())
         settings_layout.addWidget(self._target_box())
@@ -425,6 +428,94 @@ class MainWindow(QMainWindow):
         if event.type() == QEvent.PaletteChange and hasattr(self, "logo_label"):
             self._tint_logo()
 
+    def _profile_box(self) -> QGroupBox:
+        """Save a way of working once, apply it to the next library.
+
+        A profile holds the options and nothing that belongs to one library:
+        no catalog, no target folder, no rule list, no per-folder decisions.
+        That is what lets the same profile serve several collections.
+        """
+        box = QGroupBox()
+        row = QHBoxLayout(box)
+        self.profile_combo = QComboBox()
+        self.profile_combo.setEditable(True)
+        self.profile_combo.setInsertPolicy(QComboBox.NoInsert)
+        self.profile_load = QPushButton()
+        self.profile_load.clicked.connect(self.load_profile)
+        self.profile_save = QPushButton()
+        self.profile_save.clicked.connect(self.save_profile)
+        row.addWidget(self.profile_combo, 1)
+        row.addWidget(self.profile_load)
+        row.addWidget(self.profile_save)
+        self.profile_group = box
+        self._refresh_profiles()
+        return box
+
+    def _refresh_profiles(self, select: str = "") -> None:
+        current = select or self.profile_combo.currentText()
+        self.profile_combo.blockSignals(True)
+        self.profile_combo.clear()
+        self.profile_combo.addItems(list_profiles())
+        self.profile_combo.setCurrentText(current)
+        self.profile_combo.blockSignals(False)
+
+    def save_profile(self) -> None:
+        name = self.profile_combo.currentText().strip()
+        if not name:
+            QMessageBox.information(self, APP_NAME, tr("profile_needs_a_name", self.language))
+            return
+        try:
+            settings = self.collect_settings()
+        except Exception as exc:  # noqa: BLE001 - shown to the user
+            QMessageBox.warning(self, APP_NAME, str(exc))
+            return
+        path = settings.save_profile(name)
+        self._refresh_profiles(name)
+        self.say(tr("profile_saved", self.language).format(n=name, p=path))
+
+    def load_profile(self) -> None:
+        name = self.profile_combo.currentText().strip()
+        if not name:
+            return
+        try:
+            settings = Settings.load_profile(name)
+        except ConfigError as exc:
+            QMessageBox.warning(self, APP_NAME, str(exc))
+            return
+        self._apply_settings(settings)
+        self.say(tr("profile_loaded", self.language).format(n=name))
+        if self.catalog_edit.text().strip():
+            self.do_plan()
+
+    def _apply_settings(self, settings: Settings) -> None:
+        """Put a profile's options into the widgets.
+
+        The catalog, the target folder and the rules are untouched on purpose:
+        a profile does not carry them, and overwriting what the operator has
+        already set for *this* library would be the opposite of helpful.
+        """
+        self._restore_text(self.include_edit, ", ".join(settings.include_extensions))
+        self._restore_text(self.exclude_edit, ", ".join(settings.exclude_extensions))
+        self._restore_choice(self.conflict_combo, settings.conflict)
+        self._restore_choice(self.missing_combo, settings.on_missing_date)
+        self._restore_choice(self.subfolder_combo, settings.subfolder_action)
+        self._restore_choice(self.dated_combo, settings.dated_folder_action)
+        self._restore_choice(self.mismatch_combo, settings.mismatch_action)
+        self.sidecars_check.setChecked(settings.move_sidecars)
+        self.ascii_check.setChecked(settings.ascii_only)
+        self.cumulative_check.setChecked(settings.cumulative_dates)
+        self.orphans_check.setChecked(settings.collect_orphans)
+        self._restore_text(self.orphan_edit, settings.orphan_folder)
+        spec = "/".join(settings.structure)
+        for name, preset in PRESETS.items():
+            if tuple(preset) == tuple(settings.structure):
+                self.preset_combo.setCurrentText(name)
+                self.custom_edit.clear()
+                break
+        else:
+            self.custom_edit.setText(spec)
+        self.update_preview()
+
     def _catalog_box(self) -> QGroupBox:
         box = QGroupBox()
         layout = QVBoxLayout(box)
@@ -531,6 +622,7 @@ class MainWindow(QMainWindow):
         middle = QFormLayout()
         self.subfolder_combo = self._combo(SUBFOLDER_ACTIONS, defaults.subfolder_action)
         self.dated_combo = self._combo(DATED_FOLDER_ACTIONS, defaults.dated_folder_action)
+        self.dated_combo.currentTextChanged.connect(self._dated_action_changed)
         self.mismatch_combo = self._combo(MISMATCH_ACTIONS, defaults.mismatch_action)
         self.subfolder_label = QLabel()
         self.dated_label = QLabel()
@@ -677,6 +769,14 @@ class MainWindow(QMainWindow):
         column = QVBoxLayout(holder)
         column.setContentsMargins(0, 0, 0, 0)
 
+        # The one folder decision most libraries need, one click up front,
+        # instead of a rule the operator has to know how to write. It drives
+        # the dated-folder box in the options rather than duplicating it, so
+        # there is still only one setting underneath.
+        self.dated_refile_check = QCheckBox()
+        self.dated_refile_check.toggled.connect(self._dated_refile_toggled)
+        column.addWidget(self.dated_refile_check)
+
         self.rules_hint = QLabel()
         self.rules_hint.setWordWrap(True)
         column.addWidget(self.rules_hint)
@@ -711,6 +811,21 @@ class MainWindow(QMainWindow):
         buttons.addStretch(1)
         column.addLayout(buttons)
         return holder
+
+    def _dated_refile_toggled(self, checked: bool) -> None:
+        """Set the dated-folder default, and re-plan so the effect is visible."""
+        wanted = REFILE if checked else KEEP
+        if self.dated_combo.currentText() == wanted:
+            return
+        self.dated_combo.setCurrentText(wanted)
+
+    def _dated_action_changed(self, value: str) -> None:
+        """Keep the shortcut in step when the box below is used instead."""
+        self.dated_refile_check.blockSignals(True)
+        self.dated_refile_check.setChecked(value == REFILE)
+        self.dated_refile_check.blockSignals(False)
+        if self.catalog_edit.text().strip():
+            self.do_plan()
 
     # -- the rule list ------------------------------------------------------
 
@@ -841,6 +956,10 @@ class MainWindow(QMainWindow):
         self.orphans_check.setToolTip(tr("collect_orphans_hint", language))
         self.orphan_edit.setToolTip(tr("orphan_folder_hint", language))
         self.folders_group.setTitle(tr("existing", language))
+        self.profile_group.setTitle(tr("profile", language))
+        self.profile_load.setText(tr("profile_load", language))
+        self.profile_save.setText(tr("profile_save", language))
+        self.profile_combo.setToolTip(tr("profile_hint", language))
         self.findings_group.setTitle(tr("findings", language))
         self._retranslate_handles()
         self.findings_table.setHorizontalHeaderLabels(
@@ -866,6 +985,8 @@ class MainWindow(QMainWindow):
         self.rule_table.setHorizontalHeaderLabels(
             [tr("col_pattern", language), tr("col_decision", language)]
         )
+        self.dated_refile_check.setText(tr("refile_dated", language))
+        self.dated_refile_check.setToolTip(tr("refile_dated_hint", language))
         self.rules_hint.setText(tr("rules_hint", language))
         self.rule_add_button.setText(tr("rule_add", language))
         self.rule_remove_button.setText(tr("rule_remove", language))
@@ -1319,7 +1440,6 @@ class MainWindow(QMainWindow):
             "cumulative_dates": self.cumulative_check.isChecked(),
             "collect_orphans": self.orphans_check.isChecked(),
             "orphan_folder": self.orphan_edit.text().strip(),
-            "folder_rules": [list(rule) for rule in self.rules],
             "window": [self.width(), self.height()],
             "splitter": self.splitter.sizes(),
         }
@@ -1362,14 +1482,6 @@ class MainWindow(QMainWindow):
         self._restore_text(self.orphan_edit, state.get("orphan_folder"))
         # The backup switch is never restored: see gui/state.py.
         self.backup_check.setChecked(True)
-
-        rules = state.get("folder_rules")
-        if isinstance(rules, list):
-            self.rules = [
-                (str(entry[0]), str(entry[1]))
-                for entry in rules
-                if isinstance(entry, (list, tuple)) and len(entry) == 2
-            ]
 
         size = state.get("window")
         if isinstance(size, list) and len(size) == 2:
