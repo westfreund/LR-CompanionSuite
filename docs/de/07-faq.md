@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r10.0.0 · Build-Datum 2026-08-23**
+**Revision r10.1.0 · Build-Datum 2026-08-23**
 
 ## Sicherheit und Daten
 

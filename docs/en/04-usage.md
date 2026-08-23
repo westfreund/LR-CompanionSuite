@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r10.0.0 · Build date 2026-08-23**
+**Revision r10.1.0 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -534,7 +534,8 @@ version and the root folders, and `lrfc plan` runs the full pre-flight.
 
 ## What the tool is
 
-**Actions → About LR-FolderCraft** gives the three-sentence version: what it
+The window opens with the mark, the name and one sentence saying what the
+tool does. **Actions → About LR-FolderCraft** gives the three-sentence version: what it
 does, the promise that only the folder rows and each file's folder column are
 ever written, the revision and build date, and the licence. The purpose of the
 tool is also stated in one line at the top of the window, so it is visible

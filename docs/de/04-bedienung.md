@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r10.0.0 · Build-Datum 2026-08-23**
+**Revision r10.1.0 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -544,7 +544,9 @@ und Wurzelordner, `lrfc plan` fährt die vollständige Vorabprüfung.
 
 ## Was das Werkzeug ist
 
-**Aktionen → Über LR-FolderCraft** gibt die Kurzfassung in drei Sätzen: was es
+Das Fenster beginnt mit der Marke, dem Namen und einem Satz, der sagt, was das
+Werkzeug tut. **Aktionen → Über LR-FolderCraft** gibt die Kurzfassung in drei
+Sätzen: was es
 tut, das Versprechen, dass nur die Ordnerzeilen und die Ordnerspalte jeder Datei
 geschrieben werden, Revision und Build-Datum, und die Lizenz. Der Zweck steht
 außerdem als eine Zeile ganz oben im Fenster, sichtbar ohne einen Klick.

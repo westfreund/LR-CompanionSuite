@@ -16,6 +16,25 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [10.1.0] — 2026-08-23
+
+### Fixed
+
+- **The mark was invisible in the graphical interface.** r10.0.0 set it as the
+  window icon, and macOS shows no icon in a window title bar at all — so on the
+  platform this tool is developed on, the mark that had just been chosen could
+  not be seen anywhere. Reported by the user, who asked whether it was shown.
+
+  It is now drawn **inside** the window, in a masthead above the catalog field:
+  the mark, the name, and the one sentence saying what the tool does. Tinted
+  from the palette's text colour and re-tinted when the system switches between
+  light and dark, so a single-colour mark stays a single-colour mark.
+
+- The icon is now set on the **application** as well as the window, which is
+  what the macOS Dock and the Windows task bar actually read.
+
+---
+
 ## [10.0.0] — 2026-08-23 — "Signet"
 
 ### Added

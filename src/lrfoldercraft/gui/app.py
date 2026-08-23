@@ -246,12 +246,7 @@ class MainWindow(QMainWindow):
         settings = QWidget()
         settings_layout = QVBoxLayout(settings)
         settings_layout.setContentsMargins(0, 0, 0, 0)
-        self.purpose_label = QLabel()
-        self.purpose_label.setWordWrap(True)
-        purpose_font = self.purpose_label.font()
-        purpose_font.setBold(True)
-        self.purpose_label.setFont(purpose_font)
-        settings_layout.addWidget(self.purpose_label)
+        settings_layout.addWidget(self._masthead())
         settings_layout.addWidget(self._catalog_box())
         settings_layout.addWidget(self._source_box())
         settings_layout.addWidget(self._target_box())
@@ -373,6 +368,55 @@ class MainWindow(QMainWindow):
         self.undo_action = QAction(tr("undo_run", self.language), self)
         self.undo_action.triggered.connect(self.do_undo)
         menu.addAction(self.undo_action)
+
+    def _masthead(self) -> QWidget:
+        """The mark and what the tool is, at the top of the window.
+
+        A window icon is not enough: macOS shows no icon in a title bar at all,
+        so on the platform this is developed on the mark would never be seen.
+        Inside the window it is visible everywhere, and it sits beside the one
+        sentence that says what the tool does.
+        """
+        holder = QWidget()
+        row = QHBoxLayout(holder)
+        row.setContentsMargins(0, 0, 0, 2)
+        row.setSpacing(12)
+
+        self.logo_label = QLabel()
+        self.logo_label.setFixedSize(44, 44)
+        self.logo_label.setScaledContents(True)
+        row.addWidget(self.logo_label, 0, Qt.AlignTop)
+
+        column = QVBoxLayout()
+        column.setSpacing(0)
+        self.wordmark_label = QLabel(APP_NAME)
+        wordmark_font = self.wordmark_label.font()
+        wordmark_font.setBold(True)
+        wordmark_font.setPointSize(wordmark_font.pointSize() + 3)
+        self.wordmark_label.setFont(wordmark_font)
+        column.addWidget(self.wordmark_label)
+
+        self.purpose_label = QLabel()
+        self.purpose_label.setWordWrap(True)
+        column.addWidget(self.purpose_label)
+        row.addLayout(column, 1)
+
+        self._tint_logo()
+        return holder
+
+    def _tint_logo(self) -> None:
+        """Draw the mark in the current text colour, so it follows the theme."""
+        colour = self.palette().windowText().color()
+        # Rendered at twice the label size so it stays crisp on a retina screen.
+        self.logo_label.setPixmap(_logo_pixmap(88, colour))
+
+    def changeEvent(self, event) -> None:  # noqa: N802 - Qt naming
+        """Re-tint when the system switches between light and dark."""
+        from PySide6.QtCore import QEvent
+
+        super().changeEvent(event)
+        if event.type() == QEvent.PaletteChange and hasattr(self, "logo_label"):
+            self._tint_logo()
 
     def _catalog_box(self) -> QGroupBox:
         box = QGroupBox()
@@ -1395,6 +1439,9 @@ def run_gui(catalog: str = "", language: Optional[str] = None, debug: bool = Fal
     """Entry point used by ``lrfc gui``."""
     setup_logging(debug=debug, quiet=True, tag="gui")
     application = QApplication.instance() or QApplication(sys.argv)
+    # Set on the application, not only the window: that is what the macOS Dock
+    # and the Windows task bar read.
+    application.setWindowIcon(window_icon())
     window = MainWindow(catalog=catalog, language=language)
     window.show()
     return application.exec()

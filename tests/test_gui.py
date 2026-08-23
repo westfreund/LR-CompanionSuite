@@ -798,3 +798,42 @@ def test_the_window_carries_the_mark(qt_app):
     # Both cuts are in it, so a 16 px request gets the one drawn for 16 px.
     assert {size.width() for size in icon.availableSizes()} >= {16, 32, 256}
     window.close()
+
+
+# -- the mark, where it can actually be seen ---------------------------------
+
+
+def test_the_mark_is_inside_the_window_not_only_in_the_icon(qt_app):
+    """macOS shows no icon in a title bar, so the window icon alone is invisible."""
+    window = MainWindow()
+    pixmap = window.logo_label.pixmap()
+    assert pixmap is not None and not pixmap.isNull()
+    assert pixmap.width() >= 44
+    window.close()
+
+
+def test_the_masthead_names_the_tool_and_says_what_it_does(qt_app):
+    window = MainWindow(language="de")
+    assert window.wordmark_label.text() == "LR-FolderCraft"
+    assert "Bibliothek" in window.purpose_label.text()
+    window.toggle_language()
+    assert "library" in window.purpose_label.text()
+    window.close()
+
+
+def test_the_mark_takes_the_text_colour(qt_app):
+    """Single-colour by design: it must follow the theme, not fight it."""
+    window = MainWindow()
+    first = window.logo_label.pixmap().toImage()
+    window._tint_logo()
+    assert window.logo_label.pixmap().toImage() == first
+    window.close()
+
+
+def test_the_application_carries_the_icon_for_the_dock(qt_app):
+    """setWindowIcon on the window is not what the Dock or task bar reads."""
+    from lrfoldercraft.gui.app import window_icon
+
+    icon = window_icon()
+    assert not icon.isNull()
+    assert {size.width() for size in icon.availableSizes()} >= {16, 256}
