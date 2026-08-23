@@ -96,6 +96,61 @@ leave a slightly untidy tree.
 It exists for inspecting a locked catalog. Nothing stops you passing it to
 `apply`. It could be restricted to read-only commands.
 
+## Agreed and deferred
+
+Requested on 2026-08-23 and deliberately postponed until after the second test
+run, so the tests are not chasing a moving target. To pick them up, say
+"do O-21 to O-24" — each item below carries enough detail to start from.
+
+### O-21 · A page about reconnecting a copied library
+A catalog records the **absolute** path of its root folders. Copy a library to
+another drive, rename a volume, or restore from a backup, and the catalog still
+points at the old location: every photo shows as missing, and this tool refuses
+the run (r4.0.1 names the cause). Since making a copy first is exactly what the
+safety guidance recommends, the guidance has to cover the consequence.
+
+Wanted: a short page of its own, linked from installation, usage and safety in
+both languages, showing the symptom, the Lightroom remedy (right-click the
+folder, Find Missing Folder), and the alternative of renaming the volume back.
+Include how to see the recorded path (`lrfc folders CATALOG`) so the reader can
+tell what the catalog expects.
+
+### O-22 · Recommend converting the catalog first
+A catalog written by an older Lightroom Classic opens in a newer one only after
+conversion. Working on an unconverted catalog with this tool means writing to a
+schema the installed Lightroom has not accepted yet. Observed in practice: a
+restored library was schema 17.0.0 and became 18.0.0 the moment Lightroom
+opened it.
+
+Wanted: an explicit recommendation to open the catalog once in the installed
+Lightroom Classic — which reconnects and converts in the same pass — before
+running LR-FolderCraft. Belongs next to O-21.
+
+### O-23 · Make both interfaces state the preconditions
+Wanted: before the first run in a session, the TUI and the GUI should state the
+three preconditions — Lightroom closed, catalog opened once in the installed
+Lightroom, backup present — and require an explicit acknowledgement. Not a
+dialog that is clicked away by reflex: it should show what was actually found
+(schema version, whether all paths resolve, whether a backup directory has a
+recent copy) so the acknowledgement means something.
+
+The command line has the pre-flight report for this; the two interfaces show it
+only after planning.
+
+### O-24 · A move log beside the library
+Wanted: a human-readable record of what a run did, written into the library's
+own folder rather than only into `~/Library/Logs`, so it travels with the
+library when it is moved or archived — and so it can be found months later
+without knowing where the tool keeps its logs.
+
+Sketch: `LR-FolderCraft_<catalog>_<yyyy-mm-dd_HHMM>.log` next to the `.lrcat`,
+holding the revision and build date, the settings, the folder decisions, one
+line per file moved (from, to, renamed), the counts, and the result including
+the backup and journal paths. The JSON-Lines journal stays what it is -- a
+machine-readable record for undo; this is the one a person reads. Make the
+location configurable and allow it to be turned off, because a read-only or
+full volume must not fail a run.
+
 ## Ideas, not commitments
 
 ### O-15 · GUI ✔

@@ -108,6 +108,64 @@ hinterlassen.
 Es existiert, um einen gesperrten Katalog zu untersuchen. Nichts hindert daran,
 es an `apply` zu übergeben. Man könnte es auf lesende Befehle beschränken.
 
+## Zugesagt und zurückgestellt
+
+Am 23.08.2026 gewünscht und bewusst bis nach dem zweiten Testlauf verschoben,
+damit die Tests kein bewegliches Ziel haben. Zum Starten genügt „mach O-21 bis
+O-24" — jeder Punkt unten enthält genug, um damit zu beginnen.
+
+### O-21 · Eine Seite zum Neuverknüpfen einer kopierten Bibliothek
+Ein Katalog merkt sich den **absoluten** Pfad seiner Stammordner. Kopiert man
+eine Bibliothek auf ein anderes Laufwerk, benennt ein Volume um oder stellt aus
+einer Sicherung wieder her, zeigt der Katalog weiterhin auf den alten Ort: Alle
+Fotos gelten als fehlend, und dieses Werkzeug verweigert den Lauf (r4.0.1 nennt
+die Ursache). Da vorher eine Kopie anzulegen genau das ist, was die
+Sicherheitshinweise empfehlen, muss die Anleitung auch die Folge behandeln.
+
+Gewünscht: eine eigene kurze Seite, verlinkt aus Installation, Bedienung und
+Sicherheit, zweisprachig, mit dem Symptom, dem Lightroom-Weg (Rechtsklick auf
+den Ordner, Fehlenden Ordner suchen) und der Alternative, das Volume wieder
+umzubenennen. Dazu, wie man den vermerkten Pfad sieht (`lrfc folders KATALOG`),
+damit man erkennt, was der Katalog erwartet.
+
+### O-22 · Empfehlung, den Katalog vorher zu konvertieren
+Ein von einer älteren Lightroom-Classic-Fassung geschriebener Katalog lässt
+sich in einer neueren erst nach Konvertierung öffnen. Mit einem nicht
+konvertierten Katalog zu arbeiten hieße, in ein Schema zu schreiben, das das
+installierte Lightroom noch gar nicht angenommen hat. In der Praxis beobachtet:
+Eine wiederhergestellte Bibliothek hatte Schema 17.0.0 und wurde 18.0.0, sobald
+Lightroom sie öffnete.
+
+Gewünscht: die ausdrückliche Empfehlung, den Katalog einmal im installierten
+Lightroom Classic zu öffnen — das verknüpft und konvertiert in einem Zug —,
+bevor LR-FolderCraft läuft. Gehört neben O-21.
+
+### O-23 · Beide Oberflächen sollen die Voraussetzungen nennen
+Gewünscht: Vor dem ersten Lauf einer Sitzung sollen TUI und GUI die drei
+Voraussetzungen nennen — Lightroom geschlossen, Katalog einmal im installierten
+Lightroom geöffnet, Sicherung vorhanden — und eine ausdrückliche Bestätigung
+verlangen. Kein Dialog, den man reflexhaft wegklickt: Er soll zeigen, was
+tatsächlich vorgefunden wurde (Schemaversion, ob alle Pfade auflösen, ob im
+Backup-Verzeichnis eine frische Kopie liegt), damit die Bestätigung etwas
+bedeutet.
+
+Die Kommandozeile hat dafür den Vorprüfungsbericht; die beiden Oberflächen
+zeigen ihn erst nach dem Planen.
+
+### O-24 · Ein Verschiebeprotokoll neben der Bibliothek
+Gewünscht: eine lesbare Aufzeichnung dessen, was ein Lauf getan hat, im Ordner
+der Bibliothek selbst statt nur in `~/Library/Logs` — damit sie mitwandert,
+wenn die Bibliothek umzieht oder archiviert wird, und damit man sie Monate
+später findet, ohne zu wissen, wo das Werkzeug seine Logs ablegt.
+
+Entwurf: `LR-FolderCraft_<Katalog>_<jjjj-mm-tt_HHMM>.log` neben der `.lrcat`,
+mit Revision und Build-Datum, den Einstellungen, den Ordnerentscheidungen, je
+einer Zeile pro verschobener Datei (von, nach, umbenannt), den Zählungen und
+dem Ergebnis samt Backup- und Journalpfad. Das JSON-Lines-Journal bleibt, was
+es ist — die maschinenlesbare Grundlage für das Rückgängigmachen; dies hier ist
+das, was ein Mensch liest. Ort konfigurierbar und abschaltbar machen, denn ein
+schreibgeschütztes oder volles Volume darf keinen Lauf scheitern lassen.
+
 ## Ideen, keine Zusagen
 
 ### O-15 · GUI ✔
