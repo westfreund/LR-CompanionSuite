@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r6.1.0 · Build date 2026-08-23**
+**Revision r7.0.0 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -261,6 +261,21 @@ lrfc gui --lang de /Volumes/Photos/2019/2019.lrcat  # German, catalog chosen
 The language can also be switched inside the window without restarting: the
 menu entry at the top always names the **other** language, so in the English
 interface it reads "Deutsch".
+
+### What the window remembers
+
+Settings you make in the window are kept, so the next start begins where you
+left off: the language, the catalog, the target folder and its mode, the
+structure, the extension filters, the folder actions, the rule list, the window
+size and the splitter positions. They live in `gui-state.json` in the
+configuration directory; deleting that file restores the defaults.
+
+Two things are deliberately **not** remembered:
+
+| | Why not |
+| --- | --- |
+| Per-folder decisions | They are catalog folder ids. Restoring them against a different catalog would apply an answer given about one folder to whatever unrelated folder happens to share that number. |
+| The "make a backup" switch | It always starts on. Turning the safety net off should be decided for the run at hand, not inherited from a run three weeks ago. |
 
 It needs the `gui` extra: `pip install 'lr-foldercraft[gui]'`. Without it the
 command explains how to install it rather than failing with a traceback.

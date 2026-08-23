@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r6.1.0 · Build-Datum 2026-08-23**
+**Revision r7.0.0 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -256,6 +256,21 @@ lrfc gui --lang de /Volumes/Fotos/2019/2019.lrcat   # deutsch, Katalog gleich mi
 Ohne Neustart lässt sich die Sprache auch im Fenster umschalten: der
 Menüeintrag oben zeigt immer die **andere** Sprache an, in der deutschen
 Oberfläche also „English".
+
+### Was sich das Fenster merkt
+
+Im Fenster getroffene Einstellungen bleiben erhalten, der nächste Start setzt
+also dort an, wo Sie aufgehört haben: Sprache, Katalog, Zielordner samt Modus,
+Struktur, Endungsfilter, Ordneraktionen, Regelliste, Fenstergröße und
+Teilerpositionen. Sie liegen in `gui-state.json` im Konfigurationsverzeichnis;
+diese Datei zu löschen stellt die Vorgaben wieder her.
+
+Zwei Dinge werden bewusst **nicht** gemerkt:
+
+| | Warum nicht |
+| --- | --- |
+| Entscheidungen zu einzelnen Ordnern | Es sind Katalog-Ordner-IDs. Sie gegen einen anderen Katalog wiederherzustellen hieße, eine zu einem Ordner gegebene Antwort auf irgendeinen fremden Ordner anzuwenden, der zufällig dieselbe Nummer trägt. |
+| Der Schalter „Sicherung anlegen" | Er steht immer wieder auf ein. Das Sicherheitsnetz abzuschalten sollte für den anstehenden Lauf entschieden werden, nicht von einem Lauf vor drei Wochen geerbt. |
 
 Sie benötigt das Extra `gui`: `pip install 'lr-foldercraft[gui]'`. Fehlt es,
 erklärt der Befehl die Installation, statt mit einem Traceback abzubrechen.

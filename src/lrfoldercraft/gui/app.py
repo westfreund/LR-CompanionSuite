@@ -68,6 +68,7 @@ from ..report import human_bytes, render_result
 from ..rules import PRESETS, RuleError, describe_structure, parse_structure, token_help
 from ..version import APP_NAME, REVISION, __build_date__
 from .i18n import tr
+from .state import load_state, save_state
 from .workers import (
     ApplyWorker,
     CatalogWorker,
@@ -90,9 +91,13 @@ log = get_logger("gui")
 class MainWindow(QMainWindow):
     """Everything a run needs, in one window."""
 
-    def __init__(self, catalog: str = "", language: str = "en"):
+    def __init__(self, catalog: str = "", language: Optional[str] = None):
         super().__init__()
-        self.language = language if language in ("en", "de") else "en"
+        # An explicit --lang wins for this session; otherwise use what was set
+        # last time, and only then fall back to English.
+        self.state = load_state()
+        chosen = language or self.state.get("language")
+        self.language = chosen if chosen in ("en", "de") else "en"
         self.plan: Optional[Plan] = None
         self.folder_decisions: Dict[int, str] = {}
         #: The ordered rule list, as (pattern, action) pairs. Order is meaning.
@@ -105,9 +110,12 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("{n} - {r}".format(n=APP_NAME, r=REVISION))
         self._build()
         self._size_to_screen()
+        self._apply_state()
         self._retranslate()
+        # A catalog named on the command line beats the remembered one.
         if catalog:
             self.catalog_edit.setText(catalog)
+        if self.catalog_edit.text().strip():
             self.load_catalog()
 
     # -- construction ---------------------------------------------------
@@ -235,17 +243,19 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.target_in_place)
         row = QHBoxLayout()
         row.addWidget(self.target_new_tree)
+        # Both stay usable in either mode. Greying them out until the radio
+        # button above is selected reads as "this cannot be done" rather than
+        # "select that first", and leaves no hint which control to press --
+        # naming a target folder is instead taken as saying which mode is meant.
         self.target_edit = QLineEdit()
-        self.target_edit.setEnabled(False)
+        self.target_edit.textEdited.connect(self._target_named)
         self.target_browse = QPushButton()
-        self.target_browse.setEnabled(False)
         self.target_browse.clicked.connect(self.pick_target)
         row.addWidget(self.target_edit, 1)
         row.addWidget(self.target_browse)
         layout.addLayout(row)
         self.target_hint = QLabel()
         self.target_hint.setWordWrap(True)
-        self.target_hint.setEnabled(False)
         layout.addWidget(self.target_hint)
         self.target_new_tree.toggled.connect(self._target_mode_changed)
         self.target_group = box
@@ -628,6 +638,9 @@ class MainWindow(QMainWindow):
         self._retranslate()
         if self.plan is not None:
             self._show_plan(self.plan, None)
+        # Written straight away: a language chosen and then lost to a crash is
+        # more annoying than the cost of one small file.
+        self.remember_state()
 
     # -- helpers -----------------------------------------------------------
 
@@ -635,9 +648,20 @@ class MainWindow(QMainWindow):
         self.log_view.appendPlainText(message)
 
     def _target_mode_changed(self, checked: bool) -> None:
-        self.target_edit.setEnabled(checked)
-        self.target_browse.setEnabled(checked)
-        self.target_hint.setEnabled(checked)
+        """Only the emphasis changes; both controls stay reachable."""
+        font = self.target_edit.font()
+        font.setBold(checked)
+        self.target_edit.setFont(font)
+
+    def _target_named(self, text: str) -> None:
+        """Naming a folder is what "sort into a new tree" means.
+
+        Typing a path while "below the folder the photos are in" is selected
+        cannot mean anything else, so it selects the mode rather than being
+        quietly ignored.
+        """
+        if text.strip() and not self.target_new_tree.isChecked():
+            self.target_new_tree.setChecked(True)
 
     def _busy(self, busy: bool, message: str = "") -> None:
         self.plan_button.setEnabled(not busy)
@@ -716,6 +740,7 @@ class MainWindow(QMainWindow):
         )
         if path:
             self.target_edit.setText(path)
+            self.target_new_tree.setChecked(True)
 
     def load_catalog(self) -> None:
         path = self.catalog_edit.text().strip()
@@ -903,7 +928,108 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event) -> None:  # noqa: N802 - Qt naming
         """Never tear the window down while a worker is still running."""
         wait_for_threads(self._threads)
+        self.remember_state()
         super().closeEvent(event)
+
+    # -- remembering what was set ------------------------------------------
+
+    def collect_state(self) -> Dict[str, object]:
+        """The settings worth carrying into the next session.
+
+        See :mod:`lrfoldercraft.gui.state` for the two that are deliberately
+        left out.
+        """
+        return {
+            "language": self.language,
+            "catalog": self.catalog_edit.text().strip(),
+            "placement": "new-tree" if self.target_new_tree.isChecked() else "in-place",
+            "target_root": self.target_edit.text().strip(),
+            "preset": self.preset_combo.currentText(),
+            "custom_structure": self.custom_edit.text().strip(),
+            "include_extensions": self.include_edit.text().strip(),
+            "exclude_extensions": self.exclude_edit.text().strip(),
+            "conflict": self.conflict_combo.currentText(),
+            "on_missing_date": self.missing_combo.currentText(),
+            "subfolder_action": self.subfolder_combo.currentText(),
+            "dated_folder_action": self.dated_combo.currentText(),
+            "mismatch_action": self.mismatch_combo.currentText(),
+            "move_sidecars": self.sidecars_check.isChecked(),
+            "ascii_only": self.ascii_check.isChecked(),
+            "folder_rules": [list(rule) for rule in self.rules],
+            "window": [self.width(), self.height()],
+            "splitter": self.splitter.sizes(),
+        }
+
+    def remember_state(self) -> bool:
+        return save_state(self.collect_state())
+
+    def _apply_state(self) -> None:
+        """Put the remembered settings into the widgets.
+
+        Every value is checked against what the widget actually offers: a
+        remembered action that a later revision renamed must leave the default
+        standing rather than an empty combo box.
+        """
+        state = self.state
+        if not state:
+            return
+
+        self._restore_text(self.catalog_edit, state.get("catalog"))
+        self._restore_text(self.target_edit, state.get("target_root"))
+        if state.get("placement") == "new-tree":
+            self.target_new_tree.setChecked(True)
+        self._restore_text(self.include_edit, state.get("include_extensions"))
+        self._restore_text(self.exclude_edit, state.get("exclude_extensions"))
+        self._restore_text(self.custom_edit, state.get("custom_structure"))
+        self._restore_choice(self.preset_combo, state.get("preset"))
+        self._restore_choice(self.conflict_combo, state.get("conflict"))
+        self._restore_choice(self.missing_combo, state.get("on_missing_date"))
+        self._restore_choice(self.subfolder_combo, state.get("subfolder_action"))
+        self._restore_choice(self.dated_combo, state.get("dated_folder_action"))
+        self._restore_choice(self.mismatch_combo, state.get("mismatch_action"))
+        if isinstance(state.get("move_sidecars"), bool):
+            self.sidecars_check.setChecked(state["move_sidecars"])
+        if isinstance(state.get("ascii_only"), bool):
+            self.ascii_check.setChecked(state["ascii_only"])
+        # The backup switch is never restored: see gui/state.py.
+        self.backup_check.setChecked(True)
+
+        rules = state.get("folder_rules")
+        if isinstance(rules, list):
+            self.rules = [
+                (str(entry[0]), str(entry[1]))
+                for entry in rules
+                if isinstance(entry, (list, tuple)) and len(entry) == 2
+            ]
+
+        size = state.get("window")
+        if isinstance(size, list) and len(size) == 2:
+            available = QGuiApplication.primaryScreen()
+            bounds = available.availableGeometry() if available else None
+            width, height = int(size[0]), int(size[1])
+            if bounds is not None:
+                width = min(width, bounds.width())
+                height = min(height, bounds.height())
+            if width >= 720 and height >= 420:
+                self.resize(width, height)
+        sizes = state.get("splitter")
+        if isinstance(sizes, list) and len(sizes) == self.splitter.count():
+            if all(isinstance(value, int) for value in sizes) and sum(sizes) > 0:
+                self.splitter.setSizes(sizes)
+
+    @staticmethod
+    def _restore_text(widget, value) -> None:
+        if isinstance(value, str) and value:
+            widget.setText(value)
+
+    @staticmethod
+    def _restore_choice(combo: QComboBox, value) -> None:
+        """Only select what the combo really offers."""
+        if not isinstance(value, str):
+            return
+        index = combo.findText(value)
+        if index >= 0:
+            combo.setCurrentIndex(index)
 
     def wait_for_workers(self, milliseconds: int = 30000) -> None:
         """Block until no worker thread is running. Used by the tests."""
@@ -931,7 +1057,7 @@ def _split_extensions(text: str):
     )
 
 
-def run_gui(catalog: str = "", language: str = "en", debug: bool = False) -> int:
+def run_gui(catalog: str = "", language: Optional[str] = None, debug: bool = False) -> int:
     """Entry point used by ``lrfc gui``."""
     setup_logging(debug=debug, quiet=True, tag="gui")
     application = QApplication.instance() or QApplication(sys.argv)

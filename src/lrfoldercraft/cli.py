@@ -703,7 +703,7 @@ def cmd_gui(args: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return EXIT_ERROR
-    return run_gui(catalog=args.catalog or "", language=args.lang or "en", debug=args.debug)
+    return run_gui(catalog=args.catalog or "", language=args.lang, debug=args.debug)
 
 
 DISPATCH = {

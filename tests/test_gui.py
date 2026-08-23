@@ -370,3 +370,142 @@ def test_the_summary_line_no_longer_carries_the_detail(qt_app, mixed_gui_catalog
     window.do_plan()
     assert pump(lambda: window.plan is not None)
     assert "\n" not in window.summary_label.text()
+
+
+# -- naming a target folder --------------------------------------------------
+
+
+def test_the_target_field_is_usable_without_selecting_the_radio_first(qt_app, mixed_gui_catalog):
+    """A greyed-out field beside a greyed-out button reads as "impossible"."""
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    assert window.target_edit.isEnabled()
+    assert window.target_browse.isEnabled()
+
+
+def test_naming_a_target_folder_selects_the_new_tree_mode(qt_app, mixed_gui_catalog, tmp_path):
+    """Typing a path while 'in place' is selected cannot mean anything else."""
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    assert window.target_in_place.isChecked()
+
+    target = tmp_path / "Neu"
+    target.mkdir()
+    window.target_edit.setText(str(target))
+    window._target_named(str(target))
+
+    assert window.target_new_tree.isChecked()
+    settings = window.collect_settings()
+    assert settings.placement == "new-tree"
+    assert settings.target_root == str(target)
+
+
+def test_choosing_in_place_again_ignores_the_leftover_path(qt_app, mixed_gui_catalog, tmp_path):
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.target_edit.setText(str(tmp_path))
+    window._target_named(str(tmp_path))
+    window.target_in_place.setChecked(True)
+
+    settings = window.collect_settings()
+    assert settings.placement == "in-place"
+    assert settings.target_root is None
+
+
+# -- remembering the settings ------------------------------------------------
+
+
+def test_the_language_survives_a_restart(qt_app, mixed_gui_catalog):
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    assert window.language == "en"
+    window.toggle_language()
+    assert window.language == "de"
+    window.close()
+
+    again = MainWindow()
+    assert again.language == "de"
+
+
+def test_an_explicit_language_beats_the_remembered_one(qt_app, mixed_gui_catalog):
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.toggle_language()  # remembers German
+    window.close()
+
+    assert MainWindow(language="en").language == "en"
+
+
+def test_the_settings_come_back(qt_app, mixed_gui_catalog, tmp_path):
+    target = tmp_path / "Ziel"
+    target.mkdir()
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.preset_combo.setCurrentText("day")
+    window.target_edit.setText(str(target))
+    window._target_named(str(target))
+    window.mismatch_combo.setCurrentText("leave")
+    window.subfolder_combo.setCurrentText("sort-inside")
+    window.exclude_edit.setText("tif")
+    window.sidecars_check.setChecked(False)
+    window.rules = [("_extern", "leave"), ("dated+label", "resort")]
+    window.close()
+
+    again = MainWindow()
+    assert again.catalog_edit.text() == str(mixed_gui_catalog.catalog_path)
+    assert again.target_new_tree.isChecked()
+    assert again.target_edit.text() == str(target)
+    assert again.preset_combo.currentText() == "day"
+    assert again.mismatch_combo.currentText() == "leave"
+    assert again.subfolder_combo.currentText() == "sort-inside"
+    assert again.exclude_edit.text() == "tif"
+    assert again.sidecars_check.isChecked() is False
+    assert again.rules == [("_extern", "leave"), ("dated+label", "resort")]
+    again.close()
+
+
+def test_the_backup_switch_is_never_restored(qt_app, mixed_gui_catalog):
+    """Turning the safety net off must be decided for the run at hand."""
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.backup_check.setChecked(False)
+    window.close()
+
+    again = MainWindow()
+    assert again.backup_check.isChecked() is True
+    again.close()
+
+
+def test_per_folder_decisions_are_never_restored(qt_app, mixed_gui_catalog):
+    """They are catalog folder ids; another catalog would reuse the numbers."""
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.folder_decisions = {4711: "leave"}
+    window.close()
+
+    assert "folder_decisions" not in window.collect_state()
+    again = MainWindow()
+    assert again.folder_decisions == {}
+    again.close()
+
+
+def test_a_remembered_value_a_later_revision_dropped_is_ignored(qt_app):
+    """An unknown action must leave the default standing, not empty the combo."""
+    from lrfoldercraft.gui.state import save_state
+
+    save_state({"language": "de", "subfolder_action": "teleport", "preset": "nonsense"})
+    window = MainWindow()
+    assert window.language == "de"
+    assert window.subfolder_combo.currentText() == Settings().subfolder_action
+    assert window.preset_combo.currentText() != "nonsense"
+    window.close()
+
+
+def test_an_unreadable_state_file_is_shrugged_off(qt_app):
+    from lrfoldercraft.gui.state import state_path
+
+    state_path().parent.mkdir(parents=True, exist_ok=True)
+    state_path().write_text("{not json", encoding="utf-8")
+    window = MainWindow()  # must not raise
+    assert window.language == "en"
+    window.close()

@@ -16,6 +16,39 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [7.0.0] — 2026-08-23 — "Gedaechtnis"
+
+### Added
+
+- **The window remembers what you set.** Language, catalog, target folder and
+  its mode, structure, extension filters, folder actions, the rule list, window
+  size and splitter positions, in `gui-state.json` in the configuration
+  directory. The language is written the moment it is toggled; the rest on
+  close. A missing, unreadable or outdated file simply means the defaults, and
+  a remembered value a later revision no longer offers leaves the default
+  standing rather than emptying the control.
+
+  Two things are deliberately never restored. **Per-folder decisions** are
+  catalog folder ids, so restoring them against a different catalog would apply
+  an answer given about one folder to whatever unrelated folder shares that
+  number. **The backup switch** always starts on: turning the safety net off
+  should be decided for the run at hand.
+
+- `--lang` is now genuinely optional for `lrfc gui`: given, it wins for the
+  session; omitted, the remembered language is used.
+
+### Fixed
+
+- **The target folder could not be named.** The field and its Browse button were
+  disabled until the "into a new folder" radio button above them was selected,
+  which reads as "this cannot be done" rather than "select that first" and left
+  no hint which control to press. Both are now always usable, and naming a
+  folder — by typing or by choosing one — selects that mode, because typing a
+  target path while sorting in place cannot mean anything else. Reported by the
+  user, who could not find a way to give a base folder.
+
+---
+
 ## [6.1.0] — 2026-08-23
 
 ### Changed

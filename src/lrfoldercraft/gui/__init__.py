@@ -7,10 +7,12 @@ dependency produces a helpful message instead of a traceback.
 
 from __future__ import annotations
 
+from typing import Optional
+
 __all__ = ["run_gui"]
 
 
-def run_gui(catalog: str = "", language: str = "en", debug: bool = False) -> int:
+def run_gui(catalog: str = "", language: Optional[str] = None, debug: bool = False) -> int:
     """Start the graphical interface. Imported lazily on purpose."""
     from .app import run_gui as _run
 

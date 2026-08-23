@@ -22,6 +22,13 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "tests"))
 
+# The window remembers what it was last set to, and this script sets it to a
+# throwaway catalog in a temporary directory. Left alone it would write that
+# path into the real configuration and the operator's next start would point at
+# a catalog that no longer exists -- so the whole run gets its own config home.
+_CONFIG_HOME = tempfile.mkdtemp(prefix="lrfc-screenshots-")
+os.environ["LRFC_CONFIG_DIR"] = _CONFIG_HOME
+
 IMAGES = ROOT / "docs" / "images"
 LANGUAGES = ("en", "de")
 
