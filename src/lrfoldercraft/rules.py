@@ -153,6 +153,13 @@ TOKEN_SPECS: Tuple[TokenSpec, ...] = (
         "Name des heutigen Ordners",
         "file",
     ),
+    TokenSpec(
+        "folder_label",
+        "Makro Blume im Garten",
+        "Text after the date in the current folder name, empty if there is none",
+        "Text hinter dem Datum im heutigen Ordnernamen, leer wenn keiner da ist",
+        "file",
+    ),
 )
 
 TOKEN_NAMES = tuple(spec.name for spec in TOKEN_SPECS)
@@ -258,6 +265,8 @@ class TokenContext:
     file_format: Optional[str]
     extension: Optional[str]
     original_folder: Optional[str]
+    #: Descriptive text after the date prefix of the current folder's name.
+    original_folder_label: str = ""
     language: str = "en"
     unknown_camera: str = "Unknown Camera"
     unknown_lens: str = "Unknown Lens"
@@ -277,6 +286,7 @@ class TokenContext:
             "ext": (self.extension or "").upper() or "noext",
             "ext_lower": (self.extension or "").lower() or "noext",
             "orig_folder": self.original_folder or "",
+            "folder_label": self.original_folder_label or "",
         }
         when = self.when
         if when is None:
@@ -411,8 +421,28 @@ def render_level(template: str, context: TokenContext, ascii_only: bool = False)
 def render_structure(
     structure: Sequence[str], context: TokenContext, ascii_only: bool = False
 ) -> Tuple[str, ...]:
-    """Render every level into a tuple of sanitised path segments."""
-    return tuple(render_level(template, context, ascii_only) for template in structure)
+    """Render every level into a tuple of sanitised path segments.
+
+    A level whose tokens all render empty is dropped rather than turned into a
+    folder called ``unnamed``: ``{yyyy}-{mm}-{dd}/{folder_label}`` has to give a
+    plain day folder for a photo whose folder carries no descriptive text.
+    """
+    segments = []
+    for template in structure:
+        if _renders_empty(template, context):
+            continue
+        segments.append(render_level(template, context, ascii_only))
+    return tuple(segments)
+
+
+def _renders_empty(template: str, context: TokenContext) -> bool:
+    """True when substituting the tokens leaves nothing but separators."""
+    values = context.values()
+
+    def substitute(match: re.Match[str]) -> str:
+        return values.get(match.group(1), "")
+
+    return not _TOKEN_RE.sub(substitute, template).strip(" ._-")
 
 
 def parse_structure(spec: str) -> Tuple[str, ...]:
@@ -442,6 +472,7 @@ def describe_structure(structure: Sequence[str], language: str = "en") -> str:
         file_format="RAW",
         extension="CR2",
         original_folder="raw2019",
+        original_folder_label="",
         language=language,
     )
     return "/".join(render_structure(structure, sample))

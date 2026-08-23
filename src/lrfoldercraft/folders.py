@@ -13,6 +13,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import date
+from fnmatch import fnmatchcase
 from typing import Dict, List, Optional, Sequence, Tuple
 
 # -- what a folder is -------------------------------------------------------
@@ -32,13 +33,20 @@ CONSOLIDATE = "consolidate"
 LEAVE = "leave"
 #: A dated folder: keep it and leave the photos it correctly describes.
 KEEP = "keep"
+#: Rebuild the folder in place of itself, below its own parent. This is what
+#: turns "2026-06-28 Makro Blume im Garten" into "2026-06-28/Makro Blume im
+#: Garten" without dragging the photos out of the year folder they sit in.
+RESORT = "resort"
 
-SUBFOLDER_ACTIONS = (SORT_INSIDE, CONSOLIDATE, LEAVE)
-DATED_FOLDER_ACTIONS = (KEEP, CONSOLIDATE, SORT_INSIDE, LEAVE)
+SUBFOLDER_ACTIONS = (SORT_INSIDE, CONSOLIDATE, RESORT, LEAVE)
+DATED_FOLDER_ACTIONS = (KEEP, RESORT, CONSOLIDATE, SORT_INSIDE, LEAVE)
 
 #: What to do with a photo inside a kept dated folder whose date does not match.
 MOVE_OUT = "move-out"
 MISMATCH_ACTIONS = (MOVE_OUT, LEAVE)
+
+#: Everything a folder rule may ask for, in the order they are offered.
+ALL_ACTIONS = (KEEP, RESORT, SORT_INSIDE, CONSOLIDATE, LEAVE)
 
 ACTION_LABELS = {
     SORT_INSIDE: (
@@ -53,6 +61,10 @@ ACTION_LABELS = {
     KEEP: (
         "keep the folder and its matching photos",
         "Ordner mit seinen passenden Fotos behalten",
+    ),
+    RESORT: (
+        "rebuild this folder where it stands",
+        "diesen Ordner an seiner Stelle neu aufbauen",
     ),
     MOVE_OUT: (
         "move the photo to its own date folder",
@@ -148,6 +160,24 @@ def parse_folder_date(name: str) -> Optional[FolderDate]:
     return None
 
 
+#: Separators that may sit between a date prefix and the text after it.
+_LABEL_SEPARATORS = re.compile(r"^[\s_.\-]+")
+
+
+def folder_label(name: str) -> str:
+    """The descriptive text after a folder name's date prefix.
+
+    ``2026-06-28 Makro Blume im Garten`` yields ``Makro Blume im Garten``;
+    ``raw2020`` and a bare ``2026-06-28`` yield the empty string. This is what
+    lets a structure put the date and the description on separate levels
+    instead of losing one of them.
+    """
+    found = parse_folder_date(name)
+    if found is None:
+        return ""
+    return _LABEL_SEPARATORS.sub("", name[len(found.matched_text) :]).strip()
+
+
 def describes_only_a_date(name: str, folder_date: FolderDate) -> bool:
     """True when the name is *just* the date, with no descriptive text."""
     return name.strip() == folder_date.matched_text
@@ -165,12 +195,18 @@ class FolderCase:
     segments: Tuple[str, ...]
     name: str
     kind: str
+    #: Descriptive text after a date prefix in :attr:`name`; empty when the
+    #: name carries no date. Derived from the raw name, so it survives a
+    #: folder being demoted to PLAIN for being too coarse.
+    label: str = ""
     photo_count: int = 0
     folder_date: Optional[FolderDate] = None
     matching_photos: int = 0
     mismatched_photos: int = 0
     action: str = CONSOLIDATE
     action_source: str = "default"
+    #: Human readable pattern of the rule that decided this folder, if any.
+    matched_rule: str = ""
     #: Set when the folder is the run's anchor and therefore not a case at all.
     is_anchor: bool = False
 
@@ -226,8 +262,121 @@ def classify(
         segments=tuple(segments),
         name=name,
         kind=DATED if folder_date is not None else PLAIN,
+        label=folder_label(name),
         folder_date=folder_date,
     )
+
+
+class FolderRuleError(ValueError):
+    """A folder rule could not be understood."""
+
+
+#: Patterns that select folders by kind rather than by path.
+RULE_KEYWORDS = ("*", "dated", "dated+label", "dated-only", "plain")
+
+RULE_KEYWORD_HELP = {
+    "*": ("every folder not matched earlier", "jeder noch nicht getroffene Ordner"),
+    "dated": (
+        "folders whose name starts with a date",
+        "Ordner, deren Name mit einem Datum beginnt",
+    ),
+    "dated+label": (
+        "dated folders that also carry descriptive text",
+        "datierte Ordner, die zusaetzlich Text tragen",
+    ),
+    "dated-only": (
+        "dated folders with nothing but the date",
+        "datierte Ordner mit nichts als dem Datum",
+    ),
+    "plain": ("folders without a date in the name", "Ordner ohne Datum im Namen"),
+}
+
+
+@dataclass(frozen=True)
+class FolderRule:
+    """One line of the ordered rule list: which folders, and what to do."""
+
+    pattern: str
+    action: str
+
+    def describe(self, language: str = "en") -> str:
+        what = RULE_KEYWORD_HELP.get(self.pattern)
+        subject = what[1 if language == "de" else 0] if what else self.pattern
+        return "{s} -> {a}".format(s=subject, a=label(self.action, language))
+
+
+def parse_rule(text: str) -> FolderRule:
+    """Read one ``PATTERN=ACTION`` rule, as typed on the command line."""
+    if "=" not in text:
+        raise FolderRuleError(
+            "rule {t!r} needs the form PATTERN=ACTION, for example '_extern=leave'".format(t=text)
+        )
+    pattern, _, action = text.rpartition("=")
+    pattern, action = pattern.strip(), action.strip().lower()
+    if not pattern:
+        raise FolderRuleError("rule {t!r} has an empty pattern".format(t=text))
+    if action not in ALL_ACTIONS:
+        raise FolderRuleError(
+            "rule {t!r} names an unknown action {a!r} -- known actions: {k}".format(
+                t=text, a=action, k=", ".join(ALL_ACTIONS)
+            )
+        )
+    return FolderRule(pattern=pattern, action=action)
+
+
+def parse_rules(texts: Sequence[str]) -> Tuple[FolderRule, ...]:
+    """Read a whole ordered rule list."""
+    return tuple(parse_rule(text) for text in texts)
+
+
+def rule_matches(rule: FolderRule, case: FolderCase) -> bool:
+    """True when *rule* speaks about *case*.
+
+    A keyword selects by kind. Anything else is a shell glob tested against the
+    folder's path below its root and against its bare name; a pattern also
+    matches everything below the folder it names, so ``_extern`` covers
+    ``_extern/2019`` without a second rule.
+    """
+    pattern = rule.pattern
+    if pattern in ("*", "any"):
+        return True
+    if pattern == "dated":
+        return case.is_dated
+    if pattern == "dated+label":
+        return case.is_dated and bool(case.label)
+    if pattern == "dated-only":
+        return case.is_dated and not case.label
+    if pattern == "plain":
+        return not case.is_dated
+    glob = pattern.strip("/").lower()
+    path = case.path_from_root.strip("/").lower()
+    return (
+        fnmatchcase(path, glob)
+        or fnmatchcase(path, glob + "/*")
+        or fnmatchcase(case.name.lower(), glob)
+    )
+
+
+def first_matching_rule(
+    case: FolderCase, rules: Sequence[FolderRule]
+) -> Optional[Tuple[int, FolderRule]]:
+    """The first rule that speaks about *case*, with its 1-based position."""
+    for position, rule in enumerate(rules, start=1):
+        if rule_matches(rule, case):
+            return position, rule
+    return None
+
+
+def usable_action(action: str, case: FolderCase) -> str:
+    """Soften an action that cannot mean anything for this folder.
+
+    ``keep`` is about honouring the date in a folder's name. Asked of a folder
+    that has no date, the honest reading is to leave it alone rather than to
+    fail.
+    """
+    if action == KEEP and not case.is_dated:
+        return LEAVE
+    return action
 
 
 def default_action(case: FolderCase, settings_actions: Dict[str, str]) -> str:

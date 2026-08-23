@@ -37,8 +37,11 @@ from .executor import ExecutionError, execute, undo
 from .folders import (
     DATED_FOLDER_ACTIONS,
     MISMATCH_ACTIONS,
+    RULE_KEYWORDS,
     SUBFOLDER_ACTIONS,
     FolderCase,
+    FolderRuleError,
+    parse_rules,
 )
 from .folders import (
     label as action_label,
@@ -242,6 +245,16 @@ def _add_plan_flags(parser: argparse.ArgumentParser) -> None:
         "does not match the folder name (default: move-out)",
     )
     existing.add_argument(
+        "--rule",
+        action="append",
+        metavar="PATTERN=ACTION",
+        help="ordered folder rule, repeatable, first match wins, e.g. "
+        "--rule '_extern=leave' --rule 'dated+label=resort' --rule '*=sort-inside'. "
+        "PATTERN is a path glob (matching the folder and everything below it) or "
+        "one of: " + ", ".join(RULE_KEYWORDS) + ". Beats the defaults above and "
+        "answers for whole classes of folders at once.",
+    )
+    existing.add_argument(
         "--folder-action",
         action="append",
         metavar="ID=ACTION",
@@ -330,6 +343,12 @@ def settings_from_args(args: argparse.Namespace) -> Settings:
         settings.dated_folder_action = args.dated_folder_action
     if getattr(args, "mismatch_action", None):
         settings.mismatch_action = args.mismatch_action
+    if getattr(args, "rule", None):
+        try:
+            parse_rules(args.rule)
+        except FolderRuleError as error:
+            raise ConfigError(str(error)) from error
+        settings.folder_rules = tuple(args.rule)
     if getattr(args, "folder_action", None):
         for entry in args.folder_action:
             folder_id, _, action = entry.partition("=")

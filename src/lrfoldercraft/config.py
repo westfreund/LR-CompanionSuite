@@ -21,6 +21,9 @@ from .folders import (
     MISMATCH_ACTIONS,
     MOVE_OUT,
     SUBFOLDER_ACTIONS,
+    FolderRule,
+    FolderRuleError,
+    parse_rules,
 )
 from .logging_setup import get_logger
 from .rules import RuleError, parse_structure, validate_structure
@@ -110,8 +113,14 @@ class Settings:
     #: What to do with a photo inside a kept dated folder whose capture date
     #: does not match the folder's name.
     mismatch_action: str = MOVE_OUT
-    #: Per-folder overrides, ``{catalog folder id: action}``. Beats the three
-    #: settings above and is what an operator's case-by-case answers become.
+    #: Ordered ``"PATTERN=ACTION"`` rules, first match wins. A rule speaks
+    #: about a whole class of folders at once and beats the three settings
+    #: above, so a grown library needs a handful of lines instead of one
+    #: answer per folder. See :mod:`lrfoldercraft.folders` for the patterns.
+    folder_rules: Tuple[str, ...] = ()
+    #: Per-folder overrides, ``{catalog folder id: action}``. Beats the rules
+    #: and the three settings above, and is what an operator's case-by-case
+    #: answers become.
     folder_actions: Dict[int, str] = field(default_factory=dict)
     #: Ask the operator about every folder that could reasonably go either way.
     interactive_folders: bool = False
@@ -148,6 +157,7 @@ class Settings:
             e.lower().lstrip(".") for e in self.extra_sidecar_extensions
         )
         self.date_source = tuple(self.date_source)
+        self.folder_rules = tuple(str(r).strip() for r in self.folder_rules if str(r).strip())
         self.folder_actions = {int(k): str(v) for k, v in dict(self.folder_actions).items()}
 
     def validate(self) -> None:
@@ -204,6 +214,15 @@ class Settings:
                 raise ConfigError(
                     "unknown action {a!r} for folder {f}".format(a=action, f=folder_id)
                 )
+        try:
+            parse_rules(self.folder_rules)
+        except FolderRuleError as error:
+            raise ConfigError(str(error)) from error
+
+    @property
+    def parsed_folder_rules(self) -> Tuple[FolderRule, ...]:
+        """The rule list as objects the planner can match against."""
+        return parse_rules(self.folder_rules)
 
     # -- serialisation ---------------------------------------------------
 

@@ -660,3 +660,131 @@ def test_a_repeated_new_tree_run_is_a_no_op(builder, tmp_path):
         again = build_plan(CatalogReader(conn), settings)
     assert not again.has_work, [(m.source_path, m.target_path) for m in again.active_moves]
     assert again.stats.already_in_place == 2
+
+
+# -- rebuilding a folder where it stands ------------------------------------
+
+
+def test_resort_splits_a_dated_folder_below_its_own_parent(mixed_library):
+    """'2019-04-15 Ostern in Tirol' becomes '2019-04-15/Ostern in Tirol'."""
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}-{mm}-{dd}", "{folder_label}"),
+        dated_folder_action="resort",
+        mismatch_action="move-out",
+    )
+    moves = by_name(plan)
+    assert moves["D2.CR2"].target_segments == ("raw2019", "2019-04-15", "Ostern in Tirol")
+    assert moves["D3.CR2"].target_segments == ("raw2019", "2019-06-01", "Hochzeit")
+    # A folder with nothing but a date has no text level to build.
+    assert moves["D1.CR2"].target_segments == ("raw2019", "2019-03-10")
+
+
+def test_resort_does_not_drag_photos_out_of_their_parent(mixed_library):
+    """The difference to consolidate: raw2019 is kept, not bypassed."""
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}-{mm}-{dd}", "{folder_label}"),
+        dated_folder_action="resort",
+    )
+    for move in plan.moves:
+        if move.status == MOVE:
+            assert move.target_segments[0] == "raw2019"
+
+
+def test_resort_keeps_a_session_that_ran_past_midnight_together(mixed_library):
+    """X1 was shot 07-07 but belongs to the 04-15 session it sits in.
+
+    Filing it by its own date would tear the session in two, which is exactly
+    what mismatch-action=leave forbids.
+    """
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}-{mm}-{dd}", "{folder_label}"),
+        dated_folder_action="resort",
+        mismatch_action="leave",
+    )
+    moves = by_name(plan)
+    assert moves["X1.CR2"].target_segments == ("raw2019", "2019-04-15", "Ostern in Tirol")
+    assert moves["D2.CR2"].target_segments == moves["X1.CR2"].target_segments
+
+
+def test_resort_files_a_stray_photo_by_its_own_date_when_asked_to(mixed_library):
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}-{mm}-{dd}", "{folder_label}"),
+        dated_folder_action="resort",
+        mismatch_action="move-out",
+    )
+    assert by_name(plan)["X1.CR2"].target_segments == (
+        "raw2019",
+        "2019-07-07",
+        "Ostern in Tirol",
+    )
+
+
+def test_an_empty_level_collapses_instead_of_becoming_unnamed(mixed_library):
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}", "{folder_label}", "{mm}-{dd}"),
+        subfolder_action="consolidate",
+    )
+    # FLACH sits in the anchor itself, which carries no date and no text.
+    assert by_name(plan)["FLACH.CR2"].target_segments == ("raw2019", "2019", "01-03")
+
+
+# -- the ordered rule list, end to end --------------------------------------
+
+
+def test_rules_decide_whole_classes_of_folders_at_once(mixed_library):
+    """The four lines that express a grown library, instead of one per folder."""
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}-{mm}-{dd}", "{folder_label}"),
+        folder_rules=("Urlaub=leave", "dated+label=resort", "dated=keep", "*=sort-inside"),
+        mismatch_action="leave",
+    )
+    moves = by_name(plan)
+    assert moves["U1.CR2"].status == STAY  # rule 1
+    assert moves["D2.CR2"].target_segments == ("raw2019", "2019-04-15", "Ostern in Tirol")
+    assert moves["D1.CR2"].status == STAY  # rule 3, bare date kept
+    assert moves["F1.CR2"].target_segments == ("raw2019", "Familie", "2019-02-14")
+
+
+def test_a_rule_records_which_line_decided_the_folder(mixed_library):
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}-{mm}-{dd}",),
+        folder_rules=("Urlaub=leave", "*=consolidate"),
+    )
+    cases = {case.name: case for case in plan.folder_cases}
+    assert cases["Urlaub"].action_source == "rule"
+    assert cases["Urlaub"].matched_rule == "1. Urlaub"
+    assert cases["Familie"].matched_rule == "2. *"
+
+
+def test_a_manual_decision_still_beats_a_rule(mixed_library):
+    urlaub = mixed_library.folders["raw2019/Urlaub/"]
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}-{mm}-{dd}",),
+        folder_rules=("*=leave",),
+        folder_actions={urlaub: "sort-inside"},
+    )
+    cases = {case.name: case for case in plan.folder_cases}
+    assert cases["Urlaub"].action_source == "override"
+    assert by_name(plan)["U1.CR2"].target_segments == ("raw2019", "Urlaub", "2019-01-03")
+
+
+def test_a_rule_silences_the_question_it_already_answers(mixed_library):
+    """Rules exist so the operator is not asked 39 times over."""
+    asked = []
+
+    settings = Settings(
+        catalog=str(mixed_library.catalog_path),
+        structure=("{yyyy}-{mm}-{dd}",),
+        folder_rules=("Urlaub=leave", "*=consolidate"),
+    )
+    with open_catalog(mixed_library.catalog_path) as conn:
+        build_plan(CatalogReader(conn), settings, decide=lambda case: asked.append(case.name))
+    assert asked == []

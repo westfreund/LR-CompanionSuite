@@ -10,11 +10,20 @@ from lrfoldercraft.folders import (
     CONSOLIDATE,
     DATED,
     KEEP,
+    LEAVE,
     PLAIN,
+    RESORT,
+    SORT_INSIDE,
+    FolderRuleError,
     classify,
     describes_only_a_date,
+    first_matching_rule,
+    folder_label,
     parse_folder_date,
+    parse_rule,
+    parse_rules,
     summarise,
+    usable_action,
 )
 from lrfoldercraft.rules import parse_structure, structure_date_granularity
 
@@ -122,3 +131,107 @@ def test_default_actions():
     assert plain.action == CONSOLIDATE  # dataclass default
     dated.action = KEEP
     assert dated.action == KEEP
+
+
+# -- descriptive text after a date ------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "name,expected",
+    [
+        ("2026-06-28 Makro Blume im Garten", "Makro Blume im Garten"),
+        ("2019_06_01 Hochzeit", "Hochzeit"),
+        ("20190415_Hochzeit", "Hochzeit"),
+        ("2019.03.10 - Ostern", "Ostern"),
+        ("2026-06-28", ""),
+        ("raw2020", ""),
+        ("_extern", ""),
+    ],
+)
+def test_folder_label_is_the_text_after_the_date(name, expected):
+    assert folder_label(name) == expected
+
+
+def test_a_demoted_folder_keeps_its_label():
+    """Being too coarse for the structure must not lose the folder's text."""
+    case = classify(
+        name="2019 Jahresrueckblick",
+        folder_id=1,
+        path_from_root="2019 Jahresrueckblick/",
+        segments=("2019 Jahresrueckblick",),
+        wanted_granularity="day",
+    )
+    assert case.kind == PLAIN  # a year folder is no answer to a day structure
+    assert case.label == "Jahresrueckblick"
+
+
+# -- the ordered rule list ---------------------------------------------------
+
+
+def _case(name, path_from_root, granularity="day"):
+    return classify(
+        name=name,
+        folder_id=abs(hash(path_from_root)) % 100000,
+        path_from_root=path_from_root,
+        segments=tuple(path_from_root.strip("/").split("/")),
+        wanted_granularity=granularity,
+    )
+
+
+def test_rules_are_read_from_pattern_equals_action():
+    rule = parse_rule("dated+label=resort")
+    assert rule.pattern == "dated+label"
+    assert rule.action == RESORT
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["_extern", "=leave", "_extern=nonsense", "_extern="],
+)
+def test_a_broken_rule_is_refused(text):
+    with pytest.raises(FolderRuleError):
+        parse_rule(text)
+
+
+def test_the_first_matching_rule_wins():
+    rules = parse_rules(["dated+label=resort", "dated=keep", "*=sort-inside"])
+    dated_with_text = _case("2026-06-28 Makro", "raw2026/2026-06-28 Makro/")
+    position, rule = first_matching_rule(dated_with_text, rules)
+    assert (position, rule.action) == (1, RESORT)
+
+    bare_date = _case("2026-06-27", "raw2026/2026-06-27/")
+    position, rule = first_matching_rule(bare_date, rules)
+    assert (position, rule.action) == (2, KEEP)
+
+    topic = _case("raw2020", "raw2020/")
+    position, rule = first_matching_rule(topic, rules)
+    assert (position, rule.action) == (3, SORT_INSIDE)
+
+
+def test_a_path_pattern_also_covers_everything_below_it():
+    """Naming a folder must not need a second rule for its children."""
+    rules = parse_rules(["_extern=leave", "*=consolidate"])
+    for path in ("_extern/", "_extern/2019/", "_extern/2019/Sub/"):
+        position, _rule = first_matching_rule(_case("x", path), rules)
+        assert position == 1, path
+    assert first_matching_rule(_case("x", "_externals/"), rules)[0] == 2
+
+
+def test_no_rule_matches_when_none_speaks_about_the_folder():
+    rules = parse_rules(["_extern=leave"])
+    assert first_matching_rule(_case("raw2020", "raw2020/"), rules) is None
+
+
+def test_dated_only_and_plain_select_opposite_sets():
+    rules = parse_rules(["dated-only=keep", "plain=consolidate"])
+    assert first_matching_rule(_case("2026-06-27", "a/2026-06-27/"), rules)[0] == 1
+    assert first_matching_rule(_case("2026-06-27 Fest", "a/2026-06-27 Fest/"), rules) is None
+    assert first_matching_rule(_case("Urlaub", "a/Urlaub/"), rules)[0] == 2
+
+
+def test_keep_softens_to_leave_where_there_is_no_date():
+    """'Honour the date in the name' has to mean something for a plain folder."""
+    plain = _case("Urlaub", "Urlaub/")
+    assert usable_action(KEEP, plain) == LEAVE
+    dated = _case("2026-06-27", "2026-06-27/")
+    assert usable_action(KEEP, dated) == KEEP

@@ -22,9 +22,13 @@ from .folders import (
     KEEP,
     LEAVE,
     MOVE_OUT,
+    RESORT,
     SORT_INSIDE,
     FolderCase,
     classify,
+    first_matching_rule,
+    folder_label,
+    usable_action,
 )
 from .logging_setup import get_logger, step
 from .rules import (
@@ -522,6 +526,7 @@ def _structure_segments(
         file_format=photo.file_format,
         extension=photo.extension,
         original_folder=_last_segment(photo.folder_path_from_root),
+        original_folder_label=folder_label(_last_segment(photo.folder_path_from_root)),
         language=settings.language,
     )
     return (
@@ -615,17 +620,30 @@ def build_folder_cases(
             else:
                 case.mismatched_photos += 1
 
+    rules = settings.parsed_folder_rules
     for case in cases.values():
         override = settings.folder_actions.get(case.folder_id)
         if override:
-            case.action, case.action_source = override, "override"
+            case.action, case.action_source = usable_action(override, case), "override"
             continue
+
+        # A rule is the operator speaking about a whole class of folders at
+        # once, so it settles the matter and no question is asked. Folders no
+        # rule speaks about still fall through to the interactive decision.
+        hit = first_matching_rule(case, rules)
+        if hit is not None:
+            position, rule = hit
+            case.action = usable_action(rule.action, case)
+            case.action_source = "rule"
+            case.matched_rule = "{n}. {p}".format(n=position, p=rule.pattern)
+            continue
+
         case.action = settings.dated_folder_action if case.is_dated else settings.subfolder_action
         case.action_source = "default"
         if decide is not None and case.needs_a_decision:
             chosen = decide(case)
             if chosen:
-                case.action, case.action_source = chosen, "operator"
+                case.action, case.action_source = usable_action(chosen, case), "operator"
     return cases
 
 
@@ -633,7 +651,7 @@ def _consolidates(case: Optional[FolderCase], settings: Settings, photo: Photo) 
     """True when this photo will be moved below the run's shared anchor."""
     if case is None:
         return True
-    if case.action in (LEAVE, SORT_INSIDE):
+    if case.action in (LEAVE, SORT_INSIDE, RESORT):
         return False
     if case.action == KEEP:
         when = resolve_date(photo, settings)
@@ -646,6 +664,48 @@ def _consolidates(case: Optional[FolderCase], settings: Settings, photo: Photo) 
             return False
         return settings.mismatch_action == MOVE_OUT
     return True
+
+
+def _render_at(photo: Photo, settings: Settings, when: datetime) -> Tuple[str, ...]:
+    """Render the structure for *photo* as if it had been taken at *when*."""
+    original = _last_segment(photo.folder_path_from_root)
+    context = TokenContext(
+        when=when,
+        camera=photo.camera_model,
+        camera_serial=photo.camera_serial,
+        lens=photo.lens,
+        file_format=photo.file_format,
+        extension=photo.extension,
+        original_folder=original,
+        original_folder_label=folder_label(original),
+        language=settings.language,
+    )
+    return render_structure(settings.structure, context, ascii_only=settings.ascii_only)
+
+
+def _keeps_the_session_together(
+    photo: Photo, case: FolderCase, settings: Settings
+) -> Optional[Tuple[str, ...]]:
+    """Segments that file a stray photo under its *folder's* date, or ``None``.
+
+    A shoot that runs past midnight leaves photos whose own date disagrees with
+    the folder that names the session. Rebuilding such a folder by each photo's
+    own date would tear the session in two, which is precisely what
+    ``mismatch-action=leave`` says must not happen -- so those photos follow the
+    folder's date instead of their own.
+    """
+    if settings.mismatch_action != LEAVE or case.folder_date is None:
+        return None
+    if case.folder_date.day is None:
+        return None
+    when = resolve_date(photo, settings)
+    if when is not None and case.folder_date.matches(when.date()):
+        return None
+    return _render_at(
+        photo,
+        settings,
+        datetime(case.folder_date.year, case.folder_date.month or 1, case.folder_date.day),
+    )
 
 
 def _segments_for(
@@ -671,6 +731,14 @@ def _segments_for(
         return current
     if case.action == SORT_INSIDE:
         return case.segments + structure_segments
+    if case.action == RESORT:
+        # Rebuild the folder where it stands: the structure replaces the folder
+        # itself, below the same parent. This is what splits
+        # "raw2026/2026-06-28 Makro Blume im Garten" into
+        # "raw2026/2026-06-28/Makro Blume im Garten" instead of dragging the
+        # photos out of raw2026 entirely.
+        together = _keeps_the_session_together(photo, case, settings)
+        return case.segments[:-1] + (together if together is not None else structure_segments)
     if case.action == KEEP:
         when = resolve_date(photo, settings)
         matches = (
