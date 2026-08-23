@@ -11,6 +11,7 @@ flag, or to the operator answering per folder.
 from __future__ import annotations
 
 import re
+import unicodedata
 from dataclasses import dataclass
 from datetime import date
 from fnmatch import fnmatchcase
@@ -366,11 +367,18 @@ def rule_matches(rule: FolderRule, case: FolderCase) -> bool:
         return case.is_dated and not case.label
     if pattern == "plain":
         return not case.is_dated
-    glob = pattern.strip("/").lower()
+    # Same reason as in rules.fold_to_ascii: a pattern typed into a window
+    # arrives composed, a folder name out of the catalog arrives decomposed,
+    # and "Völki" then never matches "Völki".
+    glob = _composed(pattern.strip("/").lower())
     return any(
         fnmatchcase(candidate, glob) or fnmatchcase(candidate, glob + "/*")
         for candidate in _match_candidates(case)
     )
+
+
+def _composed(text: str) -> str:
+    return unicodedata.normalize("NFC", text)
 
 
 def _match_candidates(case: FolderCase) -> List[str]:
@@ -381,9 +389,13 @@ def _match_candidates(case: FolderCase) -> List[str]:
     rule would only ever reach folders sitting directly below the root, which
     is not how anyone reads ``_extern=leave``.
     """
-    segments = [segment.lower() for segment in case.path_from_root.strip("/").split("/") if segment]
+    segments = [
+        _composed(segment.lower())
+        for segment in case.path_from_root.strip("/").split("/")
+        if segment
+    ]
     if not segments:
-        return [case.name.lower()]
+        return [_composed(case.name.lower())]
     return ["/".join(segments[start:]) for start in range(len(segments))]
 
 

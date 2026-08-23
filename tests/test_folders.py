@@ -259,3 +259,20 @@ def test_a_rooted_pattern_still_says_where_it_starts():
     assert first_matching_rule(_case("2021", "raw2019/_in_Arbeit/2021/"), rules)[0] == 1
     assert first_matching_rule(_case("2021", "_in_Arbeit/2022/"), rules)[0] == 2
     assert first_matching_rule(_case("2021", "sonst/2021/"), rules)[0] == 2
+
+
+def test_a_rule_matches_a_decomposed_folder_name():
+    """Patterns are typed composed; macOS hands back folder names decomposed."""
+    import unicodedata
+
+    decomposed = unicodedata.normalize("NFD", "2026-06-18 Völki")
+    case = classify(
+        name=decomposed,
+        folder_id=1,
+        path_from_root=unicodedata.normalize("NFD", "raw2026/2026-06-18 Völki/"),
+        segments=("raw2026", decomposed),
+        wanted_granularity="day",
+    )
+    for pattern in ("*Völki", "*völki", "2026-06-18 Völki"):
+        rules = parse_rules([pattern + "=leave", "*=consolidate"])
+        assert first_matching_rule(case, rules)[1].pattern == pattern, pattern

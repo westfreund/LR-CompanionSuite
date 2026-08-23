@@ -237,9 +237,19 @@ class RuleError(ValueError):
 #: Everything else (é, ñ, å as a plain a, and so on) is handled correctly by
 #: dropping the mark, which is what NFKD does.
 TRANSLITERATIONS = {
-    "ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss",
-    "æ": "ae", "ø": "oe", "œ": "oe",
-    "å": "aa", "þ": "th", "ð": "d", "đ": "d", "ł": "l", "ı": "i",
+    "ä": "ae",
+    "ö": "oe",
+    "ü": "ue",
+    "ß": "ss",
+    "æ": "ae",
+    "ø": "oe",
+    "œ": "oe",
+    "å": "aa",
+    "þ": "th",
+    "ð": "d",
+    "đ": "d",
+    "ł": "l",
+    "ı": "i",
 }
 
 
@@ -250,6 +260,11 @@ def fold_to_ascii(text: str) -> str:
     is also upper case, so MUENCHEN comes out of MÜNCHEN rather than MUeNCHEN,
     while München still gives Muenchen.
     """
+    # macOS stores filenames decomposed, so a catalog gives back "o" plus a
+    # combining diaeresis rather than "ö". A per-character map never matches
+    # that, the mark is dropped by the fold below, and Völki quietly becomes
+    # Volki. Compose first, then map.
+    text = unicodedata.normalize("NFC", text)
     out = []
     for index, character in enumerate(text):
         lowered = character.lower()

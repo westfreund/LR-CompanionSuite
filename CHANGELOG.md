@@ -16,6 +16,28 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [14.0.1] — 2026-08-23
+
+### Fixed
+
+- **The romanisation added in r14.0.0 did nothing on macOS.** A catalog there
+  hands back filenames **decomposed**: `Völki` arrives as `o` followed by a
+  combining diaeresis, not as the single character `ö`. A per-character map
+  never matches that, so the transliteration silently did not fire and the fold
+  dropped the mark exactly as before — `Volki` again. Composing the text first
+  fixes it.
+
+  It passed every test because the tests were written with composed literals,
+  which is what a Python source file contains. Only a real library on a real
+  filesystem produced the other form.
+
+- **The same blindness affected folder rules.** A pattern typed into the window
+  arrives composed, a folder name out of the catalog arrives decomposed, and
+  `Völki` therefore never matched `Völki`. Both sides are now composed before
+  they are compared, so a rule naming a folder with an umlaut works.
+
+---
+
 ## [14.0.0] — 2026-08-23 — "Umschrift"
 
 ### Added

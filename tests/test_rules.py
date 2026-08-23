@@ -212,3 +212,18 @@ def test_folding_is_stable_when_run_twice():
     """A second run must not turn Voelki into something else again."""
     once = fold_to_ascii("Völki Straße MÜNCHEN")
     assert fold_to_ascii(once) == once
+
+
+def test_folding_handles_the_decomposed_form_macos_stores():
+    """A catalog on macOS gives back "o" plus a combining diaeresis, not "ö".
+
+    A per-character map never matches that; the mark is then dropped by the
+    fold and Völki quietly becomes Volki. This is how the first version of the
+    transliteration shipped, and it only showed up on a real library.
+    """
+    import unicodedata
+
+    for form in ("NFC", "NFD"):
+        text = unicodedata.normalize(form, "2026-06-18 Völki")
+        assert sanitise_segment(text, ascii_only=True) == "2026-06-18 Voelki"
+    assert fold_to_ascii(unicodedata.normalize("NFD", "Straße Größe")) == "Strasse Groesse"

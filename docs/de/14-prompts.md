@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r14.0.0 · Build-Datum 2026-08-23**
+**Revision r14.0.1 · Build-Datum 2026-08-23**
 
 Dieses Dokument bewahrt die Anfrage, aus der LR-FolderCraft entstanden ist,
 einen generischen Prompt zur Neuerzeugung eines vergleichbaren Werkzeugs sowie
@@ -291,6 +291,12 @@ pre-flight checks, execute with a progress callback. Then:
   meaning, so provide move-up and move-down. Changing a rule must clear the
   manual decisions it might have made and replan, or the display stops matching
   what would run.
+* **Compose text before you map or compare it.** macOS hands back filenames
+  decomposed, so a name a user typed as "Völki" arrives as "o" plus a combining
+  diaeresis. Any per-character table, and any pattern comparison, silently
+  misses it -- the transliteration below shipped broken for exactly this reason
+  and every test passed, because a Python source literal is composed and only a
+  real filesystem produces the other form. Normalise to NFC at the boundary.
 * **An ASCII option must romanise, not discard.** Normalising to NFKD and
   dropping what will not encode is the obvious implementation and it is wrong
   for German: it turns Voelki into Volki and Strasse into Strae, words that
