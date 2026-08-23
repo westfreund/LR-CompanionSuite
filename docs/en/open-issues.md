@@ -100,7 +100,7 @@ It exists for inspecting a locked catalog. Nothing stops you passing it to
 
 Requested on 2026-08-23 and deliberately postponed until after the second test
 run, so the tests are not chasing a moving target. To pick them up, say
-"do O-21 to O-24" — each item below carries enough detail to start from.
+"do O-21 to O-26" — each item below carries enough detail to start from.
 
 ### O-21 · A page about reconnecting a copied library
 A catalog records the **absolute** path of its root folders. Copy a library to
@@ -150,6 +150,30 @@ the backup and journal paths. The JSON-Lines journal stays what it is -- a
 machine-readable record for undo; this is the one a person reads. Make the
 location configurable and allow it to be turned off, because a read-only or
 full volume must not fail a run.
+
+### O-25 · A short description inside the graphical interface
+The window says what it is only through its title bar. Someone opening it
+without having read the documentation has no statement of what the tool does,
+what it will and will not touch, or where its safety net is.
+
+Wanted: a compact "About" reachable from the menu — what LR-FolderCraft does in
+three sentences, the promise that only folder rows and the file's folder column
+are ever written, the revision and build date, the licence, and a link to the
+repository. Plus a one-line description in the window itself, above the catalog
+field, so the purpose is visible without opening anything. Both languages, from
+the existing `gui/i18n.py` table.
+
+### O-26 · A logo
+The project has no mark of its own: not in the window, not in the READMEs, not
+as the GitLab project avatar, not as a favicon for the documentation.
+
+Wanted: a handful of distinct proposals to choose from, as SVG so they scale
+and can be recoloured. Constraints worth respecting: it has to read at 16 px
+for a favicon and a window icon as well as large; it should work in light and
+dark; and it should suggest *ordering photographs into folders* rather than
+being a generic camera. Once one is chosen: export the sizes the window icon,
+the GitLab avatar and the documentation need, and reference it from both
+READMEs.
 
 ## Ideas, not commitments
 

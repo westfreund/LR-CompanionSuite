@@ -112,7 +112,7 @@ es an `apply` zu übergeben. Man könnte es auf lesende Befehle beschränken.
 
 Am 23.08.2026 gewünscht und bewusst bis nach dem zweiten Testlauf verschoben,
 damit die Tests kein bewegliches Ziel haben. Zum Starten genügt „mach O-21 bis
-O-24" — jeder Punkt unten enthält genug, um damit zu beginnen.
+O-26" — jeder Punkt unten enthält genug, um damit zu beginnen.
 
 ### O-21 · Eine Seite zum Neuverknüpfen einer kopierten Bibliothek
 Ein Katalog merkt sich den **absoluten** Pfad seiner Stammordner. Kopiert man
@@ -165,6 +165,30 @@ dem Ergebnis samt Backup- und Journalpfad. Das JSON-Lines-Journal bleibt, was
 es ist — die maschinenlesbare Grundlage für das Rückgängigmachen; dies hier ist
 das, was ein Mensch liest. Ort konfigurierbar und abschaltbar machen, denn ein
 schreibgeschütztes oder volles Volume darf keinen Lauf scheitern lassen.
+
+### O-25 · Eine Kurzbeschreibung in der grafischen Oberfläche
+Das Fenster sagt nur über seine Titelzeile, was es ist. Wer es öffnet, ohne die
+Dokumentation gelesen zu haben, findet keine Aussage darüber, was das Werkzeug
+tut, was es anfasst und was nicht, und wo sein Sicherheitsnetz liegt.
+
+Gewünscht: ein kompaktes „Über" aus dem Menü heraus — was LR-FolderCraft in
+drei Sätzen tut, die Zusage, dass nur Ordnerzeilen und die Ordnerspalte der
+Datei geschrieben werden, Revision und Build-Datum, die Lizenz und ein Verweis
+auf das Repository. Dazu eine einzeilige Beschreibung im Fenster selbst, über
+dem Katalogfeld, damit der Zweck sichtbar ist, ohne etwas zu öffnen.
+Zweisprachig, aus der vorhandenen Tabelle in `gui/i18n.py`.
+
+### O-26 · Ein Logo
+Das Projekt hat kein eigenes Zeichen: weder im Fenster noch in den READMEs,
+noch als GitLab-Projektbild, noch als Favicon der Dokumentation.
+
+Gewünscht: eine Handvoll unterschiedlicher Entwürfe zur Auswahl, als SVG, damit
+sie skalieren und umfärbbar sind. Zu beachten: Es muss bei 16 px als Favicon
+und Fenstersymbol ebenso lesbar sein wie groß; es muss auf hellem und dunklem
+Grund funktionieren; und es sollte *Fotos in Ordner einsortieren* andeuten
+statt eine beliebige Kamera zu zeigen. Nach der Auswahl: die Größen erzeugen,
+die Fenstersymbol, GitLab-Profilbild und Dokumentation brauchen, und aus beiden
+READMEs darauf verweisen.
 
 ## Ideen, keine Zusagen
 
