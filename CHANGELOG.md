@@ -16,6 +16,30 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [13.0.2] — 2026-08-23
+
+Found by driving the text interface headlessly for the first time. It had never
+been exercised beyond its own unit tests.
+
+### Fixed
+
+- **Three of the four shortcuts the footer advertises did nothing.** Textual
+  reserves `ctrl+p` for its command palette and binds it with priority, so an
+  ordinary binding of the same key never fires; `ctrl+r` and `f1` were
+  swallowed the same way. Only `ctrl+l` worked. The command palette is now
+  switched off — this application does not use it — and the bindings are
+  declared with priority, so they also work while the cursor sits in a text
+  field, which is where an operator's hands actually are.
+
+  A footer promising four shortcuts and delivering one is worse than promising
+  none, so there is now a test asserting every advertised key fires.
+
+- **Escape did not close the confirmation dialog.** A modal that traps the
+  operator until they find the right button is bad anywhere; in front of the
+  one dialog that starts fifty thousand file moves it is worse than that.
+
+---
+
 ## [13.0.1] — 2026-08-23
 
 ### Fixed

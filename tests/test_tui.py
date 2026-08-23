@@ -6,6 +6,8 @@ optional extra.
 
 from __future__ import annotations
 
+import asyncio
+
 import pytest
 
 textual = pytest.importorskip("textual")
@@ -148,3 +150,83 @@ def test_folder_decisions_are_shown_and_can_be_cycled(builder):
 
     app = LRFolderCraftApp(catalog=str(builder.catalog_path))
     assert asyncio.run(_drive(app, steps))
+
+
+# -- the shortcuts the footer advertises -------------------------------------
+
+
+def test_every_advertised_shortcut_actually_fires():
+    """Three of the four did nothing at all.
+
+    Textual reserves ctrl+p for its command palette and binds it with priority,
+    so an ordinary binding of the same key never fires; ctrl+r and f1 were
+    swallowed the same way. The footer promised four shortcuts and delivered
+    one, which is worse than promising none.
+    """
+    keys = [
+        ("ctrl+l", "action_load_catalog"),
+        ("ctrl+p", "action_plan"),
+        ("ctrl+r", "action_apply"),
+        ("f1", "action_toggle_language"),
+    ]
+    app = LRFolderCraftApp(catalog="", language="de")
+    called = []
+
+    async def drive():
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause()
+            for _key, name in keys:
+                setattr(app, name, (lambda n=name: called.append(n)))
+            for key, name in keys:
+                called.clear()
+                await pilot.press(key)
+                await pilot.pause()
+                assert name in called, key
+
+    asyncio.run(drive())
+
+
+def test_the_shortcuts_work_while_typing_in_a_field():
+    """Which is where an operator's hands actually are."""
+    app = LRFolderCraftApp(catalog="", language="de")
+    called = []
+
+    async def drive():
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause()
+            app.action_plan = lambda: called.append("plan")
+            app.query_one("#catalog-path").focus()
+            await pilot.pause()
+            await pilot.press("ctrl+p")
+            await pilot.pause()
+
+    asyncio.run(drive())
+    assert called == ["plan"]
+
+
+def test_escape_declines_the_confirmation(simple_catalog):
+    """A modal in front of fifty thousand moves must be escapable."""
+    app = LRFolderCraftApp(catalog=str(simple_catalog.catalog_path), language="de")
+    seen = {}
+
+    async def drive():
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+l")
+            for _ in range(80):
+                await asyncio.sleep(0.05)
+            await pilot.press("ctrl+p")
+            for _ in range(200):
+                await asyncio.sleep(0.05)
+                if app.plan is not None:
+                    break
+            await pilot.press("ctrl+r")
+            await asyncio.sleep(0.3)
+            seen["modal"] = type(app.screen_stack[-1]).__name__
+            await pilot.press("escape")
+            await asyncio.sleep(0.3)
+            seen["after"] = type(app.screen_stack[-1]).__name__
+
+    asyncio.run(drive())
+    assert seen["modal"] == "ConfirmScreen"
+    assert seen["after"] != "ConfirmScreen", "escape must dismiss the dialog"

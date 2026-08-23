@@ -16,6 +16,7 @@ from typing import Optional
 
 from textual import on, work
 from textual.app import App, ComposeResult
+from textual.binding import Binding
 from textual.containers import Horizontal, ScrollableContainer, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import (
@@ -137,7 +138,17 @@ class TuiLogHandler(logging.Handler):
 
 
 class ConfirmScreen(ModalScreen[bool]):
-    """Blocking yes/no dialog shown before anything is written."""
+    """Blocking yes/no dialog shown before anything is written.
+
+    Escape declines. A modal that traps the operator until they find the right
+    button is bad enough anywhere; in front of the one dialog that starts fifty
+    thousand file moves it is worse than that.
+    """
+
+    BINDINGS = [Binding("escape", "decline", "Cancel", priority=True)]
+
+    def action_decline(self) -> None:
+        self.dismiss(False)
 
     def __init__(self, title: str, body: str, yes: str, no: str):
         super().__init__()
@@ -170,12 +181,20 @@ class LRFolderCraftApp(App[int]):
     TITLE = APP_NAME
     SUB_TITLE = "{r} - build {d}".format(r=REVISION, d=__build_date__)
 
+    # Textual reserves ctrl+p for its command palette and binds it with
+    # priority, so an ordinary binding of the same key never fires -- and
+    # neither did ctrl+r or f1. The footer advertised four shortcuts of which
+    # only ctrl+l worked. The palette is switched off because this application
+    # does not use it, and the bindings are declared with priority so they beat
+    # whatever a focused input would otherwise swallow.
+    ENABLE_COMMAND_PALETTE = False
+
     BINDINGS = [
-        ("ctrl+l", "load_catalog", "Load"),
-        ("ctrl+p", "plan", "Plan"),
-        ("ctrl+r", "apply", "Apply"),
-        ("f1", "toggle_language", "EN/DE"),
-        ("ctrl+q", "quit", "Quit"),
+        Binding("ctrl+l", "load_catalog", "Load", priority=True),
+        Binding("ctrl+p", "plan", "Plan", priority=True),
+        Binding("ctrl+r", "apply", "Apply", priority=True),
+        Binding("f1", "toggle_language", "EN/DE", priority=True),
+        Binding("ctrl+q", "quit", "Quit", priority=True),
     ]
 
     def __init__(self, catalog: str = "", language: str = "en", debug: bool = False):
