@@ -538,3 +538,60 @@ def test_the_divider_tooltip_follows_the_language(qt_app):
     window.toggle_language()
     assert "Drag" in window.splitter.handle(1).toolTip()
     window.close()
+
+
+# -- reversing a run from the window -----------------------------------------
+
+
+def test_the_window_offers_to_undo_a_run(qt_app):
+    window = MainWindow()
+    assert window.undo_action is not None
+    assert window.undo_action.text()
+    window.close()
+
+
+def test_the_undo_entry_follows_the_language(qt_app):
+    window = MainWindow(language="de")
+    assert "rückgängig" in window.undo_action.text()
+    window.toggle_language()
+    assert "Undo" in window.undo_action.text()
+    window.close()
+
+
+def _library_files(builder):
+    return sorted(
+        str(p.relative_to(builder.images_dir))
+        for p in builder.images_dir.rglob("*")
+        if p.is_file() and not p.name.startswith(".")
+    )
+
+
+def test_undoing_puts_the_library_back(qt_app, mixed_gui_catalog, monkeypatch):
+    """End to end through the window: apply, then undo, and nothing has moved."""
+    from PySide6.QtWidgets import QMessageBox
+
+    before = _library_files(mixed_gui_catalog)
+    before_catalog = mixed_gui_catalog.catalog_paths()
+
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.preset_combo.setCurrentText("day")
+    window.do_plan()
+    assert pump(lambda: window.plan is not None)
+
+    monkeypatch.setattr(QMessageBox, "warning", lambda *a, **k: QMessageBox.Yes)
+    monkeypatch.setattr(QMessageBox, "information", lambda *a, **k: QMessageBox.Ok)
+    window.do_apply()
+    assert pump(lambda: window.plan is None and window.progress.value() == 100)
+    assert window.last_journal, "the run must record where it can be undone from"
+    assert _library_files(mixed_gui_catalog) != before  # something really moved
+
+    monkeypatch.setattr(window, "_choose_journal", lambda: window.last_journal)
+    window.do_undo()
+    # Wait on the outcome itself: "busy" leaves the progress bar indeterminate,
+    # so its value says nothing about whether the work has finished.
+    assert pump(lambda: _library_files(mixed_gui_catalog) == before)
+    window.wait_for_workers()
+
+    assert mixed_gui_catalog.catalog_paths() == before_catalog
+    window.close()

@@ -235,3 +235,27 @@ def test_keep_softens_to_leave_where_there_is_no_date():
     assert usable_action(KEEP, plain) == LEAVE
     dated = _case("2026-06-27", "2026-06-27/")
     assert usable_action(KEEP, dated) == KEEP
+
+
+def test_a_pattern_finds_its_folder_however_deep_it_sits():
+    """'_extern=leave' must mean _extern, not "_extern if it is at the top"."""
+    rules = parse_rules(["_extern=leave", "*=consolidate"])
+    for path in (
+        "_extern/",
+        "raw2019/_extern/",
+        "a/b/_extern/",
+        "raw2019/_extern/2020/",
+        "raw2019/_extern/2020/Fest/",
+    ):
+        assert first_matching_rule(_case("x", path), rules)[0] == 1, path
+    for path in ("_externals/", "raw2019/extern/", "raw2019/"):
+        assert first_matching_rule(_case("x", path), rules)[0] == 2, path
+
+
+def test_a_rooted_pattern_still_says_where_it_starts():
+    """A pattern with a slash is matched as a path, not as a bare name."""
+    rules = parse_rules(["_in_Arbeit/2021=leave", "*=consolidate"])
+    assert first_matching_rule(_case("2021", "_in_Arbeit/2021/"), rules)[0] == 1
+    assert first_matching_rule(_case("2021", "raw2019/_in_Arbeit/2021/"), rules)[0] == 1
+    assert first_matching_rule(_case("2021", "_in_Arbeit/2022/"), rules)[0] == 2
+    assert first_matching_rule(_case("2021", "sonst/2021/"), rules)[0] == 2

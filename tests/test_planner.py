@@ -788,3 +788,64 @@ def test_a_rule_silences_the_question_it_already_answers(mixed_library):
     with open_catalog(mixed_library.catalog_path) as conn:
         build_plan(CatalogReader(conn), settings, decide=lambda case: asked.append(case.name))
     assert asked == []
+
+
+# -- carrying a folder across unchanged --------------------------------------
+
+
+def test_relocate_carries_a_topic_folder_over_untouched(mixed_library, tmp_path):
+    """Same name, same contents, no sorting -- just somewhere else."""
+    target = tmp_path / "Neu"
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}-{mm}-{dd}",),
+        placement="new-tree",
+        target_root=str(target),
+        folder_rules=("Urlaub=relocate", "*=consolidate"),
+    )
+    moves = by_name(plan)
+    assert moves["U1.CR2"].target_segments == ("raw2019", "Urlaub")
+    assert moves["U2.CR2"].target_segments == ("raw2019", "Urlaub")
+    # and the photos in it keep their own names and their shared folder
+    assert Path(moves["U1.CR2"].target_path).parent == Path(moves["U2.CR2"].target_path).parent
+    # everything else is still sorted normally, below the new root
+    assert moves["F1.CR2"].target_segments == ("2019-02-14",)
+
+
+def test_relocate_keeps_the_whole_sub_structure(builder, tmp_path):
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00", folder="raw2019/_extern/2019/Fest/")
+    builder.add_photo("B.CR2", "2019-05-20T10:00:00", folder="raw2019/_extern/2020/")
+    target = tmp_path / "Neu"
+    plan = plan_for(
+        builder,
+        structure=("{yyyy}-{mm}-{dd}",),
+        placement="new-tree",
+        target_root=str(target),
+        folder_rules=("_extern=relocate", "*=consolidate"),
+    )
+    moves = by_name(plan)
+    assert moves["A.CR2"].target_segments == ("raw2019", "_extern", "2019", "Fest")
+    assert moves["B.CR2"].target_segments == ("raw2019", "_extern", "2020")
+
+
+def test_relocate_in_place_leaves_the_folder_alone(mixed_library):
+    """There is nowhere else to put it, so the honest outcome is to do nothing."""
+    plan = plan_for(
+        mixed_library,
+        structure=("{yyyy}-{mm}-{dd}",),
+        folder_rules=("Urlaub=relocate", "*=consolidate"),
+    )
+    assert by_name(plan)["U1.CR2"].status == STAY
+
+
+def test_relocate_ignores_the_structure_entirely(mixed_library, tmp_path):
+    """No date tokens are rendered for a folder carried over unchanged."""
+    target = tmp_path / "Neu"
+    plan = plan_for(
+        mixed_library,
+        structure=("{camera_slug}", "{yyyy}", "{mm}", "{dd}"),
+        placement="new-tree",
+        target_root=str(target),
+        folder_rules=("Urlaub=relocate", "*=consolidate"),
+    )
+    assert by_name(plan)["U1.CR2"].target_segments == ("raw2019", "Urlaub")

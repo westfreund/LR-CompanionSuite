@@ -37,16 +37,20 @@ KEEP = "keep"
 #: turns "2026-06-28 Makro Blume im Garten" into "2026-06-28/Makro Blume im
 #: Garten" without dragging the photos out of the year folder they sit in.
 RESORT = "resort"
+#: Carry the folder to the new location exactly as it is: same name, same
+#: contents, same sub-structure, no sorting applied. Only meaningful when the
+#: run has somewhere else to put it -- sorting in place leaves it where it is.
+RELOCATE = "relocate"
 
-SUBFOLDER_ACTIONS = (SORT_INSIDE, CONSOLIDATE, RESORT, LEAVE)
-DATED_FOLDER_ACTIONS = (KEEP, RESORT, CONSOLIDATE, SORT_INSIDE, LEAVE)
+SUBFOLDER_ACTIONS = (SORT_INSIDE, CONSOLIDATE, RESORT, RELOCATE, LEAVE)
+DATED_FOLDER_ACTIONS = (KEEP, RESORT, CONSOLIDATE, SORT_INSIDE, RELOCATE, LEAVE)
 
 #: What to do with a photo inside a kept dated folder whose date does not match.
 MOVE_OUT = "move-out"
 MISMATCH_ACTIONS = (MOVE_OUT, LEAVE)
 
 #: Everything a folder rule may ask for, in the order they are offered.
-ALL_ACTIONS = (KEEP, RESORT, SORT_INSIDE, CONSOLIDATE, LEAVE)
+ALL_ACTIONS = (KEEP, RESORT, SORT_INSIDE, CONSOLIDATE, RELOCATE, LEAVE)
 
 ACTION_LABELS = {
     SORT_INSIDE: (
@@ -65,6 +69,10 @@ ACTION_LABELS = {
     RESORT: (
         "rebuild this folder where it stands",
         "diesen Ordner an seiner Stelle neu aufbauen",
+    ),
+    RELOCATE: (
+        "move the folder unchanged to the new location",
+        "den Ordner unverändert an den neuen Ort verschieben",
     ),
     MOVE_OUT: (
         "move the photo to its own date folder",
@@ -332,10 +340,11 @@ def parse_rules(texts: Sequence[str]) -> Tuple[FolderRule, ...]:
 def rule_matches(rule: FolderRule, case: FolderCase) -> bool:
     """True when *rule* speaks about *case*.
 
-    A keyword selects by kind. Anything else is a shell glob tested against the
-    folder's path below its root and against its bare name; a pattern also
-    matches everything below the folder it names, so ``_extern`` covers
-    ``_extern/2019`` without a second rule.
+    A keyword selects by kind. Anything else is a shell glob matched against the
+    folder's path below its root, against its bare name, and against every
+    partial path ending at the folder -- so ``_extern`` finds ``_extern`` no
+    matter how deep it sits. A pattern also covers everything **below** the
+    folder it names, so the one rule reaches ``raw2019/_extern/2020/Fest`` too.
     """
     pattern = rule.pattern
     if pattern in ("*", "any"):
@@ -349,12 +358,24 @@ def rule_matches(rule: FolderRule, case: FolderCase) -> bool:
     if pattern == "plain":
         return not case.is_dated
     glob = pattern.strip("/").lower()
-    path = case.path_from_root.strip("/").lower()
-    return (
-        fnmatchcase(path, glob)
-        or fnmatchcase(path, glob + "/*")
-        or fnmatchcase(case.name.lower(), glob)
+    return any(
+        fnmatchcase(candidate, glob) or fnmatchcase(candidate, glob + "/*")
+        for candidate in _match_candidates(case)
     )
+
+
+def _match_candidates(case: FolderCase) -> List[str]:
+    """Every path a pattern may reasonably be understood to mean.
+
+    For ``raw2019/_extern/2020`` these are that path and each shorter one
+    ending at the same folder: ``_extern/2020`` and ``2020``. Without them a
+    rule would only ever reach folders sitting directly below the root, which
+    is not how anyone reads ``_extern=leave``.
+    """
+    segments = [segment.lower() for segment in case.path_from_root.strip("/").split("/") if segment]
+    if not segments:
+        return [case.name.lower()]
+    return ["/".join(segments[start:]) for start in range(len(segments))]
 
 
 def first_matching_rule(

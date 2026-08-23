@@ -22,6 +22,7 @@ from .folders import (
     KEEP,
     LEAVE,
     MOVE_OUT,
+    RELOCATE,
     RESORT,
     SORT_INSIDE,
     FolderCase,
@@ -653,6 +654,10 @@ def _consolidates(case: Optional[FolderCase], settings: Settings, photo: Photo) 
         return True
     if case.action in (LEAVE, SORT_INSIDE, RESORT):
         return False
+    if case.action == RELOCATE:
+        # It moves below the target root, but keeps its own path rather than
+        # joining the shared anchor.
+        return False
     if case.action == KEEP:
         when = resolve_date(photo, settings)
         matches = (
@@ -731,6 +736,15 @@ def _segments_for(
         return current
     if case.action == SORT_INSIDE:
         return case.segments + structure_segments
+    if case.action == RELOCATE:
+        # Unchanged means unchanged: the folder keeps its name, its contents and
+        # its own sub-structure, and lands under the run's target root at the
+        # same relative path. No structure is rendered, and the anchor is
+        # deliberately ignored -- prefixing it would bury the folder one level
+        # deeper than "move this there" can reasonably mean. Sorting in place
+        # therefore leaves the folder exactly where it is.
+        return case.segments
+
     if case.action == RESORT:
         # Rebuild the folder where it stands: the structure replaces the folder
         # itself, below the same parent. This is what splits

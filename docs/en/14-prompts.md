@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r7.1.0 · Build date 2026-08-23**
+**Revision r8.0.0 · Build date 2026-08-23**
 
 This document preserves the request that created LR-FolderCraft, a generic
 prompt for regenerating a comparable tool from scratch, and the context needed
@@ -247,6 +247,17 @@ happen to each is a judgement call, so:
   then the kind default -- and a rule must *silence* the question it already
   answers. Record on each folder which rule decided it, and show that, or a
   rule set cannot be checked before it is run.
+* **Offer an action that moves a folder across unchanged.** Not every folder
+  wants sorting: a curated selection, an external drop box, a job folder with
+  an order of its own should arrive at the new location with its name, its
+  contents and its sub-structure intact. Render no structure for it, keep its
+  path relative to the source root, and ignore the run's anchor -- burying the
+  folder one level deeper is not what "move this there" means. Sorting in place
+  then leaves such a folder where it is, which is the honest outcome.
+* **Match a rule pattern at any depth.** A bare name that only matches folders
+  sitting directly below the root is not how anyone reads `_extern=leave`; test
+  the pattern against the folder path, its name, and every partial path ending
+  at it, and let it cover the subtree below.
 * **A "leave mismatched photos alone" setting must govern the rebuild action
   too.** This is easy to miss and was missed: a shoot running past midnight
   leaves photos whose own date disagrees with the folder naming the session.
@@ -275,6 +286,13 @@ pre-flight checks, execute with a progress callback. Then:
   meaning, so provide move-up and move-down. Changing a rule must clear the
   manual decisions it might have made and replan, or the display stops matching
   what would run.
+* **Put undo in every front end, not only on the command line.** A rollback
+  that exists but cannot be reached from the window the operator actually uses
+  is a rollback they will not have when they need it. Reverse the file moves in
+  the order they were journalled, remove the directories the run created if
+  they are empty, and restore the catalog from that run's backup -- the
+  database and the filesystem have to move back together or neither has moved
+  back. Say so in the confirmation, and require the application to be closed.
 * Write a human-readable record of each run **beside the library**, named after
   the tool, the date and the catalog. The machine-readable journal lives in the
   backup directory and exists for undo; this is the one a person finds months

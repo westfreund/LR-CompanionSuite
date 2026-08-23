@@ -643,3 +643,75 @@ def test_a_dry_run_writes_no_move_log(simple_catalog, tmp_path):
     result = execute(plan, settings)
     assert result.move_log_path is None
     assert list(simple_catalog.catalog_path.parent.glob("LR-FolderCraft_*.log")) == []
+
+
+# -- undoing a run that used the whole vocabulary ----------------------------
+
+
+def _grown_library(builder):
+    """Flat files, a topic tree, and a dated folder with descriptive text."""
+    builder.add_photo("FLACH.CR2", "2019-01-03T10:00:00", folder="raw2019/")
+    builder.add_photo("U1.CR2", "2019-01-03T11:00:00", folder="raw2019/Urlaub/")
+    builder.add_photo("E1.CR2", "2019-02-01T11:00:00", folder="raw2019/_extern/2020/")
+    builder.add_photo("D1.CR2", "2019-04-15T11:00:00", folder="raw2019/2019-04-15 Ostern/")
+    return builder
+
+
+def test_a_run_using_every_action_undoes_completely(builder, tmp_path):
+    """The rollback has to cope with what the rules can actually produce."""
+    _grown_library(builder)
+    before_disk = sorted(str(p.relative_to(builder.images_dir)) for p in _all_files(builder))
+    before_catalog = builder.catalog_paths()
+
+    target = tmp_path / "Neu"
+    plan, settings = make_plan(
+        builder,
+        tmp_path,
+        structure=("{yyyy}-{mm}-{dd}", "{folder_label}"),
+        placement="new-tree",
+        target_root=str(target),
+        folder_rules=(
+            "_extern=relocate",
+            "Urlaub=sort-inside",
+            "dated+label=resort",
+            "*=consolidate",
+        ),
+    )
+    result = execute(plan, settings)
+    assert result.success and result.files_moved == 4
+    assert (target / "raw2019" / "_extern" / "2020" / "E1.CR2").exists()
+
+    undo_result = undo(result.journal_path)
+
+    assert undo_result.success, undo_result.errors
+    assert (
+        sorted(str(p.relative_to(builder.images_dir)) for p in _all_files(builder)) == before_disk
+    )
+    assert builder.catalog_paths() == before_catalog
+    assert not (target / "raw2019").exists()
+
+
+def test_undo_puts_a_relocated_tree_back_where_it_was(builder, tmp_path):
+    builder.add_photo("A.CR2", "2019-01-03T10:00:00", folder="raw2019/_extern/2019/Fest/")
+    builder.add_photo("B.CR2", "2019-05-20T10:00:00", folder="raw2019/_extern/2020/")
+    original = sorted(str(p) for p in _all_files(builder))
+
+    target = tmp_path / "Neu"
+    plan, settings = make_plan(
+        builder,
+        tmp_path,
+        structure=("{yyyy}-{mm}-{dd}",),
+        placement="new-tree",
+        target_root=str(target),
+        folder_rules=("_extern=relocate", "*=consolidate"),
+    )
+    result = execute(plan, settings)
+    assert (target / "raw2019" / "_extern" / "2019" / "Fest" / "A.CR2").exists()
+
+    undo(result.journal_path)
+
+    assert sorted(str(p) for p in _all_files(builder)) == original
+
+
+def _all_files(builder):
+    return [p for p in builder.images_dir.rglob("*") if p.is_file() and not p.name.startswith(".")]

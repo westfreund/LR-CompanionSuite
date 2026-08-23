@@ -1,6 +1,6 @@
 # Project history
 
-**Revision r7.1.0 · Build date 2026-08-23**
+**Revision r8.0.0 · Build date 2026-08-23**
 
 The [CHANGELOG](../../CHANGELOG.md) says what changed in each revision. This
 document says **why**, and what happened in between: the decisions taken, the
@@ -266,6 +266,29 @@ interface's own text used real ones — the two stood side by side on screen.
 
 **r6.1.0** numbered the documents by weight, at the user's request, with the
 same numbers in both languages.
+
+---
+
+## 2026-08-23, late afternoon — the return ticket
+
+Two more requests, and the second is the one that mattered.
+
+**"Could a topic folder be moved to the new location unchanged?"** — It could
+not; every action either sorted the folder's contents or left them alone. The
+`relocate` action fills the gap, for material that should come along without
+being touched.
+
+**"Could we build a rollback?"** — It had been there since r1.0.0, and could be
+reached only from the command line. A rollback the operator cannot reach from
+the window they actually use is a rollback they will not have when they need
+it, so **Undo a run…** went into the menu bar. Reversing means files and
+catalog together: the moves are undone in reverse order, the created folders
+removed if empty, and the catalog restored from that run's own backup.
+
+Writing the first `relocate` test against a nested folder exposed an older
+fault: a rule pattern only ever matched folders sitting directly below the
+root, so `_extern` found `_extern` but not `raw2019/_extern`. No run had shown
+it, because the master catalog happens to keep `_extern` at the top.
 
 ---
 

@@ -16,6 +16,42 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [8.0.0] — 2026-08-23 — "Rueckfahrkarte"
+
+### Added
+
+- **`relocate`, a sixth folder action**: carry a folder to the new location
+  unchanged — same name, same contents, same sub-structure, no sorting applied.
+  For material that should come along without being touched: a curated
+  `_fineart` folder, an `_extern` drop box, a job folder with an order of its
+  own. It keeps the folder's path relative to the source root, renders no
+  structure, and ignores the run's anchor, because burying the folder one level
+  deeper is not what "move this there" means. Sorting in place leaves such a
+  folder where it is, reported as already in place. Requested by the user.
+
+- **Undo is now in the graphical interface.** `lrfc undo` had existed since
+  r1.0.0 and was reachable only from the command line — a rollback the operator
+  cannot reach from the window they actually use is one they will not have when
+  they need it. **Undo a run…** in the menu bar asks for the run's journal (the
+  one just made is offered first), states plainly what will happen, and then
+  puts every moved file back, removes the folders the run created if empty, and
+  restores the catalog from that run's backup. Requested by the user.
+
+### Fixed
+
+- **A rule pattern only matched folders directly below the root.** `_extern`
+  found `_extern` but not `raw2019/_extern`, which is not how anyone reads that
+  rule. A pattern is now tested against the folder's path, its name and every
+  partial path ending at it, and still covers the whole subtree below — so one
+  rule reaches `_extern`, `raw2019/_extern` and `raw2019/_extern/2020/Fest`
+  alike. Writing a slash still pins it to a path: `_in_Arbeit/2021` does not
+  match some other `2021`.
+
+  Found by writing the first `relocate` test against a nested folder; the
+  master catalog happens to keep `_extern` at the top, so no run had exposed it.
+
+---
+
 ## [7.1.0] — 2026-08-23
 
 ### Fixed

@@ -15,7 +15,7 @@ from PySide6.QtCore import QObject, Signal
 
 from ..catalog import CatalogReader, open_catalog
 from ..config import Settings
-from ..executor import execute
+from ..executor import execute, undo
 from ..planner import FolderCase, Plan, build_plan
 from ..safety import preflight
 
@@ -99,6 +99,23 @@ class ApplyWorker(QObject):
 
             result = execute(self.plan, self.settings, progress=report)
             self.finished.emit(result)
+        except Exception as exc:  # noqa: BLE001
+            self.failed.emit("{e}\n\n{t}".format(e=exc, t=traceback.format_exc()))
+
+
+class UndoWorker(QObject):
+    """Reverses a completed run from its journal."""
+
+    finished = Signal(object)  # RunResult
+    failed = Signal(str)
+
+    def __init__(self, journal_path: str):
+        super().__init__()
+        self.journal_path = journal_path
+
+    def run(self) -> None:
+        try:
+            self.finished.emit(undo(self.journal_path))
         except Exception as exc:  # noqa: BLE001
             self.failed.emit("{e}\n\n{t}".format(e=exc, t=traceback.format_exc()))
 

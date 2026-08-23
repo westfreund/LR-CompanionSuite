@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r7.1.0 · Build date 2026-08-23**
+**Revision r8.0.0 · Build date 2026-08-23**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -378,6 +378,7 @@ tokens at all, folder dates say nothing and are ignored.
 | `consolidate` | move the photos up and sort them below the run's anchor |
 | `sort-inside` | keep the folder and build the structure *inside* it |
 | `resort` | rebuild the folder **where it stands**, below its own parent |
+| `relocate` | carry the folder to the new location **unchanged** — same name, same contents, no sorting |
 | `leave` | do not touch the photos in this folder at all |
 | `keep` | a dated folder: leave the photos it correctly describes |
 
@@ -390,6 +391,18 @@ tokens at all, folder dates say nothing and are ignored.
 | `consolidate` | `2026-06-28/Makro Blume im Garten` — pulled out of `raw2026` |
 | `sort-inside` | `raw2026/2026-06-28 Makro Blume im Garten/2026-06-28/…` — nested |
 | `resort` | `raw2026/2026-06-28/Makro Blume im Garten` — split, in place |
+| `relocate` | `<new root>/raw2026/2026-06-28 Makro Blume im Garten` — carried over as it is |
+
+`relocate` is the one for material that should come along without being
+touched: a `_fineart` folder, an `_extern` drop box, a job folder with its own
+order. It keeps the folder's whole sub-structure and its path below the source
+root, so `_extern/2020/Fest` lands as `_extern/2020/Fest` under the new root.
+The run's structure is not rendered for it at all, and the anchor is ignored —
+burying the folder one level deeper is not what "move this there" means.
+
+It only does something when the run has somewhere else to put the folder, that
+is with a target folder set. Sorting in place leaves a relocated folder exactly
+where it is, which `plan` reports as "already in place".
 
 ### The three defaults
 
@@ -435,10 +448,12 @@ first. A pattern is either a path glob or one of five keywords:
 | `dated+label` | dated folders that also carry descriptive text |
 | `dated-only` | dated folders with nothing but the date |
 | `plain` | folders without a date in the name |
-| `_extern`, `raw20*`, `_in_Arbeit/*` | a path below the root, `*` and `?` allowed |
+| `_extern`, `raw20*`, `_in_Arbeit/*` | a folder path or name, `*` and `?` allowed |
 
-A path pattern also covers everything **below** the folder it names, so
-`_extern` reaches `_extern/2019` without a second rule.
+A pattern finds its folder **however deep it sits** and covers everything
+**below** it, so the single rule `_extern` reaches `_extern`,
+`raw2019/_extern`, and `raw2019/_extern/2020/Fest` alike. Writing a slash makes
+it a path: `_in_Arbeit/2021` matches that pair of folders, not any `2021`.
 
 `keep` asked of a folder with no date in its name softens to `leave` — the
 honest reading of "honour the date in the name" when there is none.
@@ -528,6 +543,21 @@ The log file always records the revision, build date, Python version, platform
 and full command line, so a log can be tied to an exact tool revision later.
 
 Attach the log **and** the plan JSON when reporting a problem.
+
+### Undoing a run from the window
+
+The **Undo a run…** entry in the menu bar reverses a completed run. It asks for
+the run's journal — the newest is offered first, because it is nearly always
+the one meant — states plainly what will happen, and then puts every moved file
+back where it was, removes the folders the run created if they are empty, and
+restores the catalog from the backup that run made.
+
+Lightroom Classic must be closed for this, exactly as for the run itself.
+
+Runs are undone newest first. Reversing an older run while a newer one still
+stands would restore a catalog that does not describe what is on disk; if you
+need to go further back, undo each run in turn. `lrfc undo JOURNAL` does the
+same thing from the command line.
 
 ### What the plan could not decide alone
 

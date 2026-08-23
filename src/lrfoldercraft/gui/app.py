@@ -62,6 +62,7 @@ from ..folders import (
     FolderCase,
 )
 from ..folders import label as action_label
+from ..journal import JOURNAL_SUFFIX
 from ..logging_setup import get_logger, setup_logging
 from ..planner import Plan
 from ..report import human_bytes, render_result
@@ -73,6 +74,7 @@ from .workers import (
     ApplyWorker,
     CatalogWorker,
     PlanWorker,
+    UndoWorker,
     run_in_thread,
     wait_for_threads,
 )
@@ -103,6 +105,8 @@ class MainWindow(QMainWindow):
         #: The ordered rule list, as (pattern, action) pairs. Order is meaning.
         self.rules: List[Tuple[str, str]] = []
         self.findings: List[Finding] = []
+        #: The journal of the run made in this session, offered first for undo.
+        self.last_journal: str = ""
         self.cases: List[FolderCase] = []
         self.roots: List[RootFolder] = []
         self._threads: list = []
@@ -232,6 +236,10 @@ class MainWindow(QMainWindow):
         language_action.triggered.connect(self.toggle_language)
         self.language_action = language_action
         self.menuBar().addAction(language_action)
+
+        self.undo_action = QAction(tr("undo_run", self.language), self)
+        self.undo_action.triggered.connect(self.do_undo)
+        self.menuBar().addAction(self.undo_action)
 
     def _catalog_box(self) -> QGroupBox:
         box = QGroupBox()
@@ -659,6 +667,7 @@ class MainWindow(QMainWindow):
         self.apply_button.setText(tr("apply", language))
         self.status_label.setText(tr("ready", language))
         self.language_action.setText(tr("language", language))
+        self.undo_action.setText(tr("undo_run", language))
         if self.root_combo.count():
             self.root_combo.setItemText(0, tr("all_roots", language))
         if not self.catalog_info.text() or self.catalog_info.text().startswith(
@@ -944,6 +953,10 @@ class MainWindow(QMainWindow):
 
     def _applied(self, result) -> None:
         self.plan = None
+        # Remember where the run recorded itself, so undoing it is one click
+        # rather than a hunt through the backup directory.
+        if result.journal_path:
+            self.last_journal = result.journal_path
         self._busy(False, tr("done", self.language))
         self.progress.setRange(0, 100)
         self.progress.setValue(100)
@@ -958,6 +971,65 @@ class MainWindow(QMainWindow):
         QMessageBox.critical(self, APP_NAME, first)
 
     # -- lifecycle ------------------------------------------------------------
+
+    # -- reversing a run ----------------------------------------------------
+
+    def do_undo(self) -> None:
+        """Put a completed run back, files and catalog together.
+
+        The journal is the record of what actually happened, so reversing means
+        choosing one. The newest is offered first because it is nearly always
+        the one meant, but any of them can be picked -- runs are undone in the
+        order they were made, newest first.
+        """
+        journal = self._choose_journal()
+        if not journal:
+            return
+        if not self._confirm_undo(journal):
+            return
+        self._busy(True, tr("undoing", self.language))
+        worker = UndoWorker(journal)
+        worker.finished.connect(self._undo_finished)
+        worker.failed.connect(self._worker_failed)
+        run_in_thread(worker, self._threads)
+
+    def _choose_journal(self) -> str:
+        start = self.last_journal or str(Settings().resolved_backup_dir())
+        path, _filter = QFileDialog.getOpenFileName(
+            self,
+            tr("pick_journal", self.language),
+            start,
+            "Journal (*{s});;All files (*)".format(s=JOURNAL_SUFFIX),
+        )
+        return path
+
+    def _confirm_undo(self, journal: str) -> bool:
+        answer = QMessageBox.warning(
+            self,
+            APP_NAME,
+            tr("confirm_undo", self.language).format(j=journal),
+            QMessageBox.Yes | QMessageBox.Cancel,
+            QMessageBox.Cancel,
+        )
+        return answer == QMessageBox.Yes
+
+    def _undo_finished(self, result) -> None:
+        self._busy(False, tr("done", self.language))
+        self.say(render_result(result, self.language))
+        # The catalog on disk is a different file now; nothing planned against
+        # the old one is still true.
+        self.plan = None
+        self.apply_button.setEnabled(False)
+        box = QMessageBox.information if result.success else QMessageBox.warning
+        box(
+            self,
+            APP_NAME,
+            tr("undo_done" if result.success else "undo_failed", self.language).format(
+                n=result.files_moved, e="\n".join(result.errors)
+            ),
+        )
+        if self.catalog_edit.text().strip():
+            self.load_catalog()
 
     def closeEvent(self, event) -> None:  # noqa: N802 - Qt naming
         """Never tear the window down while a worker is still running."""

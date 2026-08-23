@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r7.1.0 · Build-Datum 2026-08-23**
+**Revision r8.0.0 · Build-Datum 2026-08-23**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -380,6 +380,7 @@ Datums-Platzhalter, sagen Ordnerdaten nichts aus und werden ignoriert.
 | `consolidate` | Fotos herausholen und unterhalb des Ankers einsortieren |
 | `sort-inside` | Ordner behalten und die Struktur *darin* aufbauen |
 | `resort` | den Ordner **an seiner Stelle** neu aufbauen, unter seinem eigenen Elternordner |
+| `relocate` | den Ordner **unverändert** an den neuen Ort tragen — gleicher Name, gleicher Inhalt, keine Sortierung |
 | `leave` | die Fotos dieses Ordners gar nicht anfassen |
 | `keep` | datierter Ordner: die Fotos, die er korrekt beschreibt, bleiben |
 
@@ -392,6 +393,19 @@ Datums-Platzhalter, sagen Ordnerdaten nichts aus und werden ignoriert.
 | `consolidate` | `2026-06-28/Makro Blume im Garten` — aus `raw2026` herausgezogen |
 | `sort-inside` | `raw2026/2026-06-28 Makro Blume im Garten/2026-06-28/…` — verschachtelt |
 | `resort` | `raw2026/2026-06-28/Makro Blume im Garten` — aufgeteilt, an Ort und Stelle |
+| `relocate` | `<neue Wurzel>/raw2026/2026-06-28 Makro Blume im Garten` — unverändert hinübergetragen |
+
+`relocate` ist die Aktion für Material, das mitkommen soll, ohne angefasst zu
+werden: ein `_fineart`-Ordner, ein `_extern`-Eingang, ein Auftragsordner mit
+eigener Ordnung. Sie erhält die gesamte Unterstruktur des Ordners und seinen
+Pfad unterhalb der Quellwurzel — `_extern/2020/Fest` landet also als
+`_extern/2020/Fest` unter der neuen Wurzel. Die Struktur des Laufs wird dafür
+gar nicht gerendert, und der Anker wird ignoriert: den Ordner eine Ebene tiefer
+zu vergraben ist nicht, was „das dorthin verschieben" heißt.
+
+Sie bewirkt nur etwas, wenn der Lauf den Ordner überhaupt woandershin legen
+kann, also mit gesetztem Zielordner. Beim Sortieren am selben Ort bleibt ein
+`relocate`-Ordner genau, wo er ist — `plan` weist das als „bereits am Ziel" aus.
 
 ### Die drei Vorgaben
 
@@ -439,10 +453,13 @@ Schlüsselwörtern:
 | `dated+label` | datierte Ordner, die zusätzlich Text tragen |
 | `dated-only` | datierte Ordner mit nichts als dem Datum |
 | `plain` | Ordner ohne Datum im Namen |
-| `_extern`, `raw20*`, `_in_Arbeit/*` | ein Pfad unterhalb der Wurzel, `*` und `?` erlaubt |
+| `_extern`, `raw20*`, `_in_Arbeit/*` | ein Ordnerpfad oder -name, `*` und `?` erlaubt |
 
-Ein Pfadmuster erfasst auch alles **unterhalb** des benannten Ordners, sodass
-`_extern` ohne zweite Regel bis `_extern/2019` reicht.
+Ein Muster findet seinen Ordner, **so tief er auch liegt**, und erfasst alles
+**darunter** — die eine Regel `_extern` trifft also `_extern`,
+`raw2019/_extern` und `raw2019/_extern/2020/Fest` gleichermaßen. Ein Schrägstrich
+macht daraus einen Pfad: `_in_Arbeit/2021` trifft dieses Ordnerpaar, nicht
+irgendein `2021`.
 
 `keep` auf einen Ordner ohne Datum im Namen angewandt wird zu `leave`
 abgemildert — die ehrliche Lesart von „das Datum im Namen achten", wenn es
@@ -537,6 +554,22 @@ die vollständige Befehlszeile fest, sodass sich ein Log später eindeutig einer
 Werkzeugrevision zuordnen lässt.
 
 Bei einer Fehlermeldung bitte das Log **und** den Plan als JSON beilegen.
+
+### Einen Lauf aus dem Fenster zurücknehmen
+
+Der Menüeintrag **Lauf rückgängig machen…** dreht einen abgeschlossenen Lauf
+um. Er fragt nach dessen Journal — der neueste wird zuerst angeboten, weil fast
+immer er gemeint ist —, sagt unmissverständlich, was geschieht, und stellt dann
+jede verschobene Datei an ihren Platz zurück, entfernt die vom Lauf angelegten
+Ordner, sofern sie leer sind, und spielt den Katalog aus der Sicherung dieses
+Laufs zurück.
+
+Lightroom Classic muss dafür geschlossen sein, genau wie für den Lauf selbst.
+
+Läufe werden vom neuesten her zurückgenommen. Einen älteren Lauf zurückzunehmen,
+während ein neuerer noch steht, spielte einen Katalog ein, der nicht mehr
+beschreibt, was auf der Platte liegt; wer weiter zurück muss, nimmt die Läufe
+der Reihe nach zurück. `lrfc undo JOURNAL` tut auf der Kommandozeile dasselbe.
 
 ### Was der Plan nicht allein entscheiden konnte
 

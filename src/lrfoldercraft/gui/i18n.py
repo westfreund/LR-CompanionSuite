@@ -134,6 +134,31 @@ TEXT: Dict[str, Tuple[str, str]] = {
         "'Gesteuert durch' genannte Einstellung ändern und erneut planen.",
     ),
     "findings_more": ("... and {n:,} more", "... und {n:,} weitere"),
+    "undo_run": ("Undo a run…", "Lauf rückgängig machen…"),
+    "pick_journal": (
+        "Choose the journal of the run to undo",
+        "Journal des rückgängig zu machenden Laufs wählen",
+    ),
+    "confirm_undo": (
+        "Reverse the run recorded in\n\n{j}\n\nEvery file it moved goes back to "
+        "where it was, the folders it created are removed if empty, and the "
+        "catalog is restored from the backup that run made.\n\nMake sure "
+        "Lightroom Classic is closed.",
+        "Den in\n\n{j}\n\naufgezeichneten Lauf rückgängig machen? Jede verschobene "
+        "Datei kehrt an ihren Platz zurück, die angelegten Ordner werden entfernt, "
+        "sofern sie leer sind, und der Katalog wird aus der Sicherung dieses Laufs "
+        "zurückgespielt.\n\nBitte sicherstellen, dass Lightroom Classic geschlossen "
+        "ist.",
+    ),
+    "undoing": ("Undoing the run…", "Lauf wird rückgängig gemacht…"),
+    "undo_done": (
+        "{n:,} file(s) put back, and the catalog restored from its backup.",
+        "{n:,} Datei(en) zurückgestellt und der Katalog aus seiner Sicherung wiederhergestellt.",
+    ),
+    "undo_failed": (
+        "The run was only partly reversed:\n\n{e}",
+        "Der Lauf wurde nur teilweise rückgängig gemacht:\n\n{e}",
+    ),
     "splitter_hint": (
         "Drag to give this section more or less room -- drag it fully shut to "
         "hide the section, and back open to bring it out again",

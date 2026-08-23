@@ -1,6 +1,6 @@
 # Projekthistorie
 
-**Revision r7.1.0 · Build-Datum 2026-08-23**
+**Revision r8.0.0 · Build-Datum 2026-08-23**
 
 Der [CHANGELOG](../../CHANGELOG.md) sagt, was sich in jeder Revision geändert
 hat. Dieses Dokument sagt **warum**, und was dazwischen geschah: die getroffenen
@@ -290,6 +290,31 @@ standen beide nebeneinander.
 
 **r6.1.0** nummerierte die Dokumente nach Gewichtung, auf Wunsch des
 Auftraggebers, in beiden Sprachen mit denselben Nummern.
+
+---
+
+## 23.08.2026, später Nachmittag — die Rückfahrkarte
+
+Zwei weitere Wünsche, und der zweite war der gewichtige.
+
+**„Kann man einen thematischen Ordner unverändert an den neuen Ort
+verschieben?"** — Konnte man nicht; jede Aktion sortierte entweder den Inhalt
+oder ließ ihn liegen. Die Aktion `relocate` füllt die Lücke, für Material, das
+mitkommen soll, ohne angefasst zu werden.
+
+**„Könnten wir eine Roll-Back-Funktion machen?"** — Es gab sie seit r1.0.0, und
+erreichbar war sie nur über die Kommandozeile. Eine Rückabwicklung, die der
+Anwender aus dem Fenster, das er tatsächlich benutzt, nicht erreicht, ist eine,
+die er im Ernstfall nicht hat — also kam **Lauf rückgängig machen…** in die
+Menüleiste. Zurücknehmen heißt Dateien und Katalog gemeinsam: die
+Verschiebungen in umgekehrter Reihenfolge, die angelegten Ordner entfernt,
+sofern leer, und der Katalog aus der Sicherung genau dieses Laufs.
+
+Den ersten `relocate`-Test gegen einen verschachtelten Ordner zu schreiben legte
+einen älteren Fehler offen: Ein Regelmuster traf immer nur Ordner direkt
+unterhalb der Wurzel, `_extern` also `_extern`, aber nicht `raw2019/_extern`.
+Kein Lauf hatte das gezeigt, weil der Masterkatalog `_extern` zufällig ganz oben
+führt.
 
 ---
 
