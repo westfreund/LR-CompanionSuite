@@ -1,6 +1,6 @@
 # Safety and recovery
 
-**Revision r17.0.2 · Build date 2026-08-24**
+**Revision r17.0.3 · Build date 2026-08-24**
 
 > This tool edits your Lightroom catalog database and moves your photographs.
 > It is built carefully and it is tested, but **keep an independent, verified
@@ -120,6 +120,13 @@ lrfc undo /path/to/<catalog>-<timestamp>.lrfc-journal.jsonl
 Files go back to their original locations, empty directories are removed and
 the catalog is restored from the backup that run wrote. The journal path is
 printed at the end of every run.
+
+In the window, use **Undo…** or **History**: both list the recorded runs of
+*this* catalog rather than opening a file chooser full of identically named
+journals. The records live beside the catalog, in the `LR-FolderCraft` folder,
+which is why the window needs the catalog path at the top — with that field
+empty it has nowhere to look, and says so. If the remembered setting is ever
+lost, choosing the catalog again is enough; the runs are still there.
 
 ### The run was interrupted (power cut, forced quit)
 

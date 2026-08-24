@@ -1,6 +1,6 @@
 # Ordnerstrukturen und Platzhalter
 
-**Revision r17.0.2 · Build-Datum 2026-08-24**
+**Revision r17.0.3 · Build-Datum 2026-08-24**
 
 Eine **Struktur** ist eine geordnete Liste von **Ebenen**. Jede Ebene wird zu
 einem Verzeichnis, und jede Ebene ist ein **Template** aus festem Text und

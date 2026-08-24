@@ -1104,3 +1104,42 @@ def test_a_saved_page_layout_survives_the_round_trip(qt_app):
     again = MainWindow()
     assert (again.width(), again.height()) == wanted
     again.close()
+
+
+def test_without_a_catalog_the_runs_are_not_reported_as_none(qt_app, tmp_path):
+    """The journals live beside the catalog, so an unnamed catalog is its own case.
+
+    Reporting "no runs recorded" there sends the user hunting for a file that
+    is not missing -- which is exactly what happened once the remembered
+    catalog was lost.
+    """
+    from lrfoldercraft.gui.i18n import tr
+
+    window = MainWindow()
+    window.catalog_edit.setText("")
+    assert window._nothing_recorded() == tr("no_catalog_for_runs", window.language)
+
+    catalog = tmp_path / "Library.lrcat"
+    catalog.write_bytes(b"")
+    window.catalog_edit.setText(str(catalog))
+    assert window._nothing_recorded() == tr("history_empty", window.language)
+    window.close()
+
+
+def test_undo_without_a_catalog_offers_no_file_chooser(qt_app):
+    """Rather than open one at a folder that has held no journal for revisions."""
+    window = MainWindow()
+    window.catalog_edit.setText("")
+    seen = []
+    from lrfoldercraft.gui import app as gui_app
+
+    original = gui_app.QMessageBox.information
+    gui_app.QMessageBox.information = staticmethod(lambda *a, **k: seen.append(a[-1]))
+    try:
+        assert window._choose_journal() == ""
+    finally:
+        gui_app.QMessageBox.information = original
+    from lrfoldercraft.gui.i18n import tr
+
+    assert seen == [tr("no_catalog_for_runs", window.language)]
+    window.close()

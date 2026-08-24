@@ -1,6 +1,6 @@
 # Sicherheit und Wiederherstellung
 
-**Revision r17.0.2 · Build-Datum 2026-08-24**
+**Revision r17.0.3 · Build-Datum 2026-08-24**
 
 > Dieses Werkzeug bearbeitet die Lightroom-Katalogdatenbank und verschiebt Ihre
 > Fotografien. Es ist sorgfältig gebaut und getestet, aber: **Halten Sie vor
@@ -127,6 +127,14 @@ lrfc undo /pfad/zu/<katalog>-<zeitstempel>.lrfc-journal.jsonl
 Die Dateien wandern zurück, leere Verzeichnisse werden entfernt, und der
 Katalog wird aus dem Backup dieses Laufs wiederhergestellt. Der Journalpfad
 wird am Ende jedes Laufs ausgegeben.
+
+In der Oberfläche geht das über **Rückgängig…** oder **Historie**: beide
+zeigen die aufgezeichneten Läufe *dieses* Katalogs, statt einen Dateidialog
+voll gleich benannter Journale zu öffnen. Die Aufzeichnungen liegen neben dem
+Katalog, im Ordner `LR-FolderCraft`. Deshalb braucht das Fenster oben den
+Katalogpfad — ist das Feld leer, kann es keine Läufe finden und sagt das auch.
+Ist die gemerkte Einstellung einmal verloren gegangen, genügt es, den Katalog
+erneut zu wählen; die Läufe stehen unverändert dort.
 
 ### Der Lauf wurde unterbrochen (Stromausfall, erzwungenes Beenden)
 

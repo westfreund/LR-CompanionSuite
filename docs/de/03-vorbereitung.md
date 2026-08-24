@@ -1,6 +1,6 @@
 # Vorbereitung
 
-**Revision r17.0.2 · Build-Datum 2026-08-24**
+**Revision r17.0.3 · Build-Datum 2026-08-24**
 
 Zwei Dinge müssen für Ihre Bibliothek zutreffen, bevor LR-FolderCraft etwas
 anfasst. Keines davon ist schwierig, beide werden leicht übersehen, und beide

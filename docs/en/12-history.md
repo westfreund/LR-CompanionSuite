@@ -1,6 +1,6 @@
 # Project history
 
-**Revision r17.0.2 · Build date 2026-08-24**
+**Revision r17.0.3 · Build date 2026-08-24**
 
 The [CHANGELOG](../../CHANGELOG.md) says what changed in each revision. This
 document says **why**, and what happened in between: the decisions taken, the
@@ -96,6 +96,7 @@ and the [CHANGELOG](../../CHANGELOG.md).
 | **r17.0.0** | 23:—  | Beisammen | The collection folder for files not in the catalog moves into the target tree rather than staying in the source: a run's result had been split across two places. Fixed on the way: across a drive boundary the move would have failed. |
 | **r17.0.1** | 06:30 |  | The list of runs showed placeholders instead of a path, and the clock was cut off at `06:1`. |
 | **r17.0.2** | 07:20 |  | A repaired run was reported as interrupted again — and the files it offered to put back belonged to the standing run. Also: the window came back 640×480 with two panes collapsed. |
+| **r17.0.3** | 07:50 |  | Undo could not find this morning's run: with the remembered catalog gone, the window said no runs were recorded and opened a chooser in a folder that has held no journal for revisions. It now names the real reason and starts where the journals are. |
 
 ---
 

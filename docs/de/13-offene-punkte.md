@@ -1,6 +1,6 @@
 # Offene Punkte und Fahrplan
 
-**Revision r17.0.2 · Build-Datum 2026-08-24**
+**Revision r17.0.3 · Build-Datum 2026-08-24**
 
 Eine ehrliche Aufstellung dessen, was nicht erledigt, nicht verifiziert oder
 bewusst ausgelassen ist. Jeder Punkt ist ein Ansatzpunkt für die nächste

@@ -16,6 +16,23 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [17.0.3] — 2026-08-24
+
+Reported by the user: the undo record of a successful run could not be found.
+
+### Fixed
+
+- **Undo and History were a dead end without a catalog on screen.** The run
+  records live beside the catalog, so with the field empty there is nowhere to
+  look — but the window reported "no runs recorded for this catalog", which
+  says the opposite: that the catalog has never been touched. It now names the
+  real reason and points at the field to fill in.
+- **The fallback file chooser opened in the backup folder**, which has held no
+  journal since the records moved beside the catalog. It starts in the
+  catalog's `LR-FolderCraft` folder instead.
+
+---
+
 ## [17.0.2] — 2026-08-24
 
 Both reported by the user, from one reopening of the window.

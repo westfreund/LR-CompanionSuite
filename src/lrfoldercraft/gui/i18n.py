@@ -284,6 +284,14 @@ TEXT: Dict[str, Tuple[str, str]] = {
         "No runs recorded for this catalog yet.",
         "Für diesen Katalog sind noch keine Läufe aufgezeichnet.",
     ),
+    "no_catalog_for_runs": (
+        "No catalog is chosen. Name the catalog at the top of the window and "
+        "its recorded runs appear here — that is where the journals live, "
+        "beside the catalog itself.",
+        "Es ist kein Katalog gewählt. Tragen Sie oben im Fenster den Katalog "
+        "ein, dann erscheinen hier dessen aufgezeichnete Läufe — dort neben "
+        "dem Katalog liegen auch die Journale.",
+    ),
     "undo_run": ("Undo a run…", "Lauf rückgängig machen…"),
     "undo_button": ("Undo…", "Rückgängig…"),
     "pick_journal": (

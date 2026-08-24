@@ -89,7 +89,7 @@ from ..rules import (
     parse_structure,
     token_help,
 )
-from ..runs import history, journal_of
+from ..runs import history, journal_of, runs_directory
 from ..safety import preconditions
 from ..version import APP_NAME, APP_URL, REVISION, __build_date__
 from .i18n import tr
@@ -1539,9 +1539,21 @@ class MainWindow(QMainWindow):
         """What has been done to this catalog, and what can still be taken back."""
         records = self._recorded_runs()
         if not records:
-            QMessageBox.information(self, APP_NAME, tr("history_empty", self.language))
+            QMessageBox.information(self, APP_NAME, self._nothing_recorded())
             return
         RunPickerDialog(records, self.language, self).exec()
+
+    def _nothing_recorded(self) -> str:
+        """Say which of the two empty-handed cases this is.
+
+        Runs are recorded beside the catalog, so with no catalog named there is
+        nothing to look in -- which is not the same as a catalog that has never
+        been touched, and telling the user the latter sends them hunting for a
+        file that is not missing at all.
+        """
+        if not self.catalog_edit.text().strip():
+            return tr("no_catalog_for_runs", self.language)
+        return tr("history_empty", self.language)
 
     def _choose_journal(self) -> str:
         """Pick a run of *this* catalog, or fall back to choosing a file.
@@ -1558,7 +1570,11 @@ class MainWindow(QMainWindow):
             record = dialog.selected()
             return str(journal_of(record)) if record is not None else ""
 
-        start = self.last_journal or str(Settings().resolved_backup_dir())
+        catalog = self.catalog_edit.text().strip()
+        if not catalog:
+            QMessageBox.information(self, APP_NAME, self._nothing_recorded())
+            return ""
+        start = self.last_journal or str(runs_directory(Path(catalog)))
         path, _filter = QFileDialog.getOpenFileName(
             self,
             tr("pick_journal", self.language),
