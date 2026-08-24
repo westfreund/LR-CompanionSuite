@@ -121,3 +121,46 @@ def test_the_changelog_names_every_tagged_revision():
     released = set(released_revisions())
     missing = [t for t in tags if t.lstrip("v") not in released]
     assert not missing, missing
+
+
+#: Links into the repository, as opposed to the web.
+LOCAL_LINK = re.compile(r"\[[^\]]*\]\(([^)#\s]+)(?:#[^)]*)?\)")
+ROOT = DOCS.parent
+
+
+def _linking_files():
+    yield from sorted(DOCS.rglob("*.md"))
+    for name in ("README.md", "README.de.md", "CHANGELOG.md"):
+        yield ROOT / name
+
+
+def test_no_document_points_at_a_file_that_is_not_there():
+    """Link rot is invisible until a reader hits it, and then it is embarrassing.
+
+    Renaming a document is the usual cause -- the two language trees are moved
+    together but the links between them are not.
+    """
+    broken = []
+    for path in _linking_files():
+        for target in LOCAL_LINK.findall(path.read_text(encoding="utf-8")):
+            if target.startswith(("http://", "https://", "mailto:")):
+                continue
+            if not (path.parent / target).resolve().exists():
+                broken.append("{p} -> {t}".format(p=path.relative_to(ROOT), t=target))
+    assert not broken
+
+
+def test_the_site_offers_every_document():
+    """A document missing from the navigation exists but cannot be found.
+
+    Read with a regular expression rather than a YAML parser: the site is built
+    by CI, and the test suite should not need the documentation extra to run.
+    """
+    nav = (ROOT / "mkdocs.yml").read_text(encoding="utf-8")
+    listed = set(re.findall(r"((?:en|de)/[0-9a-z-]+\.md)", nav))
+    present = {
+        "{d}/{n}".format(d=language, n=path.name)
+        for language in LANGUAGES
+        for path in (DOCS / language).glob("*.md")
+    }
+    assert present - listed == set()

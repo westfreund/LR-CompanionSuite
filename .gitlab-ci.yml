@@ -5,7 +5,7 @@
 #
 # SPDX-License-Identifier: MIT OR GPL-3.0-or-later
 
-stages: [lint, test, build]
+stages: [lint, test, build, deploy]
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
@@ -95,3 +95,17 @@ build:
   artifacts:
     paths: [dist/]
     expire_in: 30 days
+
+
+# The documentation site. Published from the default branch only, so a topic
+# branch cannot replace what people are reading.
+pages:
+  <<: *python
+  stage: deploy
+  script:
+    - pip install -e ".[docs]"
+    - mkdocs build --strict --site-dir public
+  artifacts:
+    paths: [public]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

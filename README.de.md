@@ -14,7 +14,7 @@
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![Lizenz](https://img.shields.io/badge/Lizenz-MIT%20ODER%20GPL--3.0--or--later-green)](LICENSE)
 
-🇬🇧 **[This page in English](README.md)** · 📚 [Dokumentation](docs/de/) · [Documentation in English](docs/en/)
+🌐 **[Website](https://andy-freund.gitlab.io/LR-FolderCraft/)** · 🇬🇧 [This page in English](README.md) · 📚 [Dokumentation](docs/de/) · [Documentation in English](docs/en/)
 
 ---
 

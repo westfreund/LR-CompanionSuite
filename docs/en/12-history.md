@@ -2,7 +2,7 @@
 
 **Revision r17.0.3 · Build date 2026-08-24**
 
-The [CHANGELOG](../../CHANGELOG.md) says what changed in each revision. This
+The [CHANGELOG](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md) says what changed in each revision. This
 document says **why**, and what happened in between: the decisions taken, the
 tests run against real libraries, and the four occasions on which the tool was
 wrong in a way that mattered.
@@ -21,7 +21,7 @@ That distinction matters, so here is exactly what it rests on:
 | Part | Source | Reliable? |
 | --- | --- | --- |
 | Dates, order, what changed when | Commit history and tags | Yes — machine recorded |
-| What each revision contains | [CHANGELOG.md](../../CHANGELOG.md) | Yes — written at the time |
+| What each revision contains | [CHANGELOG.md](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md) | Yes — written at the time |
 | Test results and their numbers | Run output, quoted in the commits | Yes |
 | Reasoning, alternatives, what was learned | Reconstructed from the record | The account is faithful, but it is a narrative written afterwards |
 
@@ -49,7 +49,7 @@ project rule makes every feature extension a major version and only those get
 named.
 
 For *what* changed, one line each is here; for *why*, read the sections below
-and the [CHANGELOG](../../CHANGELOG.md).
+and the [CHANGELOG](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md).
 
 | Revision | Time | Name | What it was about |
 | --- | --- | --- | --- |
@@ -433,7 +433,7 @@ suite.** Its job is to keep them fixed — 555 tests by now.
 
 ## See also
 
-- [CHANGELOG.md](../../CHANGELOG.md) — what changed, per revision
+- [CHANGELOG.md](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md) — what changed, per revision
 - [13-open-issues.md](13-open-issues.md) — what is known to be missing
 - [14-prompts.md](14-prompts.md) — the original brief and the regeneration prompt
 - [10-development.md](10-development.md) — how to continue the work

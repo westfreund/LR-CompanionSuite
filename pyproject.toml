@@ -42,6 +42,12 @@ dev = [
     "pytest-cov>=4.0",
     "ruff>=0.1",
 ]
+# The published site is a view onto docs/, built by CI. Nothing in the tool
+# itself needs these.
+docs = [
+    "mkdocs>=1.5",
+    "mkdocs-material>=9.5",
+]
 
 [project.urls]
 Homepage = "https://gitlab.com/andy-freund/LR-FolderCraft"

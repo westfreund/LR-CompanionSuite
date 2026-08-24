@@ -1,0 +1,87 @@
+# The published documentation site.
+#
+# Both language trees are served side by side, exactly as they live in the
+# repository -- the site is a view onto docs/, never a second copy that can
+# drift away from it.
+#
+# SPDX-License-Identifier: MIT OR GPL-3.0-or-later
+
+site_name: LR-FolderCraft
+site_description: >-
+  Reorganise Adobe Lightroom Classic folder trees without losing the catalog
+  connection. Lightroom-Ordner umsortieren, ohne die Katalogverknüpfung zu
+  verlieren.
+site_url: https://andy-freund.gitlab.io/LR-FolderCraft/
+repo_url: https://gitlab.com/andy-freund/LR-FolderCraft
+repo_name: andy-freund/LR-FolderCraft
+copyright: MIT OR GPL-3.0-or-later — no telemetry, no account, no cost.
+
+docs_dir: docs
+# The repository index and the site index would both claim "/".
+exclude_docs: |
+  README.md
+
+theme:
+  name: material
+  language: en
+  logo: images/brand/logo-128-light.png
+  favicon: images/brand/logo-128-dark.png
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle: {icon: material/weather-night, name: Dark mode}
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle: {icon: material/weather-sunny, name: Light mode}
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds: {case: lower}
+  - pymdownx.details
+  - pymdownx.superfences
+
+plugins:
+  - search: {lang: [en, de]}
+
+nav:
+  - Start / Übersicht: index.md
+  - English:
+      - Overview: en/01-index.md
+      - Installation: en/02-installation.md
+      - Preparation: en/03-before-you-start.md
+      - Usage: en/04-usage.md
+      - Structures: en/05-structures.md
+      - Safety: en/06-safety.md
+      - FAQ: en/07-faq.md
+      - How it works: en/08-how-it-works.md
+      - Architecture: en/09-architecture.md
+      - Development: en/10-development.md
+      - Versioning: en/11-versioning.md
+      - History: en/12-history.md
+      - Open issues: en/13-open-issues.md
+      - Prompts: en/14-prompts.md
+  - Deutsch:
+      - Überblick: de/01-index.md
+      - Installation: de/02-installation.md
+      - Vorbereitung: de/03-vorbereitung.md
+      - Bedienung: de/04-bedienung.md
+      - Strukturen: de/05-strukturen.md
+      - Sicherheit: de/06-sicherheit.md
+      - FAQ: de/07-faq.md
+      - Funktionsweise: de/08-funktionsweise.md
+      - Architektur: de/09-architektur.md
+      - Entwicklung: de/10-entwicklung.md
+      - Versionierung: de/11-versionierung.md
+      - Historie: de/12-historie.md
+      - Offene Punkte: de/13-offene-punkte.md
+      - Prompts: de/14-prompts.md

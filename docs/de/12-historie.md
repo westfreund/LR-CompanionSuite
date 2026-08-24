@@ -2,7 +2,7 @@
 
 **Revision r17.0.3 · Build-Datum 2026-08-24**
 
-Der [CHANGELOG](../../CHANGELOG.md) sagt, was sich in jeder Revision geändert
+Der [CHANGELOG](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md) sagt, was sich in jeder Revision geändert
 hat. Dieses Dokument sagt **warum**, und was dazwischen geschah: die getroffenen
 Entscheidungen, die Tests an echten Bibliotheken und die vier Gelegenheiten, bei
 denen das Werkzeug auf eine Weise falsch lag, die zählte.
@@ -22,7 +22,7 @@ Dieser Unterschied zählt, deshalb genau, worauf es fußt:
 | Teil | Quelle | Belastbar? |
 | --- | --- | --- |
 | Daten, Reihenfolge, was wann geändert wurde | Commit-Historie und Tags | Ja — maschinell festgehalten |
-| Was jede Revision enthält | [CHANGELOG.md](../../CHANGELOG.md) | Ja — seinerzeit geschrieben |
+| Was jede Revision enthält | [CHANGELOG.md](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md) | Ja — seinerzeit geschrieben |
 | Testergebnisse und ihre Zahlen | Lauf-Ausgaben, in den Commits zitiert | Ja |
 | Begründungen, Alternativen, Gelerntes | Aus dem Bestand rekonstruiert | Die Darstellung ist wahrheitsgetreu, aber im Nachhinein verfasst |
 
@@ -53,7 +53,7 @@ und nur die bekommen einen.
 
 Wer wissen will, *was* sich geändert hat, findet es hier in einer Zeile; wer
 wissen will, *warum*, liest die Abschnitte darunter und den
-[CHANGELOG](../../CHANGELOG.md).
+[CHANGELOG](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md).
 
 | Revision | Zeit | Name | Worum es ging |
 | --- | --- | --- | --- |
@@ -462,7 +462,7 @@ Deren Aufgabe ist es, sie behoben zu halten — inzwischen mit 555 Tests.
 
 ## Siehe auch
 
-- [CHANGELOG.md](../../CHANGELOG.md) — was sich je Revision geändert hat
+- [CHANGELOG.md](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md) — was sich je Revision geändert hat
 - [13-offene-punkte.md](13-offene-punkte.md) — was bekanntermaßen fehlt
 - [14-prompts.md](14-prompts.md) — der ursprüngliche Auftrag und der generische Prompt
 - [10-entwicklung.md](10-entwicklung.md) — wie die Arbeit fortgesetzt wird
