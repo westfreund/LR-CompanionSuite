@@ -75,6 +75,21 @@ gui:
     - pip install -e ".[dev,gui]"
     - pytest -q tests/test_gui.py
 
+# The documentation guards ask git for the released tags, so this one job gets
+# a full clone and an image that has git -- rather than paying for both in
+# every matrix entry.
+docs:
+  <<: *python
+  stage: test
+  image: python:3.12
+  variables:
+    GIT_DEPTH: "0"
+  script:
+    - pip install -e ".[dev]"
+    - git fetch --tags --quiet
+    - pytest -q tests/test_docs.py tests/test_parity.py tests/test_brand.py
+
+
 # A dry run must never write anything -- guarded here so a regression cannot
 # reach a release.
 safety:

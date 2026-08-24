@@ -110,9 +110,18 @@ def test_the_history_names_every_released_revision(language):
 
 
 def test_the_changelog_names_every_tagged_revision():
-    """A release without a changelog entry is a release nobody can read about."""
+    """A release without a changelog entry is a release nobody can read about.
+
+    Skipped where git is not there to ask. A slim container has no git binary,
+    and the check then failed for a reason that had nothing to do with the
+    documentation -- so CI ran red for two revisions while the thing being
+    guarded was fine. The `docs` job runs this for real.
+    """
+    import shutil
     import subprocess
 
+    if shutil.which("git") is None:  # pragma: no cover - depends on the machine
+        pytest.skip("no git to ask for the tags")
     tags = subprocess.run(
         ["git", "tag"], capture_output=True, text=True, cwd=str(DOCS.parent)
     ).stdout.split()
