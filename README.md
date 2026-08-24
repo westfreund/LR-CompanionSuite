@@ -18,6 +18,13 @@
 
 ---
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/before-after-en-dark.svg">
+    <img src="docs/images/before-after-en-light.svg" alt="Before: five year folders. After: one folder per day, every catalog link intact." width="940">
+  </picture>
+</p>
+
 ## The problem
 
 Your Lightroom library grew into a handful of year folders, each holding many

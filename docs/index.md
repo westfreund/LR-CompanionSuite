@@ -21,6 +21,11 @@ Free, open source, no account, no telemetry, no cost.
 
 ---
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="images/before-after-en-dark.svg">
+  <img src="images/before-after-en-light.svg" alt="Before: five year folders. After: one folder per day.">
+</picture>
+
 ## The problem you probably arrived with
 
 Your Lightroom library grew into a handful of huge year folders. You would
@@ -113,6 +118,11 @@ kein einziges Foto als fehlend auftaucht.
 Frei, quelloffen, ohne Konto, ohne Telemetrie, kostenlos.
 [Installieren](de/02-installation.md) · [Wie sicher das ist](de/06-sicherheit.md) ·
 [Quelltext](https://gitlab.com/andy-freund/LR-FolderCraft)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="images/before-after-de-dark.svg">
+  <img src="images/before-after-de-light.svg" alt="Vorher: fünf Jahresordner. Nachher: ein Ordner je Tag.">
+</picture>
 
 ## Das Problem, mit dem Sie vermutlich hier sind
 

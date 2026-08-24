@@ -18,6 +18,13 @@
 
 ---
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/before-after-de-dark.svg">
+    <img src="docs/images/before-after-de-light.svg" alt="Vorher: fünf Jahresordner. Nachher: ein Ordner je Tag, jede Katalogverknüpfung erhalten." width="940">
+  </picture>
+</p>
+
 ## Das Problem
 
 Die Lightroom-Bibliothek ist über die Jahre gewachsen und besteht aus einigen
