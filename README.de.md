@@ -10,7 +10,7 @@
 **Ordnerstrukturen in Adobe Lightroom Classic neu sortieren — ohne die Katalogverbindung zu verlieren.**
 
 [![Revision](https://img.shields.io/badge/revision-r17.0.3-blue)](CHANGELOG.md)
-[![Build-Datum](https://img.shields.io/badge/build-2026--08--23-lightgrey)](CHANGELOG.md)
+[![Build-Datum](https://img.shields.io/badge/build-2026--08--24-lightgrey)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![Lizenz](https://img.shields.io/badge/Lizenz-MIT%20ODER%20GPL--3.0--or--later-green)](LICENSE)
 
