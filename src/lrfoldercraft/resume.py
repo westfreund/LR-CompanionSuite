@@ -34,6 +34,7 @@ from typing import List, Optional, Tuple
 
 from .journal import read_journal
 from .logging_setup import get_logger, step
+from .runs import find_record_for_journal
 
 log = get_logger("resume")
 
@@ -53,6 +54,13 @@ class Interruption:
 
     state: str
     journal_path: str
+    #: The run's own record, when there is one. Only it can say whether the
+    #: interruption has since been settled.
+    record: object = None
+    #: True when a later run has since reorganised the library. The paths this
+    #: run left behind are then indistinguishable from the newer run's, and
+    #: nothing about them can be acted on.
+    overtaken: bool = False
     catalog: str = ""
     backup_path: Optional[str] = None
     #: Moves whose file currently sits at its target. On its own this says
@@ -72,11 +80,16 @@ class Interruption:
     def to_revert(self) -> List[Tuple[str, str]]:
         """Files that genuinely belong back where they came from.
 
-        Only when the run stopped before the catalog was committed. After the
-        commit the catalog describes the new layout, and moving the files back
-        would break the very agreement the run established.
+        Only when the run stopped before the catalog was committed, and only
+        while nothing has happened since. After the commit the catalog
+        describes the new layout, and moving the files back would break the
+        agreement the run established. And once a later run has reorganised the
+        library, the files at these paths are that run's -- putting them
+        "back" would tear the newer run apart.
         """
-        return self.at_target if self.state == NEEDS_REVERT else []
+        if self.overtaken or self.state != NEEDS_REVERT:
+            return []
+        return self.at_target
 
     def describe(self, language: str = "en") -> str:
         if language == "de":
@@ -125,7 +138,11 @@ def inspect(journal_path: str | Path, record=None) -> Interruption:
     """
     records = read_journal(journal_path)
     events = [r.get("event") for r in records]
-    found = Interruption(state=COMPLETE, journal_path=str(journal_path))
+    if record is None:
+        # Look it up rather than deciding without it: only the record can say
+        # whether an interruption has already been settled.
+        record = find_record_for_journal(Path(journal_path))
+    found = Interruption(state=COMPLETE, journal_path=str(journal_path), record=record)
 
     for entry in records:
         if entry.get("event") == "run-start":
@@ -166,7 +183,7 @@ def inspect(journal_path: str | Path, record=None) -> Interruption:
     # That produced a blocking pre-flight error against a library that was
     # perfectly sound. Only the run's own record can say.
     if record is not None:
-        if record.undone_at:
+        if record.is_settled:
             found.state = COMPLETE
         elif record.reversal_was_cut_short:
             found.state = NEEDS_UNDO
@@ -186,13 +203,21 @@ def find_interruptions(catalog: Path) -> List[Interruption]:
     from .runs import history, journal_of
 
     out = []
+    # Newest first. Once a run has moved files since, everything older is
+    # overtaken: its target paths are occupied by that later run and say
+    # nothing about the older one any more.
+    overtaken = False
     for record in history(catalog):
         journal = journal_of(record)
         if not journal.exists():
             continue
         found = inspect(journal, record)
-        if found.needs_work:
+        found.record = record
+        found.overtaken = overtaken
+        if found.needs_work and not overtaken:
             out.append(found)
+        if record.files_moved and not record.is_settled:
+            overtaken = True
     return out
 
 
@@ -204,8 +229,9 @@ def revert_files(found: Interruption) -> Tuple[int, List[str]]:
     Does nothing unless reverting is the right direction -- see
     :attr:`Interruption.to_revert`.
     """
+    wanted = found.to_revert
     restored, errors = 0, []
-    for source, target in reversed(found.to_revert):
+    for source, target in reversed(wanted):
         try:
             if not os.path.exists(target) or os.path.exists(source):
                 continue
@@ -215,6 +241,17 @@ def revert_files(found: Interruption) -> Tuple[int, List[str]]:
         except OSError as error:
             errors.append("{t}: {e}".format(t=target, e=error))
     step("Put %d file(s) back", restored)
+    # Record that this interruption is settled. Without it the run is judged
+    # from the paths alone next time, and a later run into the same target
+    # recreates them -- which reported runs repaired hours earlier and raised a
+    # blocking pre-flight error against a sound library.
+    if wanted and found.record is not None:
+        from .runs import mark_repaired
+
+        try:
+            mark_repaired(found.record, restored)
+        except OSError as error:  # pragma: no cover - reported, not fatal
+            log.warning("Could not mark the run as repaired: %s", error)
     return restored, errors
 
 

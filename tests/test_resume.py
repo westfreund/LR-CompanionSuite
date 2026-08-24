@@ -272,3 +272,106 @@ def test_an_interrupted_reversal_is_recorded_not_guessed(simple_catalog, tmp_pat
     # and finishing it is simply running undo again
     undo(result.journal_path)
     assert read_record(Path(result.run_directory)).undone_at
+
+
+def test_a_repaired_run_is_never_reported_again(simple_catalog, tmp_path, monkeypatch):
+    """Putting the files back has to leave a mark.
+
+    Without one the run is judged from the paths alone next time, and a later
+    run into the same target recreates them -- which reported runs repaired
+    hours earlier and raised a blocking pre-flight error against a library that
+    was perfectly sound. The user met exactly this on reopening the window.
+    """
+    plan, settings = make_plan(simple_catalog, tmp_path)
+    kill_after(2, monkeypatch)
+    with pytest.raises(KeyboardInterrupt):
+        execute(plan, settings)
+    monkeypatch.undo()
+
+    found = find_interruptions(Path(simple_catalog.catalog_path))[0]
+    restored, _errors = revert_files(found)
+    remove_created_directories(found)
+    assert restored
+
+    from lrfoldercraft.runs import read_record
+
+    record = read_record(Path(found.journal_path).parent)
+    assert record.repaired_at and record.is_settled
+    assert find_interruptions(Path(simple_catalog.catalog_path)) == []
+
+    # and a later run recreating the same paths must not resurrect it
+    later, later_settings = make_plan(simple_catalog, tmp_path)
+    execute(later, later_settings)
+    reported = [f.journal_path for f in find_interruptions(Path(simple_catalog.catalog_path))]
+    assert found.journal_path not in reported
+
+
+def test_the_command_line_marks_it_too(simple_catalog, tmp_path, monkeypatch):
+    """inspect() looks the record up itself, so `lrfc resume` settles the run."""
+    plan, settings = make_plan(simple_catalog, tmp_path)
+    kill_after(2, monkeypatch)
+    with pytest.raises(KeyboardInterrupt):
+        execute(plan, settings)
+    monkeypatch.undo()
+
+    journal = sorted(
+        (Path(simple_catalog.catalog_path).parent / "LR-FolderCraft").rglob("journal.jsonl")
+    )[-1]
+    found = inspect(journal)  # no record passed, as the command does it
+    assert found.record is not None
+    revert_files(found)
+
+    from lrfoldercraft.runs import read_record
+
+    assert read_record(journal.parent).is_settled
+
+
+def test_an_overtaken_interruption_is_never_acted_on(simple_catalog, tmp_path, monkeypatch):
+    """The dangerous one: the files at those paths belong to a later run.
+
+    An interrupted run leaves files at target paths. If a later run then
+    reorganises the library into the same tree, those paths are occupied by the
+    newer run's files -- and "putting them back" would tear that run apart
+    while its catalog still points at them.
+    """
+    plan, settings = make_plan(simple_catalog, tmp_path)
+    kill_after(2, monkeypatch)
+    with pytest.raises(KeyboardInterrupt):
+        execute(plan, settings)
+    monkeypatch.undo()
+
+    # Repair it, then run again into the same structure.
+    for found in find_interruptions(Path(simple_catalog.catalog_path)):
+        revert_files(found)
+        remove_created_directories(found)
+    later, later_settings = make_plan(simple_catalog, tmp_path)
+    result = execute(later, later_settings)
+    assert result.success
+
+    after = files_under(simple_catalog)
+    assert find_interruptions(Path(simple_catalog.catalog_path)) == []
+
+    # Even asked about it directly, the older run offers nothing to move.
+    from lrfoldercraft.runs import history, journal_of
+
+    oldest = history(Path(simple_catalog.catalog_path))[-1]
+    found = inspect(journal_of(oldest), oldest)
+    found.overtaken = True
+    assert found.to_revert == []
+    revert_files(found)
+    assert files_under(simple_catalog) == after, "the later run must be untouched"
+
+
+def test_an_interruption_is_actionable_while_it_is_the_newest(
+    simple_catalog, tmp_path, monkeypatch
+):
+    """The case that must keep working: nothing has happened since."""
+    plan, settings = make_plan(simple_catalog, tmp_path)
+    kill_after(2, monkeypatch)
+    with pytest.raises(KeyboardInterrupt):
+        execute(plan, settings)
+    monkeypatch.undo()
+
+    pending = find_interruptions(Path(simple_catalog.catalog_path))
+    assert pending and pending[0].to_revert
+    assert not pending[0].overtaken

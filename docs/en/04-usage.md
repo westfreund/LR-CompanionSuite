@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r17.0.1 · Build date 2026-08-24**
+**Revision r17.0.2 · Build date 2026-08-24**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -737,6 +737,12 @@ guess:
 
 The third case is safe to simply repeat: a file is moved only while it is still
 at the place it is being moved from, so running undo again finishes it.
+
+An interruption can only be acted on **while nothing has happened since**.
+Once any later run has moved files, the paths the older one left are occupied
+by that run and say nothing about it, so it is marked overtaken and offers
+nothing to move. A repair is recorded, so a run settled once is never raised
+again.
 
 **A new run is refused while one is unfinished.** Planning on top of a
 half-moved library produces a plan for a library that does not exist, and

@@ -16,6 +16,32 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [17.0.2] — 2026-08-24
+
+Both reported by the user, from one reopening of the window.
+
+### Fixed
+
+- **A run repaired hours earlier was reported as interrupted again**, blocking
+  every plan. `resume` put the files back but recorded nothing, so next time
+  the run was judged from the paths alone — and a later run into the same
+  target had recreated them. A repair is now written into the run's record and
+  the run is never reported again.
+
+- **And the far worse case that hid behind it.** The files sitting at those
+  paths belonged to the *later* run. Reverting would have moved a standing
+  run's files out from under its catalog. An interruption is now actionable
+  only while nothing has happened since: once any run has moved files after it,
+  it is marked overtaken and offers nothing to move, however it is reached.
+
+- **The window came back 640×480 with two panes collapsed.** The interruption
+  dialog was raised from the constructor, before the window had been laid out,
+  so `width()` and the splitter sizes returned Qt's defaults and zeros — and
+  those were what got saved on close. Geometry is now stored only once the
+  window has actually been shown, and the dialog waits for that too.
+
+---
+
 ## [17.0.1] — 2026-08-24
 
 ### Fixed

@@ -1,6 +1,6 @@
 # Projekthistorie
 
-**Revision r17.0.1 · Build-Datum 2026-08-24**
+**Revision r17.0.2 · Build-Datum 2026-08-24**
 
 Der [CHANGELOG](../../CHANGELOG.md) sagt, was sich in jeder Revision geändert
 hat. Dieses Dokument sagt **warum**, und was dazwischen geschah: die getroffenen
@@ -99,6 +99,7 @@ wissen will, *warum*, liest die Abschnitte darunter und den
 | **r16.1.0** | 22:52 |  | Die Historie nennt jede ausgelieferte Revision, und ein Test hält sie dazu an. Zuvor deckte sie 18 von 39 ab. |
 | **r17.0.0** | 23:—  | Beisammen | Der Sammelordner für katalogfremde Dateien liegt im Zielbaum statt in der Quelle: sonst lag das Ergebnis eines Laufs an zwei Orten. Dabei behoben: Über Laufwerksgrenzen wäre das Verschieben gescheitert. |
 | **r17.0.1** | 06:30 |  | Die Liste der Läufe zeigte Platzhalter statt eines Pfads, und die Uhrzeit war auf `06:1` abgeschnitten. |
+| **r17.0.2** | 07:20 |  | Ein reparierter Lauf wurde erneut als abgebrochen gemeldet — und die Dateien, die er hätte zurückstellen wollen, gehörten dem laufenden Lauf. Dazu: Das Fenster kam mit 640×480 und zwei zugeklappten Bereichen zurück. |
 
 ---
 

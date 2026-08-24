@@ -314,6 +314,8 @@ class MainWindow(QMainWindow):
         self.last_journal: str = ""
         #: Catalog whose preconditions were acknowledged in this session.
         self._acknowledged: str = ""
+        #: Set once the window has been laid out, so geometry is worth saving.
+        self._was_shown = False
         self.cases: List[FolderCase] = []
         self.roots: List[RootFolder] = []
         self._threads: list = []
@@ -1218,9 +1220,21 @@ class MainWindow(QMainWindow):
             self.target_edit.setText(path)
             self.target_new_tree.setChecked(True)
 
+    def showEvent(self, event) -> None:  # noqa: N802 - Qt naming
+        """First time the window appears: settle anything left half done.
+
+        Not from the constructor. A modal dialog raised before the window has
+        been laid out leaves it reporting default geometry, which was then
+        saved on close and restored as an unusable page.
+        """
+        super().showEvent(event)
+        if self._was_shown:
+            return
+        self._was_shown = True
+        if self._offer_to_finish_an_interrupted_run():
+            self._load_catalog()
+
     def load_catalog(self) -> None:
-        # Before anything is read: an earlier run left half done blocks every
-        # plan, so it is the first thing to settle.
         self._offer_to_finish_an_interrupted_run()
         self._load_catalog()
 
@@ -1595,7 +1609,7 @@ class MainWindow(QMainWindow):
         See :mod:`lrfoldercraft.gui.state` for the two that are deliberately
         left out.
         """
-        return {
+        state = {
             "language": self.language,
             "catalog": self.catalog_edit.text().strip(),
             "placement": "new-tree" if self.target_new_tree.isChecked() else "in-place",
@@ -1614,9 +1628,15 @@ class MainWindow(QMainWindow):
             "cumulative_dates": self.cumulative_check.isChecked(),
             "collect_orphans": self.orphans_check.isChecked(),
             "orphan_folder": self.orphan_edit.text().strip(),
-            "window": [self.width(), self.height()],
-            "splitter": self.splitter.sizes(),
         }
+        # Geometry is only worth keeping once the window has actually been
+        # shown. Read before that, Qt hands back its defaults and zero-height
+        # sections -- which then come back as a 640x480 window with two panes
+        # collapsed, and the page looks broken.
+        if self._was_shown:
+            state["window"] = [self.width(), self.height()]
+            state["splitter"] = self.splitter.sizes()
+        return state
 
     def remember_state(self) -> bool:
         return save_state(self.collect_state())

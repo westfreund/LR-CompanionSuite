@@ -1060,3 +1060,47 @@ def test_the_run_list_reads_properly(qt_app, mixed_gui_catalog, tmp_path):
     assert "{" not in shown, "placeholders are not what a reader wants"
     assert shown == "2019/2019-01/2019-01-03"
     assert table.item(0, 1).toolTip() == "{yyyy}/{yyyy}-{mm}/{yyyy}-{mm}-{dd}"
+
+
+def test_geometry_from_a_window_that_was_never_shown_is_not_saved(qt_app):
+    """It came back as a 640x480 window with two panes collapsed to nothing.
+
+    Read before the window has been laid out, Qt hands back its defaults and
+    zero-height sections. Saving that and restoring it made the page look
+    broken -- which is what the user saw after a dialog appeared on startup.
+    """
+    window = MainWindow()
+    assert window._was_shown is False
+    state = window.collect_state()
+    assert "window" not in state and "splitter" not in state
+    window.close()
+
+
+def test_geometry_is_saved_once_the_window_has_been_shown(qt_app):
+    window = MainWindow()
+    window.show()
+    qt_app.processEvents()
+    state = window.collect_state()
+    assert state["window"][0] >= 720 and state["window"][1] >= 420
+    assert len(state["splitter"]) == window.splitter.count()
+    assert sum(state["splitter"]) > 0
+    window.close()
+
+
+def test_a_saved_page_layout_survives_the_round_trip(qt_app):
+    from PySide6.QtGui import QGuiApplication
+
+    # Never larger than the screen, so pick something that fits this one.
+    bounds = QGuiApplication.primaryScreen().availableGeometry()
+    wanted = (min(900, bounds.width()), min(700, bounds.height()))
+
+    window = MainWindow()
+    window.show()
+    qt_app.processEvents()
+    window.resize(*wanted)
+    qt_app.processEvents()
+    window.close()
+
+    again = MainWindow()
+    assert (again.width(), again.height()) == wanted
+    again.close()

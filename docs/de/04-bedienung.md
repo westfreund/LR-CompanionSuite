@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r17.0.1 · Build-Datum 2026-08-24**
+**Revision r17.0.2 · Build-Datum 2026-08-24**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -758,6 +758,12 @@ Vermutung:
 
 Der dritte Fall lässt sich gefahrlos wiederholen: Eine Datei wird nur bewegt,
 solange sie noch dort liegt, woher sie geholt werden soll.
+
+Ein Abbruch lässt sich nur bereinigen, **solange seither nichts geschehen
+ist**. Sobald ein späterer Lauf Dateien bewegt hat, sind die Pfade des älteren
+von jenem belegt und sagen nichts mehr über ihn aus — er gilt dann als überholt
+und bietet nichts zum Zurückstellen an. Eine Bereinigung wird vermerkt, ein
+einmal erledigter Lauf also nie wieder gemeldet.
 
 **Ein neuer Lauf wird verweigert, solange einer unabgeschlossen ist.** Auf einer
 halb verschobenen Bibliothek zu planen ergibt einen Plan für eine Bibliothek,
