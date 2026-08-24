@@ -16,6 +16,8 @@
 
 🌐 **[Website](https://andy-freund.gitlab.io/LR-FolderCraft/)** · 🇩🇪 [Diese Seite auf Deutsch](README.de.md) · 📚 [Full documentation](docs/) · [Dokumentation auf Deutsch](docs/de/)
 
+<sub>Home is [GitLab](https://gitlab.com/andy-freund/LR-FolderCraft) — issues and merge requests belong there. GitHub carries a read-only mirror.</sub>
+
 ---
 
 <p align="center">

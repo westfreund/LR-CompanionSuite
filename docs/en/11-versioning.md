@@ -76,7 +76,22 @@ LR-FolderCraft — r17.0.3 (2026-08-23) - build 2026-08-23    <- TUI header
 ```bash
 git tag -a v17.0.3 -m "LR-FolderCraft r17.0.3"
 git push origin main --tags
+git push github main --tags     # the read-only mirror, see below
 ```
+
+### The GitHub mirror
+
+GitLab is where this project lives: issues, merge requests and the pipeline are
+there. GitHub carries a read-only copy, because that is where people and search
+engines look for a tool, and a project nobody can find helps nobody.
+
+```bash
+git remote add github https://github.com/westfreund/LR-FolderCraft.git
+```
+
+Push it as part of the release, never on its own -- a mirror that lags behind
+is worse than no mirror, because it hands a reader an old revision while the
+badge says otherwise.
 
 There is a consistency check for step 1–2 in the test suite: `pyproject.toml`
 and `version.py` must not drift apart.

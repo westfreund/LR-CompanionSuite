@@ -76,10 +76,26 @@ LR-FolderCraft — r17.0.3 (2026-08-23) - build 2026-08-23    <- TUI-Kopf
 ```bash
 git tag -a v17.0.3 -m "LR-FolderCraft r17.0.3"
 git push origin main --tags
+git push github main --tags     # der Nur-Lese-Spiegel, siehe unten
 ```
 
 Für Schritt 1–2 gibt es eine Konsistenzprüfung in der Testsuite:
 `pyproject.toml` und `version.py` dürfen nicht auseinanderlaufen.
+
+### Der GitHub-Spiegel
+
+Zu Hause ist das Projekt bei GitLab: Tickets, Merge Requests und die Pipeline
+liegen dort. GitHub trägt eine Nur-Lese-Kopie, weil Menschen und Suchmaschinen
+dort nach einem Werkzeug suchen — und ein Projekt, das niemand findet, hilft
+niemandem.
+
+```bash
+git remote add github https://github.com/westfreund/LR-FolderCraft.git
+```
+
+Immer als Teil der Veröffentlichung mitschieben, nie für sich allein: Ein
+Spiegel, der hinterherhinkt, ist schlimmer als keiner, weil er dem Leser eine
+alte Revision zeigt, während das Abzeichen etwas anderes behauptet.
 
 ## Katalogschema-Kompatibilität
 
