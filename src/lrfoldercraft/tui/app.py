@@ -132,7 +132,7 @@ TEXT = {
         "Läufe einer anderen Bibliothek nicht mit diesen verwechselt werden.",
     ),
     "history_when": ("When", "Wann"),
-    "history_what": ("Structure", "Struktur"),
+    "history_what": ("Result looks like", "Ergebnis sieht so aus"),
     "history_files": ("Files", "Dateien"),
     "history_state": ("State", "Zustand"),
     "history_can_undo": ("can be undone", "kann zurückgenommen werden"),
@@ -395,8 +395,8 @@ class HistoryScreen(ModalScreen[Optional[str]]):
             else:
                 state = tr("history_failed", self._language)
             table.add_row(
-                record.started_at.replace("T", "  ")[:16],
-                record.structure or "-",
+                record.started_at[:16].replace("T", "  "),
+                record.structure_example(self._language),
                 "{n:,}".format(n=record.files_moved),
                 state,
             )

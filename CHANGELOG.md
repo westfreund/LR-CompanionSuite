@@ -16,6 +16,29 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [17.0.1] — 2026-08-24
+
+### Fixed
+
+- **The list of recorded runs showed placeholders instead of a path.** The
+  structure column printed `{yyyy}/{yyyy}-{mm}/{yyyy}-{mm}-{dd}`, which tells a
+  reader nothing about what a run produced and made every row look alike. It
+  now shows the path that structure yields, rendered on the way out so records
+  written earlier show it too; the template itself stays on the tooltip and on
+  its own line in `lrfc history`. Reported by the user.
+
+  The example uses a fixed sample date, so the column is headed "Result looks
+  like" and the one-line form says "like", to keep 2019 from reading as a fact
+  about the run. A template whose tokens this revision no longer knows renders
+  to nothing, and falls back to the raw text rather than leaving the cell
+  blank.
+
+- **The clock in that list was cut off**, printing `06:1`: the wider separator
+  was put in before the text was cut to length, which pushed the minutes past
+  the limit.
+
+---
+
 ## [17.0.0] — 2026-08-23 — "Beisammen"
 
 ### Changed

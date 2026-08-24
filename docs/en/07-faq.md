@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r17.0.0 · Build date 2026-08-23**
+**Revision r17.0.1 · Build date 2026-08-24**
 
 ## Safety and data
 

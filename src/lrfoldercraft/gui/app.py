@@ -248,8 +248,11 @@ class RunPickerDialog(QDialog):
         header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
         for row, record in enumerate(self.records):
-            self.table.setItem(row, 0, QTableWidgetItem(record.started_at.replace("T", "  ")[:16]))
-            self.table.setItem(row, 1, QTableWidgetItem(record.structure or "-"))
+            self.table.setItem(row, 0, QTableWidgetItem(record.started_at[:16].replace("T", "  ")))
+            # The example, not the placeholders: a list is read at a glance.
+            structure = QTableWidgetItem(record.structure_example(language))
+            structure.setToolTip(record.structure or "")
+            self.table.setItem(row, 1, structure)
             self.table.setItem(row, 2, QTableWidgetItem("{n:,}".format(n=record.files_moved)))
             if record.undone_at:
                 state = tr("history_undone", language).format(

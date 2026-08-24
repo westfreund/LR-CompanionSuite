@@ -669,6 +669,12 @@ def cmd_history(args: argparse.Namespace) -> int:
     )
     for record in records:
         print("  " + record.describe(language))
+        if record.structure:
+            print(
+                "    {w} {s}".format(
+                    w="Struktur:" if language == "de" else "Structure:", s=record.structure
+                )
+            )
         print("    {d}".format(d=directory_of(record)))
         journal = journal_of(record)
         if journal.exists():

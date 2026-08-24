@@ -1,6 +1,6 @@
 # Project history
 
-**Revision r17.0.0 · Build date 2026-08-23**
+**Revision r17.0.1 · Build date 2026-08-24**
 
 The [CHANGELOG](../../CHANGELOG.md) says what changed in each revision. This
 document says **why**, and what happened in between: the decisions taken, the
@@ -94,6 +94,7 @@ and the [CHANGELOG](../../CHANGELOG.md).
 | **r16.0.1** | 22:37 |  | A completed reversal was reported as interrupted, because a later run had recreated the same paths. The false positive blocked sound libraries. |
 | **r16.1.0** | 22:52 |  | The history names every released revision, and a test holds it to that. It had been covering 18 of 39. |
 | **r17.0.0** | 23:—  | Beisammen | The collection folder for files not in the catalog moves into the target tree rather than staying in the source: a run's result had been split across two places. Fixed on the way: across a drive boundary the move would have failed. |
+| **r17.0.1** | 06:30 |  | The list of runs showed placeholders instead of a path, and the clock was cut off at `06:1`. |
 
 ---
 

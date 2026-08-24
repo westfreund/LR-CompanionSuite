@@ -78,6 +78,25 @@ class RunRecord:
     def can_be_undone(self) -> bool:
         return self.success and self.undone_at is None
 
+    def structure_example(self, language: str = "en") -> str:
+        """The structure as a path it would produce, not as its placeholders.
+
+        A list of runs is read at a glance, and "{yyyy}/{yyyy}-{mm}" tells the
+        reader nothing about what came out of it. Rendered from the stored
+        template on the way out, so records written before this still show it.
+        """
+        if not self.structure:
+            return "-"
+        try:
+            from .rules import describe_structure
+
+            example = describe_structure(self.structure.split("/"), language)
+        except Exception:  # noqa: BLE001 - a record must never fail to display
+            return self.structure
+        # A template of tokens this revision no longer knows renders to
+        # nothing, and a blank cell is worse than the raw text.
+        return example or self.structure
+
     @property
     def reversal_was_cut_short(self) -> bool:
         return bool(self.undo_started_at) and not self.undone_at
@@ -90,16 +109,16 @@ class RunRecord:
                 if self.undone_at
                 else ("erfolgreich" if self.success else "fehlgeschlagen")
             )
-            return "{w}  {n:,} Datei(en)  {s}  [{st}]".format(
-                w=when, n=self.files_moved, s=self.structure, st=state
+            return "{w}  {n:,} Datei(en)  wie {s}  [{st}]".format(
+                w=when, n=self.files_moved, s=self.structure_example("de"), st=state
             )
         state = (
             "undone {u}".format(u=self.undone_at.replace("T", " ")[:16])
             if self.undone_at
             else ("success" if self.success else "failed")
         )
-        return "{w}  {n:,} file(s)  {s}  [{st}]".format(
-            w=when, n=self.files_moved, s=self.structure, st=state
+        return "{w}  {n:,} file(s)  like {s}  [{st}]".format(
+            w=when, n=self.files_moved, s=self.structure_example(language), st=state
         )
 
 

@@ -1022,3 +1022,41 @@ def test_plan_results_are_handled_on_the_main_thread(qt_app, mixed_gui_catalog):
     assert pump(lambda: window.plan is not None)
     assert seen["thread"] is threading.main_thread()
     window.close()
+
+
+def test_the_run_list_reads_properly(qt_app, mixed_gui_catalog, tmp_path):
+    """It showed a column of raw placeholders and a truncated clock."""
+    from pathlib import Path as _Path
+
+    from lrfoldercraft.catalog import CatalogReader, open_catalog
+    from lrfoldercraft.executor import execute
+    from lrfoldercraft.gui.app import RunPickerDialog
+    from lrfoldercraft.planner import build_plan
+    from lrfoldercraft.runs import history
+
+    settings = Settings(
+        catalog=str(mixed_gui_catalog.catalog_path),
+        dry_run=False,
+        structure=("{yyyy}", "{mm}", "{dd}"),
+        cumulative_dates=True,
+        backup_dir=str(tmp_path / "backups"),
+    )
+    with open_catalog(mixed_gui_catalog.catalog_path) as conn:
+        plan = build_plan(CatalogReader(conn), settings)
+    execute(plan, settings)
+
+    records = history(_Path(mixed_gui_catalog.catalog_path))
+    dialog = RunPickerDialog(records, "de")
+    table = dialog.table
+
+    import re as _re
+
+    when = table.item(0, 0).text()
+    # date, two spaces, HH:MM -- it used to print "06:1", because the wider
+    # separator was inserted before the text was cut to length.
+    assert _re.fullmatch(r"\d{4}-\d{2}-\d{2} {2}\d{2}:\d{2}", when), when
+
+    shown = table.item(0, 1).text()
+    assert "{" not in shown, "placeholders are not what a reader wants"
+    assert shown == "2019/2019-01/2019-01-03"
+    assert table.item(0, 1).toolTip() == "{yyyy}/{yyyy}-{mm}/{yyyy}-{mm}-{dd}"

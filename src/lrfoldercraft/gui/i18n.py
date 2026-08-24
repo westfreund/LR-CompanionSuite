@@ -273,7 +273,7 @@ TEXT: Dict[str, Tuple[str, str]] = {
         "werden können. Wählen Sie den zurückzunehmenden aus.",
     ),
     "history_when": ("When", "Wann"),
-    "history_what": ("Structure", "Struktur"),
+    "history_what": ("Result looks like", "Ergebnis sieht so aus"),
     "history_files": ("Files", "Dateien"),
     "history_state": ("State", "Zustand"),
     "history_can_undo": ("can be undone", "kann zurückgenommen werden"),

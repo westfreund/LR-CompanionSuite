@@ -194,3 +194,41 @@ def test_two_runs_in_the_same_second_do_not_share_a_folder(simple_catalog, tmp_p
 
     assert first.run_directory != second.run_directory
     assert len(history(simple_catalog.catalog_path)) == 2
+
+
+# -- what the list of runs shows ---------------------------------------------
+
+
+def test_the_run_list_shows_a_path_not_placeholders():
+    """A list is read at a glance, and "{yyyy}/{yyyy}-{mm}" says nothing.
+
+    The user saw a column of raw tokens and could not tell one run from
+    another. Rendered on the way out, so records written before this show it
+    too.
+    """
+    from lrfoldercraft.runs import RunRecord
+
+    record = RunRecord(stamp="x", catalog="y", structure="{yyyy}/{yyyy}-{mm}/{yyyy}-{mm}-{dd}")
+    assert record.structure_example("de") == "2019/2019-01/2019-01-03"
+    assert "2019/2019-01/2019-01-03" in record.describe("de")
+    # framed as a shape, so the sample date cannot read as a fact about the run
+    assert "wie " in record.describe("de")
+    assert "like " in record.describe("en")
+
+
+def test_a_record_never_fails_to_display():
+    """Whatever is in the field, the list still renders."""
+    from lrfoldercraft.runs import RunRecord
+
+    for spec in ("", "kaputt{", "{unbekannt}", "/"):
+        record = RunRecord(stamp="x", catalog="y", structure=spec)
+        assert record.structure_example("de")
+        assert record.describe("de")
+
+
+def test_the_template_itself_is_still_reachable():
+    """The example is for reading; the template is what was actually set."""
+    from lrfoldercraft.runs import RunRecord
+
+    record = RunRecord(stamp="x", catalog="y", structure="{yyyy}/{mm}")
+    assert record.structure == "{yyyy}/{mm}"
