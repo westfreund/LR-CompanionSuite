@@ -93,6 +93,25 @@ Push it as part of the release, never on its own -- a mirror that lags behind
 is worse than no mirror, because it hands a reader an old revision while the
 badge says otherwise.
 
+To check the two have not drifted:
+
+```bash
+git ls-remote origin main && git ls-remote github main   # same commit?
+```
+
+If keeping that in your head is the weak part -- and it is -- there are two
+ways to take it out of your hands. Give `origin` a second push URL, so one
+`git push` reaches both:
+
+```bash
+git remote set-url --add --push origin https://gitlab.com/andy-freund/LR-FolderCraft.git
+git remote set-url --add --push origin https://github.com/westfreund/LR-FolderCraft.git
+```
+
+Or let GitLab do it: **Settings -> Repository -> Mirroring repositories**, a
+push mirror to the GitHub URL. That needs a GitHub access token stored in
+GitLab, so scope it to this one repository and nothing else.
+
 There is a consistency check for step 1–2 in the test suite: `pyproject.toml`
 and `version.py` must not drift apart.
 

@@ -97,6 +97,26 @@ Immer als Teil der Veröffentlichung mitschieben, nie für sich allein: Ein
 Spiegel, der hinterherhinkt, ist schlimmer als keiner, weil er dem Leser eine
 alte Revision zeigt, während das Abzeichen etwas anderes behauptet.
 
+Zum Prüfen, ob die beiden auseinandergelaufen sind:
+
+```bash
+git ls-remote origin main && git ls-remote github main   # derselbe Commit?
+```
+
+Wenn das Daran-Denken die schwache Stelle ist — und das ist es —, gibt es zwei
+Wege, es sich aus der Hand zu nehmen. Entweder `origin` ein zweites Push-Ziel
+geben, dann erreicht ein `git push` beide:
+
+```bash
+git remote set-url --add --push origin https://gitlab.com/andy-freund/LR-FolderCraft.git
+git remote set-url --add --push origin https://github.com/westfreund/LR-FolderCraft.git
+```
+
+Oder GitLab es tun lassen: **Einstellungen → Repository → Repositorys
+spiegeln**, ein Push-Spiegel auf die GitHub-Adresse. Das braucht ein
+GitHub-Zugriffstoken in GitLab; es sollte dann auf genau dieses eine
+Repository beschränkt sein und auf nichts sonst.
+
 ## Katalogschema-Kompatibilität
 
 Zwei Konstanten in `version.py` steuern das:
