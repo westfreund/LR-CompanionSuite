@@ -75,8 +75,16 @@ nicht auf echten Fotos aufnehmen.
 
 ## Was bei dir bleibt
 
-- **Projektbild** bei GitLab und GitHub setzen — der API-Upload ging nicht, das
-  sind zwei Klicks in den Einstellungen.
+- **Linkvorschau bei GitHub setzen.** Das Repository-Bild bei GitLab steht.
+  GitHub kennt für ein Repository kein solches Bild — es zeigt das Bild des
+  Kontos. Was es gibt, ist die Linkvorschau: **Settings → General → Social
+  preview → Edit**, und dort
+  [`docs/images/brand/social-1280x640.png`](../docs/images/brand/social-1280x640.png)
+  hochladen. Nur über die Weboberfläche möglich, es gibt keine Schnittstelle
+  dafür.
+- **Wenn das Konto selbst noch kein Bild hat:** dasselbe für das GitHub-Profil,
+  mit [`avatar-512.png`](../docs/images/brand/avatar-512.png). Das ist es, was
+  neben dem Repository-Namen erscheint.
 - **Das Video aufnehmen.** Das Drehbuch steht, die Demo-Bibliothek auch.
 - **Posten — einer pro Woche, nicht alle am selben Tag.** Und vorher die Regeln
   des jeweiligen Forums zur Eigenwerbung lesen: die ändern sich, und der Stand

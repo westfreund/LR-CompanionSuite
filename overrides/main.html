@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{#
+  The card a chat window, a forum or a social site shows when somebody pastes
+  the address. Without it the link arrives as a bare URL, and a bare URL from a
+  stranger is not something people click.
+
+  The image is the one the brand script generates, so it cannot drift from the
+  mark.
+#}
+{% block extrahead %}
+  {% set card = config.site_url ~ 'images/brand/social-1280x640.png' %}
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="LR-FolderCraft">
+  <meta property="og:title" content="{% if page and page.title and not page.is_homepage %}{{ page.title }} · {% endif %}LR-FolderCraft">
+  <meta property="og:description" content="{{ config.site_description }}">
+  <meta property="og:url" content="{{ page.canonical_url if page else config.site_url }}">
+  <meta property="og:image" content="{{ card }}">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{{ card }}">
+{% endblock %}

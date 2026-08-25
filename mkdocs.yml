@@ -23,6 +23,7 @@ exclude_docs: |
 
 theme:
   name: material
+  custom_dir: overrides
   language: en
   logo: images/brand/logo-128-light.png
   favicon: images/brand/logo-128-dark.png
