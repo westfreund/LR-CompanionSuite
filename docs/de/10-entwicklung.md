@@ -20,8 +20,8 @@ exFAT).
 | Sicherheit | vollständig: 8 Prüfungen, Backup, Journal, Rollback, Undo, Verifikation |
 | CLI | vollständig: 9 Befehle |
 | TUI | vollständig: Laden, Planen, Ausführen, Live-Vorschau, EN/DE |
-| GUI | vollständig: Qt, alle Einstellungen, Ordnerentscheidungen, Fortschritt |
-| Tests | 270 Tests, 87 % Abdeckung |
+| GUI | vollständig: Qt in fünf Reitern, alle Einstellungen, Ordnerentscheidungen, Profile, Fortschritt |
+| Tests | 633 Tests, 86 % Abdeckung |
 | CI | GitLab, Python 3.9–3.13 |
 | Dokumentation | vollständig, EN und DE |
 | Installationsskripte | macOS, Linux, Windows |

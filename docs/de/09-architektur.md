@@ -67,11 +67,12 @@ LR-FolderCraft/
 │   │   ├── app.py                   die Textual-Anwendung
 │   │   └── app.tcss                 deren Stylesheet
 │   └── gui/
-│       ├── app.py                   das Qt-Hauptfenster
+│       ├── app.py                   das Qt-Hauptfenster, in fünf Reitern
 │       ├── workers.py               Katalog / Plan / Ausführung in Threads
+│       ├── state.py                 was sich das Fenster zwischen Sitzungen merkt
 │       └── i18n.py                  Oberflächentexte, EN und DE
 │
-├── tests/                           270 Tests, synthetischer Katalog als Fixture
+├── tests/                           633 Tests, synthetischer Katalog als Fixture
 ├── install/                         Installationsskripte für macOS, Linux, Windows
 └── docs/  en/  de/  images/         diese Dokumentation, in beiden Sprachen
 ```
@@ -224,6 +225,9 @@ fehlende Abhängigkeit erzeugt also eine Erklärung statt eines Tracebacks.
   zerstört wird, bricht den Prozess ab — genau das passiert beim Schließen des
   Fensters während eines Laufs.
 - `i18n.py` hält alle Oberflächentexte in beiden Sprachen.
+- `state.py` merkt sich die Einstellungen zwischen Sitzungen — bewusst *ohne*
+  die Entscheidungen zu einzelnen Ordnern, die Regelliste und den
+  Sicherungsschalter.
 
 ## Stammordner und Scopes
 

@@ -65,11 +65,12 @@ LR-FolderCraft/
 │   │   ├── app.py                   the Textual application
 │   │   └── app.tcss                 its stylesheet
 │   └── gui/
-│       ├── app.py                   the Qt main window
+│       ├── app.py                   the Qt main window, in five tabs
 │       ├── workers.py               catalog / plan / apply on worker threads
+│       ├── state.py                 what the window remembers between sessions
 │       └── i18n.py                  interface strings, EN and DE
 │
-├── tests/                           270 tests, synthetic catalog fixture
+├── tests/                           633 tests, synthetic catalog fixture
 ├── install/                         installers for macOS, Linux, Windows
 └── docs/  en/  de/  images/         this documentation, in both languages
 ```
@@ -214,6 +215,8 @@ dependency produces an explanation rather than a traceback.
   waited for, not abandoned: destroying a running `QThread` aborts the process,
   which is what happens when a window is closed mid-run.
 - `i18n.py` holds every interface string in both languages.
+- `state.py` remembers the settings between sessions -- deliberately *without*
+  the per-folder decisions, the rule list and the backup switch.
 
 ## Root folders and scopes
 

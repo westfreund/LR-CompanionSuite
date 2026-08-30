@@ -291,6 +291,33 @@ pre-flight checks, execute with a progress callback. Then:
   meaning, so provide move-up and move-down. Changing a rule must clear the
   manual decisions it might have made and replan, or the display stops matching
   what would run.
+* **A settings window outgrows one column.** Anything with more than a handful
+  of options will not fit, and stacking it in a scrolling column hides most of
+  it: the reader sees the first section and has no reason to suspect there is
+  anything below the edge. Give each step of the work its own tab from the
+  start. When this went wrong the first answer was to make the dividers easier
+  to grab, which is a better handle on the wrong shape.
+* **Keep the log outside the tabs.** It is where an error appears, and an error
+  behind a tab is an error nobody sees.
+* **Order the buttons by the work, and separate the two kinds.** Forward
+  actions -- look, then act -- on the left; the ones that undo a run that has
+  already happened after a visible rule. Undo sitting next to Apply reads as
+  the next step, which for a button that moves fifty thousand files back is the
+  wrong invitation.
+* **Moving the window for the user is only welcome when the user asked.** Going
+  to the result after a plan is helpful; doing it after the automatic replan
+  that a changed rule triggers throws them out of the table they are working
+  in. Tie it to the request, not to the event.
+* **Making a saved thing must be its own action.** A name field beside Load and
+  Save leaves the reader to work out that typing an unused name and pressing
+  Save is how one comes into being -- and it turns a typo in the name into a
+  second profile nobody wanted. List what exists, and give New a button.
+* **A modal dialog in a headless test hangs for ever.** A test that drove the
+  window down a path that raises sat on an un-patched message box, and the
+  suite ran for ten minutes instead of eighteen seconds; it looked like slow
+  Qt tests. If a test can reach a dialog, patch it or do not go that way.
+* **Qt eats a single ampersand in a tab or button label** as the accelerator
+  marker. Double it.
 * **Compose text before you map or compare it.** macOS hands back filenames
   decomposed, so a name a user typed as "Völki" arrives as "o" plus a combining
   diaeresis. Any per-character table, and any pattern comparison, silently

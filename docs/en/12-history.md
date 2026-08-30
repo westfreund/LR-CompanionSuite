@@ -430,7 +430,7 @@ Every cycle ended byte-identical to where it started: ten catalog tables, every
 path, and all 51,063 files on disk.
 
 **Most of the defects that mattered were found by real runs, not by the test
-suite.** Its job is to keep them fixed — 555 tests by now.
+suite.** Its job is to keep them fixed — 633 tests by now.
 
 ## See also
 

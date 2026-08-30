@@ -459,7 +459,7 @@ Jeder Zyklus endete bitidentisch am Ausgangszustand: zehn Katalogtabellen, alle
 Pfade und alle 51.063 Dateien auf der Platte.
 
 **Die meisten Fehler, die zählten, fanden echte Läufe, nicht die Testsuite.**
-Deren Aufgabe ist es, sie behoben zu halten — inzwischen mit 555 Tests.
+Deren Aufgabe ist es, sie behoben zu halten — inzwischen mit 633 Tests.
 
 ## Siehe auch
 
