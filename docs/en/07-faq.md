@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r17.0.3 · Build date 2026-08-24**
+**Revision r18.0.0 · Build date 2026-08-24**
 
 ## Safety and data
 
@@ -105,15 +105,17 @@ says so and asks you to restrict it with `--root-folder`. Run once per root.
 
 ### A table in the GUI looks cut off, or a setting is missing
 
-The section is too small, not empty. Between the four large sections —
-settings, "Needs your answer", "Folders found" and the log — sits a **divider**
-at the **bottom edge** of each, a thin horizontal line. Dragging gives the
-section above more room; dragging it fully shut hides it, and pulling it back
-open brings it out again. The pointer turns into a double arrow there.
+Most often it is in another **tab**. Since r18.0.0 each step of the work has
+one of its own: *1 · Library*, *2 · Structure*, *3 · Options*, *4 · Folders &
+rules*, *5 · Result*. Every tab label carries a tooltip saying what is inside.
 
-The settings section also scrolls within itself — on a small screen Target,
-Folder structure and Options start below the visible edge. The sizes you set
-are remembered for the next start. See [04-usage.md](04-usage.md).
+Up to r17 everything was stacked in one scrolling column, and that was exactly
+the problem: the window showed the catalog and hid the rest behind a scrollbar.
+
+Otherwise: tabs 4 and 5 are empty before the first plan — they describe a
+result that does not exist yet. On a small screen the first three tabs scroll
+within themselves. And the log below the tabs can be dragged shut at its
+divider; pulling it up brings it back. See [04-usage.md](04-usage.md).
 
 ### I cannot give a target folder in the GUI
 

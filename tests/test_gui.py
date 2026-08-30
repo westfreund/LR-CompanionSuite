@@ -21,8 +21,9 @@ pytest.importorskip("PySide6.QtWidgets")
 from PySide6.QtCore import QCoreApplication  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
-from lrfoldercraft.config import Settings  # noqa: E402
+from lrfoldercraft.config import Settings, list_profiles  # noqa: E402
 from lrfoldercraft.gui.app import MainWindow, _split_extensions  # noqa: E402
+from lrfoldercraft.gui.i18n import tr  # noqa: E402
 from lrfoldercraft.version import REVISION  # noqa: E402
 
 
@@ -233,13 +234,17 @@ def test_the_action_row_stays_visible_at_every_height(qt_app, height):
 
 
 def test_the_settings_area_scrolls_when_it_does_not_fit(qt_app):
+    """Even one tab's worth of boxes has to be reachable on a short screen."""
+    from PySide6.QtWidgets import QScrollArea
+
     window = MainWindow()
     window.show()
     window.resize(900, 420)
     for _ in range(20):
         QCoreApplication.processEvents()
-    scrollbar = window.settings_scroll.verticalScrollBar()
-    assert scrollbar.maximum() > 0, "the settings cannot be reached by scrolling"
+    page = window.tabs.widget(0)
+    assert isinstance(page, QScrollArea), "the library tab should scroll"
+    assert page.verticalScrollBar().maximum() > 0, "the settings cannot be reached"
     window.close()
 
 
@@ -915,8 +920,8 @@ def test_a_profile_carries_the_options_and_no_library(qt_app, mixed_gui_catalog,
     window.target_edit.setText(str(tmp_path / "Neu"))
     window._target_named(str(tmp_path / "Neu"))
 
-    window.profile_combo.setCurrentText("Meine Arbeitsweise")
-    window.save_profile()
+    # What New does once the name has been given.
+    window._write_profile("Meine Arbeitsweise")
     window.close()
 
     stored = Settings.load_profile("Meine Arbeitsweise")
@@ -947,7 +952,8 @@ def test_loading_a_profile_leaves_this_library_alone(qt_app, mixed_gui_catalog, 
     window._target_named(target)
     window.rules = [("Urlaub", "leave")]
 
-    window.profile_combo.setCurrentText("Standard")
+    window._refresh_profiles("Standard")
+    assert window.current_profile() == "Standard"
     window.load_profile()
     assert pump(lambda: window.plan is not None)
 
@@ -969,6 +975,66 @@ def test_a_profile_never_carries_a_safety_override(qt_app, tmp_path):
     assert back.ignore_lock is False
     assert back.backup_catalog is True
     assert back.allow_unsupported_catalog is False
+
+
+def test_the_profile_buttons_need_a_profile_to_act_on(qt_app):
+    """All but New. Making one is the only thing that works from nothing."""
+    window = MainWindow()
+    window._refresh_profiles()
+    assert window.current_profile() == ""
+    assert window.profile_new.isEnabled()
+    for button in (window.profile_load, window.profile_save, window.profile_delete):
+        assert not button.isEnabled()
+
+    Settings().save_profile("Vorhanden")
+    window._refresh_profiles("Vorhanden")
+    assert window.current_profile() == "Vorhanden"
+    for button in (window.profile_load, window.profile_save, window.profile_delete):
+        assert button.isEnabled()
+    window.close()
+
+
+def test_saving_without_a_profile_chosen_says_so_instead_of_writing_one(qt_app):
+    """The old window let a name typed into the box become a new profile.
+
+    Which is how somebody ends up with a profile they never meant to make, and
+    why making one is now a button of its own.
+    """
+    from lrfoldercraft.gui import app as gui_app
+
+    window = MainWindow()
+    window._refresh_profiles()
+    seen = []
+    original = gui_app.QMessageBox.information
+    gui_app.QMessageBox.information = staticmethod(lambda *a, **k: seen.append(a[-1]))
+    try:
+        window.save_profile()
+    finally:
+        gui_app.QMessageBox.information = original
+    assert seen == [tr("profile_pick_first", window.language)]
+    assert window.current_profile() == ""
+    window.close()
+
+
+def test_a_profile_can_be_taken_away_again(qt_app):
+    from lrfoldercraft.gui import app as gui_app
+
+    # Written directly: making one through the window needs a catalog, and
+    # this is about taking one away.
+    Settings().save_profile("Wegdamit")
+    window = MainWindow()
+    window._refresh_profiles("Wegdamit")
+    assert window.current_profile() == "Wegdamit"
+
+    original = gui_app.QMessageBox.question
+    gui_app.QMessageBox.question = staticmethod(lambda *a, **k: gui_app.QMessageBox.Yes)
+    try:
+        window.remove_profile()
+    finally:
+        gui_app.QMessageBox.question = original
+    assert "Wegdamit" not in list_profiles()
+    assert window.current_profile() == ""
+    window.close()
 
 
 def test_a_superseded_plan_never_becomes_the_one_that_would_run(qt_app, mixed_gui_catalog):
@@ -1142,4 +1208,101 @@ def test_undo_without_a_catalog_offers_no_file_chooser(qt_app):
     from lrfoldercraft.gui.i18n import tr
 
     assert seen == [tr("no_catalog_for_runs", window.language)]
+    window.close()
+
+
+# -- the tabbed window -------------------------------------------------------
+
+
+def test_every_setting_lives_in_a_tab_that_can_be_reached(qt_app):
+    """Nothing may be stranded outside the five tabs.
+
+    The window this replaced stacked everything in one scrolling column, and
+    the structure, the options and the rules were below the visible edge on a
+    normal screen. That is the failure this checks against.
+    """
+    window = MainWindow()
+    assert window.tabs.count() == 5
+    boxes = {
+        window.catalog_group,
+        window.source_group,
+        window.target_group,
+        window.structure_group,
+        window.options_group,
+        window.folders_group,
+        window.findings_group,
+    }
+    reachable = set()
+    for index in range(window.tabs.count()):
+        page = window.tabs.widget(index)
+        for box in boxes:
+            if box.isAncestorOf(page) or page.isAncestorOf(box):
+                reachable.add(box)
+    assert boxes - reachable == set()
+    window.close()
+
+
+def test_a_finished_plan_brings_the_result_forward(qt_app, mixed_gui_catalog):
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.tabs.setCurrentIndex(2)
+    window.plan_and_review()
+    assert pump(lambda: window.plan is not None)
+    assert window.tabs.currentIndex() == window.RESULT_TAB
+    window.close()
+
+
+def test_a_re_plan_leaves_the_operator_where_they_are(qt_app, mixed_gui_catalog):
+    """Changing a rule re-plans. Being thrown to another tab for it would be
+    the crowding problem again in a different coat."""
+    window = MainWindow(catalog=str(mixed_gui_catalog.catalog_path))
+    assert pump(lambda: "files" in window.catalog_info.text())
+    window.plan_and_review()
+    assert pump(lambda: window.plan is not None)
+
+    window.tabs.setCurrentIndex(3)
+    window.rules = [("Urlaub", "leave")]
+    window._rules_changed()
+    assert pump(lambda: window.plan is not None)
+    for _ in range(30):
+        QCoreApplication.processEvents()
+    assert window.tabs.currentIndex() == 3, "a re-plan moved the window"
+    window.close()
+
+
+def test_the_open_tab_survives_a_restart(qt_app):
+    window = MainWindow()
+    window.show()
+    QCoreApplication.processEvents()
+    window.tabs.setCurrentIndex(3)
+    state = window.collect_state()
+    window.close()
+    assert state["tab"] == 3
+
+    again = MainWindow()
+    again.state = state
+    again._apply_state()
+    assert again.tabs.currentIndex() == 3
+    again.close()
+
+
+def test_the_buttons_run_from_looking_to_acting_to_taking_back(qt_app):
+    """Order is the point: Undo must not read as the step after Apply."""
+    window = MainWindow()
+    order = [window.plan_button, window.apply_button, window.undo_button, window.history_button]
+    positions = [button.mapTo(window, button.rect().topLeft()).x() for button in order]
+    assert positions == sorted(positions), "the buttons are out of order"
+
+    # And a rule between the two groups, actually painted rather than merely
+    # added: a one-pixel sunken VLine drew nothing in several styles, and the
+    # gap then reads as a spacing mistake.
+    window.resize(1180, 820)
+    window.show()
+    QCoreApplication.processEvents()
+    image = window.grab().toImage()
+    middle = window.plan_button.mapTo(window, window.plan_button.rect().center()).y()
+    start = window.apply_button.mapTo(window, window.apply_button.rect().topRight()).x()
+    end = window.undo_button.mapTo(window, window.undo_button.rect().topLeft()).x()
+    drawn = [x for x in range(start + 4, end - 4) if image.pixelColor(x, middle).lightness() < 200]
+    assert drawn, "no rule is drawn between the two groups of buttons"
     window.close()

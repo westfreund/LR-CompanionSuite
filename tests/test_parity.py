@@ -72,6 +72,7 @@ SAFETY_CAPABILITIES = {
 #: The rest of what the interfaces offer.
 CAPABILITIES = {
     "profiles can be saved and loaded": "save_profile",
+    "profiles can be deleted again": "delete_profile",
     "folder rules can be edited": "folder_rules",
     "what the plan could not decide is shown": "collect_findings",
 }

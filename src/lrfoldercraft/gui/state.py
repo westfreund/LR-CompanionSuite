@@ -33,8 +33,10 @@ log = get_logger("gui.state")
 STATE_FILE = "gui-state.json"
 
 #: Bumped when a stored key changes meaning, so an old file is discarded rather
-#: than misread.
-STATE_VERSION = 1
+#: than misread. Version 2 is the tabbed window: `splitter` used to describe
+#: four stacked sections and now describes two, and a four-entry list read into
+#: the new layout is not wrong so much as meaningless.
+STATE_VERSION = 2
 
 
 def state_path() -> Path:

@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r17.0.3 · Build-Datum 2026-08-24**
+**Revision r18.0.0 · Build-Datum 2026-08-24**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -296,8 +296,8 @@ deutschen Oberfläche also „English".
 
 Im Fenster getroffene Einstellungen bleiben erhalten, der nächste Start setzt
 also dort an, wo Sie aufgehört haben: Sprache, Katalog, Zielordner samt Modus,
-Struktur, Endungsfilter, Ordneraktionen, Regelliste, Fenstergröße und
-Teilerpositionen. Sie liegen in `gui-state.json` im Konfigurationsverzeichnis;
+Struktur, Endungsfilter, Ordneraktionen, Regelliste, Fenstergröße, Teiler und
+der zuletzt geöffnete Reiter. Sie liegen in `gui-state.json` im Konfigurationsverzeichnis;
 diese Datei zu löschen stellt die Vorgaben wieder her.
 
 Zwei Dinge werden bewusst **nicht** gemerkt:
@@ -312,61 +312,74 @@ erklärt der Befehl die Installation, statt mit einem Traceback abzubrechen.
 
 Ein Fenster, von oben nach unten:
 
-| Bereich | Inhalt |
+```
+┌──────────────────────────────────────────────────────────────┐
+│  LR-FolderCraft                              (Marke, Zweck)  │
+│  Profil: [ Auswahl ▾ ] [Neu…] [Laden] [Speichern] [Löschen]  │
+├──────────────────────────────────────────────────────────────┤
+│ ⟦1 · Bibliothek⟧ 2 · Struktur  3 · Optionen  4 · Ordner …    │
+│                                                              │
+│   Katalog / Quelle / Ziel                                    │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│  Protokoll                                                   │
+├──────────────────────────────────────────────────────────────┤
+│ [Planen] [Ausführen] │ [Rückgängig…] [Historie…]   ▬▬▬  0 %  │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Immer sichtbar** sind die Marke, die Profilzeile, das Protokoll und die
+Schaltflächen. Alles andere liegt in fünf Reitern, einer je Arbeitsschritt:
+
+| Reiter | Inhalt |
 | --- | --- |
-| **Katalog** | der `.lrcat`-Pfad mit Durchsuchen-Schaltfläche und, nach dem Laden, eine Zeile mit Dateien, Bildern, virtuellen Kopien und Aufnahmezeitraum |
-| **Quelle** | der zu bearbeitende Stammordner (oder alle) sowie Endungsfilter |
-| **Ziel** | unterhalb des aktuellen Ordners, oder in einen neuen Ordner über den Systemdialog — dessen Schaltfläche *Neuer Ordner* legt einen an, und ein noch nicht vorhandener Pfad wird beim Lauf erzeugt |
-| **Ordnerstruktur** | eine Vorlage oder ein eigenes Template, mit Live-Vorschau beim Tippen und einer Schaltfläche, die alle 25 Platzhalter auflistet |
-| **Optionen** | Namenskonflikte, Fotos ohne Datum und die drei Entscheidungen zu vorhandenen Ordnern, dazu Sidecars, Katalog-Backup und ASCII-Namen |
-| **Braucht Ihre Antwort** | je Ursache eine Zeile mit Dateizahl, steuernder Option und deren aktuellem Wert — eine Zeile auswählen zeigt die betroffenen Dateien |
-| **Vorgefundene Ordner** | die Regelliste und darunter eine Zeile je Ordner mit Art, Fotozahl, entscheidender Regel und Auswahlfeld — eine Änderung plant sofort neu |
-| **Schaltflächen** | Planen ändert nichts; Ausführen fragt vorher nach |
-| **Fortschritt** | Balken und Zähler während des Laufs, danach das vollständige Ergebnis |
-| **Protokoll** | was geschehen ist, samt aller Warnungen aus den Vorprüfungen |
+| **1 · Bibliothek** | **Katalog**: der `.lrcat`-Pfad mit Durchsuchen-Schaltfläche und, nach dem Laden, eine Zeile mit Dateien, Bildern, virtuellen Kopien und Aufnahmezeitraum · **Quelle**: der zu bearbeitende Stammordner (oder alle) sowie Endungsfilter · **Ziel**: unterhalb des aktuellen Ordners, oder in einen neuen Ordner über den Systemdialog — dessen Schaltfläche *Neuer Ordner* legt einen an, und ein noch nicht vorhandener Pfad wird beim Lauf erzeugt |
+| **2 · Struktur** | eine Vorlage oder ein eigenes Template, mit Live-Vorschau beim Tippen und einer Schaltfläche, die alle 25 Platzhalter auflistet |
+| **3 · Optionen** | Namenskonflikte, Fotos ohne Datum und die drei Entscheidungen zu vorhandenen Ordnern, dazu Sidecars, Katalog-Backup und ASCII-Namen |
+| **4 · Ordner & Regeln** | die Regelliste und darunter eine Zeile je Ordner mit Art, Fotozahl, entscheidender Regel und Auswahlfeld — eine Änderung plant sofort neu |
+| **5 · Ergebnis** | je Ursache eine Zeile mit Dateizahl, steuernder Option und deren aktuellem Wert — eine Zeile auswählen zeigt die betroffenen Dateien |
+
+![Reiter 1: Katalog, Quelle und Ziel](../images/gui-de.png)
+
+![Reiter 4: die Regeln und die vorgefundenen Ordner](../images/gui-de-folders.png)
+
+Die Reiter 4 und 5 füllen sich mit dem ersten **Planen**; davor sind sie leer.
+Nach einem Plan springt das Fenster von selbst auf **5 · Ergebnis**, weil dort
+steht, was noch zu entscheiden ist.
+
+Das **Protokoll** liegt bewusst außerhalb der Reiter: Dort erscheinen Fehler,
+und ein Fehler hinter einem Reiter ist ein Fehler, den niemand sieht. Zwischen
+Reitern und Protokoll liegt ein **Teiler** — eine dünne waagerechte Linie, über
+der der Mauszeiger zum Doppelpfeil wird. Ziehen gibt dem einen oder dem anderen
+mehr Platz; ganz zugezogen ist das Protokoll ausgeblendet, aber nicht weg.
+
+Die **Schaltflächen** stehen in der Reihenfolge der Arbeit: erst ansehen, dann
+ausführen — und nach einem senkrechten Strich die beiden, die einen bereits
+geschehenen Lauf betreffen. Der Strich ist Absicht: Ohne ihn stand
+*Rückgängig* neben *Ausführen*, als wäre es der nächste Schritt.
 
 Über das Menü **Aktionen** lässt sich jederzeit zwischen Deutsch und Englisch
 wechseln, und dort steht auch das Rückgängigmachen.
 
-### Die Bereiche lassen sich aufziehen — Wichtig
+### Wenn etwas zu fehlen scheint
 
-Zwischen den vier großen Bereichen — **Einstellungen**, **Braucht Ihre
-Antwort**, **Vorgefundene Ordner** und **Protokoll** — liegt jeweils ein
-**Teiler**. Er ist leicht zu übersehen: eine dünne waagerechte Linie am
-**unteren Rand eines Bereichs**, früher nur ein paar graue Punkte.
+Bis r17 lag alles übereinander in einer einzigen scrollenden Spalte. Das Fenster
+zeigte den Katalog und verbarg Struktur, Optionen und Regeln hinter einer
+Bildlaufleiste, auf die zu kommen niemand Anlass hatte. Deshalb jetzt Reiter.
 
-```
-┌─ Einstellungen ─────────────────────────┐
-│  Katalog, Quelle, Ziel, Struktur …      │   ← scrollt in sich
-└─────────────────────────────────────────┘
- ────────────────────────────────────────      ← Teiler: hier ziehen
-┌─ Braucht Ihre Antwort ──────────────────┐
-```
+Sollte dennoch etwas fehlen:
 
-Der Mauszeiger wird über einem Teiler zum Doppelpfeil, und ein Tooltip sagt,
-was er tut. Damit:
-
-- **Ziehen** gibt dem Bereich darüber mehr oder weniger Platz.
-- **Ganz zuziehen** blendet einen Bereich aus. Er ist nicht weg — der Teiler
-  bleibt liegen, und Aufziehen holt ihn zurück. Wer das Protokoll nicht
-  braucht, gewinnt so Platz für die Ordnertabelle.
-- Die eingestellten Größen werden **gemerkt** und beim nächsten Start
-  wiederhergestellt.
-
-Der Bereich **Einstellungen** hat zusätzlich eine **eigene Bildlaufleiste**:
-Auf einem kleinen Bildschirm sind Ziel, Ordnerstruktur und Optionen zunächst
-unterhalb des sichtbaren Randes und werden durch Scrollen *innerhalb* des
-Bereichs erreicht — oder eben dadurch, dass man den Teiler darunter nach unten
-zieht.
-
-Wenn also eine Tabelle abgeschnitten wirkt oder eine Einstellung zu fehlen
-scheint: Der Bereich ist zu klein, nicht leer.
+- **Der gesuchte Bereich liegt in einem anderen Reiter.** Die Beschriftung
+  jedes Reiters trägt einen Tooltip, der sagt, was darin steht.
+- **Die Reiter 4 und 5 sind vor dem ersten Plan leer.** Sie beschreiben ein
+  Ergebnis, das es noch nicht gibt.
+- **Auf einem kleinen Bildschirm scrollen die ersten drei Reiter in sich.**
+  Eine Bildlaufleiste am rechten Rand zeigt das an.
+- **Das Protokoll kann zugezogen sein.** Den Teiler darüber nach oben ziehen.
 
 Das Fenster passt auf kleine Bildschirme: Es öffnet nie größer als der
-verfügbare Platz, die Einstellungen scrollen, wenn sie nicht hineinpassen, und
-Schaltflächen sowie Fortschrittsbalken bleiben außerhalb des Scrollbereichs
-stehen. Einstellungen, Ordnertabelle und Protokoll teilen sich einen Teiler,
-Sie können den Platz also dem Teil geben, mit dem Sie gerade arbeiten.
+verfügbare Platz, und Schaltflächen wie Fortschrittsbalken bleiben immer
+stehen. Welcher Reiter zuletzt offen war, wird gemerkt.
 
 Die Vorgabewerte der Optionen stammen aus demselben `Settings`-Objekt, das auch
 die Kommandozeile verwendet — die Oberfläche kann der Dokumentation also nicht
@@ -784,8 +797,25 @@ lrfc apply ANDERER_KATALOG --profile nach-kamera
 lrfc profiles
 ```
 
-Im Fenster steht dafür ganz oben eine Zeile **Profil** mit Namensfeld sowie
-*Laden* und *Speichern*.
+Im Fenster steht dafür ganz oben, über den Reitern und damit immer sichtbar,
+die Zeile **Profil**:
+
+| | |
+| --- | --- |
+| Auswahlfeld | listet die vorhandenen Profile. Ist keines gewählt, steht dort *(kein Profil)*, und alle Schaltflächen außer *Neu…* sind grau. |
+| **Neu…** | fragt nach einem Namen und legt aus den gerade gesetzten Optionen ein Profil an. Gibt es den Namen schon, wird gefragt, bevor er überschrieben wird. |
+| **Laden** | setzt die Optionen des gewählten Profils und plant sofort neu, wenn ein Katalog geladen ist. |
+| **Speichern** | schreibt die gerade gesetzten Optionen in das **gewählte** Profil zurück. |
+| **Löschen** | entfernt das gewählte Profil nach Rückfrage. Die Optionen im Fenster bleiben, wie sie sind. |
+
+Bis r17 gab es nur ein Namensfeld mit *Laden* und *Speichern*. Ein Profil
+entstand dadurch, dass man einen noch nicht vergebenen Namen eintippte und
+*Speichern* drückte — was niemand erraten konnte, und was zugleich hieß, dass
+ein Tippfehler im Namen stillschweigend ein zweites Profil anlegte. Anlegen ist
+deshalb jetzt eine eigene Schaltfläche.
+
+In der Terminaloberfläche steht unter dem Namensfeld, welche Profile es gibt,
+und daneben liegt ebenfalls *Löschen*.
 
 ### Was ein Profil enthält — und was nicht
 

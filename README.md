@@ -9,8 +9,8 @@
 
 **Reorganise Adobe Lightroom Classic folder trees — without losing the catalog connection.**
 
-[![Revision](https://img.shields.io/badge/revision-r17.0.3-blue)](CHANGELOG.md)
-[![Build date](https://img.shields.io/badge/build-2026--08--24-lightgrey)](CHANGELOG.md)
+[![Revision](https://img.shields.io/badge/revision-r18.0.0-blue)](CHANGELOG.md)
+[![Build date](https://img.shields.io/badge/build-2026--08--30-lightgrey)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20GPL--3.0--or--later-green)](LICENSE)
 

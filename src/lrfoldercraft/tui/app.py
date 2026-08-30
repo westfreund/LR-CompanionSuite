@@ -42,6 +42,8 @@ from ..config import (
     PLACEMENT_MODES,
     ConfigError,
     Settings,
+    delete_profile,
+    list_profiles,
 )
 from ..exceptions_report import collect_findings
 from ..executor import ExecutionError, execute, undo
@@ -76,6 +78,9 @@ TEXT = {
     ),
     "profile_saved": ("Profile {n} saved to {p}", "Profil {n} gespeichert unter {p}"),
     "profile_loaded": ("Profile {n} loaded", "Profil {n} geladen"),
+    "profile_delete": ("Delete", "Löschen"),
+    "profile_deleted": ("Profile {n} deleted", "Profil {n} gelöscht"),
+    "profile_known": ("known: {n}", "vorhanden: {n}"),
     "source": ("Source", "Quelle"),
     "root_folder": ("Root folder", "Stammordner"),
     "all_roots": ("All root folders", "Alle Stammordner"),
@@ -471,9 +476,13 @@ class LRFolderCraftApp(App[int]):
 
                 yield Label(tr("profile", self.language), classes="section")
                 yield Input(placeholder=tr("profile_name", self.language), id="profile-name")
+                # Which profiles there are, because a name field alone gives
+                # the reader nothing to type and no way to find out.
+                yield Label(self._known_profiles(), id="profile-known", classes="hint")
                 with Horizontal(id="profile-buttons"):
                     yield Button(tr("profile_load", self.language), id="btn-profile-load")
                     yield Button(tr("profile_save", self.language), id="btn-profile-save")
+                    yield Button(tr("profile_delete", self.language), id="btn-profile-delete")
 
                 yield Label(tr("source", self.language), classes="section")
                 yield Label(tr("root_folder", self.language), classes="hint")
@@ -696,7 +705,32 @@ class LRFolderCraftApp(App[int]):
         except Exception as exc:  # noqa: BLE001 - shown to the user
             self.notify(str(exc), severity="error", timeout=10)
             return
+        self._refresh_known_profiles()
         self.write_log(tr("profile_saved", self.language).format(n=name, p=path))
+
+    def _known_profiles(self) -> str:
+        names = list_profiles()
+        return tr("profile_known", self.language).format(n=", ".join(names) if names else "-")
+
+    def _refresh_known_profiles(self) -> None:
+        try:
+            self.query_one("#profile-known", Label).update(self._known_profiles())
+        except Exception:  # noqa: BLE001 - the label is absent before mount
+            pass
+
+    @on(Button.Pressed, "#btn-profile-delete")
+    def _profile_delete_pressed(self) -> None:
+        name = self.query_one("#profile-name", Input).value.strip()
+        if not name:
+            self.notify(tr("profile_needs_a_name", self.language), severity="warning")
+            return
+        try:
+            delete_profile(name)
+        except ConfigError as exc:
+            self.notify(str(exc), severity="error", timeout=10)
+            return
+        self._refresh_known_profiles()
+        self.write_log(tr("profile_deleted", self.language).format(n=name))
 
     @on(Button.Pressed, "#btn-profile-load")
     def _profile_load_pressed(self) -> None:

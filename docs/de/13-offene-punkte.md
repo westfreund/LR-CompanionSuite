@@ -1,6 +1,6 @@
 # Offene Punkte und Fahrplan
 
-**Revision r17.0.3 · Build-Datum 2026-08-24**
+**Revision r18.0.0 · Build-Datum 2026-08-24**
 
 Eine ehrliche Aufstellung dessen, was nicht erledigt, nicht verifiziert oder
 bewusst ausgelassen ist. Jeder Punkt ist ein Ansatzpunkt für die nächste
@@ -221,6 +221,8 @@ READMEs darauf verweisen.
 ### O-15 · GUI ✔
 Abgeschlossen in r3.0.0: ein Qt-Frontend mit allen Einstellungen,
 Entscheidungen je Ordner, nativer Zielordnerauswahl und Fortschrittsbalken.
+In r18.0.0 in Reiter gegliedert, nachdem sich zeigte, dass die Einstellungen
+in ein Fenster nicht mehr hineinpassen.
 `textual serve` bliebe ein günstiger Weg, die Textoberfläche aus der Ferne zu
 bedienen, falls das je gewünscht ist.
 

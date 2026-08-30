@@ -68,6 +68,12 @@ def shoot_tui(catalog: Path) -> None:
 
 
 def shoot_gui(catalog: Path) -> None:
+    """Two pictures per language: what you meet, and what you work in.
+
+    One shot cannot do both since the window went to tabs -- the first tab is
+    where a reader starts, and the folder table is where the tool earns its
+    keep.
+    """
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     from PySide6.QtWidgets import QApplication
 
@@ -76,7 +82,7 @@ def shoot_gui(catalog: Path) -> None:
     app = QApplication.instance() or QApplication([])
     for language in LANGUAGES:
         window = MainWindow(catalog=str(catalog), language=language)
-        window.resize(1180, 900)
+        window.resize(1180, 820)
         window.show()
         for _ in range(80):  # let the catalog worker finish and the plan land
             app.processEvents()
@@ -87,9 +93,13 @@ def shoot_gui(catalog: Path) -> None:
                 break
         for _ in range(20):
             app.processEvents()
-        target = IMAGES / "gui-{lang}.png".format(lang=language)
-        window.grab().save(str(target))
-        print("  wrote {p}".format(p=target.relative_to(ROOT)))
+        for tab, suffix in ((0, ""), (3, "-folders")):
+            window.tabs.setCurrentIndex(tab)
+            for _ in range(20):
+                app.processEvents()
+            target = IMAGES / "gui-{lang}{s}.png".format(lang=language, s=suffix)
+            window.grab().save(str(target))
+            print("  wrote {p}".format(p=target.relative_to(ROOT)))
         window.close()
         app.processEvents()
 

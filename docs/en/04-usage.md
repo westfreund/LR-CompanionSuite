@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r17.0.3 · Build date 2026-08-24**
+**Revision r18.0.0 · Build date 2026-08-24**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -298,7 +298,7 @@ English interface it reads "Deutsch".
 Settings you make in the window are kept, so the next start begins where you
 left off: the language, the catalog, the target folder and its mode, the
 structure, the extension filters, the folder actions, the rule list, the window
-size and the splitter positions. They live in `gui-state.json` in the
+size, the divider and the tab that was last open. They live in `gui-state.json` in the
 configuration directory; deleting that file restores the defaults.
 
 Two things are deliberately **not** remembered:
@@ -313,58 +313,74 @@ command explains how to install it rather than failing with a traceback.
 
 One window, top to bottom:
 
-| Section | What it holds |
+```
+┌──────────────────────────────────────────────────────────────┐
+│  LR-FolderCraft                            (mark, purpose)   │
+│  Profile: [ choose ▾ ] [New…] [Load] [Save] [Delete]         │
+├──────────────────────────────────────────────────────────────┤
+│ ⟦1 · Library⟧ 2 · Structure  3 · Options  4 · Folders …      │
+│                                                              │
+│   Catalog / Source / Target                                  │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│  Log                                                         │
+├──────────────────────────────────────────────────────────────┤
+│ [Plan] [Apply] │ [Undo…] [History…]              ▬▬▬   0 %   │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Always visible** are the mark, the profile row, the log and the buttons.
+Everything else sits in five tabs, one per step of the work:
+
+| Tab | What it holds |
 | --- | --- |
-| **Catalog** | the `.lrcat` path with a Browse button, and a one-line summary once loaded: files, images, virtual copies, capture range |
-| **Source** | the root folder to work on (or all of them), and extension filters |
-| **Target** | below the current folder, or into a new folder chosen with the system dialog — its *New Folder* button creates one, and a path that does not exist yet is created during the run |
-| **Folder structure** | a preset, or your own template, with a live preview that updates as you type, and a Placeholders button listing all 25 |
-| **Options** | name conflicts, photos without a date, and the three decisions about existing folders, plus sidecars, catalog backup and ASCII names |
-| **Needs your answer** | one row per cause with the file count, the option that governs it and that option's current value — selecting a row lists the files it concerns |
-| **Folders found** | the rule list, and below it one row per folder with its kind, photo count, the rule that decided it and a dropdown — changing one re-plans immediately |
-| **Buttons** | Plan changes nothing; Apply asks for confirmation first |
-| **Progress** | a bar and a counter during the run, and the full result afterwards |
-| **Log** | what happened, including every warning from the pre-flight checks |
+| **1 · Library** | **Catalog**: the `.lrcat` path with a Browse button, and a one-line summary once loaded: files, images, virtual copies, capture range · **Source**: the root folder to work on (or all of them), and extension filters · **Target**: below the current folder, or into a new folder chosen with the system dialog — its *New Folder* button creates one, and a path that does not exist yet is created during the run |
+| **2 · Structure** | a preset, or your own template, with a live preview that updates as you type, and a Placeholders button listing all 25 |
+| **3 · Options** | name conflicts, photos without a date, and the three decisions about existing folders, plus sidecars, catalog backup and ASCII names |
+| **4 · Folders & rules** | the rule list, and below it one row per folder with its kind, photo count, the rule that decided it and a dropdown — changing one re-plans immediately |
+| **5 · Result** | one row per cause with the file count, the option that governs it and that option's current value — selecting a row lists the files it concerns |
+
+![Tab 1: catalog, source and target](../images/gui-en.png)
+
+![Tab 4: the rules and the folders found](../images/gui-en-folders.png)
+
+Tabs 4 and 5 fill up with the first **Plan**; before that they are empty. After
+a plan the window moves to **5 · Result** by itself, because that is where what
+is still to be decided is written down.
+
+The **log** stays outside the tabs on purpose: it is where an error appears,
+and an error behind a tab is an error nobody sees. Between the tabs and the log
+sits a **divider** — a thin horizontal line the pointer turns into a double
+arrow over. Dragging gives one or the other more room; dragged fully shut the
+log is hidden, not gone.
+
+The **buttons** stand in the order the work is done: look first, then act — and
+after a vertical rule, the two that deal with a run that has already happened.
+The rule is deliberate: without it Undo sat next to Apply as though it were the
+next step.
 
 The **Actions** menu switches between English and German at any time, and
 holds the undo entry.
 
-### The sections can be pulled open — important
+### If something seems to be missing
 
-Between the four large sections — **settings**, **Needs your answer**,
-**Folders found** and **Log** — sits a **divider**. It is easy to miss: a thin
-horizontal line at the **bottom edge of a section**, formerly just a few grey
-dots.
+Up to r17 everything was stacked in one scrolling column. The window showed the
+catalog and hid the structure, the options and the rules behind a scrollbar
+nobody had reason to suspect. Hence the tabs.
 
-```
-┌─ Settings ──────────────────────────────┐
-│  Catalog, Source, Target, Structure …   │   ← scrolls within itself
-└─────────────────────────────────────────┘
- ────────────────────────────────────────      ← divider: drag here
-┌─ Needs your answer ─────────────────────┐
-```
+If something still seems to be missing:
 
-The pointer turns into a double arrow over a divider, and a tooltip says what
-it does. With it:
-
-- **Dragging** gives the section above more or less room.
-- **Dragging it fully shut** hides a section. It is not gone — the divider
-  stays, and pulling it back open brings the section out again. If you have no
-  use for the log, that is room won for the folder table.
-- The sizes you set are **remembered** and restored at the next start.
-
-The **settings** section additionally has a **scrollbar of its own**: on a
-small screen Target, Folder structure and Options start below the visible edge
-and are reached by scrolling *inside* the section — or by dragging the divider
-below it downwards.
-
-So if a table looks cut off or a setting seems to be missing: the section is
-too small, not empty.
+- **The section you want is in another tab.** Every tab label carries a tooltip
+  saying what is inside.
+- **Tabs 4 and 5 are empty before the first plan.** They describe a result that
+  does not exist yet.
+- **On a small screen the first three tabs scroll within themselves.** A
+  scrollbar down the right-hand edge says so.
+- **The log may be dragged shut.** Pull the divider above it upwards.
 
 The window fits small screens: it opens no larger than the space the screen
-offers, the settings scroll when they do not fit, and the buttons and the
-progress bar stay put outside the scrolling area. Settings, folder table and
-log share a splitter, so you can give the room to whichever you are using.
+offers, and the buttons and the progress bar always stay put. Which tab was
+last open is remembered.
 
 The option defaults are taken from the same `Settings` object the command line
 uses, so the interface cannot quietly disagree with the documentation. There is
@@ -762,8 +778,24 @@ lrfc apply ANOTHER_CATALOG --profile by-camera
 lrfc profiles
 ```
 
-In the window there is a **Profile** row at the top, with a name field and
-*Load* and *Save*.
+In the window the **Profile** row sits above the tabs, so it is always in
+view:
+
+| | |
+| --- | --- |
+| The dropdown | lists the profiles that exist. With none chosen it reads *(no profile)* and every button but *New…* is greyed out. |
+| **New…** | asks for a name and makes a profile out of the options currently set. If the name is taken, it asks before replacing it. |
+| **Load** | puts the chosen profile's options into the window, and re-plans at once if a catalog is loaded. |
+| **Save** | writes the options currently set back into the **chosen** profile. |
+| **Delete** | removes the chosen profile after asking. The options in the window stay as they are. |
+
+Up to r17 there was only a name field with *Load* and *Save*. A profile came
+into being by typing a name nobody had used yet and pressing Save — which
+nobody could be expected to guess, and which also meant a typo in the name
+silently made a second profile. Making one is its own button now.
+
+The terminal interface lists the profiles that exist below its name field, and
+has *Delete* beside the other two.
 
 ### What a profile holds — and what it does not
 

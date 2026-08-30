@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r17.0.3 · Build-Datum 2026-08-24**
+**Revision r18.0.0 · Build-Datum 2026-08-24**
 
 ## Sicherheit und Daten
 
@@ -112,16 +112,20 @@ Lauf je Stammordner.
 
 ### In der GUI ist eine Tabelle abgeschnitten oder eine Einstellung fehlt
 
-Der Bereich ist zu klein, nicht leer. Zwischen den vier großen Bereichen —
-Einstellungen, „Braucht Ihre Antwort", „Vorgefundene Ordner" und Protokoll —
-liegt am **unteren Rand** jeweils ein **Teiler**, eine dünne waagerechte Linie.
-Ziehen gibt dem Bereich darüber mehr Platz; ganz zuziehen blendet ihn aus, und
-Aufziehen holt ihn zurück. Der Mauszeiger wird dort zum Doppelpfeil.
+Meistens liegt es in einem anderen **Reiter**. Seit r18.0.0 steht jeder
+Arbeitsschritt in einem eigenen: *1 · Bibliothek*, *2 · Struktur*,
+*3 · Optionen*, *4 · Ordner & Regeln*, *5 · Ergebnis*. Die Beschriftung jedes
+Reiters trägt einen Tooltip, der sagt, was darin steht.
 
-Der Bereich Einstellungen scrollt zusätzlich in sich selbst — auf einem kleinen
-Bildschirm liegen Ziel, Ordnerstruktur und Optionen zunächst unterhalb des
-sichtbaren Randes. Die eingestellten Größen werden für den nächsten Start
-gemerkt. Siehe [04-bedienung.md](04-bedienung.md).
+Bis r17 lag alles übereinander in einer scrollenden Spalte, und genau das war
+das Problem: Das Fenster zeigte den Katalog und verbarg den Rest hinter einer
+Bildlaufleiste.
+
+Sonst: Die Reiter 4 und 5 sind vor dem ersten Plan leer — sie beschreiben ein
+Ergebnis, das es noch nicht gibt. Auf einem kleinen Bildschirm scrollen die
+ersten drei Reiter in sich. Und das Protokoll unter den Reitern lässt sich am
+Teiler zuziehen; nach oben ziehen holt es zurück. Siehe
+[04-bedienung.md](04-bedienung.md).
 
 ### Ich kann in der GUI keinen Zielordner angeben
 

@@ -292,6 +292,57 @@ TEXT: Dict[str, Tuple[str, str]] = {
         "ein, dann erscheinen hier dessen aufgezeichnete Läufe — dort neben "
         "dem Katalog liegen auch die Journale.",
     ),
+    "tab_library": ("1 · Library", "1 · Bibliothek"),
+    "tab_structure": ("2 · Structure", "2 · Struktur"),
+    "tab_options": ("3 · Options", "3 · Optionen"),
+    "tab_folders": ("4 · Folders & rules", "4 · Ordner & Regeln"),
+    "tab_findings": ("5 · Result", "5 · Ergebnis"),
+    "tab_library_hint": (
+        "Which catalog, which part of it, and where the photos should end up.",
+        "Welcher Katalog, welcher Teil davon, und wohin die Fotos sollen.",
+    ),
+    "tab_structure_hint": (
+        "The shape of the new folder tree.",
+        "Die Gestalt des neuen Ordnerbaums.",
+    ),
+    "tab_options_hint": (
+        "How the awkward cases are handled.",
+        "Wie mit den unbequemen Fällen umgegangen wird.",
+    ),
+    "tab_folders_hint": (
+        "Rules first, then the folders themselves — available after a plan.",
+        "Erst die Regeln, dann die Ordner selbst — nach einem Plan verfügbar.",
+    ),
+    "tab_findings_hint": (
+        "What the plan could not decide alone — available after a plan.",
+        "Was der Plan nicht allein entscheiden konnte — nach einem Plan verfügbar.",
+    ),
+    "profile_new": ("New…", "Neu…"),
+    "profile_delete": ("Delete", "Löschen"),
+    "profile_none": ("(no profile)", "(kein Profil)"),
+    "profile_new_title": ("New profile", "Neues Profil"),
+    "profile_new_prompt": (
+        "Name for the profile. It stores the options currently set — not the "
+        "catalog, the target folder or the rules, so it can serve the next "
+        "library too.",
+        "Name für das Profil. Es hält die gerade gesetzten Optionen fest — "
+        "nicht den Katalog, den Zielordner oder die Regeln, damit es auch der "
+        "nächsten Bibliothek dienen kann.",
+    ),
+    "profile_overwrite": (
+        "A profile named {n} already exists. Replace it with the options set now?",
+        "Ein Profil namens {n} gibt es bereits. Durch die jetzt gesetzten Optionen ersetzen?",
+    ),
+    "profile_confirm_delete": (
+        "Delete the profile {n}? The options set in the window stay as they are.",
+        "Das Profil {n} löschen? Die im Fenster gesetzten Optionen bleiben, wie sie sind.",
+    ),
+    "profile_deleted": ("Profile {n} deleted.", "Profil {n} gelöscht."),
+    "profile_pick_first": (
+        "Choose a profile first, or make one with New.",
+        "Erst ein Profil wählen, oder mit Neu eines anlegen.",
+    ),
+    "history_button": ("History…", "Historie…"),
     "undo_run": ("Undo a run…", "Lauf rückgängig machen…"),
     "undo_button": ("Undo…", "Rückgängig…"),
     "pick_journal": (

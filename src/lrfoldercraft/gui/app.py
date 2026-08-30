@@ -35,9 +35,11 @@ from PySide6.QtWidgets import (
     QDialogButtonBox,
     QFileDialog,
     QFormLayout,
+    QFrame,
     QGroupBox,
     QHBoxLayout,
     QHeaderView,
+    QInputDialog,
     QLabel,
     QLineEdit,
     QMainWindow,
@@ -50,12 +52,21 @@ from PySide6.QtWidgets import (
     QSplitter,
     QTableWidget,
     QTableWidgetItem,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
 
 from ..catalog.model import CatalogInfo, RootFolder
-from ..config import CONFLICT_MODES, MISSING_DATE_MODES, ConfigError, Settings, list_profiles
+from ..config import (
+    CONFLICT_MODES,
+    MISSING_DATE_MODES,
+    ConfigError,
+    Settings,
+    delete_profile,
+    list_profiles,
+    profile_exists,
+)
 from ..exceptions_report import (
     ERROR,
     EXCEPTION,
@@ -310,6 +321,10 @@ class MainWindow(QMainWindow):
         self.findings: List[Finding] = []
         #: Counts planning requests, so a superseded result can be discarded.
         self._plan_ticket = 0
+        #: Set when the operator asked for the plan, so only that one moves
+        #: the window to the result tab.
+        self._review_plan = False
+        self._review_ticket = 0
         #: The journal of the run made in this session, offered first for undo.
         self.last_journal: str = ""
         #: Catalog whose preconditions were acknowledged in this session.
@@ -337,45 +352,40 @@ class MainWindow(QMainWindow):
     def _build(self) -> None:
         central = QWidget()
         outer = QVBoxLayout(central)
+        outer.addWidget(self._masthead())
+        outer.addWidget(self._profile_box())
 
-        # The settings are the tall part, so they live in a scroll area: on a
-        # small screen the window must still fit, and the buttons and progress
-        # bar must never be what scrolls out of sight.
-        settings = QWidget()
-        settings_layout = QVBoxLayout(settings)
-        settings_layout.setContentsMargins(0, 0, 0, 0)
-        settings_layout.addWidget(self._masthead())
-        settings_layout.addWidget(self._profile_box())
-        settings_layout.addWidget(self._catalog_box())
-        settings_layout.addWidget(self._source_box())
-        settings_layout.addWidget(self._target_box())
-        settings_layout.addWidget(self._structure_box())
-        settings_layout.addWidget(self._options_box())
-        settings_layout.addStretch(0)
-
-        self.settings_scroll = QScrollArea()
-        self.settings_scroll.setWidget(settings)
-        self.settings_scroll.setWidgetResizable(True)
-        self.settings_scroll.setFrameShape(QScrollArea.NoFrame)
-        self.settings_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.settings_scroll.setMinimumHeight(140)
+        # One tab per step. Everything used to be stacked in a single scrolling
+        # column, which meant most of it was somewhere out of sight: the window
+        # showed the catalog and hid the structure, the options and the rules
+        # behind a scrollbar nobody had reason to suspect.
+        self.tabs = QTabWidget()
+        self.tab_pages = [
+            (
+                "tab_library",
+                "tab_library_hint",
+                self._scrolling([self._catalog_box(), self._source_box(), self._target_box()]),
+            ),
+            ("tab_structure", "tab_structure_hint", self._scrolling([self._structure_box()])),
+            ("tab_options", "tab_options_hint", self._scrolling([self._options_box()])),
+            ("tab_folders", "tab_folders_hint", self._filling(self._folders_box())),
+            ("tab_findings", "tab_findings_hint", self._filling(self._findings_box())),
+        ]
+        for _key, _hint, page in self.tab_pages:
+            self.tabs.addTab(page, "")
 
         self.log_view = QPlainTextEdit()
         self.log_view.setReadOnly(True)
         self.log_view.setFont(QFont("Menlo", 11))
         self.log_view.setMinimumHeight(60)
 
-        # One splitter for everything above the action row, so the operator can
-        # give the space to whichever part they are working with.
+        # The log stays out of the tabs on purpose: it is where an error
+        # appears, and an error behind a tab is an error nobody sees.
         self.splitter = QSplitter(Qt.Vertical)
-        self.splitter.addWidget(self.settings_scroll)
-        self.splitter.addWidget(self._findings_box())
-        self.splitter.addWidget(self._folders_box())
+        self.splitter.addWidget(self.tabs)
         self.splitter.addWidget(self.log_view)
-        self.splitter.setStretchFactor(0, 3)
-        self.splitter.setStretchFactor(1, 2)
-        self.splitter.setStretchFactor(2, 2)
-        self.splitter.setStretchFactor(3, 1)
+        self.splitter.setStretchFactor(0, 5)
+        self.splitter.setStretchFactor(1, 1)
         self._make_handles_visible()
         outer.addWidget(self.splitter, 1)
 
@@ -385,6 +395,31 @@ class MainWindow(QMainWindow):
             "{n} {r} - build {d}".format(n=APP_NAME, r=REVISION, d=__build_date__)
         )
         self._build_menu()
+
+    @staticmethod
+    def _scrolling(boxes) -> QWidget:
+        """A tab of form-like boxes, scrollable for a short screen."""
+        page = QWidget()
+        column = QVBoxLayout(page)
+        column.setContentsMargins(0, 0, 0, 0)
+        for box in boxes:
+            column.addWidget(box)
+        column.addStretch(1)
+        area = QScrollArea()
+        area.setWidget(page)
+        area.setWidgetResizable(True)
+        area.setFrameShape(QScrollArea.NoFrame)
+        area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        return area
+
+    @staticmethod
+    def _filling(box) -> QWidget:
+        """A tab whose content is a table, and should take all the room there is."""
+        page = QWidget()
+        column = QVBoxLayout(page)
+        column.setContentsMargins(0, 0, 0, 0)
+        column.addWidget(box, 1)
+        return page
 
     def _make_handles_visible(self) -> None:
         """Make the dividers between the sections look like something to grab.
@@ -432,10 +467,10 @@ class MainWindow(QMainWindow):
         self.resize(width, height)
         self._balance_splitter(height)
 
-    #: Share of the window each splitter section gets on a fresh start, and the
-    #: height below which it stops being worth showing. The list must have one
+    #: Share of the window the tabs and the log get on a fresh start, and the
+    #: height below which each stops being worth showing. The list must have one
     #: entry per widget in the splitter: Qt calls a short list undefined.
-    SPLITTER_SHARES = ((0.48, 200), (0.14, 70), (0.26, 120), (0.12, 60))
+    SPLITTER_SHARES = ((0.82, 320), (0.18, 60))
 
     def _balance_splitter(self, height: int) -> None:
         """Give the settings most of the room, but keep the others usable."""
@@ -527,47 +562,117 @@ class MainWindow(QMainWindow):
         A profile holds the options and nothing that belongs to one library:
         no catalog, no target folder, no rule list, no per-folder decisions.
         That is what lets the same profile serve several collections.
+
+        The first cut offered a name field with Load and Save beside it, and
+        left the reader to work out that typing a name nobody had used yet and
+        pressing Save was how a profile came into being. Making one is now its
+        own button, and the box lists what exists rather than inviting you to
+        type into it.
         """
         box = QGroupBox()
         row = QHBoxLayout(box)
         self.profile_combo = QComboBox()
-        self.profile_combo.setEditable(True)
-        self.profile_combo.setInsertPolicy(QComboBox.NoInsert)
+        self.profile_combo.setMinimumWidth(220)
+        self.profile_combo.currentIndexChanged.connect(self._profile_selection_changed)
+        self.profile_new = QPushButton()
+        self.profile_new.clicked.connect(self.new_profile)
         self.profile_load = QPushButton()
         self.profile_load.clicked.connect(self.load_profile)
         self.profile_save = QPushButton()
         self.profile_save.clicked.connect(self.save_profile)
+        self.profile_delete = QPushButton()
+        self.profile_delete.clicked.connect(self.remove_profile)
         row.addWidget(self.profile_combo, 1)
+        row.addWidget(self.profile_new)
         row.addWidget(self.profile_load)
         row.addWidget(self.profile_save)
+        row.addWidget(self.profile_delete)
         self.profile_group = box
         self._refresh_profiles()
         return box
 
+    def _profile_selection_changed(self) -> None:
+        """Everything but New needs a profile to act on."""
+        chosen = bool(self.current_profile())
+        for button in (self.profile_load, self.profile_save, self.profile_delete):
+            button.setEnabled(chosen)
+
+    def current_profile(self) -> str:
+        """The selected profile, or "" when the placeholder row is showing."""
+        if self.profile_combo.currentIndex() <= 0:
+            return ""
+        return self.profile_combo.currentText().strip()
+
     def _refresh_profiles(self, select: str = "") -> None:
-        current = select or self.profile_combo.currentText()
+        """Re-read the profile folder, keeping the selection where possible."""
+        current = select or self.current_profile()
         self.profile_combo.blockSignals(True)
         self.profile_combo.clear()
+        self.profile_combo.addItem(tr("profile_none", self.language))
         self.profile_combo.addItems(list_profiles())
-        self.profile_combo.setCurrentText(current)
+        index = self.profile_combo.findText(current) if current else -1
+        self.profile_combo.setCurrentIndex(index if index > 0 else 0)
         self.profile_combo.blockSignals(False)
+        self._profile_selection_changed()
+
+    def new_profile(self) -> None:
+        """Make a profile out of the options currently set."""
+        name, accepted = QInputDialog.getText(
+            self,
+            tr("profile_new_title", self.language),
+            tr("profile_new_prompt", self.language),
+        )
+        if not accepted or not name.strip():
+            return
+        name = name.strip()
+        if profile_exists(name) and not self._confirm(
+            tr("profile_overwrite", self.language).format(n=name)
+        ):
+            return
+        self._write_profile(name)
 
     def save_profile(self) -> None:
-        name = self.profile_combo.currentText().strip()
+        """Put the options currently set back into the chosen profile."""
+        name = self.current_profile()
         if not name:
-            QMessageBox.information(self, APP_NAME, tr("profile_needs_a_name", self.language))
+            QMessageBox.information(self, APP_NAME, tr("profile_pick_first", self.language))
             return
+        self._write_profile(name)
+
+    def _write_profile(self, name: str) -> None:
         try:
             settings = self.collect_settings()
         except Exception as exc:  # noqa: BLE001 - shown to the user
             QMessageBox.warning(self, APP_NAME, str(exc))
             return
         path = settings.save_profile(name)
-        self._refresh_profiles(name)
+        # The stored name is sanitised for the filesystem, so select what was
+        # actually written rather than what was typed.
+        self._refresh_profiles(path.stem)
         self.say(tr("profile_saved", self.language).format(n=name, p=path))
 
+    def remove_profile(self) -> None:
+        name = self.current_profile()
+        if not name:
+            return
+        if not self._confirm(tr("profile_confirm_delete", self.language).format(n=name)):
+            return
+        try:
+            delete_profile(name)
+        except ConfigError as exc:
+            QMessageBox.warning(self, APP_NAME, str(exc))
+            return
+        self._refresh_profiles()
+        self.say(tr("profile_deleted", self.language).format(n=name))
+
+    def _confirm(self, question: str) -> bool:
+        answer = QMessageBox.question(
+            self, APP_NAME, question, QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel
+        )
+        return answer == QMessageBox.Yes
+
     def load_profile(self) -> None:
-        name = self.profile_combo.currentText().strip()
+        name = self.current_profile()
         if not name:
             return
         try:
@@ -990,10 +1095,17 @@ class MainWindow(QMainWindow):
         )
 
     def _actions_box(self) -> QWidget:
+        """The buttons, in the order the work is done.
+
+        Forward on the left -- look, then act -- and after a rule, the two that
+        deal with a run that has already happened. The rule matters: without it
+        Undo sat next to Apply as though it were the next step, which for a
+        button that moves fifty thousand files back is the wrong invitation.
+        """
         holder = QWidget()
         row = QHBoxLayout(holder)
         self.plan_button = QPushButton()
-        self.plan_button.clicked.connect(self.do_plan)
+        self.plan_button.clicked.connect(self.plan_and_review)
         self.apply_button = QPushButton()
         self.apply_button.clicked.connect(self.do_apply)
         self.apply_button.setEnabled(False)
@@ -1001,12 +1113,29 @@ class MainWindow(QMainWindow):
         # only through a menu is one nobody finds when they need it.
         self.undo_button = QPushButton()
         self.undo_button.clicked.connect(self.do_undo)
+        self.history_button = QPushButton()
+        self.history_button.clicked.connect(self.show_history)
+
+        # Painted as a background rather than a sunken VLine: at one pixel
+        # wide the framed version drew nothing at all in several styles, which
+        # is worse than no rule, because the spacing then looks like a mistake.
+        divider = QFrame()
+        divider.setFrameShape(QFrame.NoFrame)
+        divider.setFixedWidth(1)
+        divider.setMinimumHeight(22)
+        divider.setStyleSheet("background: palette(mid);")
+
         self.progress = QProgressBar()
         self.progress.setValue(0)
         self.status_label = QLabel()
         row.addWidget(self.plan_button)
         row.addWidget(self.apply_button)
+        row.addSpacing(10)
+        row.addWidget(divider)
+        row.addSpacing(10)
         row.addWidget(self.undo_button)
+        row.addWidget(self.history_button)
+        row.addSpacing(12)
         row.addWidget(self.progress, 1)
         row.addWidget(self.status_label)
         return holder
@@ -1050,9 +1179,19 @@ class MainWindow(QMainWindow):
         self.orphan_edit.setToolTip(tr("orphan_folder_hint", language))
         self.folders_group.setTitle(tr("existing", language))
         self.profile_group.setTitle(tr("profile", language))
+        self.profile_new.setText(tr("profile_new", language))
         self.profile_load.setText(tr("profile_load", language))
         self.profile_save.setText(tr("profile_save", language))
+        self.profile_delete.setText(tr("profile_delete", language))
         self.profile_combo.setToolTip(tr("profile_hint", language))
+        for index, (key, hint, _page) in enumerate(self.tab_pages):
+            # Qt reads a single & in a tab label as the accelerator marker and
+            # swallows it, which turned "Folders & rules" into "Folders  rules".
+            self.tabs.setTabText(index, tr(key, language).replace("&", "&&"))
+            self.tabs.setTabToolTip(index, tr(hint, language))
+        # The placeholder row is a translated word, so it is rebuilt with the
+        # rest -- and the selection has to survive that.
+        self._refresh_profiles(self.current_profile())
         self.findings_group.setTitle(tr("findings", language))
         self._retranslate_handles()
         self.findings_table.setHorizontalHeaderLabels(
@@ -1096,6 +1235,7 @@ class MainWindow(QMainWindow):
         self.history_action.setText(tr("history_menu", language))
         self.undo_action.setText(tr("undo_run", language))
         self.undo_button.setText(tr("undo_button", language))
+        self.history_button.setText(tr("history_button", language))
         if self.root_combo.count():
             self.root_combo.setItemText(0, tr("all_roots", language))
         if not self.catalog_info.text() or self.catalog_info.text().startswith(
@@ -1275,6 +1415,17 @@ class MainWindow(QMainWindow):
 
     # -- planning ----------------------------------------------------------
 
+    def plan_and_review(self) -> None:
+        """Plan because the operator asked, and show the result when it lands.
+
+        Only this route moves the window. Changing a rule or a folder decision
+        re-plans too, and a window that jumped to the result each time would
+        pull the operator out of the table they are working in -- which is the
+        crowding problem again, wearing a different coat.
+        """
+        self._review_plan = True
+        self.do_plan()
+
     def do_plan(self) -> None:
         try:
             settings = self.collect_settings()
@@ -1290,6 +1441,11 @@ class MainWindow(QMainWindow):
         # does not match what is on screen. Only the newest request counts.
         self._plan_ticket += 1
         ticket = self._plan_ticket
+        # Tie the request to its ticket, so a superseded plan cannot move the
+        # window either.
+        if self._review_plan:
+            self._review_ticket = ticket
+            self._review_plan = False
         # Connect the bound method, never a lambda: a lambda has no QObject
         # receiver, so Qt makes the connection direct rather than queued and
         # the slot runs on the worker thread -- where creating the widgets of
@@ -1309,6 +1465,22 @@ class MainWindow(QMainWindow):
         self._show_plan(plan, checks)
         self._busy(False, tr("done", self.language))
         self.apply_button.setEnabled(plan.has_work)
+        if ticket == self._review_ticket:
+            self._show_result_tab()
+
+    #: The tab that holds the findings, by position in `tab_pages`.
+    RESULT_TAB = 4
+
+    def _show_result_tab(self) -> None:
+        """Move to the result once there is one.
+
+        The findings say what the plan could not decide alone, which is the
+        next thing to read -- and somebody who pressed Plan while looking at
+        the options has no reason to suspect there is anything to go and find.
+        """
+        self._review_ticket = 0
+        if self.tabs.currentIndex() != self.RESULT_TAB:
+            self.tabs.setCurrentIndex(self.RESULT_TAB)
 
     def _show_plan(self, plan: Plan, checks) -> None:
         stats = plan.stats
@@ -1652,6 +1824,9 @@ class MainWindow(QMainWindow):
         if self._was_shown:
             state["window"] = [self.width(), self.height()]
             state["splitter"] = self.splitter.sizes()
+        # Which tab is open is not geometry: Qt answers that correctly whether
+        # the window has been on screen or not.
+        state["tab"] = self.tabs.currentIndex()
         return state
 
     def remember_state(self) -> bool:
@@ -1703,6 +1878,9 @@ class MainWindow(QMainWindow):
                 height = min(height, bounds.height())
             if width >= 720 and height >= 420:
                 self.resize(width, height)
+        tab = state.get("tab")
+        if isinstance(tab, int) and 0 <= tab < self.tabs.count():
+            self.tabs.setCurrentIndex(tab)
         sizes = state.get("splitter")
         if isinstance(sizes, list) and len(sizes) == self.splitter.count():
             if all(isinstance(value, int) for value in sizes) and sum(sizes) > 0:

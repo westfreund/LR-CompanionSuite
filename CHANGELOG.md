@@ -16,6 +16,46 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [18.0.0] — 2026-08-30 — "Übersicht"
+
+Reported by the user: the settings were too many to fit in one window.
+
+### Changed
+
+- **The window is in tabs**, one per step of the work: Library, Structure,
+  Options, Folders & rules, Result. Everything used to be stacked in a single
+  scrolling column, which meant the structure, the options and the rules sat
+  below the visible edge on a normal screen, behind a scrollbar nobody had
+  reason to suspect. The mark, the profile row, the log and the buttons stay
+  visible on every tab.
+- **The log stays outside the tabs.** It is where an error appears, and an
+  error behind a tab is an error nobody sees.
+- **After a plan the window moves to the Result tab**, because that is where
+  what is still to be decided is written down — but only when the plan was
+  asked for. Changing a rule or a folder decision re-plans too, and jumping
+  away each time would pull the operator out of the table they are working in.
+- **The buttons run in the order the work is done**: Plan and Apply, then a
+  rule, then Undo and History. Undo used to sit next to Apply as though it were
+  the next step. History is a button now, not only a menu entry.
+- Which tab was last open is remembered. The stored layout is version 2: the
+  old four-section splitter no longer describes anything.
+
+### Added
+
+- **Profiles can be made and deleted.** The box lists the profiles that exist,
+  **New…** asks for a name and makes one out of the options currently set, and
+  **Delete** removes one after asking. Load, Save and Delete need a profile to
+  be chosen and are greyed out otherwise.
+- The terminal interface lists the profiles that exist and can delete one, so
+  the two front ends still offer the same things.
+
+### Fixed
+
+- The window's own title for the fourth tab lost its ampersand: Qt reads a
+  single `&` in a tab label as an accelerator marker.
+
+---
+
 ## [17.0.3] — 2026-08-24
 
 Reported by the user: the undo record of a successful run could not be found.

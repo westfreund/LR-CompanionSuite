@@ -370,3 +370,23 @@ def list_profiles(directory: Optional[Path] = None) -> List[str]:
     if not source_dir.exists():
         return []
     return sorted(p.stem for p in source_dir.glob("*.json"))
+
+
+def profile_exists(name: str, directory: Optional[Path] = None) -> bool:
+    source_dir = Path(directory) if directory else profiles_dir()
+    return (source_dir / "{n}.json".format(n=_safe_profile_name(name))).is_file()
+
+
+def delete_profile(name: str, directory: Optional[Path] = None) -> Path:
+    """Remove a saved profile and return the path that is gone.
+
+    An interface that can make profiles but not unmake them turns the profile
+    folder into a place where mistakes accumulate for ever.
+    """
+    source_dir = Path(directory) if directory else profiles_dir()
+    path = source_dir / "{n}.json".format(n=_safe_profile_name(name))
+    if not path.is_file():
+        raise ConfigError("profile not found: {p}".format(p=path))
+    path.unlink()
+    log.info("Deleted profile %r at %s", name, path)
+    return path

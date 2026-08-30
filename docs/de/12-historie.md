@@ -1,6 +1,6 @@
 # Projekthistorie
 
-**Revision r17.0.3 · Build-Datum 2026-08-24**
+**Revision r18.0.0 · Build-Datum 2026-08-24**
 
 Der [CHANGELOG](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md) sagt, was sich in jeder Revision geändert
 hat. Dieses Dokument sagt **warum**, und was dazwischen geschah: die getroffenen
@@ -101,6 +101,7 @@ wissen will, *warum*, liest die Abschnitte darunter und den
 | **r17.0.1** | 06:30 |  | Die Liste der Läufe zeigte Platzhalter statt eines Pfads, und die Uhrzeit war auf `06:1` abgeschnitten. |
 | **r17.0.2** | 07:20 |  | Ein reparierter Lauf wurde erneut als abgebrochen gemeldet — und die Dateien, die er hätte zurückstellen wollen, gehörten dem laufenden Lauf. Dazu: Das Fenster kam mit 640×480 und zwei zugeklappten Bereichen zurück. |
 | **r17.0.3** | 07:50 |  | Rückgängig fand den Lauf von heute früh nicht: Ohne gemerkten Katalog meldete das Fenster, es seien keine Läufe aufgezeichnet, und öffnete einen Dateidialog in einem Ordner, in dem seit Revisionen kein Journal mehr liegt. Es nennt jetzt den wahren Grund und startet dort, wo die Journale liegen. |
+| **r18.0.0** | 30.08. | Übersicht | Das Fenster stapelte alles in einer scrollenden Spalte, sodass Struktur, Optionen und Regeln unterhalb des sichtbaren Randes lagen. Jetzt fünf Reiter, einer je Arbeitsschritt, Schaltflächen in der Reihenfolge der Arbeit — und Profile lassen sich anlegen und löschen, statt durch Tippen eines unbenutzten Namens zu entstehen. |
 
 ---
 

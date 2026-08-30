@@ -1,6 +1,6 @@
 # Open issues and roadmap
 
-**Revision r17.0.3 · Build date 2026-08-24**
+**Revision r18.0.0 · Build date 2026-08-24**
 
 An honest list of what is not done, not verified, or deliberately left out.
 Each item is a starting point for the next session.
@@ -204,7 +204,8 @@ READMEs.
 
 ### O-15 · GUI ✔
 Closed in r3.0.0: a Qt front end with all settings, per-folder decisions, a
-native target-folder chooser and a progress bar. `textual serve` would still be
+native target-folder chooser and a progress bar. Rearranged into tabs in
+r18.0.0, once it became clear the settings no longer fit in one window. `textual serve` would still be
 a cheap way to reach the text interface remotely, if that is ever wanted.
 
 ### O-16 · More grouping criteria
