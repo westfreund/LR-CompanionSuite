@@ -8,6 +8,7 @@ made itself, and that is checked here against the original's bytes.
 
 from __future__ import annotations
 
+import os
 import shutil
 import sqlite3
 import subprocess
@@ -73,7 +74,18 @@ def test_the_folder_tool_does_not_import_the_index():
         "lrcompanion.executor, lrcompanion.folders; "
         "print([m for m in sys.modules if m.startswith('lrcompanion.metasearch')])"
     )
-    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
+    # Point the subprocess at the working tree rather than at whatever happens
+    # to be installed. Relying on an editable install broke the day the project
+    # directory was renamed: the guard failed for a reason that had nothing to
+    # do with what it guards, which is the least useful way for a test to fail.
+    source = str(Path(__file__).resolve().parents[1] / "src")
+    out = subprocess.run(
+        [sys.executable, "-c", code],
+        capture_output=True,
+        text=True,
+        check=True,
+        env=dict(os.environ, PYTHONPATH=source),
+    )
     assert out.stdout.strip() == "[]", out.stdout
 
 
