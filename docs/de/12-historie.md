@@ -432,6 +432,81 @@ wird — aber nichts im Werkzeug sagte es oder half. Daraus wurde r16.0.0.
 
 ---
 
+## 30.08.2026 — das Fenster passte nicht mehr in ein Fenster
+
+Andreas meldete, die Einstellungen seien zu viele für ein Fenster. Sie waren
+es. Alles lag übereinander in einer scrollenden Spalte: Das Fenster zeigte den
+Katalog und verbarg Struktur, Optionen und Regeln unterhalb des sichtbaren
+Randes, hinter einer Bildlaufleiste, auf die zu kommen niemand Anlass hatte.
+
+Bemerkenswert daran ist die Vorgeschichte. Genau dieses Problem war schon
+einmal gemeldet worden — damals als „die aufklappbaren Bereiche sind schwer zu
+finden" —, und die Antwort war, die Trenner griffiger zu machen: breiter, mit
+Linie, Mauszeiger und Tooltip. Ein besserer Griff an der falschen Form. Erst
+r18.0.0 änderte die Form.
+
+**r18.0.0 „Übersicht"** gliederte das Fenster in fünf Reiter, einen je
+Arbeitsschritt, und ließ Marke, Profilzeile, Protokoll und Schaltflächen
+stehen. Das Protokoll blieb bewusst außerhalb der Reiter: Dort erscheinen
+Fehler, und ein Fehler hinter einem Reiter ist ein Fehler, den niemand sieht.
+Die Schaltflächen bekamen die Reihenfolge der Arbeit und einen Strich zwischen
+Vorwärts und Rückwärts — *Rückgängig* hatte neben *Ausführen* gestanden, als
+wäre es der nächste Schritt.
+
+Beim Bauen entstand prompt ein neuer Fall desselben Fehlers: Nach einem Plan
+holt das Fenster den Ergebnis-Reiter nach vorn, was sinnvoll ist — nur plant
+eine Regeländerung *automatisch* neu, und so hätte es den Anwender bei jeder
+Regel aus der Ordnertabelle geworfen. Dasselbe Drängeln in anderem Gewand.
+
+Die Profile wurden im selben Zug geradegezogen. Ein Profil entstand bis dahin
+dadurch, dass man einen noch nicht vergebenen Namen eintippte und *Speichern*
+drückte — nicht zu erraten, und ein Tippfehler legte stillschweigend ein
+zweites an.
+
+Nebenbei: Die Testsuite lief zehn Minuten statt achtzehn Sekunden. Ein Test
+hing an einem modalen Warnhinweis, und das war mir als „die GUI-Tests sind eben
+langsam" durchgegangen.
+
+## 15.09.2026 — vier Wünsche, und welcher zuerst fallen musste
+
+Andreas kam mit vier Vorhaben: Stichwörter automatisiert bearbeiten, sie aus
+Datei- und Ordnernamen ableiten, aus einer Recherche einen neuen Katalog bauen,
+und einen Stichwortkatalog über alle Bibliotheken. Ausdrücklich mit der Bitte,
+erst abzustimmen und zu dokumentieren.
+
+Die Prüfung vorab an den echten Katalogen entschied drei der vier Punkte:
+
+| Frage | Befund |
+| --- | --- |
+| Wie viele Bibliotheken? | **48** über mehrere Laufwerke, zusammen ~135.000 Bilder |
+| Stichwort-Hierarchie | höchstens zwei Ebenen; `genealogy` ist ein ID-Pfad mit Stellenzahl-Präfix — 577 von 577 lasen sich so |
+| Zählerpflege | `imageCountCache` ist `-1`, Lightroom rechnet selbst nach |
+| Kopien erkennbar? | ja, über `Adobe_images.id_global` — der Versuch fand ein Paar mit **unterschiedlicher Bildzahl** (3296/3298) |
+
+**Der erste Wunsch wurde ganz zurückgestellt**, auf Andreas' Entscheidung. Der
+Grund verdient es, festgehalten zu werden: Das Werkzeug ist deshalb so sicher,
+weil es **keine Fotozeile anfasst**. Stichwörter hängen über
+`AgLibraryKeywordImage` unmittelbar an den Bildern und brechen mit dieser
+Zusage. Der Index dagegen liest nur.
+
+**r19.0.0 „Fundort"** brachte den Index: 47 Bibliotheken, 183.407 Fotos, 1.054
+Stichwörter, in 26 Sekunden eingelesen, ohne eine einzige Bilddatei zu öffnen.
+Ein Wächtertest sperrt das neue Paket vom Ordner-Pfad ab — `cli.py`,
+`planner.py`, `executor.py` und `folders.py` dürfen es nicht einmal
+importieren.
+
+Die Kopienerkennung war die lehrreichste Stelle. Der erste Entwurf verglich
+einen Hash über eine Stichprobe von Foto-UUIDs. Das funktionierte an den echten
+Katalogen — und **nur mit Glück**: Sortiert man nach UUID, verteilen sich
+später hinzugekommene Fotos zufällig über die Stichprobe. Ein Test mit einer
+Bibliothek aus *drei* Fotos deckte es auf. Aufnahmereihenfolge plus
+Überlappungsprüfung statt Gleichheit brachte die Zahl erkannter Kopien von drei
+auf sechs, alle echt.
+
+Der Export geht bewusst rückwärts: nicht einen Katalog schreiben, sondern den
+vorhandenen kopieren und aus der Kopie entfernen, was nicht gewählt war. Was
+übrig bleibt, hat Lightroom selbst geschrieben.
+
 ## Was die echten Tests gezeigt haben
 
 Alle Läufe gegen `Masterkatalog.Neu.lrcat`, 51.049 Fotos, 2,36 TB, sofern nicht
@@ -455,6 +530,12 @@ anders vermerkt.
 | 23.08. 22:31 | Masterkatalog | CLI, **nach 35 s abgeschossen** | 13.605 bewegt, `resume` stellte alles zurück |
 | 23.08. 22:41 | Masterkatalog | **TUI** nach r16.0.1 | geprüft, über `Strg+Z` zurückgenommen |
 | 23.08. 22:46 | Masterkatalog | TUI, **nach 45 s abgeschossen** | über `Strg+E` aus der TUI wiederaufgenommen |
+| 30.08. | GUI nach r18.0.0 | Fenster in Reitern, Profile anlegen/löschen | 633 Tests, von Andreas im Einsatz bestätigt |
+| 15.09. | **48 Kataloge**, mehrere Laufwerke | erster Index-Durchlauf | 43 von 54 scheiterten — Cursor-`lastrowid` nach dem Kind-Insert |
+| 15.09. | dieselben | nach der Behebung | 47 Bibliotheken, 183.407 Fotos, 1.054 Stichwörter in 26 s |
+| 15.09. | dieselben | Kopienerkennung über Gleichheit | 3 Kopien — wie sich zeigte, mit Glück |
+| 15.09. | dieselben | über Überlappung, Aufnahmereihenfolge | **6 Kopien**, alle echt (`_Archiv`, `-v13`) |
+| 15.09. | `shootings.lrcat`, 6.043 | Export: Kopie auf 7 Fotos verkleinert | 10,0 MB statt 78,3 MB, Original bitgleich |
 
 Jeder Zyklus endete bitidentisch am Ausgangszustand: zehn Katalogtabellen, alle
 Pfade und alle 51.063 Dateien auf der Platte.

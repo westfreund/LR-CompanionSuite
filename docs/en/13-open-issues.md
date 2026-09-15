@@ -307,6 +307,40 @@ needed at least: search with the criteria from `index find`, the list of drives
 with what is attached, and the duplicate report. The export probably belongs
 there too, but then with the same confirmation the command line asks for.
 
+### O-32 · A tool of its own, with a name of its own? — open
+Raised by Andreas on 15 September 2026, once the index existed: the searching
+half probably deserves a **window of its own**, and may well be a **tool of its
+own** with its own name. His suggestion: *LR-MetaSearch*.
+
+The observation behind it holds. More searching and reassembling is going on
+than was expected, and the index answers different questions from the folder
+reorganisation, has a different data model, and addresses a different mood --
+curating rather than tidying.
+
+**Three things have to be decided, and they are often confused:**
+
+| Question | Note |
+| --- | --- |
+| Its own name and window? | Everything argues for it. Cheap, and changes nothing technical. |
+| Its own command (`lrms` rather than `lrfc index`)? | Follows from the name. An alias will do at first. |
+| Its own repository? | This is the expensive question -- and the only one that is hard to undo. |
+
+**Recommendation:** yes to the first two, not yet to the third. One repository
+with two tools and a shared core costs one CI, one release ritual and one
+documentation tree; two repositories cost all of it twice, and the shared core
+-- `catalog/db.py` with its `mode=ro`/`immutable=1` fallback, lock detection and
+schema checks -- would have to be duplicated or published as a package of its
+own. For one person that is a lot.
+
+The separation already exists in the code (`index/` plus its guard test), and
+that is precisely what makes a later split cheap: the package can be lifted out
+with its history when the time comes. The other direction is expensive.
+
+**Still open:** whether the name fits. *MetaSearch* describes the searching
+well but leaves out finding duplicates and assembling new catalogs. That is not
+an objection -- a name need not cover everything -- but it should be a decision
+rather than an accident.
+
 ### O-30 · Writing keywords — deferred
 Originally the first wish, **deferred entirely** at Andreas's decision.
 

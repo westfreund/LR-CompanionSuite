@@ -403,6 +403,76 @@ the tool said so or helped. That became r16.0.0.
 
 ---
 
+## 30 August 2026 — the window no longer fitted in a window
+
+Andreas reported that the settings were too many for one window. They were.
+Everything was stacked in a single scrolling column: the window showed the
+catalog and hid the structure, the options and the rules below the visible
+edge, behind a scrollbar nobody had reason to suspect.
+
+The prehistory is the interesting part. This exact problem had been reported
+once before — then as "the collapsible sections are hard to find" — and the
+answer had been to make the dividers easier to grab: wider, with a rule, a
+cursor and a tooltip. A better handle on the wrong shape. Only r18.0.0 changed
+the shape.
+
+**r18.0.0 "Übersicht"** put the window into five tabs, one per step of the
+work, and left the mark, the profile row, the log and the buttons in place. The
+log stayed outside the tabs deliberately: it is where an error appears, and an
+error behind a tab is an error nobody sees. The buttons got the order of the
+work and a rule between forward and back — *Undo* had been sitting next to
+*Apply* as though it were the next step.
+
+Building it produced a fresh instance of the same mistake at once: after a plan
+the window brings the result forward, which is helpful — except that changing a
+rule re-plans *automatically*, so it would have thrown the operator out of the
+folder table on every rule. The same crowding in a different coat.
+
+Profiles were straightened out in the same pass. Until then a profile came into
+being by typing a name nobody had used yet and pressing *Save* —
+undiscoverable, and a typo silently made a second one.
+
+Incidentally: the test suite was taking ten minutes instead of eighteen
+seconds. One test hung on a modal warning, and that had gone past me as "the
+GUI tests are just slow".
+
+## 15 September 2026 — four wishes, and which one had to go first
+
+Andreas came with four: edit keywords automatically, derive them from file and
+folder names, build a new catalog out of a search, and index keywords across
+every library. Explicitly asking to agree and document before anything was
+built.
+
+Checking against the real catalogs first settled three of the four:
+
+| Question | Finding |
+| --- | --- |
+| How many libraries? | **48** across several drives, some 135,000 images |
+| Keyword hierarchy | two levels at most; `genealogy` is a path of digit-count-prefixed ids — 577 of 577 read that way |
+| Count bookkeeping | `imageCountCache` is `-1`; Lightroom recomputes it |
+| Copies detectable? | yes, via `Adobe_images.id_global` — the trial found a pair with **different image counts** (3296/3298) |
+
+**The first wish was deferred entirely**, at Andreas's decision. The reason
+deserves recording: the tool is as safe as it is because it **touches no photo
+row**. Keywords hang directly off the images through `AgLibraryKeywordImage`
+and break that promise. The index, by contrast, only reads.
+
+**r19.0.0 "Fundort"** brought the index: 47 libraries, 183,407 photographs,
+1,054 keywords, read in 26 seconds without opening a single image file. A guard
+test seals the new package off from the folder path — `cli.py`, `planner.py`,
+`executor.py` and `folders.py` may not so much as import it.
+
+Recognising copies was the most instructive part. The first design hashed a
+sample of photo UUIDs. It worked against the real catalogs — and **only by
+luck**: ordered by UUID, photographs added later scatter evenly through the
+sample. A test with a library of *three* photographs exposed it. Insertion
+order plus an overlap test instead of equality took the count of recognised
+copies from three to six, all genuine.
+
+The export runs deliberately backwards: rather than writing a catalog, copy the
+existing one and remove from the copy what was not selected. What survives was
+written by Lightroom itself.
+
 ## What the real tests have shown
 
 All runs against `Masterkatalog.Neu.lrcat`, 51,049 photos, 2.36 TB, unless
@@ -426,6 +496,12 @@ noted otherwise.
 | 23 Aug 22:31 | master catalog | command line, **killed after 35 s** | 13,605 moved, `resume` put them all back |
 | 23 Aug 22:41 | master catalog | **text interface** after r16.0.1 | verified, undone via `Ctrl+Z` |
 | 23 Aug 22:46 | master catalog | text interface, **killed after 45 s** | resumed from within it via `Ctrl+E` |
+| 30 Aug | GUI after r18.0.0 | window in tabs, profiles made and deleted | 633 tests, confirmed in use by Andreas |
+| 15 Sep | **48 catalogs**, several drives | first index run | 43 of 54 failed — cursor `lastrowid` read after the child insert |
+| 15 Sep | the same | after the fix | 47 libraries, 183,407 photographs, 1,054 keywords in 26 s |
+| 15 Sep | the same | copy detection by equality | 3 copies — as it turned out, by luck |
+| 15 Sep | the same | by overlap, insertion order | **6 copies**, all genuine (`_Archiv`, `-v13`) |
+| 15 Sep | `shootings.lrcat`, 6,043 | export: copy reduced to 7 photographs | 10.0 MB instead of 78.3 MB, original byte-identical |
 
 Every cycle ended byte-identical to where it started: ten catalog tables, every
 path, and all 51,063 files on disk.

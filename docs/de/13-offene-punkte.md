@@ -330,6 +330,41 @@ mit dem Hinweis, was angeschlossen ist, und der Dublettenbericht. Der Export
 gehört wahrscheinlich ebenfalls dazu, dann aber mit derselben Rückfrage wie auf
 der Kommandozeile.
 
+### O-32 · Ein eigenes Werkzeug mit eigenem Namen? — offen
+Am 15.09.2026 von Andreas aufgeworfen, nachdem der Index stand: Der Suchteil
+verdient vermutlich ein **eigenes Fenster**, und womöglich ist er gar ein
+**eigenes Werkzeug** mit eigenem Namen. Vorschlag: *LR-MetaSearch*.
+
+Die Beobachtung dahinter trägt: Es wird mehr gesucht und neu zusammengestellt
+als zunächst gedacht. Der Index beantwortet andere Fragen als die
+Ordnerumsortierung, hat ein anderes Datenmodell und richtet sich an eine andere
+Stimmung — Kuratieren statt Aufräumen.
+
+**Zu entscheiden sind drei Dinge, die oft verwechselt werden:**
+
+| Frage | Anmerkung |
+| --- | --- |
+| Eigener Name und eigenes Fenster? | Dafür spricht alles. Kostet wenig, ändert nichts an der Technik. |
+| Eigener Befehl (`lrms` statt `lrfc index`)? | Folgt aus dem Namen. Ein Alias genügt zunächst. |
+| Eigenes Repository? | Das ist die teure Frage — und die einzige, die schwer rückgängig zu machen ist. |
+
+**Empfehlung:** die ersten beiden ja, das dritte vorerst nein. Ein Repository
+mit zwei Werkzeugen und gemeinsamem Kern kostet eine CI, ein
+Veröffentlichungsritual und einen Dokumentationsbaum; zwei Repositorys kosten
+alles doppelt, und der gemeinsame Kern — `catalog/db.py` mit dem
+`mode=ro`/`immutable=1`-Rückfall, Sperrerkennung und Schemaprüfung — müsste
+entweder dupliziert oder als eigenes Paket veröffentlicht werden. Für eine
+Person ist das viel.
+
+Die Trennung im Code besteht bereits (`index/` plus Wächtertest), und genau
+deshalb ist ein späterer Schnitt billig: Das Paket lässt sich mit seiner
+Historie herauslösen, wenn es so weit ist. Umgekehrt ist es teuer.
+
+**Offen bleibt:** ob der Name treffend ist. *MetaSearch* beschreibt das Suchen
+gut, unterschlägt aber das Erkennen von Dubletten und das Zusammenstellen neuer
+Kataloge. Das ist kein Einwand — ein Name muss nicht alles abdecken —, aber es
+sollte bewusst entschieden sein.
+
 ### O-30 · Stichwörter schreiben — zurückgestellt
 Ursprünglich der erste Wunsch, auf Andreas' Entscheidung hin **komplett
 zurückgestellt**.

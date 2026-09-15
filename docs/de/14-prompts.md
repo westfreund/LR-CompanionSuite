@@ -318,6 +318,48 @@ pre-flight checks, execute with a progress callback. Then:
   Qt tests. If a test can reach a dialog, patch it or do not go that way.
 * **Qt eats a single ampersand in a tab or button label** as the accelerator
   marker. Double it.
+* **Read a row id before the next insert moves it.** A cursor's `lastrowid`
+  names the most recent insert on that cursor, so reading it after writing a
+  child row gives the child's id. Every photograph's second keyword was hung on
+  a row that did not exist, which surfaced as a foreign key error on 43 of 54
+  catalogs and looked like the catalogs were at fault.
+* **A reader that records what it read must roll back what it failed to read.**
+  A catalog whose read threw left a row behind saying it held no photographs.
+  Half a library in an index is worse than none, because the gap is invisible
+  afterwards.
+* **Copy the write-ahead log with the database.** A catalog in WAL mode keeps
+  recent commits in `<name>.lrcat-wal`. Copy only the `.lrcat` and the copy
+  silently lacks whatever was done last -- not lost, since the original keeps
+  it, but absent without a word.
+* **Identify a drive by something other than its name.** Two external disks
+  called "Backup" are a matter of time. Every platform offers better: VolumeUUID
+  on macOS, the volume serial number on Windows, the filesystem UUID on Linux.
+  Where none is available, fall back to a fingerprint *and say that you did* --
+  a weak answer presenting itself as a strong one is worse than no answer.
+* **Match copies by overlap, not by equality.** Deciding whether two catalogs
+  are the same library by hashing a sample of ids is exact and wrong: a copy and
+  its original drift apart, and the pair that mattered differed by two
+  photographs out of 3,296. Draw the sample in *insertion* order too -- ordered
+  by a random id, later additions scatter evenly through it and whether a grown
+  copy still matches comes down to luck. It passed against real data and failed
+  the moment a test used a library of three.
+* **Find the tables that refer to a thing, do not list them.** Removing
+  photographs from a catalog touches 46 tables in one Lightroom version and a
+  different number in the next. Look for the column by name; a hard-coded list
+  rots with the first release.
+* **Prefer subtraction to construction.** Building a catalog from nothing means
+  recreating develop settings, collections and previews, and getting any of it
+  wrong yields a file that opens and is quietly wrong. Copying the original and
+  deleting what is not wanted leaves only rows the application itself wrote.
+* **Do not ship a weak version under a name that promises more.** "Similarity"
+  that cannot see the pixels is not similarity. State the limit instead; a user
+  who trusts the name and gets the weak version is worse off than one who was
+  told.
+* **A warning that is sound advice in one place is nonsense in another.**
+  "Check the result in Lightroom" belongs to a run that writes. Emitted 40 times
+  during a read-only scan it teaches the reader to ignore warnings.
+* **Group digits the way the reader's language does.** `{:,}` is English; a
+  German reader sees 183,407 as a decimal.
 * **Compose text before you map or compare it.** macOS hands back filenames
   decomposed, so a name a user typed as "Völki" arrives as "o" plus a combining
   diaeresis. Any per-character table, and any pattern comparison, silently
