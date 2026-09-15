@@ -1,6 +1,6 @@
 # Installation
 
-**Revision r18.0.0 · Build-Datum 2026-08-24**
+**Revision r18.0.0 · Build-Datum 2026-08-30**
 
 LR-FolderCraft ist ein Python-Paket. Die Installationsskripte legen eine
 isolierte virtuelle Umgebung an, sodass am System-Python nichts verändert wird.

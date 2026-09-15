@@ -76,12 +76,20 @@ def test_both_trees_hold_the_same_documents(language):
 
 @pytest.mark.parametrize("language", LANGUAGES)
 def test_every_document_carries_the_current_revision(language):
-    from lrfoldercraft.version import __version__
+    """Revision *and* build date.
 
+    Checking only the revision let every banner sit on a build date a week old
+    through two releases: the bump script replaces the version string, and the
+    date beside it was nobody's business.
+    """
+    from lrfoldercraft.version import __build_date__, __version__
+
+    wanted = ("r{v}".format(v=__version__), __build_date__)
     stale = [
-        p.name
+        "{n}: {w}".format(n=p.name, w=w)
         for p in (DOCS / language).glob("*.md")
-        if "r{v}".format(v=__version__) not in p.read_text(encoding="utf-8")
+        for w in wanted
+        if w not in p.read_text(encoding="utf-8")
     ]
     assert not stale, stale
 

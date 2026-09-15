@@ -1,6 +1,6 @@
 # Offene Punkte und Fahrplan
 
-**Revision r18.0.0 · Build-Datum 2026-08-24**
+**Revision r18.0.0 · Build-Datum 2026-08-30**
 
 Eine ehrliche Aufstellung dessen, was nicht erledigt, nicht verifiziert oder
 bewusst ausgelassen ist. Jeder Punkt ist ein Ansatzpunkt für die nächste
@@ -215,6 +215,116 @@ Grund funktionieren; und es sollte *Fotos in Ordner einsortieren* andeuten
 statt eine beliebige Kamera zu zeigen. Nach der Auswahl: die Größen erzeugen,
 die Fenstersymbol, GitLab-Profilbild und Dokumentation brauchen, und aus beiden
 READMEs darauf verweisen.
+
+## Erweiterung: Index über alle Bibliotheken
+
+Abgestimmt am **15.09.2026**. Andreas möchte das Werkzeug über die
+Ordnerreorganisation hinaus einsetzen. Vier Wünsche standen zur Debatte, die
+Entscheidungen sind hier festgehalten, damit später nachvollziehbar bleibt,
+*warum* der Zuschnitt so ist.
+
+### Was vorher geprüft wurde
+
+Nicht aus dem Gedächtnis, sondern an den echten Katalogen:
+
+| Frage | Befund |
+| --- | --- |
+| Wie viele Bibliotheken? | **48 Kataloge** über mehrere Laufwerke erreichbar, zusammen rund 135.000 Bilder und 600.000 Stichwortzuordnungen |
+| Stichwort-Hierarchie | maximal zwei Ebenen; `genealogy` ist ein ID-Pfad mit Stellenzahl-Präfix (`/594387/594391`) — **577 von 577** Einträgen ließen sich so lesen |
+| Zählerpflege | `imageCountCache` steht auf `-1`: Lightroom rechnet selbst nach, es muss nichts konsistent gehalten werden |
+| Wolkensynchronisation | `AgRemotePhoto` ist im Masterkatalog leer. **Je Katalog zu prüfen**, nicht pauschal anzunehmen |
+| Kopien erkennbar? | ja — `Adobe_images.id_global` ist je Foto eine UUID, die eine Kopie mitträgt. Der Versuch fand zwei Kopiengruppen, darunter eine mit **unterschiedlicher Bildzahl** (3296 / 3298), die jeder Vergleich über Größe oder Namen übersehen hätte |
+| Laufwerkskennung | macOS liefert je Datenträger eine `VolumeUUID`, unabhängig vom Namen |
+
+### Die Entscheidungen
+
+**Es bleibt in diesem Projekt**, aber streng getrennt. Die Sicherheitsmaschinerie
+— nur lesend öffnen, Sicherung, Journal, Rücknahme, Wiederaufnahme — ist das
+teuer erarbeitete Gut; ein zweites Projekt würde sie verdoppeln oder ohne sie
+auskommen. Dafür gelten vier Zusagen:
+
+1. Neuer Code lebt in eigenen Modulen, **niemals** in `planner.py`,
+   `executor.py` oder `folders.py`.
+2. Ein **Wächtertest** prüft, dass der Ordner-Pfad die neuen Module nicht
+   einmal importiert. Ein Fehler dort kann ihn dann nicht erreichen.
+3. Eigene Unterbefehle; die vorhandenen bleiben unberührt.
+4. Die bestehenden Tests sind die Untergrenze, nicht das Ziel.
+
+**Kataloge und Bilddateien werden nicht angefasst.** Der Index ist rein lesend.
+
+### O-27 · Index über alle Bibliotheken
+Ein eigener Index, der jede bekannte Bibliothek erfasst und auch dann Auskunft
+gibt, wenn das Laufwerk im Schrank liegt — er sagt dann, *welches* Laufwerk
+anzuschließen ist.
+
+Je Bild aufzunehmen: **Katalogname, Ordnername, Dateiname, die im Katalog
+vergebenen Stichwörter und die EXIF-Daten.**
+
+Dazu gehören drei Anforderungen, die den Entwurf bestimmen:
+
+- **Doppelungen durch Katalogkopien und Sicherungen müssen ausbleiben.** Der
+  Weg dahin ist oben belegt: Die Bild-UUIDs (`Adobe_images.id_global`) weisen
+  eine Kopie als Kopie aus. Von einer Gruppe zählt eine, die übrigen werden
+  vermerkt, nicht stillschweigend verworfen — welche die gültige ist, entscheidet
+  der Mensch.
+- **Mehrere Laufwerke, eine Pflege.** Pfad und Dateiname des Index sind
+  wählbar, damit er dort liegen kann, wo er gebraucht wird.
+- **Je Laufwerk eine eindeutige Kennung**, nicht der Laufwerksname: unter macOS
+  die `VolumeUUID`. Unter Windows ist das Gegenstück die Datenträger-GUID; das
+  ist **noch zu verifizieren**. Fehlt beides, muss ein Fingerabdruck aus
+  Dateisystem, Größe und Erstellungsdatum einspringen — und er muss sich als
+  schwächer zu erkennen geben.
+
+Der Index ist eine **Momentaufnahme**. Er muss zu jedem Katalog sagen, wann er
+ihn zuletzt gelesen hat, sonst behauptet er Aktualität, die er nicht hat.
+
+### O-28 · Gleichheits- und Ähnlichkeitsfilter
+Doppelte Dateien und doppelte Kataloge finden. Zwei Stufen, die nicht
+verwechselt werden dürfen:
+
+- **Gleichheit** lässt sich ohne die Dateien beantworten: Aufnahmezeit, Kamera,
+  Dateiname und Bildmaße aus dem Katalog ergeben zusammen einen belastbaren
+  Schlüssel. Das funktioniert auch bei abgestecktem Laufwerk.
+- **Ähnlichkeit** — Serien, Varianten, Beschnitte — braucht die Bilddaten und
+  damit ein angeschlossenes Laufwerk. Sie ist deshalb ein eigener, langsamerer
+  Durchgang und darf nicht so tun, als käme sie aus dem Index.
+
+### O-29 · Aus dem Index ein Set, daraus ein Katalog
+Aus den gefilterten Bildern ein Set zusammenstellen und daraus einen neuen
+Katalog erzeugen — **katalogübergreifend**, mit den im Quellkatalog hinterlegten
+Einstellungen, in einen neu zu erstellenden oder zu aktualisierenden Katalog
+hinein.
+
+Der vorgeschlagene Weg ist **subtraktiv statt konstruktiv**: Einen Katalog von
+Grund auf zu schreiben hieße, Entwicklungseinstellungen, Sammlungen und
+Vorschauen nachzubauen. Stattdessen je Quellkatalog eine **Kopie** anlegen und
+darin die nicht gewählten Bilder entfernen. Das Ergebnis ist mit Sicherheit ein
+gültiger Katalog mit allen Einstellungen, ohne dass eine einzige neue Zeilenart
+geschrieben wird — und das Original wird nie angefasst. Das Zusammenführen der
+reduzierten Kataloge übernimmt dann Lightroom selbst mit *„Aus anderem Katalog
+importieren"*.
+
+**Noch nicht verifiziert**, und vor der Umsetzung zu belegen: dass ein so
+reduzierter Katalog von Lightroom anstandslos geöffnet und importiert wird.
+
+### O-30 · Stichwörter schreiben — zurückgestellt
+Ursprünglich der erste Wunsch, auf Andreas' Entscheidung hin **komplett
+zurückgestellt**.
+
+Der Grund, warum das eine eigene Überlegung verdient: Das Werkzeug ist heute
+deshalb so sicher, weil es **keine Fotozeile anfasst** — es ändert
+`AgLibraryFolder` und `AgLibraryFile.folder`, sonst nichts. Stichwörter hängen
+über `AgLibraryKeywordImage` unmittelbar an den Bildern und brechen mit dieser
+Zusage.
+
+Falls es je aufgenommen wird, stehen zwei Wege offen: direkt im Katalog, mit der
+vorhandenen Sicherheitsmaschinerie — oder ein Lightroom-Plugin über das Lua-SDK,
+der von Adobe vorgesehene Weg, der aber eine zweite Sprache, einen zweiten
+Installationsweg und die Beschränkung auf jeweils einen offenen Katalog
+mitbringt. Die Ableitung selbst, also der schwierige Teil, wäre in beiden Fällen
+dieselbe: Aus `2025.05.17 Andreas Vorreyer - Kathrin/` die Stichwörter
+*Andreas Vorreyer* und *Kathrin* zu gewinnen, ist Musterarbeit, wie sie die
+vorhandene Regel-Maschine bereits leistet.
 
 ## Ideen, keine Zusagen
 

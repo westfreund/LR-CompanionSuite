@@ -1,6 +1,6 @@
 # Projekthistorie
 
-**Revision r18.0.0 · Build-Datum 2026-08-24**
+**Revision r18.0.0 · Build-Datum 2026-08-30**
 
 Der [CHANGELOG](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md) sagt, was sich in jeder Revision geändert
 hat. Dieses Dokument sagt **warum**, und was dazwischen geschah: die getroffenen

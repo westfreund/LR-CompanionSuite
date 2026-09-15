@@ -1,6 +1,6 @@
 # Versionierung
 
-**Revision r18.0.0 · Build-Datum 2026-08-24**
+**Revision r18.0.0 · Build-Datum 2026-08-30**
 
 ## Das Schema
 

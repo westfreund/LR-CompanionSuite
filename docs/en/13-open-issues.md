@@ -1,6 +1,6 @@
 # Open issues and roadmap
 
-**Revision r18.0.0 · Build date 2026-08-24**
+**Revision r18.0.0 · Build date 2026-08-30**
 
 An honest list of what is not done, not verified, or deliberately left out.
 Each item is a starting point for the next session.
@@ -199,6 +199,108 @@ dark; and it should suggest *ordering photographs into folders* rather than
 being a generic camera. Once one is chosen: export the sizes the window icon,
 the GitLab avatar and the documentation need, and reference it from both
 READMEs.
+
+## Extension: an index across every library
+
+Agreed on **15 September 2026**. Andreas wants to use the tool beyond
+reorganising folders. Four wishes were on the table; the decisions are recorded
+here so that the shape of the work stays explicable later.
+
+### What was checked first
+
+Against the real catalogs, not from memory:
+
+| Question | Finding |
+| --- | --- |
+| How many libraries? | **48 catalogs** reachable across several drives, together some 135,000 images and 600,000 keyword assignments |
+| Keyword hierarchy | two levels at most; `genealogy` is a path of ids each prefixed by its digit count (`/594387/594391`) — **577 of 577** entries read that way |
+| Count bookkeeping | `imageCountCache` is `-1`: Lightroom recomputes it, so nothing has to be kept consistent |
+| Cloud sync | `AgRemotePhoto` is empty in the master catalog. **To be checked per catalog**, never assumed |
+| Are copies detectable? | yes — `Adobe_images.id_global` is a UUID per photo that a copy carries with it. The trial found two groups of copies, one of them with **different image counts** (3296 / 3298), which any comparison by size or name would have missed |
+| Drive identity | macOS gives each volume a `VolumeUUID`, independent of its name |
+
+### The decisions
+
+**It stays in this project**, but strictly separated. The safety machinery —
+opening read-only, the backup, the journal, undo, resume — is the hard-won
+asset; a second project would either duplicate it or do without. Four promises
+go with that:
+
+1. New code lives in modules of its own, **never** in `planner.py`,
+   `executor.py` or `folders.py`.
+2. A **guard test** checks that the folder path does not so much as import the
+   new modules. A fault there cannot then reach it.
+3. Subcommands of its own; the existing ones are untouched.
+4. The existing tests are the floor, not the target.
+
+**Catalogs and image files are not touched.** The index only reads.
+
+### O-27 · An index across every library
+An index of its own covering every known library, able to answer even when the
+drive is in a cupboard — it then says *which* drive to connect.
+
+Per image: **catalog name, folder name, file name, the keywords assigned in the
+catalog, and the EXIF data.**
+
+Three requirements shape the design:
+
+- **Copies and backups of catalogs must not appear twice.** The route is proven
+  above: the image UUIDs (`Adobe_images.id_global`) identify a copy as a copy.
+  One of a group counts, the others are recorded rather than silently dropped —
+  which one is the valid one is a person's decision.
+- **Several drives, one index.** Its path and file name are chosen, so it can
+  live where it is needed.
+- **A stable identifier per drive**, not the drive's name: on macOS the
+  `VolumeUUID`. On Windows the counterpart is the volume GUID; that is **still
+  to be verified**. With neither available, a fingerprint of filesystem, size
+  and creation date has to stand in — and must declare itself the weaker
+  answer.
+
+The index is a **snapshot**. It has to say, per catalog, when it last read it,
+or it claims a currency it does not have.
+
+### O-28 · Sameness and similarity
+Finding duplicate files and duplicate catalogs. Two stages that must not be
+confused:
+
+- **Sameness** can be answered without the files: capture time, camera, file
+  name and pixel dimensions from the catalog together make a dependable key.
+  That works with the drive disconnected.
+- **Similarity** — series, variants, crops — needs the image data and therefore
+  a connected drive. It is a separate, slower pass, and must not pretend to
+  come out of the index.
+
+### O-29 · A set from the index, and a catalog from the set
+Assemble a set from the filtered images and make a catalog of it — **across
+catalogs**, carrying the settings held in the source catalog, into a catalog to
+be newly created or updated.
+
+The proposed route is **subtractive rather than constructive**: writing a
+catalog from nothing would mean rebuilding develop settings, collections and
+previews. Instead, take a **copy** of each source catalog and remove the images
+not chosen. The result is certainly a valid catalog with every setting intact,
+without a single new kind of row being written — and the original is never
+touched. Merging the reduced catalogs is then Lightroom's own *"Import from
+Another Catalog"*.
+
+**Not yet verified**, and to be proven before any implementation: that a
+catalog reduced this way opens and imports without complaint.
+
+### O-30 · Writing keywords — deferred
+Originally the first wish, **deferred entirely** at Andreas's decision.
+
+Why it deserves its own thought: the tool is as safe as it is today because it
+**touches no photo row** — it changes `AgLibraryFolder` and
+`AgLibraryFile.folder` and nothing else. Keywords hang directly off the images
+through `AgLibraryKeywordImage` and break that promise.
+
+If it is ever taken up, two routes are open: directly in the catalog with the
+existing safety machinery, or a Lightroom plugin through the Lua SDK — Adobe's
+intended route, which brings a second language, a second way to install, and
+the limit of one open catalog at a time. The derivation itself, which is the
+hard part, would be the same either way: getting the keywords *Andreas
+Vorreyer* and *Kathrin* out of `2025.05.17 Andreas Vorreyer - Kathrin/` is
+pattern work of the kind the existing rule engine already does.
 
 ## Ideas, not commitments
 
