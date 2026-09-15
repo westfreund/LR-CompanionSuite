@@ -377,6 +377,58 @@ r20.0.0 brought the window, not the text interface. The folder reorganisation
 has three front ends, LR-MetaSearch has two. Searching and the list of drives
 would be the minimum; the export probably does not belong in a terminal.
 
+### O-34 · LR-LinkRepair — mending links that lead nowhere
+Proposed by Andreas on 15 September 2026, as a third tool in the suite.
+
+**The problem.** A catalog remembers where its photographs are as an absolute
+path. Rename or replace a drive, or move the library, and those paths lead
+nowhere: Lightroom reports every photograph as missing. By hand it is a matter
+of *"Find Missing Folder"* per folder — across many libraries on one drive that
+is not work a person should be doing.
+
+**What already exists.** The logic is in `metasearch/relink.py`: it looks in
+the catalog's own directory and a few above it, trying each tail of the stated
+path, and accepts a candidate only once **six photographs the catalog names are
+really there**. So far it is applied only to *copies* the tool made itself.
+LR-MetaSearch's index already knows which libraries sit on which drive, which
+is exactly the list such a tool needs to offer.
+
+**What the design has to do:**
+
+- **Choose a drive**, and within it include or exclude directories and
+  individual libraries. Nothing selected by default: nothing happens without a
+  deliberate choice.
+- **Show before doing.** As everywhere in this suite: a plan that changes
+  nothing — which catalog points where, where it would point instead, and on
+  how many proven photographs that rests.
+- **Never without proof.** No path is changed because it looks plausible.
+- **Reversible.** Exactly one column in one table changes
+  (`AgLibraryRootFolder.absolutePath`); the old values can be written down and
+  written back. That is a smaller intervention than LR-FolderCraft's, and the
+  same machinery — verified backup, journal, undo — carries it.
+
+**The trap it has to know about.** On 15 September 2026 it emerged that
+`G-DRIVE PROJECT` is a **backup drive**: another tool puts backups there, in a
+directory assigned to the source drive. A backup catalog pointing at its source
+drive is therefore **not broken, it is correct** — bending it towards the
+backup would be wrong, and would quietly arrange for somebody to work on copies
+instead of their photographs.
+
+So the tool has to ask about this rather than guess:
+
+| Situation | What is right |
+| --- | --- |
+| The library lives here and the drive was renamed | mend it |
+| The library is a backup pointing at its source | **leave it** |
+| The source is simply not attached right now | leave it, and say so |
+
+A drive that serves as a backup target should be markable as one, and then be
+left alone.
+
+**Open:** the command name (`lrlink`?), whether it needs a window of its own or
+a tile with a dialog will do, and whether backup drives are recognised by a
+mark the user sets or by something found in the directory naming.
+
 ### O-30 · Writing keywords — deferred
 Originally the first wish, **deferred entirely** at Andreas's decision.
 

@@ -190,10 +190,22 @@ pointed at /Volumes/G-DRIVE PROJECT/lr-andy/Andy/shootings/
 
 `--no-relink` keeps whatever the original says.
 
-The same applies to searching: a `!` before a hit means the file is **not where
-the catalog says** -- the drive may be detached, or the library was moved
-without telling Lightroom. What is checked is the photographs' folder, not the
-catalog's drive: those are not the same place.
+**If the source is a backup**, the export then points at the backed-up files
+rather than the originals. That is usually what is wanted — the backup is the
+drive that is attached — but it is worth knowing.
+
+The same applies to searching: a `!` before a hit means the file is **not
+where the catalog says**. That can mean three things, and the tool cannot tell
+which:
+
+- The drive is simply not attached.
+- The library was moved, or the drive renamed.
+- **The catalog is a backup** and is quite correctly pointing at its source
+  drive. That is not a fault — see O-34 in
+  [13-open-issues.md](13-open-issues.md).
+
+What is checked is the photographs' folder, not the catalog's drive: those are
+not the same place.
 
 ### What comes along — and why it is so large
 

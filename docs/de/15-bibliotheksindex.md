@@ -197,11 +197,22 @@ verwiesen auf /Volumes/G-DRIVE PROJECT/lr-andy/Andy/shootings/
 
 Mit `--no-relink` bleibt der Pfad so, wie er im Original steht.
 
+**Wenn die Quelle eine Sicherung ist**, zeigt der Export folglich auf die
+gesicherten Dateien, nicht auf die Originale. Das ist meist das Gewünschte —
+die Sicherung ist ja angeschlossen — sollte einem aber bewusst sein.
+
 Dasselbe gilt für die Suche: Ein `!` vor einem Treffer heißt, dass die Datei
-**nicht dort liegt, wo der Katalog sagt** — das Laufwerk ist nicht
-angeschlossen, oder die Bibliothek wurde verschoben, ohne es Lightroom zu
-sagen. Geprüft wird dabei der Ordner der Fotos, nicht das Laufwerk des
-Katalogs: Das sind nicht dieselben Orte.
+**nicht dort liegt, wo der Katalog sagt**. Das kann dreierlei bedeuten, und das
+Werkzeug kann nicht entscheiden, welches:
+
+- Das Laufwerk ist gerade nicht angeschlossen.
+- Die Bibliothek wurde verschoben oder das Laufwerk umbenannt.
+- **Der Katalog ist eine Sicherung** und zeigt völlig richtig auf sein
+  Quelllaufwerk. Das ist kein Mangel — siehe O-34 in
+  [13-offene-punkte.md](13-offene-punkte.md).
+
+Geprüft wird dabei der Ordner der Fotos, nicht das Laufwerk des Katalogs: Das
+sind nicht dieselben Orte.
 
 ### Was mitkopiert wird — und warum es so groß ist
 

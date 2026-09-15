@@ -402,6 +402,63 @@ Ordnerumsortierung hat drei Oberflächen, LR-MetaSearch zwei. Gebraucht würden
 mindestens Suche und Laufwerksliste; der Export gehört wahrscheinlich nicht in
 ein Terminal.
 
+### O-34 · LR-LinkRepair — ins Leere laufende Verknüpfungen richtigstellen
+Von Andreas am 15.09.2026 vorgeschlagen, als drittes Werkzeug der Suite.
+
+**Das Problem.** Ein Katalog merkt sich den Ort seiner Fotos als absoluten
+Pfad. Wird ein Laufwerk umbenannt, ersetzt oder die Bibliothek verschoben,
+zeigen diese Pfade ins Leere, und Lightroom meldet jedes Foto als fehlend. Von
+Hand ist das je Ordner über *„Fehlenden Ordner suchen"* zu beheben — bei vielen
+Bibliotheken auf einem Laufwerk ist das keine Arbeit, die ein Mensch tun
+sollte.
+
+**Was vorhanden ist.** Die Logik liegt bereits in
+`metasearch/relink.py`: Sie sucht den wahren Ort im Ordner des Katalogs und
+einigen darüber, mit den hinteren Teilen des behaupteten Pfades daran — und
+nimmt einen Kandidaten erst an, wenn **sechs vom Katalog benannte Fotos dort
+wirklich liegen**. Bisher wird sie nur auf *Kopien* angewandt, die das Werkzeug
+selbst angelegt hat. Der Index von LR-MetaSearch weiß außerdem schon, welche
+Bibliotheken auf welchem Laufwerk liegen — das ist genau die Auswahlliste, die
+ein solches Werkzeug braucht.
+
+**Was der Entwurf können muss:**
+
+- **Ein Laufwerk wählen**, und darunter Verzeichnisse und einzelne
+  Bibliotheken ein- oder abwählen. Voreinstellung: alles abgewählt, nichts
+  passiert ohne ausdrückliche Auswahl.
+- **Erst zeigen, dann tun.** Wie überall in dieser Suite: ein Plan, der nichts
+  ändert — welcher Katalog zeigt wohin, wohin würde er zeigen, und auf wie
+  vielen nachgewiesenen Fotos beruht das.
+- **Nie ohne Beweis.** Kein Pfad wird geändert, weil er plausibel aussieht.
+- **Zurücknehmbar.** Geändert wird genau eine Spalte in genau einer Tabelle
+  (`AgLibraryRootFolder.absolutePath`); die alten Werte lassen sich
+  aufschreiben und zurückschreiben. Das ist ein noch kleinerer Eingriff als der
+  von LR-FolderCraft, und dieselbe Maschinerie — geprüfte Sicherung, Journal,
+  Rücknahme — trägt ihn.
+
+**Die Falle, die es kennen muss.** Am 15.09.2026 stellte sich heraus, dass
+`G-DRIVE PROJECT` ein **Backup-Laufwerk** ist: Ein anderes Werkzeug legt dort
+Sicherungen in einem dem Quelllaufwerk zugeordneten Verzeichnis ab. Ein
+Backup-Katalog, der auf sein Quelllaufwerk zeigt, ist damit **nicht kaputt,
+sondern richtig** — ihn auf die Sicherung umzubiegen wäre falsch und würde
+stillschweigend dafür sorgen, dass jemand mit Sicherungskopien arbeitet statt
+mit seinen Bildern.
+
+Das Werkzeug muss diesen Fall also fragen und nicht raten:
+
+| Lage | Was richtig ist |
+| --- | --- |
+| Die Bibliothek lebt hier, das Laufwerk wurde umbenannt | richtigstellen |
+| Die Bibliothek ist eine Sicherung und zeigt auf ihre Quelle | **so lassen** |
+| Die Quelle ist gerade nicht angeschlossen | so lassen, und das sagen |
+
+Ein Laufwerk, das als Sicherungsziel dient, sollte sich als solches markieren
+lassen — dann bleibt es in Ruhe.
+
+**Offen:** der Befehlsname (`lrlink`?), ob es ein eigenes Fenster bekommt oder
+eine Kachel mit Dialog genügt, und ob die Erkennung von Sicherungslaufwerken
+über eine Markierung oder über einen Fund im Verzeichnisnamen laufen soll.
+
 ### O-30 · Stichwörter schreiben — zurückgestellt
 Ursprünglich der erste Wunsch, auf Andreas' Entscheidung hin **komplett
 zurückgestellt**.
