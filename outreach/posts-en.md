@@ -1,8 +1,8 @@
 # Posts, English
 
 Every draft below discloses authorship in the first lines. Keep that.
-Site: <https://andy-freund.gitlab.io/LR-FolderCraft> ·
-Source: <https://gitlab.com/andy-freund/LR-FolderCraft>
+Site: <https://andy-freund.gitlab.io/LR-CompanionSuite> ·
+Source: <https://gitlab.com/andy-freund/LR-CompanionSuite>
 
 ---
 
@@ -61,7 +61,7 @@ that follow.
 > catalog does not know about.
 >
 > Documentation is complete in English and German:
-> https://andy-freund.gitlab.io/LR-FolderCraft
+> https://andy-freund.gitlab.io/LR-CompanionSuite
 >
 > If anyone tries it, I would genuinely like to hear where it was confusing.
 > That is more useful to me than praise.
@@ -92,7 +92,7 @@ structure by date".
 > catalog — LR-FolderCraft. It rewrites the folder tree on disk and in the
 > catalog in one operation, with a dry run first, a verified catalog backup,
 > and a full undo. Disclosure: it is mine, and it is free with no strings.
-> https://andy-freund.gitlab.io/LR-FolderCraft
+> https://andy-freund.gitlab.io/LR-CompanionSuite
 >
 > Whatever you use: close Lightroom, back up the catalog yourself as well, and
 > never move the folders in Finder or Explorer first — that is what produces
@@ -128,7 +128,7 @@ commenting on existing threads.
 >
 > Lightroom **Classic** only. macOS and Windows, needs Python.
 >
-> https://andy-freund.gitlab.io/LR-FolderCraft
+> https://andy-freund.gitlab.io/LR-CompanionSuite
 >
 > Happy to answer anything, including "why should I trust this with my
 > catalog", which is the right question.
@@ -173,7 +173,7 @@ be around for the whole day to answer, and never ask anyone to upvote.
 > catalog tables, all paths and all files on disk.
 >
 > Python 3.9+, MIT or GPL-3.0, no telemetry, three front ends.
-> https://gitlab.com/andy-freund/LR-FolderCraft
+> https://gitlab.com/andy-freund/LR-CompanionSuite
 
 ---
 

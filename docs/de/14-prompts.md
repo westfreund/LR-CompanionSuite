@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r19.0.0 · Build-Datum 2026-09-15**
+**Revision r20.0.0 · Build-Datum 2026-09-15**
 
 Dieses Dokument bewahrt die Anfrage, aus der LR-FolderCraft entstanden ist,
 einen generischen Prompt zur Neuerzeugung eines vergleichbaren Werkzeugs sowie
@@ -556,7 +556,7 @@ offenen Fragen.
 ### Die Kurzfassung
 
 ```bash
-git clone https://gitlab.com/andy-freund/LR-FolderCraft.git
+git clone https://gitlab.com/andy-freund/LR-CompanionSuite.git
 cd LR-FolderCraft && python3 -m venv .venv && source .venv/bin/activate
 python -m pip install -e '.[dev]' && pytest        # 270 Tests sollten grün sein
 ```
@@ -566,9 +566,9 @@ Danach in dieser Reihenfolge lesen:
 1. `docs/de/10-entwicklung.md` — wo die Dinge stehen
 2. `docs/de/13-offene-punkte.md` — was als Nächstes ansteht (beginnend bei O-1)
 3. `docs/de/08-funktionsweise.md` — die Katalog-Interna
-4. `src/lrfoldercraft/planner.py` — das Herzstück des Werkzeugs
-5. `src/lrfoldercraft/folders.py` — wie vorhandene Ordner eingeordnet werden
-6. `src/lrfoldercraft/gui/app.py` — das Qt-Frontend, falls die Oberfläche dran ist
+4. `src/lrcompanion/planner.py` — das Herzstück des Werkzeugs
+5. `src/lrcompanion/folders.py` — wie vorhandene Ordner eingeordnet werden
+6. `src/lrcompanion/gui/app.py` — das Qt-Frontend, falls die Oberfläche dran ist
 
 ### Prompt zum Fortsetzen mit einem KI-Assistenten
 
@@ -576,7 +576,7 @@ Danach in dieser Reihenfolge lesen:
 Setze die Arbeit an LR-FolderCraft fort, einem Python-Werkzeug, das
 Ordnerstrukturen von Adobe Lightroom Classic neu sortiert, indem es den
 SQLite-Katalog (.lrcat) umschreibt und dabei die Dateien verschiebt. Das
-Repository liegt unter https://gitlab.com/andy-freund/LR-FolderCraft.
+Repository liegt unter https://gitlab.com/andy-freund/LR-CompanionSuite.
 
 Lies zuerst: docs/de/10-entwicklung.md (aktueller Stand und was NICHT erledigt
 ist), docs/de/13-offene-punkte.md (der Rückstand, Punkte ab O-1 nummeriert) und

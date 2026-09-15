@@ -1,6 +1,6 @@
 # Architecture
 
-**Revision r19.0.0 · Build date 2026-09-15**
+**Revision r20.0.0 · Build date 2026-09-15**
 
 ## Guiding rule
 
@@ -44,7 +44,7 @@ LR-FolderCraft/
 ├── requirements.txt requirements-dev.txt
 ├── .gitlab-ci.yml                   lint, tests on 3.9-3.13, build
 │
-├── src/lrfoldercraft/
+├── src/lrcompanion/
 │   ├── version.py                   revision, build date, banner  (single source)
 │   ├── logging_setup.py             log file, --debug, numbered STEP trail
 │   ├── config.py                    Settings, validation, JSON profiles
@@ -64,14 +64,20 @@ LR-FolderCraft/
 │   ├── tui/
 │   │   ├── app.py                   the Textual application
 │   │   └── app.tcss                 its stylesheet
-│   ├── index/                       the library index, strictly separate
+│   ├── metasearch/                  LR-MetaSearch, strictly separate
 │   │   ├── store.py                the index file and its schema
 │   │   ├── scan.py                 finding and reading catalogs
 │   │   ├── query.py                searching
 │   │   ├── duplicates.py           sameness and nearness
 │   │   ├── subset.py               copying and reducing catalogs
 │   │   ├── volumes.py              drive identity, per operating system
-│   │   └── cli.py                  the `lrfc index` commands
+│   │   ├── main.py                 the `lrms` command
+│   │   ├── cli.py                  its subcommands
+│   │   └── gui/                    the LR-MetaSearch window
+│   ├── suite/                       the launcher over both
+│   │   ├── __init__.py             the list of tools
+│   │   ├── launcher.py             the window of tiles
+│   │   └── cli.py                  the `lrcs` command
 │   └── gui/
 │       ├── app.py                   the Qt main window, in five tabs
 │       ├── workers.py               catalog / plan / apply on worker threads
@@ -209,7 +215,7 @@ without the planner knowing a user interface exists. It receives a `FolderCase`
 and returns an action or `None` for "use the default". `progress` is called as
 `progress(done, total, message)` while files move.
 
-### `index/`
+### `metasearch/`
 
 The index across every library, deliberately off to one side. It opens catalogs
 read-only and writes only into a file of its own -- and, on export, into a
@@ -218,6 +224,12 @@ and `folders.py` do not so much as import this package: a fault here cannot
 reach the part that moves photographs.
 
 See [15-index.md](15-index.md).
+
+### `suite/`
+
+The launcher. Its whole job is to say what the suite contains and get out of
+the way -- and to have an obvious place for the next tool to go. A tool is added
+to one list in `suite/__init__.py` and the tile appears.
 
 ### `gui/`
 

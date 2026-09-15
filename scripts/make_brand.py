@@ -39,9 +39,9 @@ AVATAR_SIZE = 512
 #: when the address is pasted. Neither host generates one from the README.
 SOCIAL_SIZE = (1280, 640)
 SOCIAL_TEXT = {
-    "title": "LR-FolderCraft",
-    "line": "Reorganise Lightroom Classic folders without losing the catalog",
-    "line_de": "Lightroom-Ordner umsortieren, ohne den Katalog zu verlieren",
+    "title": "LR-CompanionSuite",
+    "line": "Reorganise Lightroom Classic folders, and search every library you own",
+    "line_de": "Lightroom-Ordner umsortieren und alle Bibliotheken durchsuchen",
 }
 
 
@@ -60,32 +60,45 @@ def main() -> int:
     from PySide6.QtGui import QGuiApplication, QImage, QPainter
     from PySide6.QtSvg import QSvgRenderer
 
-    full, small = BRAND / "logo.svg", BRAND / "logo-small.svg"
-    for source in (full, small):
-        check_well_formed(source)
+    # One family per tool, plus the suite's own roof.
+    families = {
+        "logo": (BRAND / "logo.svg", BRAND / "logo-small.svg"),
+        "metasearch": (BRAND / "metasearch.svg", BRAND / "metasearch-small.svg"),
+        "suite": (BRAND / "suite.svg", BRAND / "suite-small.svg"),
+    }
+    for pair in families.values():
+        for source in pair:
+            check_well_formed(source)
 
     QGuiApplication.instance() or QGuiApplication([])
     written = 0
-    for size in SIZES:
-        source = small if size <= SMALL_CUT_UP_TO else full
-        for way, colour in COLOURS.items():
-            text = source.read_text(encoding="utf-8").replace("currentColor", colour)
-            renderer = QSvgRenderer(QByteArray(text.encode("utf-8")))
-            if not renderer.isValid():
-                print("cannot render {s}".format(s=source), file=sys.stderr)
-                return 1
-            image = QImage(size, size, QImage.Format_ARGB32)
-            image.fill(Qt.transparent)
-            painter = QPainter(image)
-            painter.setRenderHint(QPainter.Antialiasing, True)
-            renderer.render(painter, QRectF(0, 0, size, size))
-            painter.end()
-            target = BRAND / "logo-{s}-{w}.png".format(s=size, w=way)
-            image.save(str(target))
-            written += 1
-            print("  {p}  ({src})".format(p=target.relative_to(ROOT), src=source.name))
-    written += write_avatar(small, QByteArray, QRectF, Qt, QImage, QPainter, QSvgRenderer)
-    written += write_social(full, QByteArray, QRectF, Qt, QImage, QPainter, QSvgRenderer)
+    for family, (full, small) in families.items():
+        for size in SIZES:
+            source = small if size <= SMALL_CUT_UP_TO else full
+            for way, colour in COLOURS.items():
+                text = source.read_text(encoding="utf-8").replace("currentColor", colour)
+                renderer = QSvgRenderer(QByteArray(text.encode("utf-8")))
+                if not renderer.isValid():
+                    print("cannot render {s}".format(s=source), file=sys.stderr)
+                    return 1
+                image = QImage(size, size, QImage.Format_ARGB32)
+                image.fill(Qt.transparent)
+                painter = QPainter(image)
+                painter.setRenderHint(QPainter.Antialiasing, True)
+                renderer.render(painter, QRectF(0, 0, size, size))
+                painter.end()
+                target = BRAND / "{f}-{s}-{w}.png".format(f=family, s=size, w=way)
+                image.save(str(target))
+                written += 1
+                print("  {p}  ({src})".format(p=target.relative_to(ROOT), src=source.name))
+
+    # The repository wears the suite's mark, not one tool's.
+    written += write_avatar(
+        families["suite"][1], QByteArray, QRectF, Qt, QImage, QPainter, QSvgRenderer
+    )
+    written += write_social(
+        families["suite"][0], QByteArray, QRectF, Qt, QImage, QPainter, QSvgRenderer
+    )
     print("{n} file(s) written".format(n=written))
     return 0
 
@@ -118,7 +131,7 @@ def write_avatar(source, QByteArray, QRectF, Qt, QImage, QPainter, QSvgRenderer)
     painter.end()
     target = BRAND / "avatar-{s}.png".format(s=size)
     image.save(str(target))
-    print("  {p}  (logo-small.svg on a ground)".format(p=target.relative_to(ROOT)))
+    print("  {p}  ({s} on a ground)".format(p=target.relative_to(ROOT), s=source.name))
     return 1
 
 

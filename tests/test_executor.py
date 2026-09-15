@@ -9,12 +9,12 @@ from pathlib import Path
 
 import pytest
 
-from lrfoldercraft.catalog import CatalogReader, open_catalog
-from lrfoldercraft.config import Settings
-from lrfoldercraft.executor import ExecutionError, backup_catalog, execute, undo
-from lrfoldercraft.journal import read_journal
-from lrfoldercraft.planner import build_plan
-from lrfoldercraft.safety import preflight
+from lrcompanion.catalog import CatalogReader, open_catalog
+from lrcompanion.config import Settings
+from lrcompanion.executor import ExecutionError, backup_catalog, execute, undo
+from lrcompanion.journal import read_journal
+from lrcompanion.planner import build_plan
+from lrcompanion.safety import preflight
 
 
 def make_plan(builder, tmp_path, **kwargs):
@@ -212,7 +212,7 @@ def test_rollback_restores_everything_when_a_move_fails(simple_catalog, tmp_path
     before_paths = simple_catalog.catalog_paths()
     before_disk = sorted(p.name for p in simple_catalog.images_dir.iterdir())
 
-    import lrfoldercraft.executor as executor_module
+    import lrcompanion.executor as executor_module
 
     real_move = executor_module._move_file
     calls = {"n": 0}
@@ -251,7 +251,7 @@ def test_existing_target_is_never_overwritten(builder, tmp_path):
 
 
 def test_preflight_blocks_a_locked_catalog(simple_catalog, tmp_path):
-    from lrfoldercraft.catalog.db import lock_file_for
+    from lrcompanion.catalog.db import lock_file_for
 
     plan, settings = make_plan(simple_catalog, tmp_path)
     lock = lock_file_for(Path(simple_catalog.catalog_path))
@@ -340,7 +340,7 @@ def test_undo_removes_every_directory_the_run_created(builder, tmp_path):
 
 def test_appledouble_companion_is_actually_moved(builder, tmp_path, monkeypatch):
     """Non-macOS branch: the tool moves ._X itself."""
-    monkeypatch.setattr("lrfoldercraft.planner.sys.platform", "linux")
+    monkeypatch.setattr("lrcompanion.planner.sys.platform", "linux")
     builder.add_photo("A.CR2", "2019-01-03T10:00:00", content=b"image")
     (builder.images_dir / "._A.CR2").write_bytes(b"resource fork")
     builder.add_photo("B.CR2", "2019-02-14T10:00:00", content=b"image")
@@ -411,7 +411,7 @@ def test_rollback_removes_a_created_target_tree(builder, tmp_path, monkeypatch):
     builder.add_photo("B.CR2", "2019-02-14T10:00:00", content=b"image")
     target = tmp_path / "Neu" / "Sortiert"
 
-    import lrfoldercraft.executor as executor_module
+    import lrcompanion.executor as executor_module
 
     real_move = executor_module._move_file
     calls = {"n": 0}
@@ -466,7 +466,7 @@ def test_a_failure_in_the_second_root_rolls_back_the_first(builder, tmp_path, mo
     root_id = builder.add_root_folder(second, "Fotos2020")
     builder.add_photo_to_root(root_id, "C.CR2", "2020-05-05T10:00:00")
 
-    import lrfoldercraft.executor as executor_module
+    import lrcompanion.executor as executor_module
 
     real_move = executor_module._move_file
     calls = {"n": 0}

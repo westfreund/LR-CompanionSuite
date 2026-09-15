@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r19.0.0 · Build-Datum 2026-09-15**
+**Revision r20.0.0 · Build-Datum 2026-09-15**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -28,7 +28,7 @@ Schreibt nichts.
 ```console
 $ lrfc info /Volumes/Fotos/2019/2019.lrcat --lang de
   Katalog                          : /Volumes/Fotos/2019/2019.lrcat
-  Schemaversion                    : 19.0.0
+  Schemaversion                    : 18.0.0
   Stammordner                      : 1
   Ordner                           : 1
   Dateien                          : 9.452
@@ -307,7 +307,7 @@ Zwei Dinge werden bewusst **nicht** gemerkt:
 | Entscheidungen zu einzelnen Ordnern | Es sind Katalog-Ordner-IDs. Sie gegen einen anderen Katalog wiederherzustellen hieße, eine zu einem Ordner gegebene Antwort auf irgendeinen fremden Ordner anzuwenden, der zufällig dieselbe Nummer trägt. |
 | Der Schalter „Sicherung anlegen" | Er steht immer wieder auf ein. Das Sicherheitsnetz abzuschalten sollte für den anstehenden Lauf entschieden werden, nicht von einem Lauf vor drei Wochen geerbt. |
 
-Sie benötigt das Extra `gui`: `pip install 'lr-foldercraft[gui]'`. Fehlt es,
+Sie benötigt das Extra `gui`: `pip install 'lr-companion-suite[gui]'`. Fehlt es,
 erklärt der Befehl die Installation, statt mit einem Traceback abzubrechen.
 
 Ein Fenster, von oben nach unten:
@@ -592,7 +592,7 @@ Bibliothek tatsächlich vorgefunden hat, und verlangt ein bewusstes Ja:
 ```
 Vor diesem Lauf
   ✓  Keine Lightroom-Sperrdatei — der Katalog ist frei.
-  ✓  Katalogschema 19.0.0 — eine Version, gegen die diese Revision verifiziert wurde.
+  ✓  Katalogschema 20.0.0 — eine Version, gegen die diese Revision verifiziert wurde.
   ✓  Alle 1 Wurzelordner mit Dateien existieren auf der Platte (51.049 Dateien).
   ✓  Eine frühere Sicherung dieses Katalogs von 2026-08-23 09:08 ist vorhanden.
 
@@ -843,8 +843,8 @@ Einstellungen aus einer bestimmten Datei.
 Jeder Lauf schreibt eine Logdatei mit nummerierter `STEP`-Spur:
 
 ```
-2026-08-22 16:26:31,412 | INFO | lrfoldercraft | STEP 004 | Anchor resolved: ...
-2026-08-22 16:26:31,502 | INFO | lrfoldercraft | STEP 007 | Moved 40 file(s) and 1 sidecar(s)
+2026-08-22 16:26:31,412 | INFO | lrcompanion | STEP 004 | Anchor resolved: ...
+2026-08-22 16:26:31,502 | INFO | lrcompanion | STEP 007 | Moved 40 file(s) and 1 sidecar(s)
 ```
 
 | Schalter | Wirkung |

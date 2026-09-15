@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img"
+     aria-label="LR-MetaSearch">
+  <title>LR-MetaSearch</title>
+  <desc>One lens over the LR monogram: the small cut of the mark.</desc>
+  <!--
+    The small cut, for 16 and 24 px. Three stacked cards and a lens cannot
+    survive sixteen pixels, so this keeps the lens and the monogram, with the
+    strokes thickened to hold up at that size.
+  -->
+  <circle cx="30" cy="20" r="14" fill="currentColor" fill-opacity=".2"
+          stroke="currentColor" stroke-width="4.5"/>
+  <path d="M40.5 30.5 L55 45" fill="none" stroke="currentColor" stroke-width="5.5"
+        stroke-linecap="round"/>
+  <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"
+     stroke-linejoin="round">
+    <path d="M19.5 41v14h8"/>
+    <path d="M34.5 55V41h4.6a4.4 4.4 0 0 1 0 8.8h-4.6"/>
+    <path d="m38.9 49.8 4.6 5.6"/>
+  </g>
+</svg>

@@ -1,8 +1,8 @@
 # Project history
 
-**Revision r19.0.0 · Build date 2026-09-15**
+**Revision r20.0.0 · Build date 2026-09-15**
 
-The [CHANGELOG](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md) says what changed in each revision. This
+The [CHANGELOG](https://gitlab.com/andy-freund/LR-CompanionSuite/-/blob/main/CHANGELOG.md) says what changed in each revision. This
 document says **why**, and what happened in between: the decisions taken, the
 tests run against real libraries, and the four occasions on which the tool was
 wrong in a way that mattered.
@@ -21,7 +21,7 @@ That distinction matters, so here is exactly what it rests on:
 | Part | Source | Reliable? |
 | --- | --- | --- |
 | Dates, order, what changed when | Commit history and tags | Yes — machine recorded |
-| What each revision contains | [CHANGELOG.md](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md) | Yes — written at the time |
+| What each revision contains | [CHANGELOG.md](https://gitlab.com/andy-freund/LR-CompanionSuite/-/blob/main/CHANGELOG.md) | Yes — written at the time |
 | Test results and their numbers | Run output, quoted in the commits | Yes |
 | Reasoning, alternatives, what was learned | Reconstructed from the record | The account is faithful, but it is a narrative written afterwards |
 
@@ -31,7 +31,7 @@ an individual change**, use the tools that record it exactly:
 ```bash
 git log --oneline --reverse          # every step, in order
 git show v5.0.0                      # what one revision was
-git log -p -- src/lrfoldercraft/planner.py    # one file's whole life
+git log -p -- src/lrcompanion/planner.py    # one file's whole life
 ```
 
 The CHANGELOG lists releases newest first. This document reads **forwards**,
@@ -49,7 +49,7 @@ project rule makes every feature extension a major version and only those get
 named.
 
 For *what* changed, one line each is here; for *why*, read the sections below
-and the [CHANGELOG](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md).
+and the [CHANGELOG](https://gitlab.com/andy-freund/LR-CompanionSuite/-/blob/main/CHANGELOG.md).
 
 | Revision | Time | Name | What it was about |
 | --- | --- | --- | --- |
@@ -99,6 +99,7 @@ and the [CHANGELOG](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CH
 | **r17.0.3** | 07:50 |  | Undo could not find this morning's run: with the remembered catalog gone, the window said no runs were recorded and opened a chooser in a folder that has held no journal for revisions. It now names the real reason and starts where the journals are. |
 | **r18.0.0** | 30 Aug | Übersicht | The window stacked everything in one scrolling column, so the structure, the options and the rules sat below the visible edge. Now five tabs, one per step, buttons in the order the work is done -- and profiles can be made and deleted rather than coming into being by typing a name nobody had used. |
 | **r19.0.0** | 15 Sep | Fundort | An index across every library: 47 catalogs, 183,407 photographs, read-only. Catalog copies are matched by the overlap of their photo UUIDs -- a test with three photographs exposed that the first design worked only by luck. With it a duplicate report, and an export that copies and reduces catalogs rather than writing new ones. |
+| **r20.0.0** | 15 Sep | Zu zweit | The project becomes a suite: **LR-CompanionSuite**, holding LR-FolderCraft and LR-MetaSearch, each with its own name, command, mark and window, plus a launcher. The configuration, index of 183,407 photographs included, moves with it. Fixed on the way: the r19 release had overwritten the verified catalog schema version with the tool's own. |
 
 ---
 
@@ -511,7 +512,7 @@ suite.** Its job is to keep them fixed — 653 tests by now.
 
 ## See also
 
-- [CHANGELOG.md](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md) — what changed, per revision
+- [CHANGELOG.md](https://gitlab.com/andy-freund/LR-CompanionSuite/-/blob/main/CHANGELOG.md) — what changed, per revision
 - [13-open-issues.md](13-open-issues.md) — what is known to be missing
 - [14-prompts.md](14-prompts.md) — the original brief and the regeneration prompt
 - [10-development.md](10-development.md) — how to continue the work

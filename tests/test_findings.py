@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from lrfoldercraft.catalog import CatalogReader, open_catalog
-from lrfoldercraft.config import Settings
-from lrfoldercraft.exceptions_report import (
+from lrcompanion.catalog import CatalogReader, open_catalog
+from lrcompanion.config import Settings
+from lrcompanion.exceptions_report import (
     ERROR,
     EXCEPTION,
     NOTE,
@@ -14,7 +14,7 @@ from lrfoldercraft.exceptions_report import (
     collect_findings,
     render_findings,
 )
-from lrfoldercraft.planner import build_plan
+from lrcompanion.planner import build_plan
 
 
 def plan_for(builder, **kwargs):
@@ -107,7 +107,7 @@ def test_rendering_names_the_setting_and_the_examples(simple_catalog, language):
 
 
 def test_preflight_results_join_the_same_list(simple_catalog):
-    from lrfoldercraft.safety import preflight
+    from lrcompanion.safety import preflight
 
     plan = plan_for(simple_catalog, structure=("{yyyy}-{mm}-{dd}",))
     findings = collect_findings(plan, preflight(plan))

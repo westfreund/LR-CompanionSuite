@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from lrfoldercraft.config import ConfigError, Settings, list_profiles
+from lrcompanion.config import ConfigError, Settings, list_profiles
 
 
 def test_defaults_are_safe():

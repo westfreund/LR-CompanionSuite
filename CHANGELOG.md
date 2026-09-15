@@ -16,6 +16,54 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [20.0.0] — 2026-09-15 — "Zu zweit"
+
+The project becomes a suite. Two tools under one roof, each with its own name,
+its own command and its own window, and a launcher that offers both.
+
+Renamed now rather than later on purpose: the website and the mirror exist, but
+nothing has been posted anywhere yet, so the cost of a new name is close to
+zero today and considerable in two months.
+
+### Changed
+
+- **The project is `LR-CompanionSuite`.** The Python package is `lrcompanion`,
+  the distribution `lr-companion-suite`, the repository and the website follow.
+  The old GitLab repository is left standing untouched, at its owner's request.
+- **`LR-FolderCraft` is now one tool inside it**, unchanged in behaviour and
+  still `lrfc`. The index it grew in r19 becomes **`LR-MetaSearch`**, with its
+  own command `lrms` and its own window. `lrfc index` still works and points at
+  `lrms`.
+- **The configuration directory moves** from `LR-FolderCraft` to
+  `LR-CompanionSuite`, carrying the profiles, the remembered window and the
+  library index with it. Somebody's index of 183,407 photographs is not
+  something to lose to a rename.
+- The log directory and the installation directory follow the same name.
+
+### Added
+
+- **`lrcs`, a launcher** with one tile per tool: its mark, what it is for, the
+  command for people who prefer typing, and a button. Adding a tool means
+  adding an entry to one list.
+- **The LR-MetaSearch window**, in four tabs: search, libraries, duplicates,
+  export. Built on what the folder tool's window had to learn — one tab per
+  step, the log outside the tabs, buttons in the order the work is done.
+- **A mark per tool and one for the suite**, in the same single-colour,
+  stroke-drawn family as the first: a lens over stacked libraries for
+  LR-MetaSearch, four tiles for the suite. Both have a small cut for sixteen
+  pixels, like the original.
+
+### Fixed
+
+- **`VERIFIED_CATALOG_VERSIONS` had been broken by the r19 release.** It names
+  the Lightroom *catalog schema* the tool was verified against, which happened
+  to read `18.0.0` — and the blanket replace that bumped the tool from 18.0.0
+  to 19.0.0 took it along. The tool then warned about the very schema it had
+  been tested on. Restored, and a test now refuses to let the two be equal by
+  accident.
+
+---
+
 ## [19.0.0] — 2026-09-15 — "Fundort"
 
 An index across every known library, agreed as O-27 to O-29 and built on the
@@ -1252,7 +1300,7 @@ release makes the tool **recognise** those folders and lets the operator decide
 - The anchor folder is never offered as a decision and always sorts its own
   photos: "leave subfolders alone" must not silently mean "do nothing at all".
 
-[2.0.0]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v2.0.0
+[2.0.0]: https://gitlab.com/andy-freund/LR-CompanionSuite/-/tags/v2.0.0
 
 ## [1.0.6] — 2026-08-22
 
@@ -1272,7 +1320,7 @@ else changed — opens in Lightroom Classic, with all 9,452 photos selectable in
 their new day folders. One value of the wrong SQLite storage class was the
 entire fault; the folder reorganisation itself had been correct from the start.
 
-[1.0.6]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v1.0.6
+[1.0.6]: https://gitlab.com/andy-freund/LR-CompanionSuite/-/tags/v1.0.6
 
 ## [1.0.5] — 2026-08-22
 
@@ -1324,7 +1372,7 @@ the data — after which comparing `typeof()` against the *original* (rather tha
 against Lightroom's repair, where both sides were already TEXT) showed the one
 differing value.
 
-[1.0.5]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v1.0.5
+[1.0.5]: https://gitlab.com/andy-freund/LR-CompanionSuite/-/tags/v1.0.5
 
 ## [1.0.4] — 2026-08-22
 
@@ -1372,7 +1420,7 @@ schema was identical to the original, and its contents matched Lightroom's own
 repair exactly. The defects above are real and were worth fixing on their own
 merits, but none of them is *proven* to be the cause.
 
-[1.0.4]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v1.0.4
+[1.0.4]: https://gitlab.com/andy-freund/LR-CompanionSuite/-/tags/v1.0.4
 
 ## [1.0.3] — 2026-08-22
 
@@ -1397,7 +1445,7 @@ merits, but none of them is *proven* to be the cause.
   it is still carried along explicitly to preserve the metadata of a drive that
   will go back to a Mac. Both branches are covered by tests.
 
-[1.0.3]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v1.0.3
+[1.0.3]: https://gitlab.com/andy-freund/LR-CompanionSuite/-/tags/v1.0.3
 
 ## [1.0.2] — 2026-08-22
 
@@ -1419,7 +1467,7 @@ merits, but none of them is *proven* to be the cause.
   earlier read-write connection happened to make `mode=ro` succeed. Removing
   that file exposed the defect.
 
-[1.0.2]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v1.0.2
+[1.0.2]: https://gitlab.com/andy-freund/LR-CompanionSuite/-/tags/v1.0.2
 
 ## [1.0.1] — 2026-08-22
 
@@ -1436,7 +1484,7 @@ merits, but none of them is *proven* to be the cause.
   other half of `X`, not an independent document like an XMP sidecar. A renamed
   photo takes its companion under the new name.
 
-[1.0.1]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v1.0.1
+[1.0.1]: https://gitlab.com/andy-freund/LR-CompanionSuite/-/tags/v1.0.1
 
 ## [1.0.0] — 2026-08-22 — “Daybreak”
 
@@ -1537,4 +1585,4 @@ because the same traps await anyone working on this kind of tool:
 
 See [docs/en/13-open-issues.md](docs/en/13-open-issues.md).
 
-[1.0.0]: https://gitlab.com/andy-freund/LR-FolderCraft/-/tags/v1.0.0
+[1.0.0]: https://gitlab.com/andy-freund/LR-CompanionSuite/-/tags/v1.0.0

@@ -39,7 +39,7 @@ test:3.9:
   stage: test
   script:
     - pip install -e ".[dev]"
-    - pytest -q --cov=lrfoldercraft --cov-report=term --cov-report=xml
+    - pytest -q --cov=lrcompanion --cov-report=term --cov-report=xml
   coverage: '/^TOTAL.+?(\d+\%)$/'
   artifacts:
     when: always

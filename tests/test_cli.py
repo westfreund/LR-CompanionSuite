@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from lrfoldercraft.cli import EXIT_ERROR, EXIT_OK, GLOBAL_FLAG_DEFAULTS, build_parser, main
+from lrcompanion.cli import EXIT_ERROR, EXIT_OK, GLOBAL_FLAG_DEFAULTS, build_parser, main
 
 
 def test_info(simple_catalog, capsys):
@@ -236,10 +236,10 @@ def test_a_global_flag_survives_the_subcommand(argv, attribute, expected):
 
 def test_a_deliberate_refusal_is_not_reported_as_a_crash(simple_catalog, tmp_path, capsys):
     """Undoing a run twice is refused on purpose, not unexpectedly."""
-    from lrfoldercraft.catalog import CatalogReader, open_catalog
-    from lrfoldercraft.config import Settings
-    from lrfoldercraft.executor import execute, undo
-    from lrfoldercraft.planner import build_plan
+    from lrcompanion.catalog import CatalogReader, open_catalog
+    from lrcompanion.config import Settings
+    from lrcompanion.executor import execute, undo
+    from lrcompanion.planner import build_plan
 
     settings = Settings(
         catalog=str(simple_catalog.catalog_path),

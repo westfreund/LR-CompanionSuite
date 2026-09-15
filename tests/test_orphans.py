@@ -6,10 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from lrfoldercraft.catalog import CatalogReader, open_catalog
-from lrfoldercraft.config import ConfigError, Settings
-from lrfoldercraft.executor import execute, undo
-from lrfoldercraft.planner import build_plan
+from lrcompanion.catalog import CatalogReader, open_catalog
+from lrcompanion.config import ConfigError, Settings
+from lrcompanion.executor import execute, undo
+from lrcompanion.planner import build_plan
 
 
 def plan_for(builder, **kwargs):
@@ -150,7 +150,7 @@ def test_a_dry_run_moves_nothing(library_with_strays, tmp_path):
 
 
 def test_the_sweep_is_reported_so_it_is_never_a_surprise(library_with_strays):
-    from lrfoldercraft.exceptions_report import collect_findings
+    from lrcompanion.exceptions_report import collect_findings
 
     plan, _s = plan_for(library_with_strays, structure=("{yyyy}-{mm}-{dd}",), collect_orphans=True)
     finding = {f.category: f for f in collect_findings(plan)}["orphans"]
@@ -229,7 +229,7 @@ def test_the_move_is_marked_as_crossing_a_volume_when_it_does(
     Handing os.replace a cross-device path raises EXDEV, so the flag has to
     reach the mover rather than being assumed False.
     """
-    import lrfoldercraft.planner as planner
+    import lrcompanion.planner as planner
 
     # Pretend the target sits on another device, which is what makes the move
     # a copy rather than a rename.

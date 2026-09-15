@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img"
+     aria-label="LR-CompanionSuite">
+  <title>LR-CompanionSuite</title>
+  <desc>Four tiles, one of them filled, above the LR monogram.</desc>
+  <!--
+    The roof over the tools. Four tiles in a grid, because that is literally
+    what the launcher shows and because it has room for tools that do not exist
+    yet. The filled one is the tool you are about to open; the empty ones are
+    the promise that there will be more.
+
+    Same rules as the others: one colour through `currentColor`, the same rule
+    and the same drawn LR.
+  -->
+  <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round">
+    <rect x="7" y="7" width="22" height="16" rx="3"/>
+    <rect x="35" y="7" width="22" height="16" rx="3" opacity=".55"/>
+    <rect x="35" y="27" width="22" height="16" rx="3" opacity=".55"/>
+    <rect x="7" y="27" width="22" height="16" rx="3" opacity=".55"/>
+  </g>
+  <rect x="8.3" y="8.3" width="19.4" height="13.4" rx="2" fill="currentColor" opacity=".18"/>
+
+  <path d="M5 48h54" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".38"
+        stroke-linecap="round"/>
+
+  <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"
+     stroke-linejoin="round">
+    <path d="M23 50v11h6.6"/>
+    <path d="M34.6 61V50h3.6a3.2 3.2 0 0 1 0 6.4h-3.6"/>
+    <path d="m38.2 56.4 3.2 4.6"/>
+  </g>
+</svg>

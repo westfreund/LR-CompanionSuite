@@ -1,6 +1,6 @@
 # Versioning
 
-**Revision r19.0.0 · Build date 2026-09-15**
+**Revision r20.0.0 · Build date 2026-09-15**
 
 ## The scheme
 
@@ -17,13 +17,13 @@ revision then tells you unambiguously whether a given capability exists.
 
 ## Where the revision lives
 
-`src/lrfoldercraft/version.py` is the single source of truth:
+`src/lrcompanion/version.py` is the single source of truth:
 
 ```python
-__version__   = "19.0.0"
+__version__   = "20.0.0"
 __build_date__ = "2026-08-23"
 __codename__   = "Pruefstand"
-REVISION       = "r19.0.0 (2026-08-23)"
+REVISION       = "r20.0.0 (2026-08-23)"
 ```
 
 Nothing else hard-codes a version. Everything derives from this file:
@@ -41,19 +41,19 @@ It does, in five places:
 
 ```console
 $ lrfc --version
-LR-FolderCraft r19.0.0 (2026-08-23) - Beisammen
+LR-FolderCraft r20.0.0 (2026-08-23) - Beisammen
 ```
 
 ```
-LR-FolderCraft r19.0.0 (2026-08-23) - Beisammen      <- every report header
+LR-FolderCraft r20.0.0 (2026-08-23) - Beisammen      <- every report header
 ```
 
 ```
-LR-FolderCraft — r19.0.0 (2026-08-23) - build 2026-08-23    <- TUI header
+LR-FolderCraft — r20.0.0 (2026-08-23) - build 2026-08-23    <- TUI header
 ```
 
 ```
-2026-08-22 16:26:31 | INFO | Revision r19.0.0 (2026-08-23) | version 5.0.0 | build date 2026-08-23
+2026-08-22 16:26:31 | INFO | Revision r20.0.0 (2026-08-23) | version 5.0.0 | build date 2026-08-23
 ```
 
 ```json
@@ -63,7 +63,7 @@ LR-FolderCraft — r19.0.0 (2026-08-23) - build 2026-08-23    <- TUI header
 ## Releasing
 
 1. Update `__version__`, `__build_date__` and, for a MAJOR bump, `__codename__`
-   in `src/lrfoldercraft/version.py`.
+   in `src/lrcompanion/version.py`.
 2. Update `version` in `pyproject.toml` to match.
 3. Add a `CHANGELOG.md` section.
 4. Update the badges and the `**Revision …**` line at the top of every document
@@ -74,7 +74,7 @@ LR-FolderCraft — r19.0.0 (2026-08-23) - build 2026-08-23    <- TUI header
 7. Commit as `release: rX.Y.Z — <summary>` and tag:
 
 ```bash
-git tag -a v19.0.0 -m "LR-FolderCraft r19.0.0"
+git tag -a v20.0.0 -m "LR-FolderCraft r20.0.0"
 git push origin main --tags
 git push github main --tags     # the read-only mirror, see below
 ```
@@ -86,7 +86,7 @@ there. GitHub carries a read-only copy, because that is where people and search
 engines look for a tool, and a project nobody can find helps nobody.
 
 ```bash
-git remote add github https://github.com/westfreund/LR-FolderCraft.git
+git remote add github https://github.com/westfreund/LR-CompanionSuite.git
 ```
 
 Push it as part of the release, never on its own -- a mirror that lags behind
@@ -104,8 +104,8 @@ ways to take it out of your hands. Give `origin` a second push URL, so one
 `git push` reaches both:
 
 ```bash
-git remote set-url --add --push origin https://gitlab.com/andy-freund/LR-FolderCraft.git
-git remote set-url --add --push origin https://github.com/westfreund/LR-FolderCraft.git
+git remote set-url --add --push origin https://gitlab.com/andy-freund/LR-CompanionSuite.git
+git remote set-url --add --push origin https://github.com/westfreund/LR-CompanionSuite.git
 ```
 
 Or let GitLab do it: **Settings -> Repository -> Mirroring repositories**, a
@@ -120,7 +120,7 @@ and `version.py` must not drift apart.
 Two constants in `version.py` govern this:
 
 ```python
-VERIFIED_CATALOG_VERSIONS      = ("19.0.0",)   # tested against a real catalog
+VERIFIED_CATALOG_VERSIONS      = ("18.0.0",)   # tested against a real catalog
 SUPPORTED_CATALOG_VERSION_RANGE = (11, 19)     # accepted without an override
 ```
 
@@ -136,7 +136,7 @@ verified before it is added to `VERIFIED_CATALOG_VERSIONS`.
 
 | Catalog schema | Lightroom Classic | Status |
 | --- | --- | --- |
-| 19.0.0 | 14.x | verified against a real 9,452-file catalog |
+| 18.0.0 | 14.x | verified against a real 9,452-file catalog |
 | 11.x–17.x | 7.x–13.x | expected to work, opens with a warning |
 | 19.x | 15.x | inside the range, not yet verified |
 | < 11 | ≤ 6 / Lightroom 6 | refused without an override |

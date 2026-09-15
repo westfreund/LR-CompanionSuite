@@ -7,11 +7,11 @@ from pathlib import Path
 
 import pytest
 
-from lrfoldercraft.catalog import CatalogReader, open_catalog
-from lrfoldercraft.config import Settings
-from lrfoldercraft.executor import ExecutionError, execute, undo
-from lrfoldercraft.planner import build_plan
-from lrfoldercraft.runs import (
+from lrcompanion.catalog import CatalogReader, open_catalog
+from lrcompanion.config import Settings
+from lrcompanion.executor import ExecutionError, execute, undo
+from lrcompanion.planner import build_plan
+from lrcompanion.runs import (
     JOURNAL_FILE,
     RUN_FILE,
     SETTINGS_FILE,
@@ -169,7 +169,7 @@ def test_a_catalog_with_no_runs_has_an_empty_history(simple_catalog):
 
 def test_an_unwritable_catalog_folder_does_not_stop_the_run(simple_catalog, tmp_path, monkeypatch):
     """A read-only volume costs the records, never the migration."""
-    import lrfoldercraft.executor as executor
+    import lrcompanion.executor as executor
 
     def refuse(_catalog, when=None):
         raise OSError("read-only file system")
@@ -206,7 +206,7 @@ def test_the_run_list_shows_a_path_not_placeholders():
     another. Rendered on the way out, so records written before this show it
     too.
     """
-    from lrfoldercraft.runs import RunRecord
+    from lrcompanion.runs import RunRecord
 
     record = RunRecord(stamp="x", catalog="y", structure="{yyyy}/{yyyy}-{mm}/{yyyy}-{mm}-{dd}")
     assert record.structure_example("de") == "2019/2019-01/2019-01-03"
@@ -218,7 +218,7 @@ def test_the_run_list_shows_a_path_not_placeholders():
 
 def test_a_record_never_fails_to_display():
     """Whatever is in the field, the list still renders."""
-    from lrfoldercraft.runs import RunRecord
+    from lrcompanion.runs import RunRecord
 
     for spec in ("", "kaputt{", "{unbekannt}", "/"):
         record = RunRecord(stamp="x", catalog="y", structure=spec)
@@ -228,7 +228,7 @@ def test_a_record_never_fails_to_display():
 
 def test_the_template_itself_is_still_reachable():
     """The example is for reading; the template is what was actually set."""
-    from lrfoldercraft.runs import RunRecord
+    from lrcompanion.runs import RunRecord
 
     record = RunRecord(stamp="x", catalog="y", structure="{yyyy}/{mm}")
     assert record.structure == "{yyyy}/{mm}"

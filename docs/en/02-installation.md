@@ -1,6 +1,6 @@
 # Installation
 
-**Revision r19.0.0 · Build date 2026-09-15**
+**Revision r20.0.0 · Build date 2026-09-15**
 
 LR-FolderCraft is a Python package. The installers create an isolated virtual
 environment so nothing is added to your system Python.
@@ -12,14 +12,14 @@ environment so nothing is added to your system Python.
 | Python | 3.9 or newer, with `sqlite3` and `venv` |
 | Disk space | 5 MB command line only, 60 MB with the TUI, 380 MB with the Qt interface |
 | Lightroom Classic | must be **closed** while the tool runs |
-| Catalog schema | 11.x–19.x, verified against 19.0.0 (Lightroom Classic 14) |
+| Catalog schema | 11.x–19.x, verified against 18.0.0 (Lightroom Classic 14) |
 
 macOS 12 and later already ship a suitable Python at `/usr/bin/python3`.
 
 ## macOS
 
 ```bash
-git clone https://gitlab.com/andy-freund/LR-FolderCraft.git
+git clone https://gitlab.com/andy-freund/LR-CompanionSuite.git
 cd LR-FolderCraft
 ./install/install-macos.sh
 ```
@@ -28,9 +28,9 @@ The installer:
 
 1. finds the newest Python ≥ 3.9 (`python3.13` … `python3`),
 2. checks that `venv` and `sqlite3` are available,
-3. creates `~/.local/share/lr-foldercraft/venv`,
+3. creates `~/.local/share/lr-companion-suite/venv`,
 4. installs LR-FolderCraft with the TUI extra,
-5. writes launchers `lrfc` and `lr-foldercraft` into `~/.local/bin`,
+5. writes launchers `lrcs`, `lrfc` and `lrms` into `~/.local/bin`,
 6. **puts that directory on your PATH** by appending one line to the startup
    file your shell actually reads (`~/.zshrc` for zsh, `~/.bash_profile` or
    `~/.bashrc` for bash, `~/.config/fish/config.fish` for fish), unless it is
@@ -101,7 +101,7 @@ brew install python@3.12
 ## Windows
 
 ```powershell
-git clone https://gitlab.com/andy-freund/LR-FolderCraft.git
+git clone https://gitlab.com/andy-freund/LR-CompanionSuite.git
 cd LR-FolderCraft
 powershell -ExecutionPolicy Bypass -File .\install\install-windows.ps1
 ```
@@ -109,7 +109,7 @@ powershell -ExecutionPolicy Bypass -File .\install\install-windows.ps1
 The `-ExecutionPolicy Bypass` applies to this one invocation only; it does not
 change your system policy.
 
-The installer creates `%LOCALAPPDATA%\LR-FolderCraft\venv`, writes `lrfc.cmd`
+The installer creates `%LOCALAPPDATA%\LR-CompanionSuite\venv`, writes `lrfc.cmd`
 into `%LOCALAPPDATA%\Programs\bin` and adds that directory to your **user**
 PATH (not the system PATH). **Open a new terminal window afterwards** so the
 PATH change takes effect.
@@ -137,11 +137,11 @@ On Debian and Ubuntu you may need `sudo apt install python3-venv` first.
 
 ```bash
 # command line only -- no dependencies at all
-python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-FolderCraft.git'
+python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-CompanionSuite.git'
 # with the text interface
-python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-FolderCraft.git#egg=lr-foldercraft[tui]'
+python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-CompanionSuite.git#egg=lr-companion-suite[tui]'
 # with the graphical interface
-python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-FolderCraft.git#egg=lr-foldercraft[gui]'
+python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-CompanionSuite.git#egg=lr-companion-suite[gui]'
 ```
 
 Or from a clone, for development:
@@ -168,8 +168,8 @@ your catalog before you plan anything.
 
 | | macOS | Windows | Linux |
 | --- | --- | --- | --- |
-| Profiles | `~/Library/Application Support/LR-FolderCraft` | `%APPDATA%\LR-FolderCraft` | `~/.config/lr-foldercraft` |
-| Logs | `~/Library/Logs/LR-FolderCraft` | `%LOCALAPPDATA%\LR-FolderCraft\logs` | `~/.local/state/lr-foldercraft/logs` |
+| Profiles | `~/Library/Application Support/LR-CompanionSuite` | `%APPDATA%\LR-CompanionSuite` | `~/.config/lr-companion-suite` |
+| Logs | `~/Library/Logs/LR-CompanionSuite` | `%LOCALAPPDATA%\LR-CompanionSuite\logs` | `~/.local/state/lr-companion-suite/logs` |
 | Backups & journals | `<profiles>/backups` | `<profiles>\backups` | `<profiles>/backups` |
 | Reports | `<profiles>/reports` | `<profiles>\reports` | `<profiles>/reports` |
 

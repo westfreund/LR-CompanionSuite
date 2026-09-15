@@ -48,11 +48,17 @@ def build_demo_catalog(directory: Path):
     # A photo whose own date disagrees with the folder naming the session --
     # this is what puts a row in the findings table.
     builder.add_photo("D2.CR2", "2019-07-07T11:00:00", folder="raw2019/2019-03-10 Fasching/")
+    # Keywords, so the search window has something to find. Lightroom users
+    # keep them; a demonstration catalog without any shows an empty table.
+    holiday = builder.add_keyword("Urlaub")
+    carnival = builder.add_keyword("Fasching")
+    for file_id in builder.query("SELECT id_local FROM AgLibraryFile ORDER BY id_local"):
+        builder.tag(file_id[0], holiday if file_id[0] % 2 else carnival)
     return builder
 
 
 def shoot_tui(catalog: Path) -> None:
-    from lrfoldercraft.tui.app import LRFolderCraftApp
+    from lrcompanion.tui.app import LRFolderCraftApp
 
     async def run(language: str) -> None:
         app = LRFolderCraftApp(catalog=str(catalog), language=language)
@@ -77,7 +83,7 @@ def shoot_gui(catalog: Path) -> None:
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     from PySide6.QtWidgets import QApplication
 
-    from lrfoldercraft.gui.app import MainWindow
+    from lrcompanion.gui.app import MainWindow
 
     app = QApplication.instance() or QApplication([])
     for language in LANGUAGES:
@@ -104,6 +110,64 @@ def shoot_gui(catalog: Path) -> None:
         app.processEvents()
 
 
+def shoot_metasearch(catalog: Path) -> None:
+    """The LR-MetaSearch window, with a small index behind it."""
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    import tempfile
+
+    from PySide6.QtWidgets import QApplication
+
+    from lrcompanion.metasearch.gui.app import MetaSearchWindow
+    from lrcompanion.metasearch.scan import scan
+    from lrcompanion.metasearch.store import Index
+
+    index_path = Path(tempfile.mkdtemp(prefix="lrcs-shot-")) / "index.db"
+    with Index.open(index_path) as index:
+        scan([catalog], index)
+
+    app = QApplication.instance() or QApplication([])
+    for language in LANGUAGES:
+        window = MetaSearchWindow(language=language, index_path=str(index_path))
+        window.resize(1100, 780)
+        window.show()
+        for _ in range(60):
+            app.processEvents()
+        window.keywords_edit.setText("Urlaub")
+        window.do_search()
+        for _ in range(400):
+            app.processEvents()
+            if window.hits:
+                break
+        for _ in range(20):
+            app.processEvents()
+        target = IMAGES / "metasearch-{lang}.png".format(lang=language)
+        window.grab().save(str(target))
+        print("  wrote {p}".format(p=target.relative_to(ROOT)))
+        window.close()
+        app.processEvents()
+
+
+def shoot_launcher() -> None:
+    """The suite's launcher, which is the first thing anybody sees."""
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    from PySide6.QtWidgets import QApplication
+
+    from lrcompanion.suite.launcher import Launcher
+
+    app = QApplication.instance() or QApplication([])
+    for language in LANGUAGES:
+        window = Launcher(language=language)
+        window.resize(760, 540)
+        window.show()
+        for _ in range(40):
+            app.processEvents()
+        target = IMAGES / "launcher-{lang}.png".format(lang=language)
+        window.grab().save(str(target))
+        print("  wrote {p}".format(p=target.relative_to(ROOT)))
+        window.close()
+        app.processEvents()
+
+
 def main() -> int:
     IMAGES.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
@@ -114,6 +178,11 @@ def main() -> int:
         shoot_tui(catalog)
         print("GUI:")
         shoot_gui(catalog)
+        # Inside the temporary directory: the catalog it reads is in there.
+        print("LR-MetaSearch:")
+        shoot_metasearch(catalog)
+    print("Launcher:")
+    shoot_launcher()
     return 0
 
 

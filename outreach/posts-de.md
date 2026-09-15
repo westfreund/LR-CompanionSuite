@@ -2,8 +2,8 @@
 
 Jeder Entwurf legt die Urheberschaft in den ersten Zeilen offen. Das bitte
 stehen lassen.
-Website: <https://andy-freund.gitlab.io/LR-FolderCraft> ·
-Quelltext: <https://gitlab.com/andy-freund/LR-FolderCraft>
+Website: <https://andy-freund.gitlab.io/LR-CompanionSuite> ·
+Quelltext: <https://gitlab.com/andy-freund/LR-CompanionSuite>
 
 ---
 
@@ -67,7 +67,7 @@ Eigenwerbung lesen; im Zweifel einen Moderator fragen, bevor der Beitrag steht.
 > ihrem Zusatztext einreihen.
 >
 > Dokumentation vollständig auf Deutsch und Englisch:
-> https://andy-freund.gitlab.io/LR-FolderCraft
+> https://andy-freund.gitlab.io/LR-CompanionSuite
 >
 > Wenn es jemand ausprobiert: Rückmeldung, wo es unverständlich war, hilft mir
 > mehr als Lob.
@@ -100,7 +100,7 @@ Bibliotheken. Der Text sollte kürzer und weniger technisch sein als oben.
 > Nur für Lightroom **Classic**, nicht für die Cloud-Fassung. Für macOS und
 > Windows, mit deutscher Oberfläche und deutscher Anleitung.
 >
-> https://andy-freund.gitlab.io/LR-FolderCraft
+> https://andy-freund.gitlab.io/LR-CompanionSuite
 
 ---
 
@@ -119,7 +119,7 @@ Wirkt fast immer besser als ein eigener Beitrag. Auslöser sind Fragen wie
 > Werkzeug geschrieben, LR-FolderCraft, das Dateien und Katalog gemeinsam
 > umstellt — mit Probelauf, Katalogsicherung und vollständiger Rücknahme.
 > Offenlegung: ist von mir, kostenlos, quelloffen.
-> https://andy-freund.gitlab.io/LR-FolderCraft
+> https://andy-freund.gitlab.io/LR-CompanionSuite
 >
 > Egal womit: vorher Lightroom schließen und den Katalog selbst zusätzlich
 > sichern.

@@ -1,6 +1,6 @@
 # Installation
 
-**Revision r19.0.0 · Build-Datum 2026-09-15**
+**Revision r20.0.0 · Build-Datum 2026-09-15**
 
 LR-FolderCraft ist ein Python-Paket. Die Installationsskripte legen eine
 isolierte virtuelle Umgebung an, sodass am System-Python nichts verändert wird.
@@ -12,7 +12,7 @@ isolierte virtuelle Umgebung an, sodass am System-Python nichts verändert wird.
 | Python | 3.9 oder neuer, mit `sqlite3` und `venv` |
 | Speicherplatz | 5 MB nur Kommandozeile, 60 MB mit TUI, 380 MB mit Qt-Oberfläche |
 | Lightroom Classic | muss **geschlossen** sein, während das Werkzeug läuft |
-| Katalogschema | 11.x–19.x, verifiziert gegen 19.0.0 (Lightroom Classic 14) |
+| Katalogschema | 11.x–19.x, verifiziert gegen 18.0.0 (Lightroom Classic 14) |
 
 macOS 12 und neuer bringen unter `/usr/bin/python3` bereits ein passendes
 Python mit.
@@ -20,7 +20,7 @@ Python mit.
 ## macOS
 
 ```bash
-git clone https://gitlab.com/andy-freund/LR-FolderCraft.git
+git clone https://gitlab.com/andy-freund/LR-CompanionSuite.git
 cd LR-FolderCraft
 ./install/install-macos.sh
 ```
@@ -29,9 +29,9 @@ Das Skript:
 
 1. sucht das neueste Python ≥ 3.9 (`python3.13` … `python3`),
 2. prüft, ob `venv` und `sqlite3` vorhanden sind,
-3. legt `~/.local/share/lr-foldercraft/venv` an,
+3. legt `~/.local/share/lr-companion-suite/venv` an,
 4. installiert LR-FolderCraft samt TUI,
-5. schreibt die Starter `lrfc` und `lr-foldercraft` nach `~/.local/bin`,
+5. schreibt die Starter `lrcs`, `lrfc` und `lrms` nach `~/.local/bin`,
 6. **nimmt dieses Verzeichnis in den PATH auf**, indem es eine Zeile an die
    Startdatei anhängt, die Ihre Shell tatsächlich liest (`~/.zshrc` bei zsh,
    `~/.bash_profile` oder `~/.bashrc` bei bash,
@@ -104,7 +104,7 @@ brew install python@3.12
 ## Windows
 
 ```powershell
-git clone https://gitlab.com/andy-freund/LR-FolderCraft.git
+git clone https://gitlab.com/andy-freund/LR-CompanionSuite.git
 cd LR-FolderCraft
 powershell -ExecutionPolicy Bypass -File .\install\install-windows.ps1
 ```
@@ -112,7 +112,7 @@ powershell -ExecutionPolicy Bypass -File .\install\install-windows.ps1
 `-ExecutionPolicy Bypass` gilt nur für diesen einen Aufruf und ändert die
 Systemrichtlinie nicht.
 
-Das Skript legt `%LOCALAPPDATA%\LR-FolderCraft\venv` an, schreibt `lrfc.cmd`
+Das Skript legt `%LOCALAPPDATA%\LR-CompanionSuite\venv` an, schreibt `lrfc.cmd`
 nach `%LOCALAPPDATA%\Programs\bin` und ergänzt dieses Verzeichnis im
 **Benutzer**-PATH (nicht im System-PATH). **Danach ein neues Terminalfenster
 öffnen**, damit die PATH-Änderung wirkt.
@@ -142,11 +142,11 @@ Unter Debian und Ubuntu ist unter Umständen vorher
 
 ```bash
 # nur Kommandozeile -- ganz ohne Abhängigkeiten
-python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-FolderCraft.git'
+python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-CompanionSuite.git'
 # mit Textoberfläche
-python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-FolderCraft.git#egg=lr-foldercraft[tui]'
+python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-CompanionSuite.git#egg=lr-companion-suite[tui]'
 # mit grafischer Oberfläche
-python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-FolderCraft.git#egg=lr-foldercraft[gui]'
+python3 -m pip install --user 'git+https://gitlab.com/andy-freund/LR-CompanionSuite.git#egg=lr-companion-suite[gui]'
 ```
 
 Oder aus einem Klon heraus, für die Entwicklung:
@@ -173,8 +173,8 @@ bestätigen, dass das Werkzeug den Katalog öffnen kann.
 
 | | macOS | Windows | Linux |
 | --- | --- | --- | --- |
-| Profile | `~/Library/Application Support/LR-FolderCraft` | `%APPDATA%\LR-FolderCraft` | `~/.config/lr-foldercraft` |
-| Logdateien | `~/Library/Logs/LR-FolderCraft` | `%LOCALAPPDATA%\LR-FolderCraft\logs` | `~/.local/state/lr-foldercraft/logs` |
+| Profile | `~/Library/Application Support/LR-CompanionSuite` | `%APPDATA%\LR-CompanionSuite` | `~/.config/lr-companion-suite` |
+| Logdateien | `~/Library/Logs/LR-CompanionSuite` | `%LOCALAPPDATA%\LR-CompanionSuite\logs` | `~/.local/state/lr-companion-suite/logs` |
 | Backups & Journale | `<Profile>/backups` | `<Profile>\backups` | `<Profile>/backups` |
 | Berichte | `<Profile>/reports` | `<Profile>\reports` | `<Profile>/reports` |
 

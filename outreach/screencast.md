@@ -48,7 +48,7 @@ und die Datei klein.
 | 0:30–0:40 | `lrfc apply …`, Fortschritt läuft durch | „Dateien und Katalog in einem Zug." |
 | 0:40–0:48 | Finder: die neue Tagesstruktur; Lightroom öffnen, Fotos sind da, keine Fragezeichen | „Lightroom merkt nichts." |
 | 0:48–0:56 | `lrfc undo …` | „Und zurück, exakt." |
-| 0:56–1:00 | Standbild mit Adresse | „andy-freund.gitlab.io/LR-FolderCraft — frei und quelloffen" |
+| 0:56–1:00 | Standbild mit Adresse | „andy-freund.gitlab.io/LR-CompanionSuite — frei und quelloffen" |
 
 Die Sekunden 40 bis 48 sind der Kern. Wenn nur ein Ausschnitt irgendwo
 weiterverbreitet wird, dann dieser.

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img"
+     aria-label="LR-CompanionSuite">
+  <title>LR-CompanionSuite</title>
+  <desc>Four tiles over the LR monogram: the small cut of the mark.</desc>
+  <!--
+    The small cut, for 16 and 24 px: four tiles and the monogram, strokes
+    thickened so the grid still reads at that size.
+  -->
+  <g fill="none" stroke="currentColor" stroke-width="4.5" stroke-linejoin="round">
+    <rect x="8" y="6" width="20" height="14" rx="3"/>
+    <rect x="36" y="6" width="20" height="14" rx="3" opacity=".5"/>
+    <rect x="8" y="24" width="20" height="14" rx="3" opacity=".5"/>
+    <rect x="36" y="24" width="20" height="14" rx="3" opacity=".5"/>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"
+     stroke-linejoin="round">
+    <path d="M19.5 44v14h8"/>
+    <path d="M34.5 58V44h4.6a4.4 4.4 0 0 1 0 8.8h-4.6"/>
+    <path d="m38.9 52.8 4.6 5.6"/>
+  </g>
+</svg>

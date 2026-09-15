@@ -20,9 +20,9 @@ from pathlib import Path
 
 import pytest
 
-from lrfoldercraft.config import Settings
+from lrcompanion.config import Settings
 
-SRC = Path(__file__).resolve().parent.parent / "src" / "lrfoldercraft"
+SRC = Path(__file__).resolve().parent.parent / "src" / "lrcompanion"
 GUI = (SRC / "gui" / "app.py").read_text(encoding="utf-8")
 TUI = (SRC / "tui" / "app.py").read_text(encoding="utf-8")
 

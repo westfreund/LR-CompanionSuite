@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from lrfoldercraft.resources import LOGO, LOGO_SMALL, logo_for
+from lrcompanion.resources import LOGO, LOGO_SMALL, logo_for
 
 BRAND = Path(__file__).resolve().parent.parent / "docs" / "images" / "brand"
 

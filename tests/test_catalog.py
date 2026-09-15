@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from lrfoldercraft.catalog import CatalogError, CatalogLockedError, CatalogReader, CatalogWriter
-from lrfoldercraft.catalog.db import lock_file_for, open_catalog
-from lrfoldercraft.catalog.model import parse_capture_time
+from lrcompanion.catalog import CatalogError, CatalogLockedError, CatalogReader, CatalogWriter
+from lrcompanion.catalog.db import lock_file_for, open_catalog
+from lrcompanion.catalog.model import parse_capture_time
 
 
 def test_reader_reads_photos_and_metadata(simple_catalog):
@@ -39,7 +39,7 @@ def test_info_counts(simple_catalog):
     assert info.images == 8  # six masters plus two virtual copies
     assert info.virtual_copies == 2
     assert info.missing_capture_time == 1
-    assert info.schema_version == "19.0.0"
+    assert info.schema_version == "18.0.0"
     assert dict(info.cameras)["Canon EOS 70D"] == 3
 
 
@@ -176,7 +176,7 @@ def test_readonly_falls_back_when_the_filesystem_has_no_locking(simple_catalog, 
     """
     import sqlite3 as sqlite3_module
 
-    from lrfoldercraft.catalog import db as db_module
+    from lrcompanion.catalog import db as db_module
 
     real_connect = sqlite3_module.connect
     attempts = []
@@ -216,7 +216,7 @@ def test_readonly_probe_does_not_hide_a_real_failure(simple_catalog, monkeypatch
     """If even immutable=1 cannot read the file, the error must surface."""
     import sqlite3 as sqlite3_module
 
-    from lrfoldercraft.catalog import db as db_module
+    from lrcompanion.catalog import db as db_module
 
     def always_broken(target, *args, **kwargs):
         raise sqlite3_module.OperationalError("unable to open database file")
@@ -231,7 +231,7 @@ def test_commit_checkpoints_the_write_ahead_log(simple_catalog):
     """Lightroom catalogs run in WAL mode; the .lrcat must be self-contained."""
     import sqlite3 as sqlite3_module
 
-    from lrfoldercraft.catalog.db import open_catalog as open_cat
+    from lrcompanion.catalog.db import open_catalog as open_cat
 
     path = Path(simple_catalog.catalog_path)
     raw = sqlite3_module.connect(str(path))
@@ -260,7 +260,7 @@ def test_commit_checkpoints_the_write_ahead_log(simple_catalog):
 
 def test_side_file_check_never_calls_a_wal_stale(simple_catalog):
     """An earlier revision told users to clear -wal files. That destroys data."""
-    from lrfoldercraft.safety import _check_side_files
+    from lrcompanion.safety import _check_side_files
 
     path = Path(simple_catalog.catalog_path)
     wal = path.with_name(path.name + "-wal")
@@ -278,7 +278,7 @@ def test_side_file_check_never_calls_a_wal_stale(simple_catalog):
 
 
 def test_side_file_check_flags_an_interrupted_journal(simple_catalog):
-    from lrfoldercraft.safety import _check_side_files
+    from lrcompanion.safety import _check_side_files
 
     path = Path(simple_catalog.catalog_path)
     journal = path.with_name(path.name + "-journal")
@@ -352,9 +352,9 @@ def test_a_run_changes_no_storage_class_of_existing_rows(simple_catalog, tmp_pat
     """
     import shutil
 
-    from lrfoldercraft.config import Settings
-    from lrfoldercraft.executor import execute
-    from lrfoldercraft.planner import build_plan
+    from lrcompanion.config import Settings
+    from lrcompanion.executor import execute
+    from lrcompanion.planner import build_plan
 
     before_path = tmp_path / "before.lrcat"
     shutil.copy2(str(simple_catalog.catalog_path), str(before_path))
@@ -405,7 +405,7 @@ def test_a_run_changes_no_storage_class_of_existing_rows(simple_catalog, tmp_pat
 
 def test_preflight_detects_a_text_id_counter(simple_catalog):
     """Catalogs damaged by 1.0.0-1.0.4 must be recognised, not silently reused."""
-    from lrfoldercraft.safety import _check_id_counter_type
+    from lrcompanion.safety import _check_id_counter_type
 
     path = Path(simple_catalog.catalog_path)
     assert _check_id_counter_type(path).level == "ok"

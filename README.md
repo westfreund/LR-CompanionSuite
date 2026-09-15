@@ -1,24 +1,37 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/brand/logo-128-light.png">
-    <img src="docs/images/brand/logo-128-dark.png" alt="LR-FolderCraft" width="96" height="96">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/brand/suite-128-light.png">
+    <img src="docs/images/brand/suite-128-dark.png" alt="LR-CompanionSuite" width="96" height="96">
   </picture>
 </p>
 
-# LR-FolderCraft
+# LR-CompanionSuite
 
-**Reorganise Adobe Lightroom Classic folder trees — without losing the catalog connection.**
+**Two tools that sit beside Adobe Lightroom Classic rather than replacing it.**
 
-[![Revision](https://img.shields.io/badge/revision-r19.0.0-blue)](CHANGELOG.md)
+[![Revision](https://img.shields.io/badge/revision-r20.0.0-blue)](CHANGELOG.md)
 [![Build date](https://img.shields.io/badge/build-2026--09--15-lightgrey)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20GPL--3.0--or--later-green)](LICENSE)
 
-🌐 **[Website](https://andy-freund.gitlab.io/LR-FolderCraft/)** · 🇩🇪 [Diese Seite auf Deutsch](README.de.md) · 📚 [Full documentation](docs/) · [Dokumentation auf Deutsch](docs/de/)
+🌐 **[Website](https://andy-freund.gitlab.io/LR-CompanionSuite/)** · 🇩🇪 [Diese Seite auf Deutsch](README.de.md) · 📚 [Full documentation](docs/) · [Dokumentation auf Deutsch](docs/de/)
 
-<sub>Home is [GitLab](https://gitlab.com/andy-freund/LR-FolderCraft) — issues and merge requests belong there. GitHub carries a read-only mirror.</sub>
+<sub>Home is [GitLab](https://gitlab.com/andy-freund/LR-CompanionSuite) — issues and merge requests belong there. GitHub carries a read-only mirror.</sub>
 
 ---
+
+| | | |
+| :---: | --- | --- |
+| <img src="docs/images/brand/logo-64-dark.png" width="48" alt=""> | **LR-FolderCraft** · `lrfc` | Reorganise the folder tree — files and catalog together, so nothing is lost and every run can be taken back. |
+| <img src="docs/images/brand/metasearch-64-dark.png" width="48" alt=""> | **LR-MetaSearch** · `lrms` | Search across every library you own, find what is held twice, and build catalogs out of a selection. Reads only. |
+
+`lrcs` opens a launcher that offers both.
+
+---
+
+# LR-FolderCraft
+
+**Reorganise Adobe Lightroom Classic folder trees — without losing the catalog connection.**
 
 <p align="center">
   <picture>
@@ -61,7 +74,7 @@ which is exactly why nothing about your edits can get lost.
 ## Quick start
 
 ```bash
-git clone https://gitlab.com/andy-freund/LR-FolderCraft.git
+git clone https://gitlab.com/andy-freund/LR-CompanionSuite.git
 cd LR-FolderCraft
 ./install/install-macos.sh              # macOS and Linux
 # Windows: powershell -ExecutionPolicy Bypass -File .\install\install-windows.ps1
@@ -145,11 +158,53 @@ Existing files are never overwritten. A name collision is resolved by renaming
 
 **Always keep an independent backup anyway.** See [docs/en/06-safety.md](docs/en/06-safety.md).
 
+---
+
+# LR-MetaSearch
+
+**Search across every Lightroom Classic library you own — even the ones whose
+drive is in a cupboard.**
+
+Anyone who has worked with several catalogs over the years ends up with a
+question none of them can answer: *which library is this photograph actually
+in?* LR-MetaSearch answers it, and then tells you which drive to connect.
+
+![LR-MetaSearch](docs/images/metasearch-en.png)
+
+```bash
+lrms scan                                  # read every library it can reach
+lrms find --keyword Wedding --min-rating 4 # search across all of them
+lrms duplicates                            # what is held more than once
+lrms export --keyword "Best of" --to ~/Desktop/Selection
+lrms gui                                   # or the window
+```
+
+**It only reads.** No catalog is opened for writing and no image file is
+touched; a test compares the catalog's bytes before and after every scan. The
+one thing it ever writes a catalog into is a *copy* it made itself.
+
+Against the collection it was built on: **47 libraries, 183,407 photographs,
+1,054 keywords, read in 26 seconds** — without opening a single image file,
+because Lightroom already harvested the EXIF at import.
+
+- Copies and backups of catalogs are **recognised and counted once**, by the
+  overlap of their photo UUIDs rather than by their names.
+- A drive is identified by its **VolumeUUID**, not by a name two drives can
+  share.
+- Duplicate files are found from the catalogs alone, so it works with the drive
+  disconnected. Visual similarity is deliberately not offered —
+  [the documentation says why](docs/en/15-index.md).
+- Export copies each library and reduces the copy, so everything that survives
+  was written by Lightroom itself. Merging is Lightroom's own *Import from
+  Another Catalog*.
+
+[**Full documentation →**](docs/en/15-index.md)
+
 ## Requirements
 
 - Python 3.9 or newer (macOS ships with a suitable one)
 - Adobe Lightroom Classic catalog, schema version 11.x–19.x
-  (verified against 19.0.0 / Lightroom Classic 14)
+  (verified against 18.0.0 / Lightroom Classic 14)
 - Lightroom Classic **closed** while the tool runs
 
 The command line needs nothing but the standard library. `lrfc tui` adds

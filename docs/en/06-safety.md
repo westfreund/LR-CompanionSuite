@@ -1,6 +1,6 @@
 # Safety and recovery
 
-**Revision r19.0.0 · Build date 2026-09-15**
+**Revision r20.0.0 · Build date 2026-09-15**
 
 > This tool edits your Lightroom catalog database and moves your photographs.
 > It is built carefully and it is tested, but **keep an independent, verified
@@ -41,7 +41,7 @@ The catalog is copied into the backup directory under a timestamped name, and
 both copies are SHA-256 compared. If they differ the run stops immediately.
 
 ```
-~/Library/Application Support/LR-FolderCraft/backups/2019-20260822-162631.lrcat
+~/Library/Application Support/LR-CompanionSuite/backups/2019-20260822-162631.lrcat
 ```
 
 Put backups on a different drive from the catalog:
@@ -173,7 +173,7 @@ Restore the backup. If you skipped it, Lightroom's own backups are in
 
 Include:
 
-1. the log file (`~/Library/Logs/LR-FolderCraft/`), ideally from a `--debug` run,
+1. the log file (`~/Library/Logs/LR-CompanionSuite/`), ideally from a `--debug` run,
 2. the plan as JSON (`lrfc plan ... --json > plan.json`),
 3. the journal, if a run had started,
 4. `lrfc --version` and your Lightroom Classic version.

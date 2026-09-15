@@ -6,7 +6,7 @@ from datetime import date
 
 import pytest
 
-from lrfoldercraft.folders import (
+from lrcompanion.folders import (
     CONSOLIDATE,
     DATED,
     KEEP,
@@ -25,7 +25,7 @@ from lrfoldercraft.folders import (
     summarise,
     usable_action,
 )
-from lrfoldercraft.rules import parse_structure, structure_date_granularity
+from lrcompanion.rules import parse_structure, structure_date_granularity
 
 
 @pytest.mark.parametrize(

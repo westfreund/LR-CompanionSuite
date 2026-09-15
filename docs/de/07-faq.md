@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r19.0.0 · Build-Datum 2026-09-15**
+**Revision r20.0.0 · Build-Datum 2026-09-15**
 
 ## Sicherheit und Daten
 
@@ -112,7 +112,7 @@ Lauf je Stammordner.
 
 ### In der GUI ist eine Tabelle abgeschnitten oder eine Einstellung fehlt
 
-Meistens liegt es in einem anderen **Reiter**. Seit r19.0.0 steht jeder
+Meistens liegt es in einem anderen **Reiter**. Seit r20.0.0 steht jeder
 Arbeitsschritt in einem eigenen: *1 · Bibliothek*, *2 · Struktur*,
 *3 · Optionen*, *4 · Ordner & Regeln*, *5 · Ergebnis*. Die Beschriftung jedes
 Reiters trägt einen Tooltip, der sagt, was darin steht.
@@ -187,7 +187,7 @@ Lightroom prüfen.
 
 ### Welche Katalogversionen funktionieren?
 
-Verifiziert gegen Schema 19.0.0 (Lightroom Classic 14). Die Schemata 11.x–19.x
+Verifiziert gegen Schema 18.0.0 (Lightroom Classic 14). Die Schemata 11.x–19.x
 werden akzeptiert, mit Warnung, sofern nicht ausdrücklich verifiziert. Ältere
 brauchen `--allow-unsupported-catalog`.
 
@@ -198,7 +198,7 @@ Anwender entfällt damit ein Installationsschritt.
 
 ### Brauche ich die TUI?
 
-Nein. `pip install lr-foldercraft` ohne Extras hat überhaupt keine
+Nein. `pip install lr-companion-suite` ohne Extras hat überhaupt keine
 Abhängigkeiten; die CLI kann alles. Textual wird nur für `lrfc tui` gebraucht.
 
 ### Installiert, aber das Terminal sagt `lrfc: command not found`

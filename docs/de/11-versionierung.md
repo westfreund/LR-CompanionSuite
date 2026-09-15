@@ -1,6 +1,6 @@
 # Versionierung
 
-**Revision r19.0.0 · Build-Datum 2026-09-15**
+**Revision r20.0.0 · Build-Datum 2026-09-15**
 
 ## Das Schema
 
@@ -17,13 +17,13 @@ Die Revision sagt dann eindeutig, ob eine bestimmte Fähigkeit vorhanden ist.
 
 ## Wo die Revision steht
 
-`src/lrfoldercraft/version.py` ist die einzige Quelle:
+`src/lrcompanion/version.py` ist die einzige Quelle:
 
 ```python
-__version__    = "19.0.0"
+__version__    = "20.0.0"
 __build_date__ = "2026-08-23"
 __codename__   = "Pruefstand"
-REVISION       = "r19.0.0 (2026-08-23)"
+REVISION       = "r20.0.0 (2026-08-23)"
 ```
 
 Nirgends sonst steht eine Version fest verdrahtet. Alles leitet sich daraus ab:
@@ -41,19 +41,19 @@ anzeigt. Das tut es an fünf Stellen:
 
 ```console
 $ lrfc --version
-LR-FolderCraft r19.0.0 (2026-08-23) - Beisammen
+LR-FolderCraft r20.0.0 (2026-08-23) - Beisammen
 ```
 
 ```
-LR-FolderCraft r19.0.0 (2026-08-23) - Beisammen      <- jeder Berichtskopf
+LR-FolderCraft r20.0.0 (2026-08-23) - Beisammen      <- jeder Berichtskopf
 ```
 
 ```
-LR-FolderCraft — r19.0.0 (2026-08-23) - build 2026-08-23    <- TUI-Kopf
+LR-FolderCraft — r20.0.0 (2026-08-23) - build 2026-08-23    <- TUI-Kopf
 ```
 
 ```
-2026-08-22 16:26:31 | INFO | Revision r19.0.0 (2026-08-23) | version 5.0.0 | build date 2026-08-23
+2026-08-22 16:26:31 | INFO | Revision r20.0.0 (2026-08-23) | version 5.0.0 | build date 2026-08-23
 ```
 
 ```json
@@ -63,7 +63,7 @@ LR-FolderCraft — r19.0.0 (2026-08-23) - build 2026-08-23    <- TUI-Kopf
 ## Eine Version veröffentlichen
 
 1. `__version__`, `__build_date__` und bei einer MAJOR-Erhöhung `__codename__`
-   in `src/lrfoldercraft/version.py` aktualisieren.
+   in `src/lrcompanion/version.py` aktualisieren.
 2. `version` in `pyproject.toml` angleichen.
 3. Einen Abschnitt in `CHANGELOG.md` ergänzen.
 4. Die Badges und die `**Revision …**`-Zeile am Kopf jedes Dokuments in
@@ -74,7 +74,7 @@ LR-FolderCraft — r19.0.0 (2026-08-23) - build 2026-08-23    <- TUI-Kopf
 7. Als `release: rX.Y.Z — <Zusammenfassung>` committen und taggen:
 
 ```bash
-git tag -a v19.0.0 -m "LR-FolderCraft r19.0.0"
+git tag -a v20.0.0 -m "LR-FolderCraft r20.0.0"
 git push origin main --tags
 git push github main --tags     # der Nur-Lese-Spiegel, siehe unten
 ```
@@ -90,7 +90,7 @@ dort nach einem Werkzeug suchen — und ein Projekt, das niemand findet, hilft
 niemandem.
 
 ```bash
-git remote add github https://github.com/westfreund/LR-FolderCraft.git
+git remote add github https://github.com/westfreund/LR-CompanionSuite.git
 ```
 
 Immer als Teil der Veröffentlichung mitschieben, nie für sich allein: Ein
@@ -108,8 +108,8 @@ Wege, es sich aus der Hand zu nehmen. Entweder `origin` ein zweites Push-Ziel
 geben, dann erreicht ein `git push` beide:
 
 ```bash
-git remote set-url --add --push origin https://gitlab.com/andy-freund/LR-FolderCraft.git
-git remote set-url --add --push origin https://github.com/westfreund/LR-FolderCraft.git
+git remote set-url --add --push origin https://gitlab.com/andy-freund/LR-CompanionSuite.git
+git remote set-url --add --push origin https://github.com/westfreund/LR-CompanionSuite.git
 ```
 
 Oder GitLab es tun lassen: **Einstellungen → Repository → Repositorys
@@ -122,7 +122,7 @@ Repository beschränkt sein und auf nichts sonst.
 Zwei Konstanten in `version.py` steuern das:
 
 ```python
-VERIFIED_CATALOG_VERSIONS       = ("19.0.0",)   # gegen einen echten Katalog getestet
+VERIFIED_CATALOG_VERSIONS       = ("18.0.0",)   # gegen einen echten Katalog getestet
 SUPPORTED_CATALOG_VERSION_RANGE = (11, 19)      # ohne Übersteuerung akzeptiert
 ```
 
@@ -139,7 +139,7 @@ stabil, eine neue Version sollte aber verifiziert werden, bevor sie in
 
 | Katalogschema | Lightroom Classic | Stand |
 | --- | --- | --- |
-| 19.0.0 | 14.x | verifiziert gegen einen echten Katalog mit 9.452 Dateien |
+| 18.0.0 | 14.x | verifiziert gegen einen echten Katalog mit 9.452 Dateien |
 | 11.x–17.x | 7.x–13.x | sollte funktionieren, öffnet mit Warnung |
 | 19.x | 15.x | im Bereich, noch nicht verifiziert |
 | < 11 | ≤ 6 / Lightroom 6 | ohne Übersteuerung abgelehnt |

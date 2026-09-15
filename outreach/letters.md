@@ -48,7 +48,7 @@ Lightroom-Bibliothek nachträglich umbauen
 > beisteuern. Ich schreibe das ohne kommerzielles Interesse; das Werkzeug ist
 > kostenlos und bleibt es.
 >
-> https://andy-freund.gitlab.io/LR-FolderCraft
+> https://andy-freund.gitlab.io/LR-CompanionSuite
 >
 > Mit freundlichen Grüßen
 > Andreas Freund
@@ -91,7 +91,7 @@ sinnvoll antwortet, ist ein Hinweis.
 > baseline. Byte-identical each round.
 >
 > Documentation is complete in English and German:
-> https://andy-freund.gitlab.io/LR-FolderCraft
+> https://andy-freund.gitlab.io/LR-CompanionSuite
 >
 > If it is not something you want to point people at, that is entirely fair —
 > I will not ask twice.
@@ -121,7 +121,7 @@ halten; Redaktionen lesen die ersten drei Zeilen.
 > Wiederanlauf nach Abbruch und vollständiger Rücknahme. Deutsche Oberfläche
 > und deutsche Dokumentation, macOS und Windows, kostenlos.
 >
-> https://andy-freund.gitlab.io/LR-FolderCraft
+> https://andy-freund.gitlab.io/LR-CompanionSuite
 >
 > Für Rückfragen, eine Vorführung oder einen Fachbeitrag stehe ich gern zur
 > Verfügung.

@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r19.0.0 · Build date 2026-09-15**
+**Revision r20.0.0 · Build date 2026-09-15**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -26,7 +26,7 @@ virtual copies, capture time range, cameras and file formats. Writes nothing.
 ```console
 $ lrfc info /Volumes/Photos/2019/2019.lrcat
   Catalog                       : /Volumes/Photos/2019/2019.lrcat
-  Schema version                : 19.0.0
+  Schema version                : 18.0.0
   Root folders                  : 1
   Folders                       : 1
   Files                         : 9,452
@@ -308,7 +308,7 @@ Two things are deliberately **not** remembered:
 | Per-folder decisions | They are catalog folder ids. Restoring them against a different catalog would apply an answer given about one folder to whatever unrelated folder happens to share that number. |
 | The "make a backup" switch | It always starts on. Turning the safety net off should be decided for the run at hand, not inherited from a run three weeks ago. |
 
-It needs the `gui` extra: `pip install 'lr-foldercraft[gui]'`. Without it the
+It needs the `gui` extra: `pip install 'lr-companion-suite[gui]'`. Without it the
 command explains how to install it rather than failing with a traceback.
 
 One window, top to bottom:
@@ -582,7 +582,7 @@ the library and asks for a deliberate yes:
 ```
 Before this run
   ✓  No Lightroom lock file — the catalog is free.
-  ✓  Catalog schema 19.0.0, a version this revision was verified against.
+  ✓  Catalog schema 18.0.0, a version this revision was verified against.
   ✓  All 1 root folder(s) holding files exist on disk (51,049 files).
   ✓  A previous backup of this catalog exists, from 2026-08-23 09:08.
 
@@ -822,8 +822,8 @@ stores `dry_run`, so loading one can never start a live run by accident.
 Every run writes a log file with a numbered `STEP` trail:
 
 ```
-2026-08-22 16:26:31,412 | INFO | lrfoldercraft | STEP 004 | Anchor resolved: ...
-2026-08-22 16:26:31,502 | INFO | lrfoldercraft | STEP 007 | Moved 40 file(s) and 1 sidecar(s)
+2026-08-22 16:26:31,412 | INFO | lrcompanion | STEP 004 | Anchor resolved: ...
+2026-08-22 16:26:31,502 | INFO | lrcompanion | STEP 007 | Moved 40 file(s) and 1 sidecar(s)
 ```
 
 | Flag | Effect |

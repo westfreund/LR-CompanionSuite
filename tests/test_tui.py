@@ -14,8 +14,8 @@ textual = pytest.importorskip("textual")
 
 from textual.widgets import Input, Select, Static  # noqa: E402
 
-from lrfoldercraft.tui.app import LRFolderCraftApp  # noqa: E402
-from lrfoldercraft.version import REVISION  # noqa: E402
+from lrcompanion.tui.app import LRFolderCraftApp  # noqa: E402
+from lrcompanion.version import REVISION  # noqa: E402
 
 
 def test_header_shows_the_revision():
@@ -270,10 +270,10 @@ def test_the_preconditions_gate_the_apply(simple_catalog):
 
 
 def test_the_history_screen_lists_recorded_runs(simple_catalog, tmp_path):
-    from lrfoldercraft.catalog import CatalogReader, open_catalog
-    from lrfoldercraft.config import Settings
-    from lrfoldercraft.executor import execute
-    from lrfoldercraft.planner import build_plan
+    from lrcompanion.catalog import CatalogReader, open_catalog
+    from lrcompanion.config import Settings
+    from lrcompanion.executor import execute
+    from lrcompanion.planner import build_plan
 
     settings = Settings(
         catalog=str(simple_catalog.catalog_path),

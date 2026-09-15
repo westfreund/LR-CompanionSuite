@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from lrfoldercraft import version as version_module
+from lrcompanion import version as version_module
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -54,3 +54,22 @@ def test_documents_state_the_revision():
             if stamp not in text and stamp_de not in text:
                 missing.append(str(path.relative_to(ROOT)))
     assert not missing, "documents without a revision line: " + ", ".join(missing)
+
+
+def test_the_verified_catalog_schema_is_not_the_tool_version():
+    """They are different numbers that happen to look alike.
+
+    Bumping the tool from 18.0.0 to 19.0.0 was done with a blanket replace, and
+    it took VERIFIED_CATALOG_VERSIONS with it -- so the tool started claiming it
+    had been verified against a Lightroom schema that does not exist, and warned
+    about the one it really was tested on. The two must never be equal by
+    accident; if a future Lightroom really does ship schema 19.0.0 and it gets
+    verified, this check is the place to say so deliberately.
+    """
+    from lrcompanion.version import VERIFIED_CATALOG_VERSIONS, __version__
+
+    assert __version__ not in VERIFIED_CATALOG_VERSIONS, (
+        "the verified catalog schema equals the tool version -- almost certainly "
+        "a blanket replace during a release"
+    )
+    assert VERIFIED_CATALOG_VERSIONS == ("18.0.0",)

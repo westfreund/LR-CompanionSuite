@@ -1,24 +1,37 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/brand/logo-128-light.png">
-    <img src="docs/images/brand/logo-128-dark.png" alt="LR-FolderCraft" width="96" height="96">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/brand/suite-128-light.png">
+    <img src="docs/images/brand/suite-128-dark.png" alt="LR-CompanionSuite" width="96" height="96">
   </picture>
 </p>
 
-# LR-FolderCraft
+# LR-CompanionSuite
 
-**Ordnerstrukturen in Adobe Lightroom Classic neu sortieren — ohne die Katalogverbindung zu verlieren.**
+**Zwei Werkzeuge, die neben Adobe Lightroom Classic stehen, statt es zu ersetzen.**
 
-[![Revision](https://img.shields.io/badge/revision-r19.0.0-blue)](CHANGELOG.md)
+[![Revision](https://img.shields.io/badge/revision-r20.0.0-blue)](CHANGELOG.md)
 [![Build-Datum](https://img.shields.io/badge/build-2026--09--15-lightgrey)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![Lizenz](https://img.shields.io/badge/Lizenz-MIT%20ODER%20GPL--3.0--or--later-green)](LICENSE)
 
-🌐 **[Website](https://andy-freund.gitlab.io/LR-FolderCraft/)** · 🇬🇧 [This page in English](README.md) · 📚 [Dokumentation](docs/de/) · [Documentation in English](docs/en/)
+🌐 **[Website](https://andy-freund.gitlab.io/LR-CompanionSuite/)** · 🇬🇧 [This page in English](README.md) · 📚 [Dokumentation](docs/de/) · [Documentation in English](docs/en/)
 
-<sub>Zu Hause ist das Projekt bei [GitLab](https://gitlab.com/andy-freund/LR-FolderCraft) — Tickets und Merge Requests gehören dorthin. GitHub trägt einen Nur-Lese-Spiegel.</sub>
+<sub>Zu Hause ist das Projekt bei [GitLab](https://gitlab.com/andy-freund/LR-CompanionSuite) — Tickets und Merge Requests gehören dorthin. GitHub trägt einen Nur-Lese-Spiegel.</sub>
 
 ---
+
+| | | |
+| :---: | --- | --- |
+| <img src="docs/images/brand/logo-64-dark.png" width="48" alt=""> | **LR-FolderCraft** · `lrfc` | Den Ordnerbaum umsortieren — Dateien und Katalog in einem Zug, sodass nichts verloren geht und jeder Lauf zurücknehmbar ist. |
+| <img src="docs/images/brand/metasearch-64-dark.png" width="48" alt=""> | **LR-MetaSearch** · `lrms` | Über alle Bibliotheken suchen, Doppeltes finden und aus einer Auswahl Kataloge bauen. Liest nur. |
+
+`lrcs` öffnet einen Startbildschirm, der beide anbietet.
+
+---
+
+# LR-FolderCraft
+
+**Die Ordner einer Adobe-Lightroom-Classic-Bibliothek umsortieren — ohne die Katalogverknüpfung zu verlieren.**
 
 <p align="center">
   <picture>
@@ -61,7 +74,7 @@ genau deshalb kann an den Bearbeitungen nichts verloren gehen.
 ## Schnellstart
 
 ```bash
-git clone https://gitlab.com/andy-freund/LR-FolderCraft.git
+git clone https://gitlab.com/andy-freund/LR-CompanionSuite.git
 cd LR-FolderCraft
 ./install/install-macos.sh              # macOS und Linux
 # Windows: powershell -ExecutionPolicy Bypass -File .\install\install-windows.ps1
@@ -152,11 +165,55 @@ Umbenennen gelöst (der Katalog wird entsprechend nachgeführt), alternativ
 **Trotzdem immer ein unabhängiges Backup vorhalten.** Siehe
 [docs/de/06-sicherheit.md](docs/de/06-sicherheit.md).
 
+---
+
+# LR-MetaSearch
+
+**Über alle Lightroom-Classic-Bibliotheken suchen — auch über die, deren
+Laufwerk gerade im Schrank liegt.**
+
+Wer über die Jahre mit mehreren Katalogen gearbeitet hat, kommt irgendwann zu
+einer Frage, die keiner davon beantworten kann: *In welcher Bibliothek liegt
+dieses Foto eigentlich?* LR-MetaSearch beantwortet sie und sagt dann, welches
+Laufwerk anzuschließen ist.
+
+![LR-MetaSearch](docs/images/metasearch-de.png)
+
+```bash
+lrms --lang de scan                              # alle erreichbaren Bibliotheken einlesen
+lrms --lang de find --keyword Hochzeit --min-rating 4
+lrms --lang de duplicates                        # was mehrfach vorhanden ist
+lrms --lang de export --keyword "Best of" --to ~/Desktop/Auswahl
+lrms --lang de gui                               # oder das Fenster
+```
+
+**Es liest nur.** Kein Katalog wird zum Schreiben geöffnet, keine Bilddatei
+angefasst; ein Test vergleicht den Katalog Byte für Byte vor und nach jedem
+Durchlauf. Das Einzige, worin je ein Katalog geschrieben wird, ist eine
+*Kopie*, die das Werkzeug selbst angelegt hat.
+
+An der Sammlung, an der es entstand: **47 Bibliotheken, 183.407 Fotos, 1.054
+Stichwörter, eingelesen in 26 Sekunden** — ohne eine einzige Bilddatei zu
+öffnen, weil Lightroom die EXIF-Daten beim Import bereits geerntet hat.
+
+- Kopien und Sicherungen von Katalogen werden **erkannt und nur einmal
+  gezählt**, über die Überlappung ihrer Foto-UUIDs statt über Namen.
+- Ein Laufwerk wird über seine **VolumeUUID** erkannt, nicht über einen Namen,
+  den zwei Laufwerke tragen können.
+- Doppelte Dateien werden allein aus den Katalogen gefunden, funktionieren also
+  bei abgestecktem Laufwerk. Visuelle Ähnlichkeit gibt es bewusst nicht —
+  [die Doku sagt, warum](docs/de/15-bibliotheksindex.md).
+- Der Export kopiert jede Bibliothek und verkleinert die Kopie; alles, was
+  übrig bleibt, hat Lightroom selbst geschrieben. Das Zusammenführen macht
+  Lightrooms eigenes *Aus anderem Katalog importieren*.
+
+[**Vollständige Dokumentation →**](docs/de/15-bibliotheksindex.md)
+
 ## Voraussetzungen
 
 - Python 3.9 oder neuer (macOS bringt eine passende Version mit)
 - Adobe-Lightroom-Classic-Katalog, Schemaversion 11.x–19.x
-  (verifiziert gegen 19.0.0 / Lightroom Classic 14)
+  (verifiziert gegen 18.0.0 / Lightroom Classic 14)
 - Lightroom Classic **geschlossen**, während das Werkzeug läuft
 
 Die Kommandozeile benötigt nur die Standardbibliothek. `lrfc tui` bringt

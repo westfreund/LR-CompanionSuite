@@ -1,6 +1,6 @@
 # Development and continuation
 
-**Revision r19.0.0 · Build date 2026-09-15**
+**Revision r20.0.0 · Build date 2026-09-15**
 
 This document exists so that work can be picked up later — by you, by someone
 else, or by an AI assistant — without reconstructing context from the code.
@@ -8,7 +8,7 @@ else, or by an AI assistant — without reconstructing context from the code.
 ## Current state
 
 **r1.0.0 is complete and working.** Verified end to end against a real
-Lightroom Classic catalog (schema 19.0.0, 9,452 files, 337 GiB, exFAT).
+Lightroom Classic catalog (schema 18.0.0, 9,452 files, 337 GiB, exFAT).
 
 | Area | State |
 | --- | --- |
@@ -43,7 +43,7 @@ Lightroom Classic catalog (schema 19.0.0, 9,452 files, 337 GiB, exFAT).
 ## Getting set up
 
 ```bash
-git clone https://gitlab.com/andy-freund/LR-FolderCraft.git
+git clone https://gitlab.com/andy-freund/LR-CompanionSuite.git
 cd LR-FolderCraft
 python3 -m venv .venv
 source .venv/bin/activate           # Windows: .venv\Scripts\activate
@@ -54,7 +54,7 @@ pytest
 Run the tool from the source tree without installing:
 
 ```bash
-PYTHONPATH=src python3 -m lrfoldercraft info /path/to.lrcat
+PYTHONPATH=src python3 -m lrcompanion info /path/to.lrcat
 ```
 
 ## Test strategy

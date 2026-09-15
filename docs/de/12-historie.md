@@ -1,8 +1,8 @@
 # Projekthistorie
 
-**Revision r19.0.0 · Build-Datum 2026-09-15**
+**Revision r20.0.0 · Build-Datum 2026-09-15**
 
-Der [CHANGELOG](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md) sagt, was sich in jeder Revision geändert
+Der [CHANGELOG](https://gitlab.com/andy-freund/LR-CompanionSuite/-/blob/main/CHANGELOG.md) sagt, was sich in jeder Revision geändert
 hat. Dieses Dokument sagt **warum**, und was dazwischen geschah: die getroffenen
 Entscheidungen, die Tests an echten Bibliotheken und die vier Gelegenheiten, bei
 denen das Werkzeug auf eine Weise falsch lag, die zählte.
@@ -22,7 +22,7 @@ Dieser Unterschied zählt, deshalb genau, worauf es fußt:
 | Teil | Quelle | Belastbar? |
 | --- | --- | --- |
 | Daten, Reihenfolge, was wann geändert wurde | Commit-Historie und Tags | Ja — maschinell festgehalten |
-| Was jede Revision enthält | [CHANGELOG.md](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md) | Ja — seinerzeit geschrieben |
+| Was jede Revision enthält | [CHANGELOG.md](https://gitlab.com/andy-freund/LR-CompanionSuite/-/blob/main/CHANGELOG.md) | Ja — seinerzeit geschrieben |
 | Testergebnisse und ihre Zahlen | Lauf-Ausgaben, in den Commits zitiert | Ja |
 | Begründungen, Alternativen, Gelerntes | Aus dem Bestand rekonstruiert | Die Darstellung ist wahrheitsgetreu, aber im Nachhinein verfasst |
 
@@ -33,7 +33,7 @@ festhalten:
 ```bash
 git log --oneline --reverse          # jeder Schritt, der Reihe nach
 git show v5.0.0                      # was eine Revision war
-git log -p -- src/lrfoldercraft/planner.py    # das ganze Leben einer Datei
+git log -p -- src/lrcompanion/planner.py    # das ganze Leben einer Datei
 ```
 
 Der CHANGELOG listet Releases neueste zuerst. Dieses Dokument liest sich
@@ -53,7 +53,7 @@ und nur die bekommen einen.
 
 Wer wissen will, *was* sich geändert hat, findet es hier in einer Zeile; wer
 wissen will, *warum*, liest die Abschnitte darunter und den
-[CHANGELOG](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md).
+[CHANGELOG](https://gitlab.com/andy-freund/LR-CompanionSuite/-/blob/main/CHANGELOG.md).
 
 | Revision | Zeit | Name | Worum es ging |
 | --- | --- | --- | --- |
@@ -103,6 +103,7 @@ wissen will, *warum*, liest die Abschnitte darunter und den
 | **r17.0.3** | 07:50 |  | Rückgängig fand den Lauf von heute früh nicht: Ohne gemerkten Katalog meldete das Fenster, es seien keine Läufe aufgezeichnet, und öffnete einen Dateidialog in einem Ordner, in dem seit Revisionen kein Journal mehr liegt. Es nennt jetzt den wahren Grund und startet dort, wo die Journale liegen. |
 | **r18.0.0** | 30.08. | Übersicht | Das Fenster stapelte alles in einer scrollenden Spalte, sodass Struktur, Optionen und Regeln unterhalb des sichtbaren Randes lagen. Jetzt fünf Reiter, einer je Arbeitsschritt, Schaltflächen in der Reihenfolge der Arbeit — und Profile lassen sich anlegen und löschen, statt durch Tippen eines unbenutzten Namens zu entstehen. |
 | **r19.0.0** | 15.09. | Fundort | Ein Index über alle Bibliotheken: 47 Kataloge, 183.407 Fotos, rein lesend. Kopien von Katalogen werden über die Überlappung ihrer Foto-UUIDs erkannt — ein Test mit drei Fotos deckte auf, dass der erste Entwurf nur mit Glück funktionierte. Dazu Dublettenbericht und ein Export, der Kataloge kopiert und verkleinert, statt neue zu schreiben. |
+| **r20.0.0** | 15.09. | Zu zweit | Aus dem Projekt wird eine Suite: **LR-CompanionSuite** mit LR-FolderCraft und LR-MetaSearch darin, je eigener Name, Befehl, Marke und Fenster, dazu ein Startbildschirm. Die Konfiguration samt Index mit 183.407 Fotos wird mitgenommen. Nebenbei behoben: Das r19-Release hatte die verifizierte Katalog-Schemaversion mit der Werkzeugversion überschrieben. |
 
 ---
 
@@ -545,7 +546,7 @@ Deren Aufgabe ist es, sie behoben zu halten — inzwischen mit 653 Tests.
 
 ## Siehe auch
 
-- [CHANGELOG.md](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md) — was sich je Revision geändert hat
+- [CHANGELOG.md](https://gitlab.com/andy-freund/LR-CompanionSuite/-/blob/main/CHANGELOG.md) — was sich je Revision geändert hat
 - [13-offene-punkte.md](13-offene-punkte.md) — was bekanntermaßen fehlt
 - [14-prompts.md](14-prompts.md) — der ursprüngliche Auftrag und der generische Prompt
 - [10-entwicklung.md](10-entwicklung.md) — wie die Arbeit fortgesetzt wird

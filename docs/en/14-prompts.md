@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r19.0.0 · Build date 2026-09-15**
+**Revision r20.0.0 · Build date 2026-09-15**
 
 This document preserves the request that created LR-FolderCraft, a generic
 prompt for regenerating a comparable tool from scratch, and the context needed
@@ -550,7 +550,7 @@ already taken and the questions still open.
 ### The short version
 
 ```bash
-git clone https://gitlab.com/andy-freund/LR-FolderCraft.git
+git clone https://gitlab.com/andy-freund/LR-CompanionSuite.git
 cd LR-FolderCraft && python3 -m venv .venv && source .venv/bin/activate
 python -m pip install -e '.[dev]' && pytest        # expect 270 passing
 ```
@@ -560,16 +560,16 @@ Then read, in this order:
 1. `docs/en/10-development.md` — where things stand
 2. `docs/en/13-open-issues.md` — what to do next (start at O-1)
 3. `docs/en/08-how-it-works.md` — the catalog internals
-4. `src/lrfoldercraft/planner.py` — the heart of the tool
-5. `src/lrfoldercraft/folders.py` — how existing folders are classified
-6. `src/lrfoldercraft/gui/app.py` — the Qt front end, if you touch the interface
+4. `src/lrcompanion/planner.py` — the heart of the tool
+5. `src/lrcompanion/folders.py` — how existing folders are classified
+6. `src/lrcompanion/gui/app.py` — the Qt front end, if you touch the interface
 
 ### Prompt for resuming with an AI assistant
 
 ```text
 Continue work on LR-FolderCraft, a Python tool that reorganises Adobe Lightroom
 Classic folder trees by rewriting the .lrcat SQLite catalog while moving the
-files. The repository is at https://gitlab.com/andy-freund/LR-FolderCraft.
+files. The repository is at https://gitlab.com/andy-freund/LR-CompanionSuite.
 
 Read these first: docs/en/10-development.md (current state and what is NOT done),
 docs/en/13-open-issues.md (the backlog, with items numbered O-1 onwards) and

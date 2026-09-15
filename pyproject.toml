@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lr-foldercraft"
-version = "19.0.0"
-description = "Reorganise Adobe Lightroom Classic folder trees by date, camera and more, without losing the catalog connection."
+name = "lr-companion-suite"
+version = "20.0.0"
+description = "A companion suite for Adobe Lightroom Classic: reorganise folder trees without losing the catalog connection, and search across every library you own."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT OR GPL-3.0-or-later" }
@@ -50,21 +50,24 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://gitlab.com/andy-freund/LR-FolderCraft"
-Repository = "https://gitlab.com/andy-freund/LR-FolderCraft"
-Documentation = "https://gitlab.com/andy-freund/LR-FolderCraft/-/tree/main/docs"
-Issues = "https://gitlab.com/andy-freund/LR-FolderCraft/-/issues"
-Changelog = "https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md"
+Homepage = "https://gitlab.com/andy-freund/LR-CompanionSuite"
+Repository = "https://gitlab.com/andy-freund/LR-CompanionSuite"
+Documentation = "https://gitlab.com/andy-freund/LR-CompanionSuite/-/tree/main/docs"
+Issues = "https://gitlab.com/andy-freund/LR-CompanionSuite/-/issues"
+Changelog = "https://gitlab.com/andy-freund/LR-CompanionSuite/-/blob/main/CHANGELOG.md"
 
 [project.scripts]
-lrfc = "lrfoldercraft.cli:main"
-lr-foldercraft = "lrfoldercraft.cli:main"
+# One command per tool, plus the launcher that offers both.
+lrcs = "lrcompanion.suite.cli:main"
+lrfc = "lrcompanion.cli:main"
+lrms = "lrcompanion.metasearch.main:main"
+lr-companion-suite = "lrcompanion.suite.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-lrfoldercraft = ["tui/*.tcss", "resources/*.svg"]
+lrcompanion = ["tui/*.tcss", "resources/*.svg"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -88,4 +91,4 @@ ignore = ["UP006", "UP007", "UP035", "UP045", "UP032"]
 [tool.ruff.lint.per-file-ignores]
 # TOKEN_SPECS is a declarative table; one row per line reads far better than
 # wrapping every bilingual description across three lines.
-"src/lrfoldercraft/rules.py" = ["E501"]
+"src/lrcompanion/rules.py" = ["E501"]

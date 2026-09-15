@@ -21,10 +21,10 @@ pytest.importorskip("PySide6.QtWidgets")
 from PySide6.QtCore import QCoreApplication  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
-from lrfoldercraft.config import Settings, list_profiles  # noqa: E402
-from lrfoldercraft.gui.app import MainWindow, _split_extensions  # noqa: E402
-from lrfoldercraft.gui.i18n import tr  # noqa: E402
-from lrfoldercraft.version import REVISION  # noqa: E402
+from lrcompanion.config import Settings, list_profiles  # noqa: E402
+from lrcompanion.gui.app import MainWindow, _split_extensions  # noqa: E402
+from lrcompanion.gui.i18n import tr  # noqa: E402
+from lrcompanion.version import REVISION  # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -509,7 +509,7 @@ def test_per_folder_decisions_are_never_restored(qt_app, mixed_gui_catalog):
 
 def test_a_remembered_value_a_later_revision_dropped_is_ignored(qt_app):
     """An unknown action must leave the default standing, not empty the combo."""
-    from lrfoldercraft.gui.state import save_state
+    from lrcompanion.gui.state import save_state
 
     save_state({"language": "de", "subfolder_action": "teleport", "preset": "nonsense"})
     window = MainWindow()
@@ -520,7 +520,7 @@ def test_a_remembered_value_a_later_revision_dropped_is_ignored(qt_app):
 
 
 def test_an_unreadable_state_file_is_shrugged_off(qt_app):
-    from lrfoldercraft.gui.state import state_path
+    from lrcompanion.gui.state import state_path
 
     state_path().parent.mkdir(parents=True, exist_ok=True)
     state_path().write_text("{not json", encoding="utf-8")
@@ -706,14 +706,14 @@ def test_the_sweep_setting_is_remembered(qt_app):
 def _preconditions_for(catalog):
     from pathlib import Path as _Path
 
-    from lrfoldercraft.safety import preconditions
+    from lrcompanion.safety import preconditions
 
     return preconditions(_Path(catalog), Settings(catalog=str(catalog)))
 
 
 def test_the_dialog_cannot_be_confirmed_without_ticking(qt_app, mixed_gui_catalog):
     """A confirmation given by reflex is not a confirmation."""
-    from lrfoldercraft.gui.app import PreconditionDialog
+    from lrcompanion.gui.app import PreconditionDialog
 
     result = _preconditions_for(mixed_gui_catalog.catalog_path)
     dialog = PreconditionDialog(result, "en")
@@ -723,8 +723,8 @@ def test_the_dialog_cannot_be_confirmed_without_ticking(qt_app, mixed_gui_catalo
 
 
 def test_a_blocking_finding_cannot_be_acknowledged_away(qt_app, mixed_gui_catalog):
-    from lrfoldercraft.gui.app import PreconditionDialog
-    from lrfoldercraft.safety import ERROR, Check, PreflightResult
+    from lrcompanion.gui.app import PreconditionDialog
+    from lrcompanion.safety import ERROR, Check, PreflightResult
 
     blocked = PreflightResult(
         checks=[Check("folders-connected", ERROR, "root folder missing", "Wurzel fehlt")]
@@ -848,7 +848,7 @@ def test_the_mark_takes_the_text_colour(qt_app):
 
 def test_the_application_carries_the_icon_for_the_dock(qt_app):
     """setWindowIcon on the window is not what the Dock or task bar reads."""
-    from lrfoldercraft.gui.app import window_icon
+    from lrcompanion.gui.app import window_icon
 
     icon = window_icon()
     assert not icon.isNull()
@@ -1000,7 +1000,7 @@ def test_saving_without_a_profile_chosen_says_so_instead_of_writing_one(qt_app):
     Which is how somebody ends up with a profile they never meant to make, and
     why making one is now a button of its own.
     """
-    from lrfoldercraft.gui import app as gui_app
+    from lrcompanion.gui import app as gui_app
 
     window = MainWindow()
     window._refresh_profiles()
@@ -1017,7 +1017,7 @@ def test_saving_without_a_profile_chosen_says_so_instead_of_writing_one(qt_app):
 
 
 def test_a_profile_can_be_taken_away_again(qt_app):
-    from lrfoldercraft.gui import app as gui_app
+    from lrcompanion.gui import app as gui_app
 
     # Written directly: making one through the window needs a catalog, and
     # this is about taking one away.
@@ -1094,11 +1094,11 @@ def test_the_run_list_reads_properly(qt_app, mixed_gui_catalog, tmp_path):
     """It showed a column of raw placeholders and a truncated clock."""
     from pathlib import Path as _Path
 
-    from lrfoldercraft.catalog import CatalogReader, open_catalog
-    from lrfoldercraft.executor import execute
-    from lrfoldercraft.gui.app import RunPickerDialog
-    from lrfoldercraft.planner import build_plan
-    from lrfoldercraft.runs import history
+    from lrcompanion.catalog import CatalogReader, open_catalog
+    from lrcompanion.executor import execute
+    from lrcompanion.gui.app import RunPickerDialog
+    from lrcompanion.planner import build_plan
+    from lrcompanion.runs import history
 
     settings = Settings(
         catalog=str(mixed_gui_catalog.catalog_path),
@@ -1179,7 +1179,7 @@ def test_without_a_catalog_the_runs_are_not_reported_as_none(qt_app, tmp_path):
     is not missing -- which is exactly what happened once the remembered
     catalog was lost.
     """
-    from lrfoldercraft.gui.i18n import tr
+    from lrcompanion.gui.i18n import tr
 
     window = MainWindow()
     window.catalog_edit.setText("")
@@ -1197,7 +1197,7 @@ def test_undo_without_a_catalog_offers_no_file_chooser(qt_app):
     window = MainWindow()
     window.catalog_edit.setText("")
     seen = []
-    from lrfoldercraft.gui import app as gui_app
+    from lrcompanion.gui import app as gui_app
 
     original = gui_app.QMessageBox.information
     gui_app.QMessageBox.information = staticmethod(lambda *a, **k: seen.append(a[-1]))
@@ -1205,7 +1205,7 @@ def test_undo_without_a_catalog_offers_no_file_chooser(qt_app):
         assert window._choose_journal() == ""
     finally:
         gui_app.QMessageBox.information = original
-    from lrfoldercraft.gui.i18n import tr
+    from lrcompanion.gui.i18n import tr
 
     assert seen == [tr("no_catalog_for_runs", window.language)]
     window.close()

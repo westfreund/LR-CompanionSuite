@@ -1,6 +1,6 @@
 # Sicherheit und Wiederherstellung
 
-**Revision r19.0.0 · Build-Datum 2026-09-15**
+**Revision r20.0.0 · Build-Datum 2026-09-15**
 
 > Dieses Werkzeug bearbeitet die Lightroom-Katalogdatenbank und verschiebt Ihre
 > Fotografien. Es ist sorgfältig gebaut und getestet, aber: **Halten Sie vor
@@ -46,7 +46,7 @@ und beide Kopien werden per SHA-256 verglichen. Weichen sie ab, bricht der Lauf
 sofort ab.
 
 ```
-~/Library/Application Support/LR-FolderCraft/backups/2019-20260822-162631.lrcat
+~/Library/Application Support/LR-CompanionSuite/backups/2019-20260822-162631.lrcat
 ```
 
 Backups auf einen anderen Datenträger als den Katalog legen:
@@ -185,7 +185,7 @@ prüfen lassen.
 
 Beilegen:
 
-1. die Logdatei (`~/Library/Logs/LR-FolderCraft/`), idealerweise aus einem
+1. die Logdatei (`~/Library/Logs/LR-CompanionSuite/`), idealerweise aus einem
    `--debug`-Lauf,
 2. den Plan als JSON (`lrfc plan ... --json > plan.json`),
 3. das Journal, falls ein Lauf begonnen hatte,

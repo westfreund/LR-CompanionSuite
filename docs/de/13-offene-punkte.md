@@ -1,6 +1,6 @@
 # Offene Punkte und Fahrplan
 
-**Revision r19.0.0 · Build-Datum 2026-09-15**
+**Revision r20.0.0 · Build-Datum 2026-09-15**
 
 Eine ehrliche Aufstellung dessen, was nicht erledigt, nicht verifiziert oder
 bewusst ausgelassen ist. Jeder Punkt ist ein Ansatzpunkt für die nächste
@@ -323,14 +323,14 @@ Zwei Dinge, die der Entwurf vom 15.09. so nicht vorhergesehen hatte:
   Fenster zu drücken hätte beides verschlechtert. Fenster und
   Terminaloberfläche stehen aus; siehe O-31.
 
-### O-31 · Der Index in Fenster und Terminaloberfläche
+### O-31 · Der Index in Fenster und Terminaloberfläche ✔ r20.0.0 (teilweise)
 Die Ordnerumsortierung hat drei Oberflächen, der Index bisher eine. Gebraucht
 werden mindestens: Suche mit den Kriterien aus `index find`, die Laufwerksliste
 mit dem Hinweis, was angeschlossen ist, und der Dublettenbericht. Der Export
 gehört wahrscheinlich ebenfalls dazu, dann aber mit derselben Rückfrage wie auf
 der Kommandozeile.
 
-### O-32 · Ein eigenes Werkzeug mit eigenem Namen? — offen
+### O-32 · Ein eigenes Werkzeug mit eigenem Namen? ✔ r20.0.0
 Am 15.09.2026 von Andreas aufgeworfen, nachdem der Index stand: Der Suchteil
 verdient vermutlich ein **eigenes Fenster**, und womöglich ist er gar ein
 **eigenes Werkzeug** mit eigenem Namen. Vorschlag: *LR-MetaSearch*.
@@ -364,6 +364,29 @@ Historie herauslösen, wenn es so weit ist. Umgekehrt ist es teuer.
 gut, unterschlägt aber das Erkennen von Dubletten und das Zusammenstellen neuer
 Kataloge. Das ist kein Einwand — ein Name muss nicht alles abdecken —, aber es
 sollte bewusst entschieden sein.
+
+### Wie O-32 entschieden wurde
+Am 15.09.2026: **LR-CompanionSuite**, ein Repository, zwei Werkzeuge. Der Name
+kam von Andreas, nachdem zwei andere Vorschläge geprüft und verworfen waren —
+„MasterSuite" kollidierte mit seinem eigenen `Masterkatalog`, und *Companion*
+sagt genau, in welchem Verhältnis die Werkzeuge zu Lightroom stehen.
+
+Umbenannt wurde **jetzt** und nicht später: Website und Spiegel standen, aber
+es war noch nirgends etwas gepostet. Heute kostete der neue Name fast nichts;
+in zwei Monaten hätte er alles gekostet, was an Auffindbarkeit aufgebaut war.
+
+Auf Andreas' Wunsch bleibt das **alte GitLab-Repository unangetastet stehen**.
+Das neue ist ein eigenes Projekt, kein umbenanntes.
+
+Nicht entschieden, weil nicht nötig: ein zweites Repository. Die Trennung im
+Code besteht (`metasearch/` plus Wächtertest), und damit bleibt der Schnitt
+billig, wenn er je gewollt ist.
+
+### O-33 · LR-MetaSearch in der Terminaloberfläche
+r20.0.0 brachte das Fenster, nicht die Textoberfläche. Die
+Ordnerumsortierung hat drei Oberflächen, LR-MetaSearch zwei. Gebraucht würden
+mindestens Suche und Laufwerksliste; der Export gehört wahrscheinlich nicht in
+ein Terminal.
 
 ### O-30 · Stichwörter schreiben — zurückgestellt
 Ursprünglich der erste Wunsch, auf Andreas' Entscheidung hin **komplett

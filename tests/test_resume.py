@@ -13,11 +13,11 @@ from pathlib import Path
 
 import pytest
 
-from lrfoldercraft.catalog import CatalogReader, open_catalog
-from lrfoldercraft.config import Settings
-from lrfoldercraft.executor import execute, undo
-from lrfoldercraft.planner import build_plan
-from lrfoldercraft.resume import (
+from lrcompanion.catalog import CatalogReader, open_catalog
+from lrcompanion.config import Settings
+from lrcompanion.executor import execute, undo
+from lrcompanion.planner import build_plan
+from lrcompanion.resume import (
     COMPLETE,
     NEEDS_RECORD,
     NEEDS_REVERT,
@@ -27,7 +27,7 @@ from lrfoldercraft.resume import (
     remove_created_directories,
     revert_files,
 )
-from lrfoldercraft.safety import preflight
+from lrcompanion.safety import preflight
 
 
 def make_plan(builder, tmp_path, **kwargs):
@@ -52,7 +52,7 @@ def files_under(builder):
 
 def kill_after(count, monkeypatch):
     """Make the move loop die after *count* files, as a crash would."""
-    import lrfoldercraft.executor as executor
+    import lrcompanion.executor as executor
 
     real = executor._move_file
     state = {"n": 0}
@@ -167,7 +167,7 @@ def test_moved_back_files_alone_do_not_mean_an_interrupted_reversal(simple_catal
         Path(move.source_path).parent.mkdir(parents=True, exist_ok=True)
         os.replace(move.target_path, move.source_path)
 
-    from lrfoldercraft.runs import read_record
+    from lrcompanion.runs import read_record
 
     record = read_record(Path(result.run_directory))
     assert not record.reversal_was_cut_short
@@ -178,7 +178,7 @@ def test_a_run_that_committed_but_did_not_finish_needs_no_moving(
     simple_catalog, tmp_path, monkeypatch
 ):
     """Past the commit the two sides agree; only the bookkeeping is missing."""
-    import lrfoldercraft.executor as executor
+    import lrcompanion.executor as executor
 
     plan, settings = make_plan(simple_catalog, tmp_path)
     real = executor._verify
@@ -206,7 +206,7 @@ def test_a_committed_run_is_never_reverted_by_mistake(simple_catalog, tmp_path, 
     files to move back is empty unless reverting is the right direction, so a
     caller cannot get this wrong by reading the wrong field.
     """
-    import lrfoldercraft.executor as executor
+    import lrcompanion.executor as executor
 
     plan, settings = make_plan(simple_catalog, tmp_path)
     monkeypatch.setattr(
@@ -243,7 +243,7 @@ def test_a_finished_reversal_is_not_reported_as_interrupted(simple_catalog, tmp_
 
 
 def test_an_interrupted_reversal_is_recorded_not_guessed(simple_catalog, tmp_path, monkeypatch):
-    import lrfoldercraft.executor as executor
+    import lrcompanion.executor as executor
 
     plan, settings = make_plan(simple_catalog, tmp_path)
     result = execute(plan, settings)
@@ -262,7 +262,7 @@ def test_an_interrupted_reversal_is_recorded_not_guessed(simple_catalog, tmp_pat
         undo(result.journal_path)
     monkeypatch.undo()
 
-    from lrfoldercraft.runs import read_record
+    from lrcompanion.runs import read_record
 
     record = read_record(Path(result.run_directory))
     assert record.undo_started_at and not record.undone_at
@@ -293,7 +293,7 @@ def test_a_repaired_run_is_never_reported_again(simple_catalog, tmp_path, monkey
     remove_created_directories(found)
     assert restored
 
-    from lrfoldercraft.runs import read_record
+    from lrcompanion.runs import read_record
 
     record = read_record(Path(found.journal_path).parent)
     assert record.repaired_at and record.is_settled
@@ -321,7 +321,7 @@ def test_the_command_line_marks_it_too(simple_catalog, tmp_path, monkeypatch):
     assert found.record is not None
     revert_files(found)
 
-    from lrfoldercraft.runs import read_record
+    from lrcompanion.runs import read_record
 
     assert read_record(journal.parent).is_settled
 
@@ -352,7 +352,7 @@ def test_an_overtaken_interruption_is_never_acted_on(simple_catalog, tmp_path, m
     assert find_interruptions(Path(simple_catalog.catalog_path)) == []
 
     # Even asked about it directly, the older run offers nothing to move.
-    from lrfoldercraft.runs import history, journal_of
+    from lrcompanion.runs import history, journal_of
 
     oldest = history(Path(simple_catalog.catalog_path))[-1]
     found = inspect(journal_of(oldest), oldest)

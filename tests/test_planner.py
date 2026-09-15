@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from lrfoldercraft.catalog import CatalogReader, open_catalog
-from lrfoldercraft.config import Settings
-from lrfoldercraft.planner import (
+from lrcompanion.catalog import CatalogReader, open_catalog
+from lrcompanion.config import Settings
+from lrcompanion.planner import (
     MOVE,
     RENAMED,
     SKIP_CONFLICT,
@@ -370,7 +370,7 @@ def test_deeper_partial_overlap(builder):
 
 def test_macos_leaves_appledouble_to_the_kernel(builder, monkeypatch):
     """Measured behaviour: macOS moves ._X itself; moving it again collides."""
-    monkeypatch.setattr("lrfoldercraft.planner.sys.platform", "darwin")
+    monkeypatch.setattr("lrcompanion.planner.sys.platform", "darwin")
     builder.add_photo("A.CR2", "2019-01-03T10:00:00")
     (builder.images_dir / "._A.CR2").write_bytes(b"resource fork")
     plan = plan_for(builder, structure=("{yyyy}-{mm}-{dd}",))
@@ -378,7 +378,7 @@ def test_macos_leaves_appledouble_to_the_kernel(builder, monkeypatch):
 
 
 def test_other_platforms_carry_the_appledouble_along(builder, monkeypatch):
-    monkeypatch.setattr("lrfoldercraft.planner.sys.platform", "linux")
+    monkeypatch.setattr("lrcompanion.planner.sys.platform", "linux")
     builder.add_photo("A.CR2", "2019-01-03T10:00:00")
     (builder.images_dir / "._A.CR2").write_bytes(b"resource fork")
     plan = plan_for(builder, structure=("{yyyy}-{mm}-{dd}",))
@@ -388,7 +388,7 @@ def test_other_platforms_carry_the_appledouble_along(builder, monkeypatch):
 
 def test_appledouble_moves_even_with_sidecars_disabled(builder, monkeypatch):
     """It is part of the file, not a document beside it."""
-    monkeypatch.setattr("lrfoldercraft.planner.sys.platform", "linux")
+    monkeypatch.setattr("lrcompanion.planner.sys.platform", "linux")
     builder.add_photo("A.CR2", "2019-01-03T10:00:00", sidecars=["A.xmp"])
     (builder.images_dir / "._A.CR2").write_bytes(b"resource fork")
     plan = plan_for(builder, structure=("{yyyy}",), move_sidecars=False)
@@ -397,7 +397,7 @@ def test_appledouble_moves_even_with_sidecars_disabled(builder, monkeypatch):
 
 
 def test_appledouble_follows_a_renamed_photo(builder, monkeypatch):
-    monkeypatch.setattr("lrfoldercraft.planner.sys.platform", "linux")
+    monkeypatch.setattr("lrcompanion.planner.sys.platform", "linux")
     builder.add_photo("SAME.CR2", "2019-01-03T10:00:00", folder="a/")
     builder.add_photo("SAME.CR2", "2019-01-03T11:00:00", folder="b/")
     (builder.images_dir / "b" / "._SAME.CR2").write_bytes(b"resource fork")
@@ -409,7 +409,7 @@ def test_appledouble_follows_a_renamed_photo(builder, monkeypatch):
 
 
 def test_no_companion_means_no_extra_move(builder, monkeypatch):
-    monkeypatch.setattr("lrfoldercraft.planner.sys.platform", "linux")
+    monkeypatch.setattr("lrcompanion.planner.sys.platform", "linux")
     builder.add_photo("A.CR2", "2019-01-03T10:00:00")
     plan = plan_for(builder, structure=("{yyyy}",))
     assert by_name(plan)["A.CR2"].sidecars == ()
@@ -417,7 +417,7 @@ def test_no_companion_means_no_extra_move(builder, monkeypatch):
 
 def test_companion_is_never_treated_as_a_sidecar_document(builder, monkeypatch):
     """._A.CR2 must be reported once, not twice."""
-    monkeypatch.setattr("lrfoldercraft.planner.sys.platform", "linux")
+    monkeypatch.setattr("lrcompanion.planner.sys.platform", "linux")
     builder.add_photo("A.CR2", "2019-01-03T10:00:00")
     (builder.images_dir / "._A.CR2").write_bytes(b"resource fork")
     plan = plan_for(builder, structure=("{yyyy}",))
@@ -552,7 +552,7 @@ def test_sorting_inside_is_idempotent(mixed_library):
     """A second run must not build Urlaub/2019-01-03/2019-01-03."""
     import shutil
 
-    from lrfoldercraft.executor import execute
+    from lrcompanion.executor import execute
 
     settings = Settings(
         catalog=str(mixed_library.catalog_path),
@@ -642,7 +642,7 @@ def test_a_repeated_new_tree_run_is_a_no_op(builder, tmp_path):
     builder.add_photo("B.CR2", "2019-02-14T10:00:00", folder="raw2019/")
     target = tmp_path / "Sortiert"
 
-    from lrfoldercraft.executor import execute
+    from lrcompanion.executor import execute
 
     settings = Settings(
         catalog=str(builder.catalog_path),

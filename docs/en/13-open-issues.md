@@ -1,6 +1,6 @@
 # Open issues and roadmap
 
-**Revision r19.0.0 · Build date 2026-09-15**
+**Revision r20.0.0 · Build date 2026-09-15**
 
 An honest list of what is not done, not verified, or deliberately left out.
 Each item is a starting point for the next session.
@@ -301,13 +301,13 @@ Two things the plan of 15 September did not foresee:
   window as an afterthought would have made both worse. The window and the
   terminal interface are still to come; see O-31.
 
-### O-31 · The index in the window and the terminal interface
+### O-31 · The index in the window and the terminal interface ✔ r20.0.0 (in part)
 The folder reorganisation has three front ends; the index has one. What is
 needed at least: search with the criteria from `index find`, the list of drives
 with what is attached, and the duplicate report. The export probably belongs
 there too, but then with the same confirmation the command line asks for.
 
-### O-32 · A tool of its own, with a name of its own? — open
+### O-32 · A tool of its own, with a name of its own? ✔ r20.0.0
 Raised by Andreas on 15 September 2026, once the index existed: the searching
 half probably deserves a **window of its own**, and may well be a **tool of its
 own** with its own name. His suggestion: *LR-MetaSearch*.
@@ -340,6 +340,29 @@ with its history when the time comes. The other direction is expensive.
 well but leaves out finding duplicates and assembling new catalogs. That is not
 an objection -- a name need not cover everything -- but it should be a decision
 rather than an accident.
+
+### How O-32 was decided
+On 15 September 2026: **LR-CompanionSuite**, one repository, two tools. The
+name came from Andreas after two others were considered and dropped --
+"MasterSuite" collided with his own `Masterkatalog`, and *Companion* says
+exactly what relation the tools have to Lightroom.
+
+The rename happened **now** rather than later: the website and the mirror
+existed, but nothing had been posted anywhere yet. Today a new name cost close
+to nothing; in two months it would have cost everything that had been built up
+in findability.
+
+At Andreas's request the **old GitLab repository is left standing untouched**.
+The new one is a project of its own, not a renamed one.
+
+Not decided, because it did not need to be: a second repository. The separation
+exists in the code (`metasearch/` plus its guard test), which keeps that cut
+cheap for whenever it is wanted.
+
+### O-33 · LR-MetaSearch in the terminal interface
+r20.0.0 brought the window, not the text interface. The folder reorganisation
+has three front ends, LR-MetaSearch has two. Searching and the list of drives
+would be the minimum; the export probably does not belong in a terminal.
 
 ### O-30 · Writing keywords — deferred
 Originally the first wish, **deferred entirely** at Andreas's decision.

@@ -1,6 +1,6 @@
-# The index across every library
+# LR-MetaSearch — the index across every library
 
-**Revision r19.0.0 · Build date 2026-09-15**
+**Revision r20.0.0 · Build date 2026-09-15**
 
 Anyone who has worked with several Lightroom catalogs over the years ends up
 with a question none of them can answer: *which library is this photograph
@@ -15,17 +15,17 @@ tells you **which** drive to connect.
 ## In three commands
 
 ```bash
-lrfc index scan                            # read every library it can reach
-lrfc index status                          # what the index holds
-lrfc index find --keyword Wedding --min-rating 4
+lrms scan                            # read every library it can reach
+lrms status                          # what the index holds
+lrms find --keyword Wedding --min-rating 4
 ```
 
-## `index scan` — reading libraries in
+## `lrms scan` — reading libraries in
 
 ```bash
-lrfc index scan                            # looks in ~/Pictures and under /Volumes
-lrfc index scan "/Volumes/Photos" ~/Pictures   # or in the places you name
-lrfc index scan --index ~/my-index.db      # a different index file
+lrms scan                            # looks in ~/Pictures and under /Volumes
+lrms scan "/Volumes/Photos" ~/Pictures   # or in the places you name
+lrms scan --index ~/my-index.db      # a different index file
 ```
 
 Recorded per photograph: **catalog name, folder, file name, the keywords
@@ -70,7 +70,7 @@ whether a grown copy is still recognised comes down to luck.
 the valid one is your decision. The ones judged to be copies appear under
 `index status --all` with a `=` in front.
 
-## `index status` — what is in it
+## `lrms status` — what is in it
 
 ```
   47 catalogs, 183,407 photographs, 1,054 keywords, 1 drives, 6 known copies
@@ -88,15 +88,15 @@ filesystem and size. That is weaker, which is why it says so.
 
 The index is a **snapshot**. Each catalog carries the moment it was last read.
 
-## `index find` — searching
+## `lrms find` — searching
 
 ```bash
-lrfc index find --keyword Wedding --keyword Berlin      # both must apply
-lrfc index find --any-keyword Anna --any-keyword Ben    # one is enough
-lrfc index find --camera "EOS R5" --since 2024-01-01 --min-rating 3
-lrfc index find --text IMG_0042                         # file name or folder
-lrfc index find --with-gps --ext cr3 --limit 200
-lrfc index find --keyword Wedding --paths               # paths only, one per line
+lrms find --keyword Wedding --keyword Berlin      # both must apply
+lrms find --any-keyword Anna --any-keyword Ben    # one is enough
+lrms find --camera "EOS R5" --since 2024-01-01 --min-rating 3
+lrms find --text IMG_0042                         # file name or folder
+lrms find --with-gps --ext cr3 --limit 200
+lrms find --keyword Wedding --paths               # paths only, one per line
 ```
 
 | Criterion | What it does |
@@ -115,15 +115,15 @@ lrfc index find --keyword Wedding --paths               # paths only, one per li
 A `!` in front of a hit means the drive is not attached at the moment. The
 entry is still right — it tells you where to look.
 
-`lrfc index keywords` lists every keyword with its count, `--cameras` every
+`lrms keywords` lists every keyword with its count, `--cameras` every
 camera.
 
-## `index duplicates` — the same file more than once
+## `lrms duplicates` — the same file more than once
 
 ```bash
-lrfc index duplicates                       # the totals and the first groups
-lrfc index duplicates --across-catalogs     # only what spans libraries
-lrfc index duplicates --near                # bursts and brackets
+lrms duplicates                       # the totals and the first groups
+lrms duplicates --across-catalogs     # only what spans libraries
+lrms duplicates --near                # bursts and brackets
 ```
 
 Two questions that look alike and are not:
@@ -146,10 +146,10 @@ their master, and otherwise every edit would be a duplicate.
 
 The command **changes nothing**. It is a report.
 
-## `index export` — a catalog out of a search
+## `lrms export` — a catalog out of a search
 
 ```bash
-lrfc index export --keyword "Best of" --min-rating 4 --to ~/Desktop/Selection
+lrms export --keyword "Best of" --min-rating 4 --to ~/Desktop/Selection
 ```
 
 The obvious way would be to write a catalog. That would mean recreating develop
@@ -181,6 +181,22 @@ Note:
 - The **image files are not copied.** The reduced catalog points at the same
   files as before. To take the photographs along, use Lightroom's option to
   copy them while importing.
+
+## The window
+
+```bash
+lrms gui            # or through the launcher: lrcs
+```
+
+![The LR-MetaSearch window](../images/metasearch-en.png)
+
+Four tabs, one per step of the work: **Search**, **Libraries** (drives and
+catalogs, saying which are attached), **Duplicates** and **Export**. The log
+sits below the tabs because that is where errors appear — and an error behind a
+tab is an error nobody sees. The same lesson the folder window learned in r18.
+
+Long jobs run on worker threads, so the window stays usable while 47 libraries
+are read in.
 
 ## Limits
 

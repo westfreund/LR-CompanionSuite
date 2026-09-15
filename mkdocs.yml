@@ -11,8 +11,8 @@ site_description: >-
   Reorganise Adobe Lightroom Classic folder trees without losing the catalog
   connection. Lightroom-Ordner umsortieren, ohne die Katalogverknüpfung zu
   verlieren.
-site_url: https://andy-freund.gitlab.io/LR-FolderCraft/
-repo_url: https://gitlab.com/andy-freund/LR-FolderCraft
+site_url: https://andy-freund.gitlab.io/LR-CompanionSuite/
+repo_url: https://gitlab.com/andy-freund/LR-CompanionSuite
 repo_name: andy-freund/LR-FolderCraft
 copyright: MIT OR GPL-3.0-or-later — no telemetry, no account, no cost.
 

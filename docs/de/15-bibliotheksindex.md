@@ -1,6 +1,6 @@
-# Der Index über alle Bibliotheken
+# LR-MetaSearch — der Index über alle Bibliotheken
 
-**Revision r19.0.0 · Build-Datum 2026-09-15**
+**Revision r20.0.0 · Build-Datum 2026-09-15**
 
 Wer über die Jahre mit mehreren Lightroom-Katalogen arbeitet, hat irgendwann
 eine Frage, die keiner davon beantworten kann: *In welcher Bibliothek liegt
@@ -17,17 +17,17 @@ anzuschließen ist.
 ## In drei Befehlen
 
 ```bash
-lrfc --lang de index scan                  # alle erreichbaren Bibliotheken einlesen
-lrfc --lang de index status                # was der Index enthält
-lrfc --lang de index find --keyword Hochzeit --min-rating 4
+lrms --lang de scan                  # alle erreichbaren Bibliotheken einlesen
+lrms --lang de status                # was der Index enthält
+lrms --lang de find --keyword Hochzeit --min-rating 4
 ```
 
-## `index scan` — einlesen
+## `lrms scan` — einlesen
 
 ```bash
-lrfc index scan                            # sucht in ~/Pictures und unter /Volumes
-lrfc index scan "/Volumes/Fotos" ~/Bilder  # oder an genannten Stellen
-lrfc index scan --index ~/mein-index.db    # eine andere Indexdatei
+lrms scan                            # sucht in ~/Pictures und unter /Volumes
+lrms scan "/Volumes/Fotos" ~/Bilder  # oder an genannten Stellen
+lrms scan --index ~/mein-index.db    # eine andere Indexdatei
 ```
 
 Erfasst wird je Foto: **Katalogname, Ordner, Dateiname, die im Katalog
@@ -72,7 +72,7 @@ Stichprobe, und ob eine gewachsene Kopie noch erkannt wird, wäre Glückssache.
 Welche die gültige ist, entscheiden Sie. Die Vermuteten stehen unter
 `index status --all` mit einem `=` davor.
 
-## `index status` — was drin ist
+## `lrms status` — was drin ist
 
 ```
   47 Kataloge, 183.407 Fotos, 1.054 Stichwörter, 1 Laufwerke, 6 erkannte Kopien
@@ -92,15 +92,15 @@ Das ist schwächer, und deshalb steht es da.
 Der Index ist eine **Momentaufnahme**. Zu jedem Katalog steht, wann er zuletzt
 gelesen wurde.
 
-## `index find` — suchen
+## `lrms find` — suchen
 
 ```bash
-lrfc index find --keyword Hochzeit --keyword Berlin     # beide müssen zutreffen
-lrfc index find --any-keyword Anna --any-keyword Ben    # eines genügt
-lrfc index find --camera "EOS R5" --since 2024-01-01 --min-rating 3
-lrfc index find --text IMG_0042                         # Dateiname oder Ordner
-lrfc index find --with-gps --ext cr3 --limit 200
-lrfc index find --keyword Hochzeit --paths              # nur Pfade, zeilenweise
+lrms find --keyword Hochzeit --keyword Berlin     # beide müssen zutreffen
+lrms find --any-keyword Anna --any-keyword Ben    # eines genügt
+lrms find --camera "EOS R5" --since 2024-01-01 --min-rating 3
+lrms find --text IMG_0042                         # Dateiname oder Ordner
+lrms find --with-gps --ext cr3 --limit 200
+lrms find --keyword Hochzeit --paths              # nur Pfade, zeilenweise
 ```
 
 | Kriterium | Wirkung |
@@ -119,15 +119,15 @@ lrfc index find --keyword Hochzeit --paths              # nur Pfade, zeilenweise
 Ein `!` vor einem Treffer heißt: Das Laufwerk ist gerade nicht angeschlossen.
 Der Eintrag stimmt trotzdem — er sagt Ihnen, wo zu suchen ist.
 
-`lrfc index keywords` listet alle Stichwörter mit Anzahl, `--cameras` alle
+`lrms keywords` listet alle Stichwörter mit Anzahl, `--cameras` alle
 Kameras.
 
-## `index duplicates` — dieselbe Datei mehrfach
+## `lrms duplicates` — dieselbe Datei mehrfach
 
 ```bash
-lrfc index duplicates                       # Übersicht und die ersten Gruppen
-lrfc index duplicates --across-catalogs     # nur, was über Bibliotheken geht
-lrfc index duplicates --near                # Serien und Belichtungsreihen
+lrms duplicates                       # Übersicht und die ersten Gruppen
+lrms duplicates --across-catalogs     # nur, was über Bibliotheken geht
+lrms duplicates --near                # Serien und Belichtungsreihen
 ```
 
 Zwei Fragen, die sich ähneln und nicht dasselbe sind:
@@ -153,10 +153,10 @@ Datei mit dem Original, und sonst wäre jede Bearbeitung eine Dublette.
 
 Der Befehl **ändert nichts**. Er ist ein Bericht.
 
-## `index export` — aus der Suche ein Katalog
+## `lrms export` — aus der Suche ein Katalog
 
 ```bash
-lrfc index export --keyword "Best of" --min-rating 4 --to ~/Desktop/Auswahl
+lrms export --keyword "Best of" --min-rating 4 --to ~/Desktop/Auswahl
 ```
 
 Der naheliegende Weg wäre, einen Katalog zu schreiben. Das hieße,
@@ -190,6 +190,24 @@ Beachten Sie:
 - Die **Bilddateien werden nicht mitkopiert.** Der reduzierte Katalog verweist
   auf dieselben Dateien wie zuvor. Wer die Fotos mitnehmen will, benutzt in
   Lightroom beim Importieren die Option, sie zu kopieren.
+
+## Das Fenster
+
+```bash
+lrms gui            # oder über den Startbildschirm: lrcs
+lrms --lang de gui
+```
+
+![Das LR-MetaSearch-Fenster](../images/metasearch-de.png)
+
+Vier Reiter, einer je Arbeitsschritt: **Suche**, **Bibliotheken** (Laufwerke
+und Kataloge, mit dem Hinweis, was gerade angeschlossen ist), **Dubletten** und
+**Export**. Das Protokoll liegt unter den Reitern, weil dort die Fehler
+erscheinen — und ein Fehler hinter einem Reiter ist ein Fehler, den niemand
+sieht. Dieselbe Lehre wie beim Ordnerfenster in r18.
+
+Lange Arbeiten laufen in eigenen Threads, das Fenster bleibt also bedienbar,
+während 47 Bibliotheken eingelesen werden.
 
 ## Grenzen
 

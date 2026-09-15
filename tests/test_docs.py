@@ -13,9 +13,9 @@ from pathlib import Path
 
 import pytest
 
-from lrfoldercraft.cli import build_parser
-from lrfoldercraft.folders import ALL_ACTIONS, MISMATCH_ACTIONS
-from lrfoldercraft.rules import PRESETS, TOKEN_NAMES
+from lrcompanion.cli import build_parser
+from lrcompanion.folders import ALL_ACTIONS, MISMATCH_ACTIONS
+from lrcompanion.rules import PRESETS, TOKEN_NAMES
 
 DOCS = Path(__file__).resolve().parent.parent / "docs"
 LANGUAGES = ("en", "de")
@@ -82,7 +82,7 @@ def test_every_document_carries_the_current_revision(language):
     through two releases: the bump script replaces the version string, and the
     date beside it was nobody's business.
     """
-    from lrfoldercraft.version import __build_date__, __version__
+    from lrcompanion.version import __build_date__, __version__
 
     wanted = ("r{v}".format(v=__version__), __build_date__)
     stale = [

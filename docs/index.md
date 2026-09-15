@@ -15,7 +15,7 @@ photo turns up missing afterwards.
 
 Free, open source, no account, no telemetry, no cost.
 [Install it](en/02-installation.md) · [Read the safety story](en/06-safety.md) ·
-[Source code](https://gitlab.com/andy-freund/LR-FolderCraft)
+[Source code](https://gitlab.com/andy-freund/LR-CompanionSuite)
 
 🇩🇪 **[Diese Seite auf Deutsch](#lightroom-ordner-verschieben-ohne-die-katalogverknüpfung-zu-verlieren)**
 
@@ -117,7 +117,7 @@ kein einziges Foto als fehlend auftaucht.
 
 Frei, quelloffen, ohne Konto, ohne Telemetrie, kostenlos.
 [Installieren](de/02-installation.md) · [Wie sicher das ist](de/06-sicherheit.md) ·
-[Quelltext](https://gitlab.com/andy-freund/LR-FolderCraft)
+[Quelltext](https://gitlab.com/andy-freund/LR-CompanionSuite)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="images/before-after-de-dark.svg">

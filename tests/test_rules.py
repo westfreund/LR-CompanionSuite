@@ -6,7 +6,7 @@ from datetime import datetime
 
 import pytest
 
-from lrfoldercraft.rules import (
+from lrcompanion.rules import (
     PRESETS,
     RuleError,
     TokenContext,

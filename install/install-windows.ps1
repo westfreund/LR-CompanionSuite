@@ -1,14 +1,14 @@
 <#
 .SYNOPSIS
-    LR-FolderCraft installer for Windows.
+    LR-CompanionSuite installer for Windows.
 
 .DESCRIPTION
-    Creates a self contained virtual environment, installs LR-FolderCraft with
+    Creates a self contained virtual environment, installs the LR-CompanionSuite with
     the TUI extra and puts an `lrfc` launcher on your PATH. Nothing outside the
     install prefix and the launcher directory is touched.
 
 .PARAMETER Prefix
-    Installation directory. Defaults to %LOCALAPPDATA%\LR-FolderCraft.
+    Installation directory. Defaults to %LOCALAPPDATA%\LR-CompanionSuite.
 
 .PARAMETER BinDir
     Directory for the launcher. Defaults to %LOCALAPPDATA%\Programs\bin.
@@ -40,7 +40,7 @@
 
 [CmdletBinding()]
 param(
-    [string]$Prefix = "$env:LOCALAPPDATA\LR-FolderCraft",
+    [string]$Prefix = "$env:LOCALAPPDATA\LR-CompanionSuite",
     [string]$BinDir = "$env:LOCALAPPDATA\Programs\bin",
     [switch]$NoTui,
     [switch]$WithGui,
@@ -51,7 +51,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$AppName = 'LR-FolderCraft'
+$AppName = 'LR-CompanionSuite'
 $MinMajor = 3
 $MinMinor = 9
 
@@ -135,7 +135,7 @@ $ProjectDir = Split-Path -Parent $ScriptDir
 if ($Uninstall) {
     Write-Info "Removing $AppName"
     if (Test-Path $Prefix) { Remove-Item -Recurse -Force $Prefix }
-    foreach ($name in @('lrfc.cmd', 'lr-foldercraft.cmd')) {
+    foreach ($name in @('lrcs.cmd', 'lrfc.cmd', 'lrms.cmd', 'lr-companion-suite.cmd')) {
         $launcher = Join-Path $BinDir $name
         if (Test-Path $launcher) { Remove-Item -Force $launcher }
     }
@@ -146,7 +146,7 @@ if ($Uninstall) {
         Write-Info "Removed $BinDir from your user PATH"
     }
     Write-Info 'Removed. Your catalogs, photos, logs and profiles were not touched.'
-    Write-Host "    Config and profiles remain in: $env:APPDATA\LR-FolderCraft"
+    Write-Host "    Config and profiles remain in: $env:APPDATA\LR-CompanionSuite"
     exit 0
 }
 
@@ -275,7 +275,7 @@ if (-not $Check) {
 Write-Info "Installing the launcher in $BinDir"
 New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
 $launcherBody = "@echo off`r`n`"$VenvExe`" %*`r`n"
-foreach ($name in @('lrfc.cmd', 'lr-foldercraft.cmd')) {
+foreach ($name in @('lrcs.cmd', 'lrfc.cmd', 'lrms.cmd', 'lr-companion-suite.cmd')) {
     Set-Content -Path (Join-Path $BinDir $name) -Value $launcherBody -Encoding ASCII
 }
 
@@ -305,7 +305,7 @@ Write-Host ''
 Write-Info "$AppName is installed."
 Write-Host "    Command      : $BinDir\lrfc.cmd"
 Write-Host "    Environment  : $VenvDir"
-Write-Host "    Logs         : $env:LOCALAPPDATA\LR-FolderCraft\logs"
+Write-Host "    Logs         : $env:LOCALAPPDATA\LR-CompanionSuite\logs"
 $working = @('cli') + @('tui','gui' | Where-Object { Test-Component $_ })
 Write-Host "    Interfaces   : $($working -join ' ')"
 

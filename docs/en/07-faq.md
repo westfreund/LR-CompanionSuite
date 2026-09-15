@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r19.0.0 · Build date 2026-09-15**
+**Revision r20.0.0 · Build date 2026-09-15**
 
 ## Safety and data
 
@@ -105,7 +105,7 @@ says so and asks you to restrict it with `--root-folder`. Run once per root.
 
 ### A table in the GUI looks cut off, or a setting is missing
 
-Most often it is in another **tab**. Since r19.0.0 each step of the work has
+Most often it is in another **tab**. Since r20.0.0 each step of the work has
 one of its own: *1 · Library*, *2 · Structure*, *3 · Options*, *4 · Folders &
 rules*, *5 · Result*. Every tab label carries a tooltip saying what is inside.
 
@@ -175,7 +175,7 @@ exists. Verify the result in Lightroom after your first run.
 
 ### Which catalog versions work?
 
-Verified against schema 19.0.0 (Lightroom Classic 14). Schemas 11.x–19.x are
+Verified against schema 18.0.0 (Lightroom Classic 14). Schemas 11.x–19.x are
 accepted, with a warning if not explicitly verified. Older ones need
 `--allow-unsupported-catalog`.
 
@@ -186,7 +186,7 @@ users.
 
 ### Do I need the TUI?
 
-No. `pip install lr-foldercraft` without extras has no dependencies at all; the
+No. `pip install lr-companion-suite` without extras has no dependencies at all; the
 CLI does everything. Textual is only needed for `lrfc tui`.
 
 ### I installed it but the terminal says `lrfc: command not found`
