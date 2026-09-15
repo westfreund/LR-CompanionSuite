@@ -1,6 +1,6 @@
 # Projekthistorie
 
-**Revision r20.0.0 · Build-Datum 2026-09-15**
+**Revision r20.0.1 · Build-Datum 2026-09-15**
 
 Der [CHANGELOG](https://gitlab.com/andy-freund/LR-CompanionSuite/-/blob/main/CHANGELOG.md) sagt, was sich in jeder Revision geändert
 hat. Dieses Dokument sagt **warum**, und was dazwischen geschah: die getroffenen
@@ -104,6 +104,7 @@ wissen will, *warum*, liest die Abschnitte darunter und den
 | **r18.0.0** | 30.08. | Übersicht | Das Fenster stapelte alles in einer scrollenden Spalte, sodass Struktur, Optionen und Regeln unterhalb des sichtbaren Randes lagen. Jetzt fünf Reiter, einer je Arbeitsschritt, Schaltflächen in der Reihenfolge der Arbeit — und Profile lassen sich anlegen und löschen, statt durch Tippen eines unbenutzten Namens zu entstehen. |
 | **r19.0.0** | 15.09. | Fundort | Ein Index über alle Bibliotheken: 47 Kataloge, 183.407 Fotos, rein lesend. Kopien von Katalogen werden über die Überlappung ihrer Foto-UUIDs erkannt — ein Test mit drei Fotos deckte auf, dass der erste Entwurf nur mit Glück funktionierte. Dazu Dublettenbericht und ein Export, der Kataloge kopiert und verkleinert, statt neue zu schreiben. |
 | **r20.0.0** | 15.09. | Zu zweit | Aus dem Projekt wird eine Suite: **LR-CompanionSuite** mit LR-FolderCraft und LR-MetaSearch darin, je eigener Name, Befehl, Marke und Fenster, dazu ein Startbildschirm. Die Konfiguration samt Index mit 183.407 Fotos wird mitgenommen. Nebenbei behoben: Das r19-Release hatte die verifizierte Katalog-Schemaversion mit der Werkzeugversion überschrieben. |
+| **r20.0.1** | 15.09. |  | Ein exportierter Katalog ließ sich nicht öffnen: Lightroom legt seit Version 11 ein Verzeichnis `.lrcat-data` neben den Katalog, und der Export nahm es nicht mit. Von Andreas in Lightroom gefunden — dem einzigen Ort, an dem das auffallen konnte. |
 
 ---
 

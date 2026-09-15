@@ -25,7 +25,14 @@ log = get_logger("metasearch.scan")
 
 #: AppleDouble companions and Lightroom's own working directories. Walking into
 #: a previews bundle costs minutes and yields nothing.
-SKIP_DIRECTORIES = {".lrdata", ".lrprev", "Lightroom Catalog Previews.lrdata"}
+SKIP_DIRECTORIES = {
+    ".lrdata",
+    ".lrprev",
+    # Lightroom's blob store beside a catalog: routinely hundreds of megabytes
+    # of files that are not catalogs, and walking it costs real time.
+    ".lrcat-data",
+    "Lightroom Catalog Previews.lrdata",
+}
 
 #: How many image UUIDs make up a catalog's fingerprint. A *sample* rather than
 #: all of them on purpose: a catalog that has grown since the copy was taken

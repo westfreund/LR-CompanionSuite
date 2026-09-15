@@ -296,3 +296,119 @@ def test_finding_catalogs_ignores_appledouble_companions(tmp_path):
     (tmp_path / "._real.lrcat").write_bytes(b"")
     found = find_catalogs([tmp_path])
     assert [p.name for p in found] == ["real.lrcat"]
+
+
+# -- the companion directory -------------------------------------------------
+
+
+def test_a_reduced_catalog_takes_the_data_directory_with_it(filled, library, tmp_path):
+    """Reported from Lightroom: "<name>.lrcat-data could not be opened".
+
+    Lightroom Classic 11 and later keeps a directory of blobs beside the
+    catalog -- masking data among them. The first cut of the export copied the
+    .lrcat and its write-ahead log and left that behind, and Lightroom refused
+    the result. It is not optional, and it cannot be reduced: the store is
+    keyed by things this tool has no business guessing at.
+    """
+    from lrcompanion.metasearch.subset import data_directory
+
+    source_data = data_directory(Path(library.catalog_path))
+    source_data.mkdir()
+    (source_data / "000001.blob").write_bytes(b"pretend this is a mask")
+
+    hits = query.search(filled, query.Filter(keywords=("Portrait",)))
+    results = subset.build(filled, [h.photo_id for h in hits], tmp_path / "out")
+
+    made = data_directory(results[0].target)
+    assert made.is_dir(), "the .lrcat-data directory did not come along"
+    assert (made / "000001.blob").read_bytes() == b"pretend this is a mask"
+    assert results[0].data_bytes > 0
+
+
+def test_the_data_directory_can_be_left_behind_deliberately(filled, library, tmp_path):
+    """Half a gigabyte for seven photographs is a choice somebody may not want."""
+    from lrcompanion.metasearch.subset import data_directory
+
+    source_data = data_directory(Path(library.catalog_path))
+    source_data.mkdir()
+    (source_data / "000001.blob").write_bytes(b"x" * 1024)
+
+    hits = query.search(filled, query.Filter(keywords=("Portrait",)))
+    results = subset.build(filled, [h.photo_id for h in hits], tmp_path / "out", with_data=False)
+    assert not data_directory(results[0].target).exists()
+    assert results[0].data_bytes == 0
+
+
+def test_a_catalog_without_a_data_directory_still_reduces(filled, tmp_path):
+    """Older catalogs have none, and that is not an error."""
+    hits = query.search(filled, query.Filter(keywords=("Portrait",)))
+    results = subset.build(filled, [h.photo_id for h in hits], tmp_path / "out")
+    assert results[0].kept == 1
+    assert results[0].data_bytes == 0
+
+
+def test_a_failed_reduction_leaves_no_data_directory_behind(filled, library, tmp_path):
+    """The half-made copy is cleared away, blobs included."""
+    from lrcompanion.metasearch import subset as subset_module
+    from lrcompanion.metasearch.subset import data_directory
+
+    source_data = data_directory(Path(library.catalog_path))
+    source_data.mkdir()
+    (source_data / "000001.blob").write_bytes(b"x")
+
+    hits = query.search(filled, query.Filter(keywords=("Portrait",)))
+    original = subset_module._tables_referring_to_images
+
+    def explode(_db):
+        raise RuntimeError("pretend the schema surprised us")
+
+    subset_module._tables_referring_to_images = explode
+    try:
+        with pytest.raises(subset.SubsetError):
+            subset.build(filled, [h.photo_id for h in hits], tmp_path / "out")
+    finally:
+        subset_module._tables_referring_to_images = original
+    assert list((tmp_path / "out").iterdir()) == []
+
+
+def test_the_scan_does_not_walk_into_the_blob_directory(tmp_path):
+    """It holds hundreds of megabytes and not one catalog."""
+    library = tmp_path / "Lib.lrcat"
+    library.write_bytes(b"")
+    blobs = tmp_path / "Lib.lrcat-data"
+    blobs.mkdir()
+    (blobs / "stray.lrcat").write_bytes(b"")
+    assert [p.name for p in find_catalogs([tmp_path])] == ["Lib.lrcat"]
+
+
+def test_the_export_command_runs_end_to_end(filled, library, tmp_path, monkeypatch, capsys):
+    """Through the command line, not around it.
+
+    The size report was written with one `..` too many and reached Lightroom
+    users before any test: every unit test called the library directly, so the
+    command's own path had never once been walked.
+    """
+    from lrcompanion.metasearch.main import main
+    from lrcompanion.metasearch.subset import data_directory
+
+    source_data = data_directory(Path(library.catalog_path))
+    source_data.mkdir()
+    (source_data / "000001.blob").write_bytes(b"x" * 2048)
+
+    target = tmp_path / "exported"
+    code = main(
+        [
+            "export",
+            "--index",
+            str(filled.path),
+            "--keyword",
+            "Portrait",
+            "--to",
+            str(target),
+            "--yes",
+        ]
+    )
+    assert code == 0
+    printed = capsys.readouterr().out
+    assert ".lrcat-data" in printed, printed
+    assert data_directory(next(target.glob("*.lrcat"))).is_dir()

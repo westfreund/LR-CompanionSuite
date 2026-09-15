@@ -46,26 +46,66 @@ class Reduced(NamedTuple):
     removed: int
     bytes_before: int
     bytes_after: int
+    #: What the ``.lrcat-data`` directory added, separately: it dwarfs the
+    #: catalog and is the reason an export can be far larger than expected.
+    data_bytes: int = 0
 
 
 class SubsetError(Exception):
     """The reduction could not be carried out."""
 
 
-def _copy_with_journal(source: Path, target: Path) -> None:
-    """Copy the catalog *and* its write-ahead log.
+#: The companion directory Lightroom Classic 11 and later keeps beside a
+#: catalog. It holds a key-value store of blobs -- masking data among them --
+#: and the catalog is not complete without it: Lightroom refuses the catalog
+#: with "<name>.lrcat-data could not be opened".
+DATA_DIRECTORY_SUFFIX = "-data"
 
-    A catalog in WAL mode keeps recently committed data in ``<name>.lrcat-wal``
-    until it is checkpointed. Copying only the ``.lrcat`` therefore takes a
-    version of the library that is missing whatever Lightroom did last -- work
-    that is not lost, because the original keeps it, but silently absent from
-    the copy. That is the quietest kind of wrong.
+
+def data_directory(catalog: Path) -> Path:
+    return catalog.with_name(catalog.name + DATA_DIRECTORY_SUFFIX)
+
+
+def _directory_size(directory: Path) -> int:
+    total = 0
+    for path in directory.rglob("*"):
+        try:
+            if path.is_file():
+                total += path.stat().st_size
+        except OSError:  # pragma: no cover - a file that vanished mid-walk
+            continue
+    return total
+
+
+def _copy_with_journal(source: Path, target: Path, with_data: bool = True) -> int:
+    """Copy the catalog, its write-ahead log and its data directory.
+
+    Three things travel together and Lightroom needs all of them:
+
+    * the ``.lrcat`` itself;
+    * ``<name>.lrcat-wal``, because a catalog in WAL mode keeps recent commits
+      there until they are checkpointed -- copy only the ``.lrcat`` and the copy
+      silently lacks whatever was done last;
+    * ``<name>.lrcat-data``, a *directory* of blobs that Lightroom Classic 11
+      and later keeps beside the catalog. Leaving it behind is what produced
+      "shootings.lrcat-data could not be opened" the first time a reduced
+      catalog was carried to Lightroom.
+
+    Returns how many bytes the data directory added, because it is routinely
+    larger than the catalog -- 492 MB against 75 MB in the library this was
+    found on -- and a person deserves to be told before it is copied.
     """
     shutil.copy2(str(source), str(target))
     for suffix in ("-wal", "-shm"):
         companion = source.with_name(source.name + suffix)
         if companion.exists():
             shutil.copy2(str(companion), str(target.with_name(target.name + suffix)))
+
+    data = data_directory(source)
+    if not with_data or not data.is_dir():
+        return 0
+    shutil.copytree(str(data), str(data_directory(target)))
+    return _directory_size(data_directory(target))
 
 
 def _tables_referring_to_images(db: sqlite3.Connection) -> list[tuple[str, str]]:
@@ -96,6 +136,7 @@ def reduce_catalog(
     target: Path,
     keep_ids: set[int],
     progress: Optional[Callable[[str], None]] = None,
+    with_data: bool = True,
 ) -> Reduced:
     """Copy *source* to *target* and remove everything but *keep_ids*."""
     source = Path(source)
@@ -104,13 +145,15 @@ def reduce_catalog(
         raise SubsetError("catalog not found: {p}".format(p=source))
     if target.exists():
         raise SubsetError("refusing to overwrite {p}".format(p=target))
+    if data_directory(target).exists():
+        raise SubsetError("refusing to overwrite {p}".format(p=data_directory(target)))
     if not keep_ids:
         raise SubsetError("nothing selected from {p}".format(p=source.name))
 
     target.parent.mkdir(parents=True, exist_ok=True)
     if progress:
         progress("copying {n}".format(n=source.name))
-    _copy_with_journal(source, target)
+    data_bytes = _copy_with_journal(source, target, with_data=with_data)
     before = target.stat().st_size
 
     db = sqlite3.connect(str(target))
@@ -171,6 +214,7 @@ def reduce_catalog(
     except Exception as exc:  # noqa: BLE001 - the copy is worthless if this failed
         db.close()
         target.unlink(missing_ok=True)
+        shutil.rmtree(str(data_directory(target)), ignore_errors=True)
         raise SubsetError("could not reduce {n}: {e}".format(n=source.name, e=exc)) from exc
     finally:
         try:
@@ -186,7 +230,7 @@ def reduce_catalog(
 
     after = target.stat().st_size
     log.info("Reduced %s: %d of %d photographs kept", source.name, kept, total)
-    return Reduced(source, target, kept, total - kept, before, after)
+    return Reduced(source, target, kept, total - kept, before, after, data_bytes)
 
 
 def selection_by_catalog(index: Index, photo_ids: list[int]) -> dict[int, set[int]]:
@@ -206,6 +250,7 @@ def build(
     photo_ids: list[int],
     target_directory: str | Path,
     progress: Optional[Callable[[str], None]] = None,
+    with_data: bool = True,
 ) -> list[Reduced]:
     """Reduce every catalog the selection touches, into *target_directory*."""
     directory = Path(target_directory).expanduser()
@@ -236,6 +281,12 @@ def build(
             suffix += 1
         used.add(candidate)
         results.append(
-            reduce_catalog(source, directory / "{c}.lrcat".format(c=candidate), local_ids, progress)
+            reduce_catalog(
+                source,
+                directory / "{c}.lrcat".format(c=candidate),
+                local_ids,
+                progress,
+                with_data=with_data,
+            )
         )
     return results

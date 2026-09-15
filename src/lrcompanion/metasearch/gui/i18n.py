@@ -133,6 +133,18 @@ TEXT = {
         "gefundenen Fotos verkleinert. Die Originale werden nur gelesen.",
     ),
     "export_target": ("Into this empty folder", "In diesen leeren Ordner"),
+    "with_data": (
+        "Take the .lrcat-data directory along (Lightroom needs it)",
+        "Das Verzeichnis .lrcat-data mitnehmen (Lightroom braucht es)",
+    ),
+    "with_data_hint": (
+        "Lightroom Classic 11 and later keeps masking data in a directory beside "
+        "the catalog. It cannot be reduced and is often several times the size of "
+        "the catalog — but without it Lightroom refuses the result.",
+        "Lightroom Classic 11 und neuer legt Maskendaten in einem Verzeichnis "
+        "neben dem Katalog ab. Es lässt sich nicht verkleinern und ist oft ein "
+        "Vielfaches des Katalogs groß — ohne es verweigert Lightroom das Ergebnis.",
+    ),
     "browse": ("Browse…", "Durchsuchen…"),
     "export": ("Export…", "Exportieren…"),
     "export_nothing": (

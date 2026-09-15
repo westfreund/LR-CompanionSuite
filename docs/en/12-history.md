@@ -1,6 +1,6 @@
 # Project history
 
-**Revision r20.0.0 · Build date 2026-09-15**
+**Revision r20.0.1 · Build date 2026-09-15**
 
 The [CHANGELOG](https://gitlab.com/andy-freund/LR-CompanionSuite/-/blob/main/CHANGELOG.md) says what changed in each revision. This
 document says **why**, and what happened in between: the decisions taken, the
@@ -100,6 +100,7 @@ and the [CHANGELOG](https://gitlab.com/andy-freund/LR-CompanionSuite/-/blob/main
 | **r18.0.0** | 30 Aug | Übersicht | The window stacked everything in one scrolling column, so the structure, the options and the rules sat below the visible edge. Now five tabs, one per step, buttons in the order the work is done -- and profiles can be made and deleted rather than coming into being by typing a name nobody had used. |
 | **r19.0.0** | 15 Sep | Fundort | An index across every library: 47 catalogs, 183,407 photographs, read-only. Catalog copies are matched by the overlap of their photo UUIDs -- a test with three photographs exposed that the first design worked only by luck. With it a duplicate report, and an export that copies and reduces catalogs rather than writing new ones. |
 | **r20.0.0** | 15 Sep | Zu zweit | The project becomes a suite: **LR-CompanionSuite**, holding LR-FolderCraft and LR-MetaSearch, each with its own name, command, mark and window, plus a launcher. The configuration, index of 183,407 photographs included, moves with it. Fixed on the way: the r19 release had overwritten the verified catalog schema version with the tool's own. |
+| **r20.0.1** | 15 Sep |  | An exported catalog would not open: Lightroom has kept a `.lrcat-data` directory beside the catalog since version 11, and the export left it behind. Found by Andreas in Lightroom — the only place it could have been. |
 
 ---
 

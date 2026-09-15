@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r20.0.0 · Build-Datum 2026-09-15**
+**Revision r20.0.1 · Build-Datum 2026-09-15**
 
 ## Sicherheit und Daten
 
@@ -112,7 +112,7 @@ Lauf je Stammordner.
 
 ### In der GUI ist eine Tabelle abgeschnitten oder eine Einstellung fehlt
 
-Meistens liegt es in einem anderen **Reiter**. Seit r20.0.0 steht jeder
+Meistens liegt es in einem anderen **Reiter**. Seit r20.0.1 steht jeder
 Arbeitsschritt in einem eigenen: *1 · Bibliothek*, *2 · Struktur*,
 *3 · Optionen*, *4 · Ordner & Regeln*, *5 · Ergebnis*. Die Beschriftung jedes
 Reiters trägt einen Tooltip, der sagt, was darin steht.

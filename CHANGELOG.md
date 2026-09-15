@@ -16,6 +16,35 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [20.0.1] — 2026-09-15
+
+Reported from Lightroom, which is the only place this could have been found.
+
+### Fixed
+
+- **An exported catalog would not open**: *"<name>.lrcat-data could not be
+  opened"*. Lightroom Classic 11 and later keeps a directory of that name
+  beside every catalog — a key-value store of blobs, masking data among them —
+  and the export copied the `.lrcat` and its write-ahead log and left that
+  behind. It travels with the copy now.
+- The size is said out loud before anything is copied. The store cannot be
+  reduced, because it is keyed by things this tool has no business guessing at,
+  and it is routinely several times the size of the catalog: 492 MB beside a
+  75 MB catalog in the library where this came to light. `--without-data`
+  leaves it behind for anyone who decides to.
+- The final report said the catalog's size alone after writing half a gigabyte.
+- A scan no longer walks into `.lrcat-data`, which holds hundreds of megabytes
+  and not one catalog.
+
+### Added
+
+- A test that runs `lrms export` **through the command line** rather than
+  around it. The size report shipped with one `..` too many in an import, and
+  every existing test called the library directly — so the command's own path
+  had never been walked once.
+
+---
+
 ## [20.0.0] — 2026-09-15 — "Zu zweit"
 
 The project becomes a suite. Two tools under one roof, each with its own name,

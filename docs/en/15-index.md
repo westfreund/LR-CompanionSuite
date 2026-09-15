@@ -1,6 +1,6 @@
 # LR-MetaSearch — the index across every library
 
-**Revision r20.0.0 · Build date 2026-09-15**
+**Revision r20.0.1 · Build date 2026-09-15**
 
 Anyone who has worked with several Lightroom catalogs over the years ends up
 with a question none of them can answer: *which library is this photograph
@@ -169,6 +169,27 @@ Open each in Lightroom, then use File > Import from Another Catalog to merge
 them into the catalog you want.
 ```
 
+### What comes along — and why it is so large
+
+Lightroom Classic 11 and later keeps a **directory** called
+`<name>.lrcat-data` beside every catalog. Inside is a key-value store of
+`.blob` and `.sst` files; masking data among them. It belongs to the catalog:
+without it Lightroom refuses with *"<name>.lrcat-data could not be opened"*.
+
+So it travels with the copy. Two things worth knowing:
+
+- **It cannot be reduced.** The store is keyed by things this tool knows
+  nothing about, and guessing would mean quietly damaging the catalog. So it
+  comes whole or not at all.
+- **It is often several times the size of the catalog.** In the library where
+  this came to light: 492 MB beside a 75 MB catalog. An export of seven
+  photographs becomes half a gigabyte. The command says how large before it
+  copies.
+
+`--without-data` leaves it behind. The reduced catalog still opens — but the
+work held in there is not in it. That is a decision to take deliberately, not
+a default.
+
 Merging across libraries is Lightroom's **File → Import from Another Catalog**.
 It does that well, and it is not this tool's business to reimplement it.
 
@@ -178,6 +199,7 @@ Note:
   log, so whatever Lightroom did last comes along.
 - A virtual copy brings its master with it — it cannot exist without one.
 - The target directory has to be empty.
+- The `.lrcat-data` directory comes along; see above.
 - The **image files are not copied.** The reduced catalog points at the same
   files as before. To take the photographs along, use Lightroom's option to
   copy them while importing.

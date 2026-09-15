@@ -108,16 +108,23 @@ class ExportWorker(QObject):
     finished = Signal(object)
     failed = Signal(str)
 
-    def __init__(self, photo_ids, target: str, index_path: str):
+    def __init__(self, photo_ids, target: str, index_path: str, with_data: bool = True):
         super().__init__()
         self.photo_ids = list(photo_ids)
         self.target = target
         self.index_path = index_path
+        self.with_data = with_data
 
     def run(self) -> None:
         try:
             with Index.open(self.index_path or None, create=False) as index:
-                results = build(index, self.photo_ids, self.target, progress=self.progress.emit)
+                results = build(
+                    index,
+                    self.photo_ids,
+                    self.target,
+                    progress=self.progress.emit,
+                    with_data=self.with_data,
+                )
             self.finished.emit(results)
         except Exception as exc:  # noqa: BLE001 - reported in the window
             log.error("Export failed: %s", traceback.format_exc())

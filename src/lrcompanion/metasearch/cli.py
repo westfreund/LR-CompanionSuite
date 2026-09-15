@@ -141,6 +141,11 @@ def add_subcommands(inner, add_global_flags) -> None:
     p_export.add_argument("--index", default="")
     p_export.add_argument("--to", required=True, help="an empty directory for the result")
     p_export.add_argument("-y", "--yes", action="store_true", help="do not ask")
+    p_export.add_argument(
+        "--without-data",
+        action="store_true",
+        help="leave the .lrcat-data directory behind (smaller, loses masking data)",
+    )
     add_filter_flags(p_export)
     add_global_flags(p_export)
 
@@ -416,6 +421,51 @@ def _duplicates(args, language: str) -> int:
     return OK
 
 
+def _report_data_size(index, hits, args, language: str) -> None:
+    """Say how big the blob directories are before copying them.
+
+    Lightroom keeps a `.lrcat-data` directory beside each catalog, and it is
+    routinely several times the size of the catalog. Copying it without a word
+    turns a seven-photograph export into half a gigabyte.
+    """
+    from .subset import _directory_size, data_directory, selection_by_catalog
+
+    total = 0
+    for catalog_id in selection_by_catalog(index, [hit.photo_id for hit in hits]):
+        row = index.db.execute(
+            "select full_path from catalogs where id = ?", (catalog_id,)
+        ).fetchone()
+        if row is None:
+            continue
+        directory = data_directory(Path(row[0]))
+        if directory.is_dir():
+            total += _directory_size(directory)
+    if not total:
+        return
+    if args.without_data:
+        print(
+            _(
+                language,
+                "  Skipping {s:.1f} GB of .lrcat-data. Lightroom keeps masking data "
+                "there; the reduced catalogs will open without it but that work is "
+                "not in them.",
+                "  {s:.1f} GB .lrcat-data werden ausgelassen. Lightroom legt dort "
+                "Maskendaten ab; die verkleinerten Kataloge öffnen auch ohne, aber "
+                "diese Arbeit ist dann nicht darin.",
+            ).format(s=total / 1e9)
+        )
+        return
+    print(
+        _(
+            language,
+            "  Including {s:.1f} GB of .lrcat-data, which Lightroom needs and which "
+            "cannot be reduced. Use --without-data to leave it out.",
+            "  Dazu {s:.1f} GB .lrcat-data, die Lightroom braucht und die sich nicht "
+            "verkleinern lassen. Mit --without-data bleiben sie weg.",
+        ).format(s=total / 1e9)
+    )
+
+
 def _export(args, language: str) -> int:
     criteria = filter_from(args)
     if criteria.is_empty:
@@ -457,6 +507,7 @@ def _export(args, language: str) -> int:
                 "Die Originale werden nur gelesen.",
             )
         )
+        _report_data_size(index, hits, args, language)
         if not args.yes:
             answer = input(_(language, "Go ahead? [y/N] ", "Fortfahren? [j/N] ")).strip().lower()
             if answer not in ("y", "yes", "j", "ja"):
@@ -468,6 +519,7 @@ def _export(args, language: str) -> int:
                 [hit.photo_id for hit in hits],
                 target,
                 progress=lambda message: print("    {m}".format(m=message), flush=True),
+                with_data=not args.without_data,
             )
         except SubsetError as exc:
             print(str(exc))
@@ -485,12 +537,17 @@ def _export(args, language: str) -> int:
             )
             continue
         print(
-            "  {n:<34} {k} {of} {t}  ({a:.1f} MB)".format(
+            "  {n:<34} {k} {of} {t}  ({a:.1f} MB{d})".format(
                 n=result.target.name[:34],
                 k=_n(result.kept, language),
                 of=_(language, "of", "von"),
                 t=_n(result.kept + result.removed, language),
                 a=result.bytes_after / 1e6,
+                # The catalog is the small half; saying only its size when half
+                # a gigabyte of blobs went with it is a number that misleads.
+                d=" + {b:.1f} GB .lrcat-data".format(b=result.data_bytes / 1e9)
+                if result.data_bytes
+                else "",
             )
         )
     print()

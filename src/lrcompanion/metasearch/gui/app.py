@@ -321,6 +321,14 @@ class MetaSearchWindow(QMainWindow):
         row.addWidget(self.export_browse)
         column.addLayout(row)
 
+        self.with_data_check = QCheckBox()
+        self.with_data_check.setChecked(True)
+        column.addWidget(self.with_data_check)
+        self.with_data_hint = QLabel()
+        self.with_data_hint.setWordWrap(True)
+        self.with_data_hint.setEnabled(False)
+        column.addWidget(self.with_data_hint)
+
         self.export_button = QPushButton()
         self.export_button.clicked.connect(self.do_export)
         column.addWidget(self.export_button, 0, Qt.AlignLeft)
@@ -424,6 +432,8 @@ class MetaSearchWindow(QMainWindow):
         self.export_label.setText(tr("export_target", language))
         self.export_browse.setText(tr("browse", language))
         self.export_button.setText(tr("export", language))
+        self.with_data_check.setText(tr("with_data", language))
+        self.with_data_hint.setText(tr("with_data_hint", language))
         self.search_button.setText(tr("search", language))
         self.clear_button.setText(tr("clear", language))
         self.status_label.setText(tr("ready", language))
@@ -704,7 +714,12 @@ class MetaSearchWindow(QMainWindow):
         # The table shows at most RESULT_LIMIT rows; the export takes the whole
         # result, which is what the confirmation counted.
         self._busy(True, tr("working", self.language))
-        worker = ExportWorker(self._all_matching_ids(), str(path), self.index_path)
+        worker = ExportWorker(
+            self._all_matching_ids(),
+            str(path),
+            self.index_path,
+            with_data=self.with_data_check.isChecked(),
+        )
         worker.progress.connect(self.export_view.appendPlainText)
         worker.finished.connect(self._export_done)
         worker.failed.connect(self._failed)

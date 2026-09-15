@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r20.0.0 · Build date 2026-09-15**
+**Revision r20.0.1 · Build date 2026-09-15**
 
 This document preserves the request that created LR-FolderCraft, a generic
 prompt for regenerating a comparable tool from scratch, and the context needed
@@ -355,6 +355,16 @@ pre-flight checks, execute with a progress callback. Then:
   during a read-only scan it teaches the reader to ignore warnings.
 * **Group digits the way the reader's language does.** `{:,}` is English; a
   German reader sees 183,407 as a decimal.
+* **An application's file is often not one file.** A Lightroom catalog is a
+  `.lrcat`, a `-wal` beside it, and since version 11 a `.lrcat-data` *directory*
+  of blobs that is routinely several times larger. Copy the one you know about
+  and the application refuses the result. Before copying anything an application
+  owns, list what else sits beside it under the same stem -- and expect a
+  directory, not only files.
+* **Test the command, not only the library behind it.** A size report shipped
+  with one `..` too many in a relative import and reached a user, because every
+  test called the functions directly and the command's own path had never once
+  been walked.
 * **Compose text before you map or compare it.** macOS hands back filenames
   decomposed, so a name a user typed as "Völki" arrives as "o" plus a combining
   diaeresis. Any per-character table, and any pattern comparison, silently

@@ -1,6 +1,6 @@
 # LR-MetaSearch — der Index über alle Bibliotheken
 
-**Revision r20.0.0 · Build-Datum 2026-09-15**
+**Revision r20.0.1 · Build-Datum 2026-09-15**
 
 Wer über die Jahre mit mehreren Lightroom-Katalogen arbeitet, hat irgendwann
 eine Frage, die keiner davon beantworten kann: *In welcher Bibliothek liegt
@@ -176,6 +176,27 @@ Jeden in Lightroom öffnen und über Datei > Aus anderem Katalog importieren
 in den gewünschten Katalog zusammenführen.
 ```
 
+### Was mitkopiert wird — und warum es so groß ist
+
+Lightroom Classic 11 und neuer legt neben jedem Katalog ein **Verzeichnis**
+`<Name>.lrcat-data` ab. Darin steht ein Schlüssel-Wert-Speicher aus `.blob`-
+und `.sst`-Dateien; unter anderem die Maskendaten. Es gehört zum Katalog: Fehlt
+es, verweigert Lightroom mit *„<Name>.lrcat-data konnte nicht geöffnet
+werden"*.
+
+Deshalb wandert es mit. Zwei Dinge sollten Sie dazu wissen:
+
+- **Es lässt sich nicht verkleinern.** Der Speicher ist nach Dingen
+  geschlüsselt, über die dieses Werkzeug nichts weiß; daran zu raten hieße, den
+  Katalog still zu beschädigen. Also kommt er ganz mit oder gar nicht.
+- **Er ist oft ein Vielfaches des Katalogs.** In der Bibliothek, an der das
+  auffiel: 492 MB neben 75 MB Katalog. Ein Export von sieben Fotos wird so zu
+  einem halben Gigabyte. Der Befehl nennt die Größe, bevor er kopiert.
+
+Mit `--without-data` bleibt es weg. Der verkleinerte Katalog öffnet dann
+trotzdem — aber die dort abgelegte Arbeit ist nicht darin. Das ist eine
+bewusste Entscheidung, keine Voreinstellung.
+
 Das Zusammenführen über Bibliotheken hinweg macht Lightroom mit **Datei → Aus
 anderem Katalog importieren**. Das kann es gut, und es ist nicht Aufgabe dieses
 Werkzeugs, das nachzubauen.
@@ -187,6 +208,7 @@ Beachten Sie:
 - Eine virtuelle Kopie zieht ihr Original mit — ohne dieses kann sie nicht
   bestehen.
 - Der Zielordner muss leer sein.
+- Das `.lrcat-data`-Verzeichnis kommt mit; siehe oben.
 - Die **Bilddateien werden nicht mitkopiert.** Der reduzierte Katalog verweist
   auf dieselben Dateien wie zuvor. Wer die Fotos mitnehmen will, benutzt in
   Lightroom beim Importieren die Option, sie zu kopieren.
