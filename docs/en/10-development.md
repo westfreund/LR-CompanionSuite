@@ -25,6 +25,24 @@ Lightroom Classic catalog (schema 18.0.0, 9,452 files, 337 GiB, exFAT).
 | Docs | complete, EN and DE |
 | Installers | macOS, Linux, Windows |
 
+### The playground
+`scripts/make_playground.py` builds somewhere to experiment. It makes drives
+out of disk images that behave like real ones: they mount under `/Volumes/`,
+carry a genuine `VolumeUUID`, and can be detached or renamed — a drive
+unplugged or replaced, without anybody having to own five external disks.
+
+```bash
+python scripts/make_playground.py prepare   ~/Desktop/LRCS-playground
+# ... now make a catalog on it in Lightroom ...
+python scripts/make_playground.py scenarios ~/Desktop/LRCS-playground
+python scripts/make_playground.py teardown  ~/Desktop/LRCS-playground
+```
+
+The middle step is done by hand for one reason: **a real Lightroom catalog
+cannot be fabricated.** The synthetic catalogs the test suite builds are
+plausible imitations, and plausible is precisely what fails here — all three
+faults in the export passed every test and only broke in Lightroom.
+
 ### What has *not* been done
 
 - The r2.0.0 handling of grown folder structures -- topic folders, dated
