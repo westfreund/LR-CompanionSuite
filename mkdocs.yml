@@ -6,14 +6,14 @@
 #
 # SPDX-License-Identifier: MIT OR GPL-3.0-or-later
 
-site_name: LR-FolderCraft
+site_name: LR-CompanionSuite
 site_description: >-
-  Reorganise Adobe Lightroom Classic folder trees without losing the catalog
-  connection. Lightroom-Ordner umsortieren, ohne die Katalogverknüpfung zu
-  verlieren.
+  A companion suite for Adobe Lightroom Classic. Reorganise folder trees
+  without losing the catalog connection, and search across every library you
+  own. Lightroom-Ordner umsortieren und alle Bibliotheken durchsuchen.
 site_url: https://andy-freund.gitlab.io/LR-CompanionSuite/
 repo_url: https://gitlab.com/andy-freund/LR-CompanionSuite
-repo_name: andy-freund/LR-FolderCraft
+repo_name: andy-freund/LR-CompanionSuite
 copyright: MIT OR GPL-3.0-or-later — no telemetry, no account, no cost.
 
 docs_dir: docs
@@ -25,8 +25,8 @@ theme:
   name: material
   custom_dir: overrides
   language: en
-  logo: images/brand/logo-128-light.png
-  favicon: images/brand/logo-128-dark.png
+  logo: images/brand/suite-128-light.png
+  favicon: images/brand/suite-128-dark.png
   features:
     - navigation.sections
     - navigation.top

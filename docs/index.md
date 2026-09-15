@@ -3,6 +3,28 @@ hide:
   - navigation
 ---
 
+# Two tools that sit beside Adobe Lightroom Classic
+
+<p align="center">
+  <img src="images/brand/suite-128-dark.png" alt="LR-CompanionSuite" width="96" height="96">
+</p>
+
+**LR-CompanionSuite** is free, open source, and has no account, no telemetry and
+no cost. It holds two tools:
+
+| | | |
+| :---: | --- | --- |
+| <img src="images/brand/logo-64-dark.png" width="40" alt=""> | **LR-FolderCraft** · `lrfc` | Reorganise the folder tree — files and catalog together, so nothing is lost and every run can be taken back. |
+| <img src="images/brand/metasearch-64-dark.png" width="40" alt=""> | **LR-MetaSearch** · `lrms` | Search across every library you own, find what is held twice, and build catalogs out of a selection. Reads only. |
+
+`lrcs` opens a launcher offering both.
+
+[Install them](en/02-installation.md) ·
+[Read the safety story](en/06-safety.md) ·
+[Source code](https://gitlab.com/andy-freund/LR-CompanionSuite)
+
+---
+
 # Move Lightroom Classic folders without losing the catalog connection
 
 <p align="center">
@@ -95,6 +117,24 @@ This is the part that matters, and it is why the tool exists at all.
 - **Three front ends** — command line, terminal interface, and a window —
   all with the same abilities, in **English and German**.
 
+---
+
+## LR-MetaSearch — search across every library
+
+![The LR-MetaSearch window](images/metasearch-en.png)
+
+```bash
+lrms scan                                   # read your libraries into an index
+lrms find --keyword Wedding --min-rating 4  # search across all of them
+lrms duplicates                             # what is held more than once
+```
+
+Against the collection it was built on: **47 libraries, 183,407 photographs,
+read in 26 seconds**, without opening a single image file. It answers with the
+drive in a cupboard, and then tells you which drive to connect.
+
+[**Read more →**](en/15-index.md)
+
 ## Requirements and limits
 
 | | |
@@ -107,6 +147,24 @@ This is the part that matters, and it is why the tool exists at all.
 [**Install it →**](en/02-installation.md) [**Full documentation →**](en/01-index.md)
 
 ---
+---
+
+# Zwei Werkzeuge, die neben Adobe Lightroom Classic stehen
+
+**LR-CompanionSuite** ist frei, quelloffen, ohne Konto, ohne Telemetrie,
+kostenlos. Sie enthält zwei Werkzeuge:
+
+| | | |
+| :---: | --- | --- |
+| <img src="images/brand/logo-64-dark.png" width="40" alt=""> | **LR-FolderCraft** · `lrfc` | Den Ordnerbaum umsortieren — Dateien und Katalog in einem Zug, sodass nichts verloren geht und jeder Lauf zurücknehmbar ist. |
+| <img src="images/brand/metasearch-64-dark.png" width="40" alt=""> | **LR-MetaSearch** · `lrms` | Über alle Bibliotheken suchen, Doppeltes finden und aus einer Auswahl Kataloge bauen. Liest nur. |
+
+`lrcs` öffnet einen Startbildschirm, der beide anbietet.
+
+[Installieren](de/02-installation.md) ·
+[Wie sicher das ist](de/06-sicherheit.md) ·
+[Quelltext](https://gitlab.com/andy-freund/LR-CompanionSuite)
+
 ---
 
 # Lightroom-Ordner verschieben, ohne die Katalogverknüpfung zu verlieren
@@ -198,6 +256,24 @@ Das ist der Punkt, auf den es ankommt — und der Grund, warum es das Werkzeug
   eindeutig benannten Ordner, statt verstreut liegen zu bleiben.
 - **Drei Oberflächen** — Kommandozeile, Terminaloberfläche und Fenster — alle
   mit demselben Funktionsumfang, auf **Deutsch und Englisch**.
+
+---
+
+## LR-MetaSearch — über alle Bibliotheken suchen
+
+![Das LR-MetaSearch-Fenster](images/metasearch-de.png)
+
+```bash
+lrms --lang de scan                              # Bibliotheken einlesen
+lrms --lang de find --keyword Hochzeit --min-rating 4
+lrms --lang de duplicates                        # was mehrfach vorhanden ist
+```
+
+An der Sammlung, an der es entstand: **47 Bibliotheken, 183.407 Fotos, in 26
+Sekunden eingelesen**, ohne eine einzige Bilddatei zu öffnen. Es antwortet auch
+bei abgestecktem Laufwerk — und sagt dann, welches anzuschließen ist.
+
+[**Mehr dazu →**](de/15-bibliotheksindex.md)
 
 ## Voraussetzungen und Grenzen
 
