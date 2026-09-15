@@ -216,6 +216,10 @@ So it travels with the copy. Two things worth knowing:
 work held in there is not in it. That is a decision to take deliberately, not
 a default.
 
+> **Proven in Lightroom.** On 15 September 2026 a catalog made this way was
+> opened in Lightroom Classic: the chosen photographs, with their develop
+> settings.
+
 Merging across libraries is Lightroom's **File → Import from Another Catalog**.
 It does that well, and it is not this tool's business to reimplement it.
 

@@ -506,6 +506,7 @@ noted otherwise.
 | 15 Sep | the same | copy detection by equality | 3 copies — as it turned out, by luck |
 | 15 Sep | the same | by overlap, insertion order | **6 copies**, all genuine (`_Archiv`, `-v13`) |
 | 15 Sep | `shootings.lrcat`, 6,043 | export: copy reduced to 7 photographs | 10.0 MB instead of 78.3 MB, original byte-identical |
+| 15 Sep | `shootings.lrcat`, 6,043 | export opened in Lightroom | **7 photographs with their develop settings** — O-29 proven, after three attempts |
 
 Every cycle ended byte-identical to where it started: ten catalog tables, every
 path, and all 51,063 files on disk.

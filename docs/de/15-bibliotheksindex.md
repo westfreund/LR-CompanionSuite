@@ -224,6 +224,9 @@ Mit `--without-data` bleibt es weg. Der verkleinerte Katalog öffnet dann
 trotzdem — aber die dort abgelegte Arbeit ist nicht darin. Das ist eine
 bewusste Entscheidung, keine Voreinstellung.
 
+> **In Lightroom belegt.** Am 15.09.2026 wurde ein so erzeugter Katalog in
+> Lightroom Classic geöffnet: die gewählten Fotos samt ihrer Bearbeitungen.
+
 Das Zusammenführen über Bibliotheken hinweg macht Lightroom mit **Datei → Aus
 anderem Katalog importieren**. Das kann es gut, und es ist nicht Aufgabe dieses
 Werkzeugs, das nachzubauen.

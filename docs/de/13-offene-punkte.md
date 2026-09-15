@@ -304,8 +304,22 @@ geschrieben wird — und das Original wird nie angefasst. Das Zusammenführen de
 reduzierten Kataloge übernimmt dann Lightroom selbst mit *„Aus anderem Katalog
 importieren"*.
 
-**Noch nicht verifiziert**, und vor der Umsetzung zu belegen: dass ein so
-reduzierter Katalog von Lightroom anstandslos geöffnet und importiert wird.
+**Verifiziert am 15.09.2026.** Andreas hat einen reduzierten Katalog in
+Lightroom Classic geöffnet: sieben Fotos, **samt ihrer Bearbeitungen**. Damit
+ist der subtraktive Weg belegt.
+
+Es brauchte drei Anläufe, und alle drei Fehler waren nur in Lightroom zu
+finden, nicht hier:
+
+| Anlauf | Was fehlte | Revision |
+| --- | --- | --- |
+| 1 | `.lrcat-data`, das Verzeichnis mit den Maskendaten, wurde nicht mitkopiert | r20.0.1 |
+| 2 | Der Katalog nannte ein Laufwerk, das es nicht mehr gibt — getreu mitkopiert und damit eine Sackgasse | r20.0.2 |
+| 3 | Die Verkleinerung löschte die Ordnerzeile des Wurzelordners selbst; neun Ordnerzeilen wurden zwei | r20.0.3 |
+
+Der dritte ist der lehrreichste: Der ganze Entwurf beruht darauf, **nur Zeilen
+zu behalten, die Lightroom selbst geschrieben hat** — und dann wurde eine
+gelöscht, weil sie leer aussah.
 
 ### Was bei der Umsetzung anders kam
 

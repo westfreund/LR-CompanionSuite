@@ -540,6 +540,7 @@ anders vermerkt.
 | 15.09. | dieselben | Kopienerkennung über Gleichheit | 3 Kopien — wie sich zeigte, mit Glück |
 | 15.09. | dieselben | über Überlappung, Aufnahmereihenfolge | **6 Kopien**, alle echt (`_Archiv`, `-v13`) |
 | 15.09. | `shootings.lrcat`, 6.043 | Export: Kopie auf 7 Fotos verkleinert | 10,0 MB statt 78,3 MB, Original bitgleich |
+| 15.09. | `shootings.lrcat`, 6.043 | Export in Lightroom geöffnet | **7 Fotos samt Bearbeitungen** — O-29 belegt, nach drei Anläufen |
 
 Jeder Zyklus endete bitidentisch am Ausgangszustand: zehn Katalogtabellen, alle
 Pfade und alle 51.063 Dateien auf der Platte.

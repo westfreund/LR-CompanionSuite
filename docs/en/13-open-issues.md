@@ -283,8 +283,21 @@ without a single new kind of row being written — and the original is never
 touched. Merging the reduced catalogs is then Lightroom's own *"Import from
 Another Catalog"*.
 
-**Not yet verified**, and to be proven before any implementation: that a
-catalog reduced this way opens and imports without complaint.
+**Verified on 15 September 2026.** Andreas opened a reduced catalog in
+Lightroom Classic: seven photographs, **with their develop settings**. The
+subtractive route holds.
+
+It took three attempts, and all three faults could only be found in Lightroom,
+not here:
+
+| Attempt | What was missing | Revision |
+| --- | --- | --- |
+| 1 | `.lrcat-data`, the directory holding the masking data, was not copied | r20.0.1 |
+| 2 | The catalog named a drive that no longer exists — copied faithfully, and therefore a dead end | r20.0.2 |
+| 3 | The reduction deleted the root folder's own row; nine folder rows became two | r20.0.3 |
+
+The third is the instructive one: the whole design rests on **keeping only rows
+Lightroom itself wrote** — and then one was deleted because it looked empty.
 
 ### What turned out differently
 
