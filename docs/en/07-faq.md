@@ -1,6 +1,6 @@
 # FAQ
 
-**Revision r20.0.1 · Build date 2026-09-15**
+**Revision r20.0.2 · Build date 2026-09-15**
 
 ## Safety and data
 
@@ -105,7 +105,7 @@ says so and asks you to restrict it with `--root-folder`. Run once per root.
 
 ### A table in the GUI looks cut off, or a setting is missing
 
-Most often it is in another **tab**. Since r20.0.1 each step of the work has
+Most often it is in another **tab**. Since r20.0.2 each step of the work has
 one of its own: *1 · Library*, *2 · Structure*, *3 · Options*, *4 · Folders &
 rules*, *5 · Result*. Every tab label carries a tooltip saying what is inside.
 

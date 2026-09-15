@@ -1,6 +1,6 @@
 # LR-MetaSearch — der Index über alle Bibliotheken
 
-**Revision r20.0.1 · Build-Datum 2026-09-15**
+**Revision r20.0.2 · Build-Datum 2026-09-15**
 
 Wer über die Jahre mit mehreren Lightroom-Katalogen arbeitet, hat irgendwann
 eine Frage, die keiner davon beantworten kann: *In welcher Bibliothek liegt
@@ -175,6 +175,33 @@ Stichwörter, Sammlungen, Bewertungen, alles.
 Jeden in Lightroom öffnen und über Datei > Aus anderem Katalog importieren
 in den gewünschten Katalog zusammenführen.
 ```
+
+### Wenn der Katalog auf ein Laufwerk zeigt, das es nicht mehr gibt
+
+Ein Katalog merkt sich den Ort seiner Fotos als **absoluten Pfad**. Wird ein
+Laufwerk umbenannt oder die Bibliothek verschoben, merkt der Katalog davon
+nichts — er nennt weiter einen Datenträger, den es so nicht mehr gibt. Am
+eigenen Rechner ist das lästig; in einem verkleinerten Export ist es eine
+Sackgasse: Lightroom öffnet den Katalog und findet keine Fotos.
+
+Der Export prüft das deshalb und stellt es richtig — aber **nur mit Beweis**.
+Gesucht wird im Ordner des Quellkatalogs und einigen darüber, jeweils mit den
+hinteren Teilen des behaupteten Pfades daran. Ein Kandidat zählt erst, wenn
+**sechs Fotos aus dem Katalog dort wirklich liegen**. Über den Ort der Fotos
+eines Menschen zu raten ist nichts, was dieses Werkzeug tut.
+
+```
+Die Fotos liegen nicht mehr unter /Volumes/Foto_extern/Andy/shootings/;
+verwiesen auf /Volumes/G-DRIVE PROJECT/lr-andy/Andy/shootings/
+```
+
+Mit `--no-relink` bleibt der Pfad so, wie er im Original steht.
+
+Dasselbe gilt für die Suche: Ein `!` vor einem Treffer heißt, dass die Datei
+**nicht dort liegt, wo der Katalog sagt** — das Laufwerk ist nicht
+angeschlossen, oder die Bibliothek wurde verschoben, ohne es Lightroom zu
+sagen. Geprüft wird dabei der Ordner der Fotos, nicht das Laufwerk des
+Katalogs: Das sind nicht dieselben Orte.
 
 ### Was mitkopiert wird — und warum es so groß ist
 

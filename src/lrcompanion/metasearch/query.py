@@ -56,7 +56,7 @@ class Hit(NamedTuple):
     catalog: str
     catalog_path: str
     volume: str
-    volume_attached: bool
+    reachable: bool
     folder: str
     file_name: str
     capture_time: str
@@ -137,18 +137,23 @@ def search(index: Index, criteria: Filter) -> list[Hit]:
         sql += " limit ?"
         params.append(criteria.limit)
     hits = []
-    attached: dict[str, bool] = {}
+    # Whether the photographs can be reached, judged by the folder they are in
+    # rather than by the drive the *catalog* sits on. Those are not the same
+    # place: a catalog can name a volume that was renamed years ago, and then
+    # its own drive being attached says nothing at all. Cached per folder,
+    # because a search returns many photographs from few folders.
+    reachable: dict[str, bool] = {}
     for row in index.db.execute(sql, params):
-        mount = row[4] or ""
-        if mount not in attached:
-            attached[mount] = bool(mount) and os.path.ismount(mount)
+        folder = row[5] or ""
+        if folder not in reachable:
+            reachable[folder] = bool(folder) and os.path.isdir(folder)
         hits.append(
             Hit(
                 row[0],
                 row[1],
                 row[2],
                 row[3],
-                attached[mount],
+                reachable[folder],
                 row[5],
                 row[6],
                 row[7],

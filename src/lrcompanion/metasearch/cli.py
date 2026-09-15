@@ -142,6 +142,11 @@ def add_subcommands(inner, add_global_flags) -> None:
     p_export.add_argument("--to", required=True, help="an empty directory for the result")
     p_export.add_argument("-y", "--yes", action="store_true", help="do not ask")
     p_export.add_argument(
+        "--no-relink",
+        action="store_true",
+        help="keep the stated photo paths even where they no longer exist",
+    )
+    p_export.add_argument(
         "--without-data",
         action="store_true",
         help="leave the .lrcat-data directory behind (smaller, loses masking data)",
@@ -328,7 +333,7 @@ def _find(args, language: str) -> int:
         for hit in hits:
             print(
                 "  {mark} {f:<36} {c:<22} {t:<16} {v}".format(
-                    mark=" " if hit.volume_attached else "!",
+                    mark=" " if hit.reachable else "!",
                     f=hit.file_name[:36],
                     c=hit.catalog[:22],
                     t=hit.capture_time[:16].replace("T", " "),
@@ -337,13 +342,17 @@ def _find(args, language: str) -> int:
             )
             if hit.keywords:
                 print("      {k}".format(k=hit.keywords[:100]))
-        if any(not hit.volume_attached for hit in hits):
+        if any(not hit.reachable for hit in hits):
             print()
             print(
                 _(
                     language,
-                    "! the drive holding this one is not attached.",
-                    "! das Laufwerk dieses Treffers ist nicht angeschlossen.",
+                    "! this one is not where the catalog says it is -- the drive "
+                    "may be detached, or the library was moved without telling "
+                    "Lightroom.",
+                    "! dieser Treffer liegt nicht dort, wo der Katalog sagt — das "
+                    "Laufwerk ist nicht angeschlossen, oder die Bibliothek wurde "
+                    "verschoben, ohne es Lightroom zu sagen.",
                 )
             )
     return OK
@@ -520,6 +529,7 @@ def _export(args, language: str) -> int:
                 target,
                 progress=lambda message: print("    {m}".format(m=message), flush=True),
                 with_data=not args.without_data,
+                repoint=not args.no_relink,
             )
         except SubsetError as exc:
             print(str(exc))
@@ -536,6 +546,14 @@ def _export(args, language: str) -> int:
                 ).format(n=result.source.name)
             )
             continue
+        for was, now in result.relinked:
+            print(
+                _(
+                    language,
+                    "  Photographs are not at {w} any more; pointed at {n}",
+                    "  Die Fotos liegen nicht mehr unter {w}; verwiesen auf {n}",
+                ).format(w=was, n=now)
+            )
         print(
             "  {n:<34} {k} {of} {t}  ({a:.1f} MB{d})".format(
                 n=result.target.name[:34],

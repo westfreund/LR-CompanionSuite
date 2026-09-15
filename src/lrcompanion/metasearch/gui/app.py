@@ -541,7 +541,7 @@ class MetaSearchWindow(QMainWindow):
         table = self.result_table
         table.setRowCount(len(self.hits))
         for row, hit in enumerate(self.hits):
-            table.setItem(row, 0, QTableWidgetItem("" if hit.volume_attached else "!"))
+            table.setItem(row, 0, QTableWidgetItem("" if hit.reachable else "!"))
             table.setItem(row, 1, QTableWidgetItem(hit.file_name))
             table.setItem(row, 2, QTableWidgetItem(hit.catalog))
             table.setItem(row, 3, QTableWidgetItem(hit.capture_time[:16].replace("T", " ")))
@@ -550,13 +550,13 @@ class MetaSearchWindow(QMainWindow):
             table.setItem(row, 6, QTableWidgetItem(hit.keywords))
             table.setItem(row, 7, QTableWidgetItem(hit.volume))
             item = table.item(row, 0)
-            if item is not None and not hit.volume_attached:
+            if item is not None and not hit.reachable:
                 item.setToolTip(tr("not_attached", language))
         if not self.hits:
             self.hits_label.setText(tr("no_hits", language))
             return
         text = tr("hits", language).format(n=self._n(self.total), s=len(self.hits))
-        if any(not hit.volume_attached for hit in self.hits):
+        if any(not hit.reachable for hit in self.hits):
             text += "   " + tr("not_attached", language)
         self.hits_label.setText(text)
 
@@ -736,6 +736,8 @@ class MetaSearchWindow(QMainWindow):
         for result in results:
             if not str(result.target):
                 continue
+            for was, now in result.relinked:
+                self.export_view.appendPlainText("{w}  ->  {n}".format(w=was, n=now))
             self.export_view.appendPlainText(
                 "{n}: {k} / {t}".format(
                     n=result.target.name, k=result.kept, t=result.kept + result.removed

@@ -74,8 +74,10 @@ TEXT = {
         "Bitte mindestens ein Kriterium angeben.",
     ),
     "not_attached": (
-        "! the drive holding this one is not attached",
-        "! das Laufwerk dieses Treffers ist nicht angeschlossen",
+        "! not where the catalog says — the drive may be detached, or the library "
+        "was moved without telling Lightroom",
+        "! nicht dort, wo der Katalog sagt — Laufwerk nicht angeschlossen, oder die "
+        "Bibliothek wurde verschoben, ohne es Lightroom zu sagen",
     ),
     # -- libraries
     "scan": ("Read libraries in…", "Bibliotheken einlesen…"),

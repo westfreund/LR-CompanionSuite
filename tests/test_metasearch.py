@@ -412,3 +412,92 @@ def test_the_export_command_runs_end_to_end(filled, library, tmp_path, monkeypat
     printed = capsys.readouterr().out
     assert ".lrcat-data" in printed, printed
     assert data_directory(next(target.glob("*.lrcat"))).is_dir()
+
+
+# -- pointing a copy at the photographs --------------------------------------
+
+
+def _move_the_photographs(builder, tmp_path):
+    """Make the catalog name a drive that no longer exists, as real ones do.
+
+    A renamed or replaced drive changes the *front* of the path; the folders
+    below it keep their names, which is the whole reason the real location can
+    be found again.
+    """
+    import sqlite3 as sql
+
+    catalog = Path(builder.catalog_path)
+    db = sql.connect(str(catalog))
+    stated = db.execute("select absolutePath from AgLibraryRootFolder").fetchone()[0]
+    leaf = Path(stated.rstrip("/")).name
+    db.execute(
+        "update AgLibraryRootFolder set absolutePath = ?",
+        (str(tmp_path / "Foto_extern" / leaf) + "/",),
+    )
+    db.commit()
+    db.close()
+    return stated
+
+
+def test_a_copy_is_pointed_at_where_the_photographs_really_are(filled, library, tmp_path):
+    """Reported from Lightroom: the catalog opened, the photographs were gone.
+
+    A catalog stores an absolute path, drives get renamed, and the catalog does
+    not notice. Carried faithfully into an export that is not a nuisance but a
+    dead end.
+    """
+    _move_the_photographs(library, tmp_path)
+    hits = query.search(filled, query.Filter(keywords=("Urlaub",)))
+    results = subset.build(filled, [h.photo_id for h in hits], tmp_path / "out")
+
+    assert results[0].relinked, "the copy was left pointing at a drive that is gone"
+    was, now = results[0].relinked[0]
+    assert "Foto_extern" in was
+    assert Path(now).is_dir()
+
+    made = sqlite3.connect(str(results[0].target))
+    root = made.execute("select absolutePath from AgLibraryRootFolder").fetchone()[0]
+    made.close()
+    assert root.endswith(os.sep), "Lightroom needs the trailing separator"
+    assert Path(root).is_dir()
+
+
+def test_nothing_is_repointed_without_proof(library, tmp_path, filled):
+    """A candidate counts only when the catalog's folders are really in it.
+
+    Repointing to somewhere merely plausible would be guessing about where
+    somebody's photographs are, which is not this tool's business.
+    """
+    from lrcompanion.metasearch.relink import find_root
+
+    empty = tmp_path / "looks-right"
+    (empty / "Foto_extern").mkdir(parents=True)
+    assert find_root("/Volumes/Gone/lib/", empty / "Foto_extern", ["A0001.CR2"]) is None
+
+
+def test_a_catalog_that_is_already_right_is_left_alone(filled, tmp_path):
+    hits = query.search(filled, query.Filter(keywords=("Urlaub",)))
+    results = subset.build(filled, [h.photo_id for h in hits], tmp_path / "out")
+    assert results[0].relinked == ()
+
+
+def test_repointing_can_be_declined(filled, library, tmp_path):
+    _move_the_photographs(library, tmp_path)
+    hits = query.search(filled, query.Filter(keywords=("Urlaub",)))
+    results = subset.build(filled, [h.photo_id for h in hits], tmp_path / "out", repoint=False)
+    assert results[0].relinked == ()
+
+
+def test_reachability_is_judged_by_the_folder_not_the_catalog_drive(library, tmp_path):
+    """The catalog's own drive being attached says nothing about the photographs.
+
+    The first cut marked a hit as reachable when the drive holding the catalog
+    was mounted -- which for a library whose volume was renamed is exactly when
+    the answer is wrong.
+    """
+    _move_the_photographs(library, tmp_path)
+    with Index.open(tmp_path / "second.db") as index:
+        scan([library.catalog_path], index)
+        hits = query.search(index, query.Filter(keywords=("Urlaub",)))
+        assert hits
+        assert all(not hit.reachable for hit in hits)

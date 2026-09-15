@@ -27,6 +27,7 @@ from pathlib import Path
 from typing import Callable, NamedTuple, Optional
 
 from ..logging_setup import get_logger
+from .relink import relink
 from .store import Index
 
 log = get_logger("metasearch.subset")
@@ -49,6 +50,9 @@ class Reduced(NamedTuple):
     #: What the ``.lrcat-data`` directory added, separately: it dwarfs the
     #: catalog and is the reason an export can be far larger than expected.
     data_bytes: int = 0
+    #: Root folders repointed at where the photographs really are, as
+    #: (was, now) pairs. Empty when the catalog was already right.
+    relinked: tuple = ()
 
 
 class SubsetError(Exception):
@@ -137,6 +141,7 @@ def reduce_catalog(
     keep_ids: set[int],
     progress: Optional[Callable[[str], None]] = None,
     with_data: bool = True,
+    repoint: bool = True,
 ) -> Reduced:
     """Copy *source* to *target* and remove everything but *keep_ids*."""
     source = Path(source)
@@ -203,6 +208,15 @@ def reduce_catalog(
         )
 
         kept = int(db.execute("select count(*) from Adobe_images").fetchone()[0])
+
+        # A catalog names its photographs by absolute path, and drives get
+        # renamed. Carried faithfully into an export that is not a nuisance but
+        # a dead end: Lightroom opens the copy and finds nothing.
+        moved = relink(db, source) if repoint else []
+        if moved and progress:
+            for entry in moved:
+                progress("pointing at {n}".format(n=entry.now))
+
         db.commit()
         if progress:
             progress("compacting")
@@ -230,7 +244,16 @@ def reduce_catalog(
 
     after = target.stat().st_size
     log.info("Reduced %s: %d of %d photographs kept", source.name, kept, total)
-    return Reduced(source, target, kept, total - kept, before, after, data_bytes)
+    return Reduced(
+        source,
+        target,
+        kept,
+        total - kept,
+        before,
+        after,
+        data_bytes,
+        tuple((entry.was, entry.now) for entry in moved),
+    )
 
 
 def selection_by_catalog(index: Index, photo_ids: list[int]) -> dict[int, set[int]]:
@@ -251,6 +274,7 @@ def build(
     target_directory: str | Path,
     progress: Optional[Callable[[str], None]] = None,
     with_data: bool = True,
+    repoint: bool = True,
 ) -> list[Reduced]:
     """Reduce every catalog the selection touches, into *target_directory*."""
     directory = Path(target_directory).expanduser()
@@ -287,6 +311,7 @@ def build(
                 local_ids,
                 progress,
                 with_data=with_data,
+                repoint=repoint,
             )
         )
     return results

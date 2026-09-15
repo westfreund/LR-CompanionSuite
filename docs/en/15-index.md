@@ -1,6 +1,6 @@
 # LR-MetaSearch — the index across every library
 
-**Revision r20.0.1 · Build date 2026-09-15**
+**Revision r20.0.2 · Build date 2026-09-15**
 
 Anyone who has worked with several Lightroom catalogs over the years ends up
 with a question none of them can answer: *which library is this photograph
@@ -168,6 +168,32 @@ collections, ratings, all of it.
 Open each in Lightroom, then use File > Import from Another Catalog to merge
 them into the catalog you want.
 ```
+
+### When the catalog names a drive that is gone
+
+A catalog remembers where its photographs are as an **absolute path**. Rename a
+drive or move the library and the catalog does not notice: it goes on naming a
+volume that no longer exists. On its own machine that is a nuisance; in a
+reduced export it is a dead end, because Lightroom opens the catalog and finds
+nothing.
+
+So the export checks, and puts it right -- but **only with proof**. It looks in
+the source catalog's own directory and a few above it, trying each tail of the
+stated path against them. A candidate counts only once **six photographs from
+the catalog are really there**. Guessing about where somebody's photographs are
+is not something this tool does.
+
+```
+Photographs are not at /Volumes/Foto_extern/Andy/shootings/ any more;
+pointed at /Volumes/G-DRIVE PROJECT/lr-andy/Andy/shootings/
+```
+
+`--no-relink` keeps whatever the original says.
+
+The same applies to searching: a `!` before a hit means the file is **not where
+the catalog says** -- the drive may be detached, or the library was moved
+without telling Lightroom. What is checked is the photographs' folder, not the
+catalog's drive: those are not the same place.
 
 ### What comes along — and why it is so large
 

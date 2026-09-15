@@ -1,6 +1,6 @@
 # Safety and recovery
 
-**Revision r20.0.1 · Build date 2026-09-15**
+**Revision r20.0.2 · Build date 2026-09-15**
 
 > This tool edits your Lightroom catalog database and moves your photographs.
 > It is built carefully and it is tested, but **keep an independent, verified

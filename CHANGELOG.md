@@ -16,6 +16,30 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [20.0.2] — 2026-09-15
+
+Reported from Lightroom again: the catalog opened, and the photographs were
+not found. Not something the export introduced — the original says the same
+thing — but faithfully copying a dead end is not much of a service.
+
+### Fixed
+
+- **An exported catalog is pointed at where the photographs really are.** A
+  catalog stores their location as an absolute path; drives get renamed and
+  libraries get moved, and the catalog never notices. The library this was
+  found on names `/Volumes/Foto_extern/…`, which has not existed for some time;
+  the photographs are on another drive entirely.
+- **Only with proof.** The search looks in the source catalog's own directory
+  and a few above it, trying each tail of the stated path. A candidate is
+  accepted only once six photographs named by the catalog are really there.
+  `--no-relink` keeps whatever the original says.
+- **A search result's `!` now means what it says.** It marked a hit when the
+  drive holding the *catalog* was not mounted — which for a library whose
+  volume was renamed is exactly when the answer is wrong. It tests the
+  photographs' folder now, and the wording says what it found.
+
+---
+
 ## [20.0.1] — 2026-09-15
 
 Reported from Lightroom, which is the only place this could have been found.

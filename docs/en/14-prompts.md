@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r20.0.1 · Build date 2026-09-15**
+**Revision r20.0.2 · Build date 2026-09-15**
 
 This document preserves the request that created LR-FolderCraft, a generic
 prompt for regenerating a comparable tool from scratch, and the context needed
@@ -365,6 +365,16 @@ pre-flight checks, execute with a progress callback. Then:
   with one `..` too many in a relative import and reached a user, because every
   test called the functions directly and the command's own path had never once
   been walked.
+* **An absolute path stored in a file is a claim, not a fact.** A catalog
+  records where its photographs are and never notices a renamed drive. Copy it
+  somewhere and the claim travels intact and useless. Check before you carry it,
+  and if you correct it, correct it only on evidence: six files named by the
+  catalog actually present at the new place. Guessing where somebody's
+  photographs are is not a thing to do on their behalf.
+* **Check the thing you are actually asked about.** "Is this photograph
+  reachable" was answered by testing whether the drive holding the *catalog*
+  was mounted -- which is precisely wrong for a library whose volume was
+  renamed, the one case where the question matters.
 * **Compose text before you map or compare it.** macOS hands back filenames
   decomposed, so a name a user typed as "Völki" arrives as "o" plus a combining
   diaeresis. Any per-character table, and any pattern comparison, silently
