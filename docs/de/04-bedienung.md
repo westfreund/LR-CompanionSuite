@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r18.0.0 · Build-Datum 2026-08-30**
+**Revision r19.0.0 · Build-Datum 2026-09-15**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -28,7 +28,7 @@ Schreibt nichts.
 ```console
 $ lrfc info /Volumes/Fotos/2019/2019.lrcat --lang de
   Katalog                          : /Volumes/Fotos/2019/2019.lrcat
-  Schemaversion                    : 18.0.0
+  Schemaversion                    : 19.0.0
   Stammordner                      : 1
   Ordner                           : 1
   Dateien                          : 9.452
@@ -592,7 +592,7 @@ Bibliothek tatsächlich vorgefunden hat, und verlangt ein bewusstes Ja:
 ```
 Vor diesem Lauf
   ✓  Keine Lightroom-Sperrdatei — der Katalog ist frei.
-  ✓  Katalogschema 18.0.0 — eine Version, gegen die diese Revision verifiziert wurde.
+  ✓  Katalogschema 19.0.0 — eine Version, gegen die diese Revision verifiziert wurde.
   ✓  Alle 1 Wurzelordner mit Dateien existieren auf der Platte (51.049 Dateien).
   ✓  Eine frühere Sicherung dieses Katalogs von 2026-08-23 09:08 ist vorhanden.
 

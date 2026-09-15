@@ -30,6 +30,7 @@ und `04-bedienung.md` sind also dasselbe Dokument.
 | 12 | History / Historie | [en/12-history.md](en/12-history.md) | [de/12-historie.md](de/12-historie.md) |
 | 13 | Open issues / Offene Punkte | [en/13-open-issues.md](en/13-open-issues.md) | [de/13-offene-punkte.md](de/13-offene-punkte.md) |
 | 14 | Prompts | [en/14-prompts.md](en/14-prompts.md) | [de/14-prompts.md](de/14-prompts.md) |
+| 15 | Library index / Bibliotheksindex | [en/15-index.md](en/15-index.md) | [de/15-bibliotheksindex.md](de/15-bibliotheksindex.md) |
 
 `images/brand/` holds the project's mark in its two cuts, with a README of its
 own; `python scripts/make_brand.py` regenerates the PNG sizes from the SVG

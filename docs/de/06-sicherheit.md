@@ -1,6 +1,6 @@
 # Sicherheit und Wiederherstellung
 
-**Revision r18.0.0 · Build-Datum 2026-08-30**
+**Revision r19.0.0 · Build-Datum 2026-09-15**
 
 > Dieses Werkzeug bearbeitet die Lightroom-Katalogdatenbank und verschiebt Ihre
 > Fotografien. Es ist sorgfältig gebaut und getestet, aber: **Halten Sie vor

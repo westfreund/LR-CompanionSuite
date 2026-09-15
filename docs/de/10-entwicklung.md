@@ -1,6 +1,6 @@
 # Entwicklung und Fortsetzung
 
-**Revision r18.0.0 · Build-Datum 2026-08-30**
+**Revision r19.0.0 · Build-Datum 2026-09-15**
 
 Dieses Dokument existiert, damit die Arbeit später fortgesetzt werden kann —
 von Ihnen, von jemand anderem oder von einem KI-Assistenten — ohne den Kontext
@@ -9,7 +9,7 @@ aus dem Code rekonstruieren zu müssen.
 ## Aktueller Stand
 
 **r1.0.0 ist vollständig und funktionsfähig.** Ende-zu-Ende verifiziert gegen
-einen echten Lightroom-Classic-Katalog (Schema 18.0.0, 9.452 Dateien, 337 GiB,
+einen echten Lightroom-Classic-Katalog (Schema 19.0.0, 9.452 Dateien, 337 GiB,
 exFAT).
 
 | Bereich | Stand |
@@ -20,8 +20,9 @@ exFAT).
 | Sicherheit | vollständig: 8 Prüfungen, Backup, Journal, Rollback, Undo, Verifikation |
 | CLI | vollständig: 9 Befehle |
 | TUI | vollständig: Laden, Planen, Ausführen, Live-Vorschau, EN/DE |
+| Index | vollständig: Einlesen, Suche, Dubletten, Export — nur Kommandozeile |
 | GUI | vollständig: Qt in fünf Reitern, alle Einstellungen, Ordnerentscheidungen, Profile, Fortschritt |
-| Tests | 633 Tests, 86 % Abdeckung |
+| Tests | 653 Tests, 84 % Abdeckung |
 | CI | GitLab, Python 3.9–3.13 |
 | Dokumentation | vollständig, EN und DE |
 | Installationsskripte | macOS, Linux, Windows |

@@ -1,6 +1,6 @@
 # Architektur
 
-**Revision r18.0.0 · Build-Datum 2026-08-30**
+**Revision r19.0.0 · Build-Datum 2026-09-15**
 
 ## Leitregel
 
@@ -66,13 +66,21 @@ LR-FolderCraft/
 │   ├── tui/
 │   │   ├── app.py                   die Textual-Anwendung
 │   │   └── app.tcss                 deren Stylesheet
+│   ├── index/                       der Bibliotheksindex, streng getrennt
+│   │   ├── store.py                die Indexdatei und ihr Schema
+│   │   ├── scan.py                 Kataloge finden und lesen
+│   │   ├── query.py                Suche
+│   │   ├── duplicates.py           Gleichheit und Nähe
+│   │   ├── subset.py               Kataloge kopieren und verkleinern
+│   │   ├── volumes.py              Laufwerkskennung je Betriebssystem
+│   │   └── cli.py                  die `lrfc index`-Befehle
 │   └── gui/
 │       ├── app.py                   das Qt-Hauptfenster, in fünf Reitern
 │       ├── workers.py               Katalog / Plan / Ausführung in Threads
 │       ├── state.py                 was sich das Fenster zwischen Sitzungen merkt
 │       └── i18n.py                  Oberflächentexte, EN und DE
 │
-├── tests/                           633 Tests, synthetischer Katalog als Fixture
+├── tests/                           653 Tests, synthetischer Katalog als Fixture
 ├── install/                         Installationsskripte für macOS, Linux, Windows
 └── docs/  en/  de/  images/         diese Dokumentation, in beiden Sprachen
 ```
@@ -209,6 +217,16 @@ result = execute(plan, settings, progress=callback)
 Ordner befragt, ohne dass der Planer von einer Oberfläche wüsste. Es bekommt
 einen `FolderCase` und liefert eine Aktion oder `None` für „Vorgabe". `progress`
 wird als `progress(done, total, message)` während des Verschiebens aufgerufen.
+
+### `index/`
+
+Der Index über alle Bibliotheken, bewusst abseits. Er öffnet Kataloge nur
+lesend und schreibt ausschließlich in seine eigene Datei — und beim Export in
+eine *Kopie*, die er zuvor selbst angelegt hat. Ein Test prüft, dass `cli.py`,
+`planner.py`, `executor.py` und `folders.py` dieses Paket nicht einmal
+importieren: Ein Fehler hier kann den Teil, der Fotos bewegt, nicht erreichen.
+
+Siehe [15-bibliotheksindex.md](15-bibliotheksindex.md).
 
 ### `gui/`
 

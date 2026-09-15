@@ -9,8 +9,8 @@
 
 **Reorganise Adobe Lightroom Classic folder trees — without losing the catalog connection.**
 
-[![Revision](https://img.shields.io/badge/revision-r18.0.0-blue)](CHANGELOG.md)
-[![Build date](https://img.shields.io/badge/build-2026--08--30-lightgrey)](CHANGELOG.md)
+[![Revision](https://img.shields.io/badge/revision-r19.0.0-blue)](CHANGELOG.md)
+[![Build date](https://img.shields.io/badge/build-2026--09--15-lightgrey)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20GPL--3.0--or--later-green)](LICENSE)
 
@@ -149,7 +149,7 @@ Existing files are never overwritten. A name collision is resolved by renaming
 
 - Python 3.9 or newer (macOS ships with a suitable one)
 - Adobe Lightroom Classic catalog, schema version 11.x–19.x
-  (verified against 18.0.0 / Lightroom Classic 14)
+  (verified against 19.0.0 / Lightroom Classic 14)
 - Lightroom Classic **closed** while the tool runs
 
 The command line needs nothing but the standard library. `lrfc tui` adds

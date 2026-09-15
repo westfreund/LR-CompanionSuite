@@ -496,7 +496,7 @@ def preconditions(catalog: Path, settings: Settings) -> PreflightResult:
     after the work is already described.
 
     Each check reports **what was actually found**. A dialog that merely
-    recites three rules gets clicked away; one that says "schema 18.0.0,
+    recites three rules gets clicked away; one that says "schema 19.0.0,
     verified" and "51,049 of 51,049 files found" is worth reading.
     """
     catalog = Path(catalog)

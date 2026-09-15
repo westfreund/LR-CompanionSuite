@@ -1,6 +1,6 @@
 # Architecture
 
-**Revision r18.0.0 · Build date 2026-08-30**
+**Revision r19.0.0 · Build date 2026-09-15**
 
 ## Guiding rule
 
@@ -64,13 +64,21 @@ LR-FolderCraft/
 │   ├── tui/
 │   │   ├── app.py                   the Textual application
 │   │   └── app.tcss                 its stylesheet
+│   ├── index/                       the library index, strictly separate
+│   │   ├── store.py                the index file and its schema
+│   │   ├── scan.py                 finding and reading catalogs
+│   │   ├── query.py                searching
+│   │   ├── duplicates.py           sameness and nearness
+│   │   ├── subset.py               copying and reducing catalogs
+│   │   ├── volumes.py              drive identity, per operating system
+│   │   └── cli.py                  the `lrfc index` commands
 │   └── gui/
 │       ├── app.py                   the Qt main window, in five tabs
 │       ├── workers.py               catalog / plan / apply on worker threads
 │       ├── state.py                 what the window remembers between sessions
 │       └── i18n.py                  interface strings, EN and DE
 │
-├── tests/                           633 tests, synthetic catalog fixture
+├── tests/                           653 tests, synthetic catalog fixture
 ├── install/                         installers for macOS, Linux, Windows
 └── docs/  en/  de/  images/         this documentation, in both languages
 ```
@@ -200,6 +208,16 @@ result = execute(plan, settings, progress=callback)
 without the planner knowing a user interface exists. It receives a `FolderCase`
 and returns an action or `None` for "use the default". `progress` is called as
 `progress(done, total, message)` while files move.
+
+### `index/`
+
+The index across every library, deliberately off to one side. It opens catalogs
+read-only and writes only into a file of its own -- and, on export, into a
+*copy* it made first. A test checks that `cli.py`, `planner.py`, `executor.py`
+and `folders.py` do not so much as import this package: a fault here cannot
+reach the part that moves photographs.
+
+See [15-index.md](15-index.md).
 
 ### `gui/`
 

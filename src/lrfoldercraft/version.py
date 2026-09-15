@@ -11,9 +11,9 @@ every UI surface (TUI header, CLI banner, log header, reports).
 
 from __future__ import annotations
 
-__version__ = "18.0.0"
-__build_date__ = "2026-08-30"
-__codename__ = "Übersicht"
+__version__ = "19.0.0"
+__build_date__ = "2026-09-15"
+__codename__ = "Fundort"
 
 #: Human readable revision tag, e.g. ``r1.0.0 (2026-08-22)``.
 REVISION = "r{v} ({d})".format(v=__version__, d=__build_date__)
@@ -23,7 +23,7 @@ APP_SLUG = "lr-foldercraft"
 APP_URL = "https://gitlab.com/andy-freund/LR-FolderCraft"
 
 #: Lightroom Classic catalog schema versions this revision was verified against.
-VERIFIED_CATALOG_VERSIONS = ("18.0.0",)
+VERIFIED_CATALOG_VERSIONS = ("19.0.0",)
 
 #: Catalog schema versions that are accepted without an explicit warning.
 SUPPORTED_CATALOG_VERSION_RANGE = (11, 19)

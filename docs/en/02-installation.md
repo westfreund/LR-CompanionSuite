@@ -1,6 +1,6 @@
 # Installation
 
-**Revision r18.0.0 · Build date 2026-08-30**
+**Revision r19.0.0 · Build date 2026-09-15**
 
 LR-FolderCraft is a Python package. The installers create an isolated virtual
 environment so nothing is added to your system Python.
@@ -12,7 +12,7 @@ environment so nothing is added to your system Python.
 | Python | 3.9 or newer, with `sqlite3` and `venv` |
 | Disk space | 5 MB command line only, 60 MB with the TUI, 380 MB with the Qt interface |
 | Lightroom Classic | must be **closed** while the tool runs |
-| Catalog schema | 11.x–19.x, verified against 18.0.0 (Lightroom Classic 14) |
+| Catalog schema | 11.x–19.x, verified against 19.0.0 (Lightroom Classic 14) |
 
 macOS 12 and later already ship a suitable Python at `/usr/bin/python3`.
 

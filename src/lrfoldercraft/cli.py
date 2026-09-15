@@ -166,6 +166,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_presets = sub.add_parser("presets", help="list ready made structures")
     _add_global_flags(p_presets)
 
+    # The index is a world of its own -- its subcommands, its flags and its
+    # store. It hangs off here and lives in its own package, which is also what
+    # keeps it out of the folder tool: a test checks that nothing on the path
+    # that moves photographs imports it.
+    from .index.cli import add_parser as add_index_parser
+
+    add_index_parser(sub, _add_global_flags)
+
     p_tui = sub.add_parser("tui", help="start the interactive interface")
     p_tui.add_argument("catalog", nargs="?", help="optional catalog to preload")
     _add_global_flags(p_tui)
@@ -836,6 +844,13 @@ def cmd_gui(args: argparse.Namespace) -> int:
     return run_gui(catalog=args.catalog or "", language=args.lang, debug=args.debug)
 
 
+def _cmd_index(args: argparse.Namespace) -> int:
+    """Hand over to the index package, imported only when it is asked for."""
+    from .index.cli import cmd_index
+
+    return cmd_index(args)
+
+
 DISPATCH = {
     "info": cmd_info,
     "folders": cmd_folders,
@@ -849,6 +864,7 @@ DISPATCH = {
     "presets": cmd_presets,
     "tui": cmd_tui,
     "gui": cmd_gui,
+    "index": _cmd_index,
 }
 
 

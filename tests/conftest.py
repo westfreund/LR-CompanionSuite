@@ -46,10 +46,19 @@ CREATE UNIQUE INDEX index_AgLibraryFile_nameAndFolder
 CREATE TABLE Adobe_images (
     id_local INTEGER PRIMARY KEY, id_global UNIQUE NOT NULL, captureTime,
     copyName, copyReason, fileFormat NOT NULL DEFAULT 'unset', masterImage INTEGER,
-    rating, rootFile INTEGER NOT NULL DEFAULT 0);
+    rating, rootFile INTEGER NOT NULL DEFAULT 0,
+    fileHeight, fileWidth, colorLabels, pick);
 CREATE TABLE AgHarvestedExifMetadata (
     id_local INTEGER PRIMARY KEY, image INTEGER, cameraModelRef INTEGER,
-    cameraSNRef INTEGER, dateDay, dateMonth, dateYear, lensRef INTEGER);
+    cameraSNRef INTEGER, dateDay, dateMonth, dateYear, lensRef INTEGER,
+    aperture, focalLength, gpsLatitude, gpsLongitude, gpsSequence, hasGPS,
+    isoSpeedRating, shutterSpeed, flashFired);
+CREATE TABLE AgLibraryKeyword (
+    id_local INTEGER PRIMARY KEY, id_global UNIQUE NOT NULL, dateCreated,
+    genealogy, imageCountCache, includeOnExport, includeParents, includeSynonyms,
+    keywordType, lastApplied, lc_name, name, parent INTEGER);
+CREATE TABLE AgLibraryKeywordImage (
+    id_local INTEGER PRIMARY KEY, image INTEGER, tag INTEGER);
 CREATE TABLE AgInternedExifCameraModel (
     id_local INTEGER PRIMARY KEY, searchIndex, value);
 CREATE TABLE AgInternedExifCameraSN (
@@ -70,7 +79,7 @@ class CatalogBuilder:
         self._next_id = 1000
         self._conn = sqlite3.connect(str(self.catalog_path))
         self._conn.executescript(SCHEMA)
-        self._var("Adobe_DBVersion", "18.0.0")
+        self._var("Adobe_DBVersion", "19.0.0")
         # Lightroom stores the id counter as a REAL, not a string. Getting this
         # wrong in the fixture would hide a defect that makes catalogs unopenable.
         self._var("Adobe_entityIDCounter", 5000.0)
@@ -228,6 +237,53 @@ class CatalogBuilder:
             (new_id, value.lower(), value),
         )
         return new_id
+
+    def add_keyword(self, name: str, parent: Optional[int] = None) -> int:
+        """A keyword the index can find later."""
+        keyword_id = self._new_id()
+        self._conn.execute(
+            "INSERT INTO AgLibraryKeyword "
+            "(id_local,id_global,name,lc_name,genealogy,imageCountCache,parent) "
+            "VALUES (?,?,?,?,?,?,?)",
+            (keyword_id, self._uuid(), name, name.lower(), "/{i}".format(i=keyword_id), -1, parent),
+        )
+        self._conn.commit()
+        return keyword_id
+
+    def tag(self, file_id: int, keyword_id: int) -> None:
+        """Hang *keyword_id* on the image belonging to *file_id*."""
+        row = self._conn.execute(
+            "SELECT id_local FROM Adobe_images WHERE rootFile = ? AND masterImage IS NULL",
+            (file_id,),
+        ).fetchone()
+        if row is None:  # pragma: no cover - a caller error
+            raise AssertionError("no image for file {f}".format(f=file_id))
+        self._conn.execute(
+            "INSERT INTO AgLibraryKeywordImage (id_local,image,tag) VALUES (?,?,?)",
+            (self._new_id(), row[0], keyword_id),
+        )
+        self._conn.commit()
+
+    def set_exif(self, file_id: int, **values) -> None:
+        """Fill in the harvested EXIF row for this file's image."""
+        row = self._conn.execute(
+            "SELECT id_local FROM Adobe_images WHERE rootFile = ? AND masterImage IS NULL",
+            (file_id,),
+        ).fetchone()
+        assignments = ", ".join("{k} = ?".format(k=key) for key in values)
+        self._conn.execute(
+            "UPDATE AgHarvestedExifMetadata SET {a} WHERE image = ?".format(a=assignments),
+            tuple(values.values()) + (row[0],),
+        )
+        self._conn.commit()
+
+    def set_size(self, file_id: int, width: int, height: int) -> None:
+        self._conn.execute(
+            "UPDATE Adobe_images SET fileWidth = ?, fileHeight = ?"
+            " WHERE rootFile = ? AND masterImage IS NULL",
+            (width, height, file_id),
+        )
+        self._conn.commit()
 
     def add_root_folder(self, directory: Path, name: str) -> int:
         """Register a second root folder, as a catalog spanning drives has."""

@@ -1,6 +1,6 @@
 # Für Andreas — Stand der Bekanntmachung
 
-*24.08.2026, nach r18.0.0. Was aufgesetzt ist, was es kann, und was bei dir
+*24.08.2026, nach r19.0.0. Was aufgesetzt ist, was es kann, und was bei dir
 liegen bleibt. Zum Nachschlagen, wenn du das Thema wieder aufnimmst.*
 
 ---
@@ -21,7 +21,7 @@ Ist offen. Ebenso stand die Adresse auf einer Zufallsdomain; jetzt die lesbare.
 **GitLab:** zwölf Schlagworte gesetzt (waren keine), Beschreibung geschärft.
 
 **GitHub-Spiegel:** <https://github.com/westfreund/LR-FolderCraft> — öffentlich,
-vollständige Historie mit 44 Tags, dieselben Schlagworte, Release r18.0.0
+vollständige Historie mit 44 Tags, dieselben Schlagworte, Release r19.0.0
 veröffentlicht. Beide READMEs sagen jetzt, dass GitLab das Zuhause ist und
 Tickets dorthin gehören. Wie die beiden synchron bleiben, steht in
 [../docs/de/11-versionierung.md](../docs/de/11-versionierung.md) im

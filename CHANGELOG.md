@@ -16,6 +16,56 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [19.0.0] — 2026-09-15 — "Fundort"
+
+An index across every known library, agreed as O-27 to O-29 and built on the
+condition that the folder reorganisation stays exactly as it was. A guard test
+enforces that: importing the command line, the planner, the executor or the
+folder rules must not pull the index in at all.
+
+### Added
+
+- **`lrfc index scan`** reads every catalog it can find into an index of its
+  own: catalog, folder, file name, the keywords assigned in the catalog, and
+  the EXIF data Lightroom harvested at import -- camera, lens, ISO, focal
+  length, aperture, shutter, dimensions, rating, colour label, position. No
+  image file is opened; aperture and shutter are converted out of APEX on the
+  way in. A catalog Lightroom has open is reported and skipped.
+- **Copies and backups of catalogs are recognised and counted once.** By the
+  UUIDs of their photographs, compared for *overlap* rather than equality,
+  drawn in insertion order. One of a group counts; the others are recorded, not
+  deleted. Against the reference collection this found six, where an earlier
+  design that compared for equality found three.
+- **A drive is identified by something other than its name**: the VolumeUUID on
+  macOS, the volume serial number on Windows, the filesystem UUID on Linux.
+  Where none is available the index falls back to a fingerprint and says so.
+- **`lrfc index find`** searches across every library, by keyword, camera,
+  lens, catalog, file name, extension, date range, rating or position -- and
+  answers with the drive in a cupboard, marking which hits are out of reach.
+- **`lrfc index duplicates`** reports the same photograph held more than once,
+  and separately the bursts and brackets. Visual similarity is deliberately
+  absent, and the documentation says why.
+- **`lrfc index export`** turns a search into catalogs Lightroom can merge. It
+  copies each source catalog and removes from the copy what was not selected,
+  so everything that survives was written by Lightroom itself. The original is
+  only read. Merging is Lightroom's own *Import from Another Catalog*.
+- The synthetic catalog the tests build now has keywords, pixel dimensions and
+  the harvested EXIF columns, so the index can be tested without a real library.
+
+### Fixed
+
+- Every doc carried a build date a week old: the guard checked the revision and
+  not the date beside it.
+
+### Known limits
+
+- The index is reachable from the command line only; the window and the
+  terminal interface are still to come (O-31).
+- The Windows drive identifier is implemented but has not been tried on
+  Windows.
+
+---
+
 ## [18.0.0] — 2026-08-30 — "Übersicht"
 
 Reported by the user: the settings were too many to fit in one window.

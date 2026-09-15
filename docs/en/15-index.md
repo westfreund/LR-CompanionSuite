@@ -1,0 +1,198 @@
+# The index across every library
+
+**Revision r19.0.0 · Build date 2026-09-15**
+
+Anyone who has worked with several Lightroom catalogs over the years ends up
+with a question none of them can answer: *which library is this photograph
+actually in?* The index answers it — even with the drive in a cupboard. It then
+tells you **which** drive to connect.
+
+> **The index only reads.** No catalog is opened for writing, no image file is
+> touched. The only thing written is the index file itself — and, on export, a
+> *copy* the tool made first. A test compares the catalog's bytes before and
+> after every scan.
+
+## In three commands
+
+```bash
+lrfc index scan                            # read every library it can reach
+lrfc index status                          # what the index holds
+lrfc index find --keyword Wedding --min-rating 4
+```
+
+## `index scan` — reading libraries in
+
+```bash
+lrfc index scan                            # looks in ~/Pictures and under /Volumes
+lrfc index scan "/Volumes/Photos" ~/Pictures   # or in the places you name
+lrfc index scan --index ~/my-index.db      # a different index file
+```
+
+Recorded per photograph: **catalog name, folder, file name, the keywords
+assigned in the catalog** and the **EXIF data** — camera, lens, ISO, focal
+length, aperture, shutter speed, pixel dimensions, rating, colour label and,
+where there is one, the geographic position.
+
+None of it requires opening an image file: Lightroom harvested these when the
+photographs were imported and keeps them in the catalog. Aperture and shutter
+speed are stored there in APEX and are converted to f-numbers and seconds as
+they are read.
+
+A catalog Lightroom currently has open is **reported and skipped** rather than
+read behind its back. With `--include-locked` it is read anyway; what comes out
+may then be out of date.
+
+### Where the index file lives
+
+Beside the profiles in the configuration directory by default. `--index PATH`
+puts it anywhere else — on the drive it belongs to, say, or somewhere that gets
+backed up.
+
+### Copies and backups are not counted twice
+
+This was the hardest requirement. A catalog Lightroom rewrote as
+`…-v13-3.lrcat` during a version upgrade, and the version sitting in an
+`_Archive` folder beside it, are **the same library** — counting both doubles
+every answer.
+
+They are recognised by the **UUIDs of their photographs**: Lightroom gives each
+photograph one, and a copy carries the same ones. The comparison is not for
+equality but for **overlap** — a copy and its original drift apart. In the
+collection this was developed against, two versions of one library differed by
+two photographs out of 3,296; asking whether they were identical would have
+called them unrelated.
+
+The sample is drawn in **insertion order**, not UUID order: photographs added
+after the copy was taken otherwise scatter randomly through the sample, and
+whether a grown copy is still recognised comes down to luck.
+
+**One of a group counts; the others are recorded, not deleted.** Which one is
+the valid one is your decision. The ones judged to be copies appear under
+`index status --all` with a `=` in front.
+
+## `index status` — what is in it
+
+```
+  47 catalogs, 183,407 photographs, 1,054 keywords, 1 drives, 6 known copies
+
+Drives:
+  * G-DRIVE PROJECT          certain      722276AB-A223-4A2C-B68C-8A5E1D7CACEA
+  * attached right now
+```
+
+**Certain** means the operating system gave up an identifier for the volume —
+on macOS the `VolumeUUID`, on Windows the volume serial number, on Linux the
+filesystem UUID. It survives renaming the drive. Where it says **guessed**,
+none was to be had, and the index falls back to a fingerprint of name,
+filesystem and size. That is weaker, which is why it says so.
+
+The index is a **snapshot**. Each catalog carries the moment it was last read.
+
+## `index find` — searching
+
+```bash
+lrfc index find --keyword Wedding --keyword Berlin      # both must apply
+lrfc index find --any-keyword Anna --any-keyword Ben    # one is enough
+lrfc index find --camera "EOS R5" --since 2024-01-01 --min-rating 3
+lrfc index find --text IMG_0042                         # file name or folder
+lrfc index find --with-gps --ext cr3 --limit 200
+lrfc index find --keyword Wedding --paths               # paths only, one per line
+```
+
+| Criterion | What it does |
+| --- | --- |
+| `--keyword` | repeatable; **all** must apply |
+| `--any-keyword` | repeatable; **one** is enough |
+| `--text` | file name or folder contains this |
+| `--camera`, `--lens` | camera or lens name contains this |
+| `--catalog` | only libraries whose name contains this |
+| `--ext` | file extension, e.g. `cr3` |
+| `--since`, `--until` | capture date, `YYYY-MM-DD`, inclusive |
+| `--min-rating` | at least this many stars |
+| `--with-gps` | only photographs with a position |
+| `--include-copies` | count virtual copies too |
+
+A `!` in front of a hit means the drive is not attached at the moment. The
+entry is still right — it tells you where to look.
+
+`lrfc index keywords` lists every keyword with its count, `--cameras` every
+camera.
+
+## `index duplicates` — the same file more than once
+
+```bash
+lrfc index duplicates                       # the totals and the first groups
+lrfc index duplicates --across-catalogs     # only what spans libraries
+lrfc index duplicates --near                # bursts and brackets
+```
+
+Two questions that look alike and are not:
+
+**Sameness** is answerable from the catalogs alone: capture time, camera, file
+name and pixel dimensions together. Any one of them repeats within a library;
+all four together do not, unless it really is the same photograph. It works
+with the drive disconnected.
+
+**Nearness** — a burst, a bracket, a raw beside its JPEG — is also answerable
+from the catalog, because such photographs differ in ways it records.
+
+**What is not here is visual similarity.** Telling two different frames apart
+by what they show needs the pixels, and reading the pixels of a raw file needs
+a decoder this tool does not ship. Better to state the limit than to offer a
+weak version of it under a name that promises more.
+
+Virtual copies are **not** counted as duplicates — they share their file with
+their master, and otherwise every edit would be a duplicate.
+
+The command **changes nothing**. It is a report.
+
+## `index export` — a catalog out of a search
+
+```bash
+lrfc index export --keyword "Best of" --min-rating 4 --to ~/Desktop/Selection
+```
+
+The obvious way would be to write a catalog. That would mean recreating develop
+settings, collections, stacks and previews — and getting any of it wrong
+produces a catalog that opens and is quietly wrong, which is the worst outcome
+available.
+
+So it goes the other way round. Every library involved is **copied**, and from
+the copy everything not selected is removed. What survives was written by
+Lightroom itself and is therefore right: develop settings, keywords,
+collections, ratings, all of it.
+
+```
+  Selection.lrcat                    20 of 6,043  (10.5 MB)
+
+Open each in Lightroom, then use File > Import from Another Catalog to merge
+them into the catalog you want.
+```
+
+Merging across libraries is Lightroom's **File → Import from Another Catalog**.
+It does that well, and it is not this tool's business to reimplement it.
+
+Note:
+
+- The original is only read. The copy is taken together with its write-ahead
+  log, so whatever Lightroom did last comes along.
+- A virtual copy brings its master with it — it cannot exist without one.
+- The target directory has to be empty.
+- The **image files are not copied.** The reduced catalog points at the same
+  files as before. To take the photographs along, use Lightroom's option to
+  copy them while importing.
+
+## Limits
+
+| | |
+| --- | --- |
+| The index is a snapshot | Scan again after a library changes |
+| Visual similarity | Not included, see above |
+| Windows drive identity | Implemented, but **not tried on a Windows machine** |
+| Interface | The command line for now; the window and the terminal interface are still to come |
+
+## See also
+
+- [13-open-issues.md](13-open-issues.md) — O-27 to O-30, and how this came about
+- [06-safety.md](06-safety.md) — why the tool treats catalogs the way it does
+- [04-usage.md](04-usage.md) — the folder reorganisation, the older and larger half of the tool

@@ -1,6 +1,6 @@
 # Versioning
 
-**Revision r18.0.0 · Build date 2026-08-30**
+**Revision r19.0.0 · Build date 2026-09-15**
 
 ## The scheme
 
@@ -20,10 +20,10 @@ revision then tells you unambiguously whether a given capability exists.
 `src/lrfoldercraft/version.py` is the single source of truth:
 
 ```python
-__version__   = "18.0.0"
+__version__   = "19.0.0"
 __build_date__ = "2026-08-23"
 __codename__   = "Pruefstand"
-REVISION       = "r18.0.0 (2026-08-23)"
+REVISION       = "r19.0.0 (2026-08-23)"
 ```
 
 Nothing else hard-codes a version. Everything derives from this file:
@@ -41,19 +41,19 @@ It does, in five places:
 
 ```console
 $ lrfc --version
-LR-FolderCraft r18.0.0 (2026-08-23) - Beisammen
+LR-FolderCraft r19.0.0 (2026-08-23) - Beisammen
 ```
 
 ```
-LR-FolderCraft r18.0.0 (2026-08-23) - Beisammen      <- every report header
+LR-FolderCraft r19.0.0 (2026-08-23) - Beisammen      <- every report header
 ```
 
 ```
-LR-FolderCraft — r18.0.0 (2026-08-23) - build 2026-08-23    <- TUI header
+LR-FolderCraft — r19.0.0 (2026-08-23) - build 2026-08-23    <- TUI header
 ```
 
 ```
-2026-08-22 16:26:31 | INFO | Revision r18.0.0 (2026-08-23) | version 5.0.0 | build date 2026-08-23
+2026-08-22 16:26:31 | INFO | Revision r19.0.0 (2026-08-23) | version 5.0.0 | build date 2026-08-23
 ```
 
 ```json
@@ -74,7 +74,7 @@ LR-FolderCraft — r18.0.0 (2026-08-23) - build 2026-08-23    <- TUI header
 7. Commit as `release: rX.Y.Z — <summary>` and tag:
 
 ```bash
-git tag -a v18.0.0 -m "LR-FolderCraft r18.0.0"
+git tag -a v19.0.0 -m "LR-FolderCraft r19.0.0"
 git push origin main --tags
 git push github main --tags     # the read-only mirror, see below
 ```
@@ -120,7 +120,7 @@ and `version.py` must not drift apart.
 Two constants in `version.py` govern this:
 
 ```python
-VERIFIED_CATALOG_VERSIONS      = ("18.0.0",)   # tested against a real catalog
+VERIFIED_CATALOG_VERSIONS      = ("19.0.0",)   # tested against a real catalog
 SUPPORTED_CATALOG_VERSION_RANGE = (11, 19)     # accepted without an override
 ```
 
@@ -136,7 +136,7 @@ verified before it is added to `VERIFIED_CATALOG_VERSIONS`.
 
 | Catalog schema | Lightroom Classic | Status |
 | --- | --- | --- |
-| 18.0.0 | 14.x | verified against a real 9,452-file catalog |
+| 19.0.0 | 14.x | verified against a real 9,452-file catalog |
 | 11.x–17.x | 7.x–13.x | expected to work, opens with a warning |
 | 19.x | 15.x | inside the range, not yet verified |
 | < 11 | ≤ 6 / Lightroom 6 | refused without an override |

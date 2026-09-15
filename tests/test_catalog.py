@@ -39,7 +39,7 @@ def test_info_counts(simple_catalog):
     assert info.images == 8  # six masters plus two virtual copies
     assert info.virtual_copies == 2
     assert info.missing_capture_time == 1
-    assert info.schema_version == "18.0.0"
+    assert info.schema_version == "19.0.0"
     assert dict(info.cameras)["Canon EOS 70D"] == 3
 
 

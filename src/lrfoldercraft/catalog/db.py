@@ -102,7 +102,7 @@ class CatalogConnection:
         return None if row is None else row[0]
 
     def schema_version(self) -> Optional[str]:
-        """Return the catalog schema version, e.g. ``18.0.0``."""
+        """Return the catalog schema version, e.g. ``19.0.0``."""
         row = self.query_one(
             "SELECT value FROM Adobe_variablesTable "
             "WHERE name = 'Adobe_DBVersion' OR value LIKE '__._._'"

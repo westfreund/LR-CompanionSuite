@@ -1,6 +1,6 @@
 # Development and continuation
 
-**Revision r18.0.0 · Build date 2026-08-30**
+**Revision r19.0.0 · Build date 2026-09-15**
 
 This document exists so that work can be picked up later — by you, by someone
 else, or by an AI assistant — without reconstructing context from the code.
@@ -8,7 +8,7 @@ else, or by an AI assistant — without reconstructing context from the code.
 ## Current state
 
 **r1.0.0 is complete and working.** Verified end to end against a real
-Lightroom Classic catalog (schema 18.0.0, 9,452 files, 337 GiB, exFAT).
+Lightroom Classic catalog (schema 19.0.0, 9,452 files, 337 GiB, exFAT).
 
 | Area | State |
 | --- | --- |
@@ -18,8 +18,9 @@ Lightroom Classic catalog (schema 18.0.0, 9,452 files, 337 GiB, exFAT).
 | Safety | complete: 8 checks, backup, journal, rollback, undo, verification |
 | CLI | complete: 9 commands |
 | TUI | complete: load, plan, apply, live preview, EN/DE |
+| Index | complete: scanning, searching, duplicates, export — command line only |
 | GUI | complete: Qt in five tabs, all settings, folder decisions, profiles, progress |
-| Tests | 633 tests, 86 % coverage |
+| Tests | 653 tests, 84 % coverage |
 | CI | GitLab, Python 3.9–3.13 |
 | Docs | complete, EN and DE |
 | Installers | macOS, Linux, Windows |

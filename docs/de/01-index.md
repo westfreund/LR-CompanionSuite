@@ -1,6 +1,6 @@
 # LR-FolderCraft — Überblick
 
-**Revision r18.0.0 · Build-Datum 2026-08-30**
+**Revision r19.0.0 · Build-Datum 2026-09-15**
 
 LR-FolderCraft sortiert die Ordnerstruktur einer Adobe-Lightroom-Classic-
 Bibliothek neu. Es verschiebt die Bilddateien auf dem Datenträger und schreibt
@@ -69,6 +69,7 @@ Nach Gewichtung nummeriert: je kleiner die Zahl, desto eher wird sie gebraucht.
 - [12-historie.md](12-historie.md) — warum das Projekt so verlief, wie es verlief
 - [13-offene-punkte.md](13-offene-punkte.md) — bekannte Grenzen und Fahrplan
 - [14-prompts.md](14-prompts.md) — ursprünglicher und generischer Prompt
+- [15-bibliotheksindex.md](15-bibliotheksindex.md) — der Index über alle Bibliotheken
 
 ## Die drei Befehle, die man braucht
 

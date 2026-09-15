@@ -71,6 +71,7 @@ nav:
       - History: en/12-history.md
       - Open issues: en/13-open-issues.md
       - Prompts: en/14-prompts.md
+      - Library index: en/15-index.md
   - Deutsch:
       - Überblick: de/01-index.md
       - Installation: de/02-installation.md
@@ -86,3 +87,4 @@ nav:
       - Historie: de/12-historie.md
       - Offene Punkte: de/13-offene-punkte.md
       - Prompts: de/14-prompts.md
+      - Bibliotheksindex: de/15-bibliotheksindex.md

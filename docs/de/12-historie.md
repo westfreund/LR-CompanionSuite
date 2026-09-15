@@ -1,6 +1,6 @@
 # Projekthistorie
 
-**Revision r18.0.0 · Build-Datum 2026-08-30**
+**Revision r19.0.0 · Build-Datum 2026-09-15**
 
 Der [CHANGELOG](https://gitlab.com/andy-freund/LR-FolderCraft/-/blob/main/CHANGELOG.md) sagt, was sich in jeder Revision geändert
 hat. Dieses Dokument sagt **warum**, und was dazwischen geschah: die getroffenen
@@ -102,6 +102,7 @@ wissen will, *warum*, liest die Abschnitte darunter und den
 | **r17.0.2** | 07:20 |  | Ein reparierter Lauf wurde erneut als abgebrochen gemeldet — und die Dateien, die er hätte zurückstellen wollen, gehörten dem laufenden Lauf. Dazu: Das Fenster kam mit 640×480 und zwei zugeklappten Bereichen zurück. |
 | **r17.0.3** | 07:50 |  | Rückgängig fand den Lauf von heute früh nicht: Ohne gemerkten Katalog meldete das Fenster, es seien keine Läufe aufgezeichnet, und öffnete einen Dateidialog in einem Ordner, in dem seit Revisionen kein Journal mehr liegt. Es nennt jetzt den wahren Grund und startet dort, wo die Journale liegen. |
 | **r18.0.0** | 30.08. | Übersicht | Das Fenster stapelte alles in einer scrollenden Spalte, sodass Struktur, Optionen und Regeln unterhalb des sichtbaren Randes lagen. Jetzt fünf Reiter, einer je Arbeitsschritt, Schaltflächen in der Reihenfolge der Arbeit — und Profile lassen sich anlegen und löschen, statt durch Tippen eines unbenutzten Namens zu entstehen. |
+| **r19.0.0** | 15.09. | Fundort | Ein Index über alle Bibliotheken: 47 Kataloge, 183.407 Fotos, rein lesend. Kopien von Katalogen werden über die Überlappung ihrer Foto-UUIDs erkannt — ein Test mit drei Fotos deckte auf, dass der erste Entwurf nur mit Glück funktionierte. Dazu Dublettenbericht und ein Export, der Kataloge kopiert und verkleinert, statt neue zu schreiben. |
 
 ---
 
@@ -459,7 +460,7 @@ Jeder Zyklus endete bitidentisch am Ausgangszustand: zehn Katalogtabellen, alle
 Pfade und alle 51.063 Dateien auf der Platte.
 
 **Die meisten Fehler, die zählten, fanden echte Läufe, nicht die Testsuite.**
-Deren Aufgabe ist es, sie behoben zu halten — inzwischen mit 633 Tests.
+Deren Aufgabe ist es, sie behoben zu halten — inzwischen mit 653 Tests.
 
 ## Siehe auch
 

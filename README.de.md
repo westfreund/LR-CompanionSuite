@@ -9,8 +9,8 @@
 
 **Ordnerstrukturen in Adobe Lightroom Classic neu sortieren — ohne die Katalogverbindung zu verlieren.**
 
-[![Revision](https://img.shields.io/badge/revision-r18.0.0-blue)](CHANGELOG.md)
-[![Build-Datum](https://img.shields.io/badge/build-2026--08--30-lightgrey)](CHANGELOG.md)
+[![Revision](https://img.shields.io/badge/revision-r19.0.0-blue)](CHANGELOG.md)
+[![Build-Datum](https://img.shields.io/badge/build-2026--09--15-lightgrey)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![Lizenz](https://img.shields.io/badge/Lizenz-MIT%20ODER%20GPL--3.0--or--later-green)](LICENSE)
 
@@ -156,7 +156,7 @@ Umbenennen gelöst (der Katalog wird entsprechend nachgeführt), alternativ
 
 - Python 3.9 oder neuer (macOS bringt eine passende Version mit)
 - Adobe-Lightroom-Classic-Katalog, Schemaversion 11.x–19.x
-  (verifiziert gegen 18.0.0 / Lightroom Classic 14)
+  (verifiziert gegen 19.0.0 / Lightroom Classic 14)
 - Lightroom Classic **geschlossen**, während das Werkzeug läuft
 
 Die Kommandozeile benötigt nur die Standardbibliothek. `lrfc tui` bringt

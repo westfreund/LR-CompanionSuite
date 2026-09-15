@@ -1,6 +1,6 @@
 # Open issues and roadmap
 
-**Revision r18.0.0 · Build date 2026-08-30**
+**Revision r19.0.0 · Build date 2026-09-15**
 
 An honest list of what is not done, not verified, or deliberately left out.
 Each item is a starting point for the next session.
@@ -235,7 +235,7 @@ go with that:
 
 **Catalogs and image files are not touched.** The index only reads.
 
-### O-27 · An index across every library
+### O-27 · An index across every library ✔ r19.0.0
 An index of its own covering every known library, able to answer even when the
 drive is in a cupboard — it then says *which* drive to connect.
 
@@ -259,7 +259,7 @@ Three requirements shape the design:
 The index is a **snapshot**. It has to say, per catalog, when it last read it,
 or it claims a currency it does not have.
 
-### O-28 · Sameness and similarity
+### O-28 · Sameness and similarity ✔ r19.0.0
 Finding duplicate files and duplicate catalogs. Two stages that must not be
 confused:
 
@@ -270,7 +270,7 @@ confused:
   a connected drive. It is a separate, slower pass, and must not pretend to
   come out of the index.
 
-### O-29 · A set from the index, and a catalog from the set
+### O-29 · A set from the index, and a catalog from the set ✔ r19.0.0
 Assemble a set from the filtered images and make a catalog of it — **across
 catalogs**, carrying the settings held in the source catalog, into a catalog to
 be newly created or updated.
@@ -285,6 +285,27 @@ Another Catalog"*.
 
 **Not yet verified**, and to be proven before any implementation: that a
 catalog reduced this way opens and imports without complaint.
+
+### What turned out differently
+
+Two things the plan of 15 September did not foresee:
+
+- **Copies are matched by overlap, not by equality.** The first attempt hashed
+  a sample of photo UUIDs. It worked against the real catalogs -- but only by
+  luck: ordered by UUID, photographs added later scatter evenly through the
+  sample. A test with a library of three photographs exposed it. The sample is
+  now drawn in insertion order and compared for **overlap**. Against the real
+  collection: six copies found instead of three.
+- **The command line only, for now.** The index is a tool with questions of its
+  own -- searching, drives, duplicates -- and pushing it into the existing
+  window as an afterthought would have made both worse. The window and the
+  terminal interface are still to come; see O-31.
+
+### O-31 · The index in the window and the terminal interface
+The folder reorganisation has three front ends; the index has one. What is
+needed at least: search with the criteria from `index find`, the list of drives
+with what is attached, and the duplicate report. The export probably belongs
+there too, but then with the same confirmation the command line asks for.
 
 ### O-30 · Writing keywords — deferred
 Originally the first wish, **deferred entirely** at Andreas's decision.

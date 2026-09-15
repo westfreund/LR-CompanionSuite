@@ -1,6 +1,6 @@
 # Usage
 
-**Revision r18.0.0 · Build date 2026-08-30**
+**Revision r19.0.0 · Build date 2026-09-15**
 
 > **Close Lightroom Classic before running `apply`.** The tool refuses to start
 > if it finds Lightroom's lock file, but a catalog that Lightroom opens *while*
@@ -26,7 +26,7 @@ virtual copies, capture time range, cameras and file formats. Writes nothing.
 ```console
 $ lrfc info /Volumes/Photos/2019/2019.lrcat
   Catalog                       : /Volumes/Photos/2019/2019.lrcat
-  Schema version                : 18.0.0
+  Schema version                : 19.0.0
   Root folders                  : 1
   Folders                       : 1
   Files                         : 9,452
@@ -582,7 +582,7 @@ the library and asks for a deliberate yes:
 ```
 Before this run
   ✓  No Lightroom lock file — the catalog is free.
-  ✓  Catalog schema 18.0.0, a version this revision was verified against.
+  ✓  Catalog schema 19.0.0, a version this revision was verified against.
   ✓  All 1 root folder(s) holding files exist on disk (51,049 files).
   ✓  A previous backup of this catalog exists, from 2026-08-23 09:08.
 

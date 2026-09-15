@@ -1,6 +1,6 @@
 # Vorbereitung
 
-**Revision r18.0.0 · Build-Datum 2026-08-30**
+**Revision r19.0.0 · Build-Datum 2026-09-15**
 
 Zwei Dinge müssen für Ihre Bibliothek zutreffen, bevor LR-FolderCraft etwas
 anfasst. Keines davon ist schwierig, beide werden leicht übersehen, und beide
@@ -91,7 +91,7 @@ Datei zeigen lassen.
 `lrfc info` gibt die gefundene Schemaversion aus und ob sie verifiziert ist:
 
 ```
-Katalogversion     18.0.0  (verifiziert)
+Katalogversion     19.0.0  (verifiziert)
 ```
 
 Steht dort `nicht verifiziert`, fährt `--allow-unsupported-catalog` trotzdem

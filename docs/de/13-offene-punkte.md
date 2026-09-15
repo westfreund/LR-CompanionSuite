@@ -1,6 +1,6 @@
 # Offene Punkte und Fahrplan
 
-**Revision r18.0.0 · Build-Datum 2026-08-30**
+**Revision r19.0.0 · Build-Datum 2026-09-15**
 
 Eine ehrliche Aufstellung dessen, was nicht erledigt, nicht verifiziert oder
 bewusst ausgelassen ist. Jeder Punkt ist ein Ansatzpunkt für die nächste
@@ -252,7 +252,7 @@ auskommen. Dafür gelten vier Zusagen:
 
 **Kataloge und Bilddateien werden nicht angefasst.** Der Index ist rein lesend.
 
-### O-27 · Index über alle Bibliotheken
+### O-27 · Index über alle Bibliotheken ✔ r19.0.0
 Ein eigener Index, der jede bekannte Bibliothek erfasst und auch dann Auskunft
 gibt, wenn das Laufwerk im Schrank liegt — er sagt dann, *welches* Laufwerk
 anzuschließen ist.
@@ -278,7 +278,7 @@ Dazu gehören drei Anforderungen, die den Entwurf bestimmen:
 Der Index ist eine **Momentaufnahme**. Er muss zu jedem Katalog sagen, wann er
 ihn zuletzt gelesen hat, sonst behauptet er Aktualität, die er nicht hat.
 
-### O-28 · Gleichheits- und Ähnlichkeitsfilter
+### O-28 · Gleichheits- und Ähnlichkeitsfilter ✔ r19.0.0
 Doppelte Dateien und doppelte Kataloge finden. Zwei Stufen, die nicht
 verwechselt werden dürfen:
 
@@ -289,7 +289,7 @@ verwechselt werden dürfen:
   damit ein angeschlossenes Laufwerk. Sie ist deshalb ein eigener, langsamerer
   Durchgang und darf nicht so tun, als käme sie aus dem Index.
 
-### O-29 · Aus dem Index ein Set, daraus ein Katalog
+### O-29 · Aus dem Index ein Set, daraus ein Katalog ✔ r19.0.0
 Aus den gefilterten Bildern ein Set zusammenstellen und daraus einen neuen
 Katalog erzeugen — **katalogübergreifend**, mit den im Quellkatalog hinterlegten
 Einstellungen, in einen neu zu erstellenden oder zu aktualisierenden Katalog
@@ -306,6 +306,29 @@ importieren"*.
 
 **Noch nicht verifiziert**, und vor der Umsetzung zu belegen: dass ein so
 reduzierter Katalog von Lightroom anstandslos geöffnet und importiert wird.
+
+### Was bei der Umsetzung anders kam
+
+Zwei Dinge, die der Entwurf vom 15.09. so nicht vorhergesehen hatte:
+
+- **Kopien werden über Überlappung erkannt, nicht über Gleichheit.** Der erste
+  Entwurf verglich einen Hash über eine Stichprobe von Foto-UUIDs. Das
+  funktionierte an den echten Katalogen — aber nur mit Glück: Sortiert man nach
+  UUID, verteilen sich später hinzugekommene Fotos zufällig über die
+  Stichprobe. Ein Test mit einer Bibliothek aus drei Fotos deckte es auf. Jetzt
+  wird die Stichprobe in Aufnahmereihenfolge gezogen und auf **Überlappung**
+  geprüft. Ergebnis an der echten Sammlung: sechs erkannte Kopien statt drei.
+- **Oberfläche vorerst nur Kommandozeile.** Der Index ist ein Werkzeug mit
+  eigenen Fragen — Suche, Laufwerke, Dubletten —, und ihn nebenbei in das
+  Fenster zu drücken hätte beides verschlechtert. Fenster und
+  Terminaloberfläche stehen aus; siehe O-31.
+
+### O-31 · Der Index in Fenster und Terminaloberfläche
+Die Ordnerumsortierung hat drei Oberflächen, der Index bisher eine. Gebraucht
+werden mindestens: Suche mit den Kriterien aus `index find`, die Laufwerksliste
+mit dem Hinweis, was angeschlossen ist, und der Dublettenbericht. Der Export
+gehört wahrscheinlich ebenfalls dazu, dann aber mit derselben Rückfrage wie auf
+der Kommandozeile.
 
 ### O-30 · Stichwörter schreiben — zurückgestellt
 Ursprünglich der erste Wunsch, auf Andreas' Entscheidung hin **komplett

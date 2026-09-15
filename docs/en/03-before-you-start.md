@@ -1,6 +1,6 @@
 # Before you start
 
-**Revision r18.0.0 · Build date 2026-08-30**
+**Revision r19.0.0 · Build date 2026-09-15**
 
 Two things about your library have to be true before LR-FolderCraft touches
 anything. Neither is difficult, both are easy to overlook, and both were found
@@ -87,7 +87,7 @@ untouched. Point LR-FolderCraft at the upgraded file.
 been verified:
 
 ```
-Catalog version    18.0.0  (verified)
+Catalog version    19.0.0  (verified)
 ```
 
 If it says `not verified`, `--allow-unsupported-catalog` will proceed anyway.
