@@ -27,6 +27,26 @@ exFAT).
 | Dokumentation | vollständig, EN und DE |
 | Installationsskripte | macOS, Linux, Windows |
 
+### Die Spielwiese
+Zum Ausprobieren gibt es `scripts/make_playground.py`. Es baut aus
+Festplattenabbildern Laufwerke, die sich wie echte verhalten: Sie hängen sich
+unter `/Volumes/` ein, tragen eine echte `VolumeUUID` und lassen sich aushängen
+oder umbenennen — ein Laufwerk, das abgezogen oder ersetzt wurde, ohne dass
+jemand fünf externe Platten besitzen muss.
+
+```bash
+python scripts/make_playground.py prepare   ~/Desktop/LRCS-Spielwiese
+# ... jetzt in Lightroom einen Katalog darauf anlegen ...
+python scripts/make_playground.py scenarios ~/Desktop/LRCS-Spielwiese
+python scripts/make_playground.py teardown  ~/Desktop/LRCS-Spielwiese
+```
+
+Der Grund, warum der mittlere Schritt von Hand geschieht: **Ein echter
+Lightroom-Katalog lässt sich nicht nachbauen.** Die synthetischen Kataloge der
+Testsuite sind glaubwürdige Nachahmungen, und glaubwürdig ist genau das, was
+hier versagt — alle drei Fehler im Export bestanden jeden Test und scheiterten
+erst in Lightroom.
+
 ### Was *nicht* erledigt ist
 
 - Der Umgang mit gewachsenen Ordnerstrukturen aus r2.0.0 -- thematische Ordner,
