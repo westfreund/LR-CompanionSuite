@@ -1,6 +1,6 @@
 # Open issues and roadmap
 
-**Revision r20.0.2 · Build date 2026-09-15**
+**Revision r20.0.3 · Build date 2026-09-15**
 
 An honest list of what is not done, not verified, or deliberately left out.
 Each item is a starting point for the next session.

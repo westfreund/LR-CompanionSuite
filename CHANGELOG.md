@@ -16,6 +16,20 @@ große Änderung** ist — siehe [docs/de/11-versionierung.md](docs/de/11-versio
 
 ---
 
+## [20.0.3] — 2026-09-15
+
+### Fixed
+
+- **The reduction deleted the root folder's own row.** A catalog carries a row
+  in `AgLibraryFolder` for the root folder itself — empty `pathFromRoot`, no
+  files in it — and the pruning that tidied away emptied folders took it along
+  with them. The copy had 2 folder rows where the original had 9. Folders are
+  left alone now: an empty folder in a reduced catalog is untidy, a folder tree
+  missing its root is broken, and only one of those is visible from outside
+  Lightroom.
+
+---
+
 ## [20.0.2] — 2026-09-15
 
 Reported from Lightroom again: the catalog opened, and the photographs were

@@ -1,6 +1,6 @@
 # Project history
 
-**Revision r20.0.2 · Build date 2026-09-15**
+**Revision r20.0.3 · Build date 2026-09-15**
 
 The [CHANGELOG](https://gitlab.com/andy-freund/LR-CompanionSuite/-/blob/main/CHANGELOG.md) says what changed in each revision. This
 document says **why**, and what happened in between: the decisions taken, the
@@ -102,6 +102,7 @@ and the [CHANGELOG](https://gitlab.com/andy-freund/LR-CompanionSuite/-/blob/main
 | **r20.0.0** | 15 Sep | Zu zweit | The project becomes a suite: **LR-CompanionSuite**, holding LR-FolderCraft and LR-MetaSearch, each with its own name, command, mark and window, plus a launcher. The configuration, index of 183,407 photographs included, moves with it. Fixed on the way: the r19 release had overwritten the verified catalog schema version with the tool's own. |
 | **r20.0.1** | 15 Sep |  | An exported catalog would not open: Lightroom has kept a `.lrcat-data` directory beside the catalog since version 11, and the export left it behind. Found by Andreas in Lightroom — the only place it could have been. |
 | **r20.0.2** | 15 Sep |  | The exported catalog opened but found no photographs: the source catalog names a drive that no longer exists. The export puts that right now — but only once six photographs are proven to be where it thinks. Also fixed: searching judged reachability by the catalog's drive rather than the photographs' folder. |
+| **r20.0.3** | 15 Sep |  | The reduction had deleted the root folder's own row — nine folder rows became two. Folders are left alone now. The second fault in a row that only a look in Lightroom could find. |
 
 ---
 

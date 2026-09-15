@@ -9,7 +9,7 @@
 
 **Two tools that sit beside Adobe Lightroom Classic rather than replacing it.**
 
-[![Revision](https://img.shields.io/badge/revision-r20.0.2-blue)](CHANGELOG.md)
+[![Revision](https://img.shields.io/badge/revision-r20.0.3-blue)](CHANGELOG.md)
 [![Build date](https://img.shields.io/badge/build-2026--09--15-lightgrey)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20GPL--3.0--or--later-green)](LICENSE)

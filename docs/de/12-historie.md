@@ -1,6 +1,6 @@
 # Projekthistorie
 
-**Revision r20.0.2 · Build-Datum 2026-09-15**
+**Revision r20.0.3 · Build-Datum 2026-09-15**
 
 Der [CHANGELOG](https://gitlab.com/andy-freund/LR-CompanionSuite/-/blob/main/CHANGELOG.md) sagt, was sich in jeder Revision geändert
 hat. Dieses Dokument sagt **warum**, und was dazwischen geschah: die getroffenen
@@ -106,6 +106,7 @@ wissen will, *warum*, liest die Abschnitte darunter und den
 | **r20.0.0** | 15.09. | Zu zweit | Aus dem Projekt wird eine Suite: **LR-CompanionSuite** mit LR-FolderCraft und LR-MetaSearch darin, je eigener Name, Befehl, Marke und Fenster, dazu ein Startbildschirm. Die Konfiguration samt Index mit 183.407 Fotos wird mitgenommen. Nebenbei behoben: Das r19-Release hatte die verifizierte Katalog-Schemaversion mit der Werkzeugversion überschrieben. |
 | **r20.0.1** | 15.09. |  | Ein exportierter Katalog ließ sich nicht öffnen: Lightroom legt seit Version 11 ein Verzeichnis `.lrcat-data` neben den Katalog, und der Export nahm es nicht mit. Von Andreas in Lightroom gefunden — dem einzigen Ort, an dem das auffallen konnte. |
 | **r20.0.2** | 15.09. |  | Der exportierte Katalog öffnete, fand aber keine Fotos: Der Quellkatalog nennt ein Laufwerk, das es nicht mehr gibt. Der Export stellt das jetzt richtig — aber erst, wenn sechs Fotos am vermuteten Ort wirklich liegen. Ebenfalls behoben: Die Suche prüfte die Erreichbarkeit am Laufwerk des Katalogs statt am Ordner der Fotos. |
+| **r20.0.3** | 15.09. |  | Die Verkleinerung hatte die Zeile des Wurzelordners selbst gelöscht — von neun Ordnerzeilen blieben zwei. Ordner werden jetzt in Ruhe gelassen. Der zweite Fehler in Folge, den nur ein Blick in Lightroom finden konnte. |
 
 ---
 

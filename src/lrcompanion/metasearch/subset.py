@@ -187,25 +187,18 @@ def reduce_catalog(
 
         db.execute("delete from Adobe_images where id_local not in (select id from _keep)")
 
-        # What is left of the file and folder tree once the photographs are gone.
+        # File rows belong to photographs, so they go with them.
         db.execute(
             "delete from AgLibraryFile where id_local not in"
             " (select rootFile from Adobe_images where rootFile is not null)"
         )
-        # Folders nest, so emptying them is repeated until nothing more falls out.
-        while True:
-            removed = db.execute(
-                "delete from AgLibraryFolder where id_local not in"
-                " (select folder from AgLibraryFile where folder is not null)"
-                " and id_local not in"
-                " (select parentId from AgLibraryFolder where parentId is not null)"
-            ).rowcount
-            if removed <= 0:
-                break
-        db.execute(
-            "delete from AgLibraryRootFolder where id_local not in"
-            " (select rootFolder from AgLibraryFolder where rootFolder is not null)"
-        )
+        # Folders stay. Tidying them away cost two rounds of "Lightroom cannot
+        # find the photographs": a catalog carries a row for the root folder
+        # itself, with an empty pathFromRoot and no files in it, and the first
+        # cut deleted it along with every other folder that had been emptied.
+        # An empty folder in a reduced catalog is untidy; a folder tree missing
+        # its root is broken, and nothing about the difference is visible from
+        # here. Untidy wins.
 
         kept = int(db.execute("select count(*) from Adobe_images").fetchone()[0])
 

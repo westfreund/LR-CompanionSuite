@@ -1,6 +1,6 @@
 # Prompts
 
-**Revision r20.0.2 · Build-Datum 2026-09-15**
+**Revision r20.0.3 · Build-Datum 2026-09-15**
 
 Dieses Dokument bewahrt die Anfrage, aus der LR-FolderCraft entstanden ist,
 einen generischen Prompt zur Neuerzeugung eines vergleichbaren Werkzeugs sowie
@@ -380,6 +380,11 @@ pre-flight checks, execute with a progress callback. Then:
   reachable" was answered by testing whether the drive holding the *catalog*
   was mounted -- which is precisely wrong for a library whose volume was
   renamed, the one case where the question matters.
+* **Do not tidy a structure you do not own.** Pruning rows that "had nothing
+  in them" removed the row an application keeps for the root of its own tree,
+  and the result opened and was quietly broken. A copy that is untidy is fine;
+  a copy that is missing a structural row it did not know was structural is
+  not, and the difference is invisible from outside the application.
 * **Compose text before you map or compare it.** macOS hands back filenames
   decomposed, so a name a user typed as "Völki" arrives as "o" plus a combining
   diaeresis. Any per-character table, and any pattern comparison, silently

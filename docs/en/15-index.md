@@ -1,6 +1,6 @@
 # LR-MetaSearch — the index across every library
 
-**Revision r20.0.2 · Build date 2026-09-15**
+**Revision r20.0.3 · Build date 2026-09-15**
 
 Anyone who has worked with several Lightroom catalogs over the years ends up
 with a question none of them can answer: *which library is this photograph

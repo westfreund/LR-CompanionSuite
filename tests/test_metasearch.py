@@ -501,3 +501,30 @@ def test_reachability_is_judged_by_the_folder_not_the_catalog_drive(library, tmp
         hits = query.search(index, query.Filter(keywords=("Urlaub",)))
         assert hits
         assert all(not hit.reachable for hit in hits)
+
+
+def test_the_folder_tree_survives_the_reduction(filled, library, tmp_path):
+    """Every folder row of the original is still there, the root's included.
+
+    Two rounds of "Lightroom cannot find the photographs" came from tidying
+    these away. A catalog carries a row for the root folder itself -- empty
+    pathFromRoot, no files in it -- and pruning folders with no files took it.
+    An empty folder is untidy; a tree without its root is broken.
+    """
+    import sqlite3 as sql
+
+    before = sql.connect(str(library.catalog_path))
+    original = sorted(r[0] for r in before.execute("select id_local from AgLibraryFolder"))
+    roots = before.execute("select count(*) from AgLibraryRootFolder").fetchone()[0]
+    before.close()
+
+    hits = query.search(filled, query.Filter(keywords=("Portrait",)))
+    results = subset.build(filled, [h.photo_id for h in hits], tmp_path / "out")
+
+    after = sql.connect(str(results[0].target))
+    kept = sorted(r[0] for r in after.execute("select id_local from AgLibraryFolder"))
+    kept_roots = after.execute("select count(*) from AgLibraryRootFolder").fetchone()[0]
+    after.close()
+
+    assert kept == original, "folder rows went missing"
+    assert kept_roots == roots

@@ -1,6 +1,6 @@
 # LR-MetaSearch — der Index über alle Bibliotheken
 
-**Revision r20.0.2 · Build-Datum 2026-09-15**
+**Revision r20.0.3 · Build-Datum 2026-09-15**
 
 Wer über die Jahre mit mehreren Lightroom-Katalogen arbeitet, hat irgendwann
 eine Frage, die keiner davon beantworten kann: *In welcher Bibliothek liegt

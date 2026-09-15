@@ -1,6 +1,6 @@
 # Development and continuation
 
-**Revision r20.0.2 · Build date 2026-09-15**
+**Revision r20.0.3 · Build date 2026-09-15**
 
 This document exists so that work can be picked up later — by you, by someone
 else, or by an AI assistant — without reconstructing context from the code.

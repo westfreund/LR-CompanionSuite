@@ -1,6 +1,6 @@
 # Bedienung
 
-**Revision r20.0.2 · Build-Datum 2026-09-15**
+**Revision r20.0.3 · Build-Datum 2026-09-15**
 
 > **Lightroom Classic vor `apply` schließen.** Das Werkzeug verweigert den
 > Start, wenn es Lightrooms Sperrdatei findet — ein Katalog, den Lightroom
@@ -592,7 +592,7 @@ Bibliothek tatsächlich vorgefunden hat, und verlangt ein bewusstes Ja:
 ```
 Vor diesem Lauf
   ✓  Keine Lightroom-Sperrdatei — der Katalog ist frei.
-  ✓  Katalogschema 20.0.2 — eine Version, gegen die diese Revision verifiziert wurde.
+  ✓  Katalogschema 20.0.3 — eine Version, gegen die diese Revision verifiziert wurde.
   ✓  Alle 1 Wurzelordner mit Dateien existieren auf der Platte (51.049 Dateien).
   ✓  Eine frühere Sicherung dieses Katalogs von 2026-08-23 09:08 ist vorhanden.
 
