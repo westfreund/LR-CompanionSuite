@@ -1,5 +1,20 @@
 # Outreach / Bekanntmachung
 
+> **Stand 15.09.2026 — neuer Name.** Das Projekt heißt jetzt
+> **LR-CompanionSuite** und enthält zwei Werkzeuge: *LR-FolderCraft* (Ordner
+> umsortieren) und *LR-MetaSearch* (über alle Bibliotheken suchen). Die
+> Entwürfe unten beschreiben LR-FolderCraft — das bleibt richtig, es ist nur
+> nicht mehr das Ganze. Wo ein Beitrag das Projekt benennt, gehört jetzt die
+> Suite hin; wo er das Werkzeug beschreibt, bleibt LR-FolderCraft stehen.
+>
+> Für LR-MetaSearch fehlen die Entwürfe noch. Es hat vermutlich ein anderes
+> Publikum: nicht „mein Ordnerbaum ist ein Durcheinander", sondern „in welchem
+> meiner zwölf Kataloge steckt dieses Foto".
+>
+> **Es ist noch nichts gepostet.** Genau deshalb war jetzt der Zeitpunkt für
+> den neuen Namen.
+
+
 Drafts for making LR-FolderCraft findable by the people who have this problem.
 Nothing here is sent automatically. Read it, change it into your own voice,
 send it yourself.
@@ -23,7 +38,7 @@ stärkste Argument sind nicht die Funktionen, sondern der Beleg: 51.049 Fotos,
 2,36 TB, mehrfach hin und zurück, byte-identisch geprüft — dazu Probelauf,
 Sicherung, Journal und Rücknahme. Diese Zahl gehört in den ersten Absatz.
 
-**Auffindbarkeit.** Niemand sucht nach „LR-FolderCraft". Gesucht wird
+**Auffindbarkeit.** Niemand sucht nach „LR-CompanionSuite". Gesucht wird
 *„Lightroom Ordner verschieben ohne Verknüpfung zu verlieren"*. Deshalb steht
 diese Formulierung auf der Startseite, und deshalb sollte jeder Beitrag mit
 dem Problem beginnen, nicht mit dem Namen.

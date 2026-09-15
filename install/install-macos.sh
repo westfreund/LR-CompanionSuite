@@ -400,15 +400,22 @@ cat <<'NEXT'
 
 Next steps:
 
+  LR-FolderCraft -- reorganise a folder tree:
     lrfc info /path/to/your.lrcat          # inspect a catalog, read only
     lrfc presets                           # see the ready made structures
     lrfc plan /path/to/your.lrcat -s day   # see what would happen
+
+  LR-MetaSearch -- search across every library:
+    lrms scan                              # read your libraries into an index
+    lrms find --keyword Wedding            # search across all of them
 NEXT
 if component_works tui; then
-    printf '    lrfc tui                               # interactive text interface\n'
+    printf '    lrfc tui                               # the folder tool in a terminal\n'
 fi
 if component_works gui; then
-    printf '    lrfc gui                               # graphical interface\n'
+    printf '    lrfc gui                               # the folder window\n'
+    printf '    lrms gui                               # the search window\n'
+    printf '    lrcs                                   # a launcher offering both\n'
 else
     printf '\n'
     printf 'The graphical interface is not installed. To add it:\n'

@@ -1,5 +1,12 @@
 # Für Andreas — Stand der Bekanntmachung
 
+> **Nachtrag 15.09.2026:** Das Projekt heißt jetzt **LR-CompanionSuite** und
+> enthält zwei Werkzeuge. Alle Adressen unten sind auf den neuen Namen
+> gezogen. Das alte GitLab-Repository steht unangetastet weiter; das neue ist
+> ein eigenes Projekt. Die Aufgaben in „Was bei dir bleibt" gelten unverändert
+> — nur eben für die Suite.
+
+
 *24.08.2026, nach r20.0.0. Was aufgesetzt ist, was es kann, und was bei dir
 liegen bleibt. Zum Nachschlagen, wenn du das Thema wieder aufnimmst.*
 
